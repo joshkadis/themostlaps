@@ -19,12 +19,12 @@ app.listen(port, () => console.log(`Example app listening on port ${port}`));
 
 /* Mongo Setup */
 
-MongoClient.connect(process.env.DB_URL, function(err, client) {
-  assert.equal(null, err);
-  console.log("Connected successfully to server");
+// MongoClient.connect(process.env.DB_URL, function(err, client) {
+//   assert.equal(null, err);
+//   console.log("Connected successfully to server");
 
-  const db = client.db(process.env.DB_NAME);
-  db.createCollection('tml_users', () => {
-    console.log('created tml_users');
-  });
-});
+//   const db = client.db(process.env.DB_NAME);
+//   db.createCollection('tml_users', () => {
+//     console.log('created tml_users');
+//   });
+// });
