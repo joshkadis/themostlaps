@@ -1,5 +1,5 @@
 require('isomorphic-fetch');
-const fetchAthleteLaps = require('./fetchAthleteLaps');
+const fetchAthleteActivities = require('./fetchAthleteActivities');
 
 module.exports = (req, res) => {
   if (req.query.error) {
@@ -22,6 +22,6 @@ module.exports = (req, res) => {
     if (!athlete || !athlete.access_token) {
       return;
     }
-    fetchAthleteLaps(athlete.access_token, res);
+    fetchAthleteActivities(athlete.access_token, res);
   });
 };

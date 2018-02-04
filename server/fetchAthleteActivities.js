@@ -24,7 +24,14 @@ function distFromParkCenter(latlng = null) {
   );
 }
 
-function getActivities(token, page = 1, allActivities = []) {
+/**
+ * Get all of a user's activities by iterating recursively over paginated API results
+ *
+ * @param {String} token
+ * @param {Array} allActivities
+ * @return {Promise}
+ */
+function fetchAllAthleteActivities(token, page = 1, allActivities = []) {
   const url = `${config.apiUrl}/athlete/activities?per_page=200&page=${page}`;
   console.log(`Fetching ${url}`)
   return fetch(url, {
@@ -37,14 +44,15 @@ function getActivities(token, page = 1, allActivities = []) {
     if (!activities.length) {
       return allActivities;
     }
-    return getActivities(token, (page + 1), allActivities.concat(activities));
+    return fetchAllAthleteActivities(token, (page + 1), allActivities.concat(activities));
   });
 }
 
 /**
- * Should activity be checked for laps?
+ * Should activity be checked for laps? Must be longer than min distance and
+ * starting or ending within allowed radius of park center
  *
- 8 @param {Bool} manual
+ * @param {Bool} manual
  * @param {Array} start_latlng
  * @param {Array} end_latlng
  * @param {Float} distance
@@ -72,13 +80,13 @@ function activityIsEligible({
  * @return {Promise}
  */
 module.exports = (token, res) => {
-  getActivities(token)
+  fetchAllAthleteActivities(token)
     .then((activities) => {
       console.log(`Found ${activities.length} total activities`);
       return activities.filter((activity) => activityIsEligible(activity));
     })
     .then((activities) => {
-      const msg = `${activities.length} activities within allowed radius`;
+      const msg = `${activities.length} activities within allowed radius and min. distance`;
       console.log(msg);
       res.send(msg);
     });
