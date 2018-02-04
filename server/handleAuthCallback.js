@@ -1,6 +1,6 @@
 require('isomorphic-fetch');
-const fetchAthleteActivities = require('./fetchAthleteActivities');
-const fetchLapsFromActivities = require('./fetchLapsFromActivities');
+const fetchAthleteActivities = require('../utils/fetchAthleteActivities');
+const fetchLapsFromActivities = require('../utils/fetchLapsFromActivities');
 
 module.exports = (req, res) => {
   if (req.query.error) {
