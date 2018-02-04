@@ -24,6 +24,23 @@ function distFromParkCenter(latlng = null) {
   );
 }
 
+function getActivities(token, page = 1, allActivities = []) {
+  const url = `${config.apiUrl}/athlete/activities?per_page=200&page=${page}`;
+  console.log(`Fetching ${url}`)
+  return fetch(url, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+  .then((response) => response.json())
+  .then((activities) => {
+    if (!activities.length) {
+      return allActivities;
+    }
+    return getActivities(token, (page + 1), allActivities.concat(activities));
+  });
+}
+
 /**
  * Get list of athlete's activities that might contain laps
  *
@@ -32,20 +49,18 @@ function distFromParkCenter(latlng = null) {
  * @return {Promise}
  */
 module.exports = (token, res) => {
-  fetch(`${config.apiUrl}/athlete/activities?per_page=25&page=1`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  })
-  .then((response) => response.json())
-  .then((activities) => {
-    return activities.filter(({ start_latlng, end_latlng }) => {
-      // return true if start or end dates within 50km of PP
-      return (start_latlng && distFromParkCenter(start_latlng) < config.allowWithin) ||
-        (end_latlng && distFromParkCenter(end_latlng) < config.allowWithin);
+  getActivities(token)
+    .then((activities) => {
+      console.log(`Found ${activities.length} total activities`);
+      return activities.filter(({ start_latlng, end_latlng }) => {
+        // return true if start or end dates within 50km of PP
+        return (start_latlng && distFromParkCenter(start_latlng) < config.allowedRadius) ||
+          (end_latlng && distFromParkCenter(end_latlng) < config.allowedRadius);
+      });
+    })
+    .then((activities) => {
+      const msg = `${activities.length} activities within allowed radius`;
+      console.log(msg);
+      res.send(msg);
     });
-  })
-  .then((activities) => {
-    res.send(`${activities.length} activities within allowed distance`);
-  });
 }

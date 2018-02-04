@@ -2,7 +2,6 @@ require('isomorphic-fetch');
 const fetchAthleteLaps = require('./fetchAthleteLaps');
 
 module.exports = (req, res) => {
-  console.log(req.query);
   if (req.query.error) {
     res.send(`Error ${req.query.error}`);
     return;
@@ -18,13 +17,11 @@ module.exports = (req, res) => {
     method: 'POST',
     body,
   }).then((response) => {
-    console.log(`Response status ${response.status}`);
     return response.status === 200 ? response.json() : false;
   }).then((athlete = false) => {
     if (!athlete || !athlete.access_token) {
       return;
     }
-    console.log(athlete);
     fetchAthleteLaps(athlete.access_token, res);
   });
 };

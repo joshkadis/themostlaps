@@ -4,5 +4,5 @@ module.exports = {
     latitude: 40.661990,
     longitude: -73.969681,
   },
-  allowWithin: 50000,
+  allowedRadius: 50000,
 };
