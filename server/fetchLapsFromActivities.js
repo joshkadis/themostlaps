@@ -26,7 +26,8 @@ function getLapsFromActivity({ id, start_date_local, segment_efforts = [] }) {
 }
 
 /**
- * Iterate over activity ids list and get laps
+ * Iterate over activity ids list and get laps.
+ * Fetch sequentially for API rate limiting.
  *
  * @param {Array} activityIds
  * @param {String} token
@@ -35,9 +36,8 @@ function getLapsFromActivity({ id, start_date_local, segment_efforts = [] }) {
  * @return {Object}
  */
 function fetchActivityDetails(activityIds, token, idx = 0, allLaps) {
-  const url = `${config.apiUrl}/activities/${activityIds[idx]}`;
-  console.log(`Fetching ${url}`)
-  return fetch(url, {
+  console.log(`Fetching ${(idx + 1)} of ${activityIds.length}: ${activityIds[idx]}`)
+  return fetch(`${config.apiUrl}/activities/${activityIds[idx]}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

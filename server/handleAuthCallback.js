@@ -25,12 +25,14 @@ module.exports = (req, res) => {
       res.send('could not find athlete');
       return;
     }
+
+    res.send(`Importing laps for ${athlete.athlete.firstname} ${athlete.athlete.lastname}. This will take a few minutes.`);
+
     fetchAthleteActivities(athlete.access_token, res)
       .then((activityIds) => fetchLapsFromActivities(activityIds, athlete.access_token))
       .then((laps) => {
         console.log(laps);
         // @todo Output laps info;
-        res.send(`Fetched laps for ${athlete.athlete.firstname} ${athlete.athlete.lastname}`);
       });
   });
 };
