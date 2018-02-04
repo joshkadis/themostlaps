@@ -36,7 +36,9 @@ function getLapsFromActivity({ id, start_date_local, segment_efforts = [] }) {
  * @return {Object}
  */
 function fetchActivityDetails(activityIds, token, idx = 0, allLaps) {
-  console.log(`Fetching ${(idx + 1)} of ${activityIds.length}: ${activityIds[idx]}`)
+  const fetchNum = 'development' === process.env.NODE_ENV ? config.devFetchActivities : activityIds.length;
+
+  console.log(`Fetching ${(idx + 1)} of ${fetchNum}: ${activityIds[idx]}`)
   return fetch(`${config.apiUrl}/activities/${activityIds[idx]}`, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -46,7 +48,7 @@ function fetchActivityDetails(activityIds, token, idx = 0, allLaps) {
   .then((activity) => {
     const activityLaps = getLapsFromActivity(activity);
     const updatedLaps = activityLaps ? Object.assign(allLaps, activityLaps) : allLaps;
-    if (idx === (activityIds.length - 1)) {
+    if ((idx + 1) === fetchNum) {
       return updatedLaps;
     }
     return fetchActivityDetails(activityIds, token, (idx + 1), updatedLaps);

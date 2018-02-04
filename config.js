@@ -8,4 +8,5 @@ module.exports = {
   minDistance: 3300,
   lapSegmentId: 5313629,
   addMakeupLap: true,
+  devFetchActivities: 10,
 };
