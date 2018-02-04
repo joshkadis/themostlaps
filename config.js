@@ -5,4 +5,5 @@ module.exports = {
     longitude: -73.969681,
   },
   allowedRadius: 50000,
+  minDistance: 3300,
 };

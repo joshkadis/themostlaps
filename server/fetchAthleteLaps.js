@@ -42,6 +42,29 @@ function getActivities(token, page = 1, allActivities = []) {
 }
 
 /**
+ * Should activity be checked for laps?
+ *
+ 8 @param {Bool} manual
+ * @param {Array} start_latlng
+ * @param {Array} end_latlng
+ * @param {Float} distance
+ * @return {Bool}
+ */
+function activityIsEligible({
+  manual = false,
+  start_latlng = null,
+  end_latlng = null,
+  distance = 0,
+}) {
+  if (manual || distance < config.minDistance) {
+    return false;
+  }
+
+  return (start_latlng && distFromParkCenter(start_latlng) < config.allowedRadius) ||
+    (end_latlng && distFromParkCenter(end_latlng) < config.allowedRadius);
+}
+
+/**
  * Get list of athlete's activities that might contain laps
  *
  * @param {String} token
@@ -52,11 +75,7 @@ module.exports = (token, res) => {
   getActivities(token)
     .then((activities) => {
       console.log(`Found ${activities.length} total activities`);
-      return activities.filter(({ start_latlng, end_latlng }) => {
-        // return true if start or end dates within 50km of PP
-        return (start_latlng && distFromParkCenter(start_latlng) < config.allowedRadius) ||
-          (end_latlng && distFromParkCenter(end_latlng) < config.allowedRadius);
-      });
+      return activities.filter((activity) => activityIsEligible(activity));
     })
     .then((activities) => {
       const msg = `${activities.length} activities within allowed radius`;
