@@ -73,14 +73,13 @@ function activityIsEligible({
 }
 
 /**
- * Get list of athlete's activities that might contain laps
+ * Get list of athlete's activity IDs that might contain laps
  *
  * @param {String} token
- * @param {Response} res
  * @return {Promise}
  */
-module.exports = (token, res) => {
-  fetchAllAthleteActivities(token)
+module.exports = (token) => {
+  return fetchAllAthleteActivities(token)
     .then((activities) => {
       console.log(`Found ${activities.length} total activities`);
       return activities.filter((activity) => activityIsEligible(activity));
@@ -88,6 +87,6 @@ module.exports = (token, res) => {
     .then((activities) => {
       const msg = `${activities.length} activities within allowed radius and min. distance`;
       console.log(msg);
-      res.send(msg);
+      return activities.map(({ id }) => id);
     });
 }

@@ -1,5 +1,6 @@
 require('isomorphic-fetch');
 const fetchAthleteActivities = require('./fetchAthleteActivities');
+const fetchLapsFromActivities = require('./fetchLapsFromActivities');
 
 module.exports = (req, res) => {
   if (req.query.error) {
@@ -20,8 +21,16 @@ module.exports = (req, res) => {
     return response.status === 200 ? response.json() : false;
   }).then((athlete = false) => {
     if (!athlete || !athlete.access_token) {
+      // @todo Handle error
+      res.send('could not find athlete');
       return;
     }
-    fetchAthleteActivities(athlete.access_token, res);
+    fetchAthleteActivities(athlete.access_token, res)
+      .then((activityIds) => fetchLapsFromActivities(activityIds, athlete.access_token))
+      .then((laps) => {
+        console.log(laps);
+        // @todo Output laps info;
+        res.send(`Fetched laps for ${athlete.athlete.firstname} ${athlete.athlete.lastname}`);
+      });
   });
 };

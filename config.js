@@ -6,4 +6,6 @@ module.exports = {
   },
   allowedRadius: 50000,
   minDistance: 3300,
+  lapSegmentId: 5313629,
+  addMakeupLap: true,
 };
