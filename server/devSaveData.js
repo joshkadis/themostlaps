@@ -12,7 +12,7 @@ module.exports = (req, res) => {
 
   const athleteModel = new Athlete({
     token: athlete.access_token,
-    id: athlete.athlete.id,
+    _id: athlete.athlete.id,
     firstname: athlete.athlete.firstname,
     lastname: athlete.athlete.lastname,
     activities: athleteLaps,
@@ -21,5 +21,6 @@ module.exports = (req, res) => {
   athleteModel.save((err) => {
     if (err) throw err;
     console.log('saved athlete to db');
+    res.send('saved dev athlete data to db');
   });
 };

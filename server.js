@@ -12,7 +12,7 @@ const app = express();
 
 app.get('/', renderApp);
 app.get('/auth-callback', handleAuthCallback);
-app.get('/rider/:id', showRiderData);
+app.get('/by/:id', showRiderData);
 
 // Development routes
 if ('development' === process.env.NODE_ENV) {

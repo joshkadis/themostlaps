@@ -17,7 +17,7 @@ function getLapsFromActivity({ id, start_date_local, segment_efforts = [] }) {
   const date = start_date_local.split('T')[0];
 
   return {
-    id,
+    _id: id,
     date,
     laps: (config.addMakeupLap ? (lapCount + 1) : lapCount),
   };

@@ -7,7 +7,7 @@ module.exports = (req, res) => {
 
   console.log(`Getting athlete ${req.params.id}`);
 
-  Athlete.find({ id: parseInt(req.params.id, 10) }, (err, athlete) => {
+  Athlete.findById(parseInt(req.params.id, 10), (err, athlete) => {
     if (err) throw err;
     console.log(athlete);
     res.send(`${athlete.firstname} ${athlete.lastname}
