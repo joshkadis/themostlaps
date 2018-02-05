@@ -17,11 +17,9 @@ function getLapsFromActivity({ id, start_date_local, segment_efforts = [] }) {
   const date = start_date_local.split('T')[0];
 
   return {
-     [date]: {
-      id,
-      date,
-      laps: (config.addMakeupLap ? (lapCount + 1) : lapCount),
-    },
+    id,
+    date,
+    laps: (config.addMakeupLap ? (lapCount + 1) : lapCount),
   };
 }
 
@@ -47,7 +45,10 @@ function fetchActivityDetails(activityIds, token, idx = 0, allLaps) {
   .then((response) => response.json())
   .then((activity) => {
     const activityLaps = getLapsFromActivity(activity);
-    const updatedLaps = activityLaps ? Object.assign(allLaps, activityLaps) : allLaps;
+    if(activityLaps) {
+      allLaps.push(activityLaps);
+    }
+
     if ((idx + 1) === fetchNum) {
       return updatedLaps;
     }
@@ -61,9 +62,9 @@ function fetchActivityDetails(activityIds, token, idx = 0, allLaps) {
  *
  * @param {Array} activityIds List of eligible activities
  * @param {String} token User token
- * @return {Object} Map of date:laps
+ * @return {Array}
  */
 module.exports = (activityIds, token) => {
-  return fetchActivityDetails(activityIds, token, 0, {})
+  return fetchActivityDetails(activityIds, token, 0, [])
     .then((laps) => laps);
 };
