@@ -5,12 +5,14 @@ const express = require('express');
 const handleAuthCallback = require('./server/handleAuthCallback');
 const renderApp = require('./server/renderApp');
 const devSaveData = require('./server/devSaveData');
+const showRiderData = require('./server/showRiderData');
 
 /* Express Setup */
 const app = express();
 
 app.get('/', renderApp);
 app.get('/auth-callback', handleAuthCallback);
+app.get('/rider/:id', showRiderData);
 
 // Development routes
 if ('development' === process.env.NODE_ENV) {
