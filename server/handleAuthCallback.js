@@ -4,9 +4,14 @@ const Activity = require('./schema/activity');
 const fetchAthleteActivities = require('../utils/fetchAthleteActivities');
 const fetchLapsFromActivities = require('../utils/fetchLapsFromActivities');
 
+/**
+ * Check if an activity exists before saving to database. Known activities
+ * are not updated because their segment data cannot be changed remotely
+ *
+ * @param {Activity} activityModel
+ * @param {Number} activityId
+ */
 function _saveActivityIfNotExists(activityModel, activityId) {
-  // Do not overwrite activities we already know about because
-  // the segment data cannot be changed
   Activity.findById(activityId, (err, found) => {
     if (found) {
       console.log(`Already saved activity ${activityId}`)
@@ -22,10 +27,18 @@ function _saveActivityIfNotExists(activityModel, activityId) {
   });
 }
 
+/**
+ * When we have an authorized athlete, fetch and save their activities
+ *
+ * @param {Object} athlete
+ * @param {Response} res
+ */
 function _fetchAndSaveActivities(athlete, res) {
   fetchAthleteActivities(athlete.access_token, res)
     .then((activityIds) => fetchLapsFromActivities(activityIds, athlete.access_token))
     .then((activities) => {
+      // @todo update athlete.status from 'ingseting' to 'done'
+      // when all activities have been processed
       activities.forEach((activity) => {
         const activityModel = new Activity(activity);
         activityModel.validate((err) => {
