@@ -1,18 +1,13 @@
 const mongoose = require('mongoose');
+const Mixed = mongoose.Schema.Types.Mixed;
 const Schema = mongoose.Schema;
 
-const activitySchema = new Schema({
-	_id: Number,
-	date: String,
-	laps: Number,
-});
-
 const athleteSchema = new Schema({
-	token: { type: String, required: true, unique: true },
 	_id: Number,
-	firstname: String,
-	lastname: String,
-	activities: [ activitySchema ],
+	access_token: { type: String, required: true, unique: true },
+	token_type: String,
+	athlete: Mixed,
+	status: String,
 });
 
 const Athlete = mongoose.model('Athlete', athleteSchema);

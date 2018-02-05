@@ -52,6 +52,7 @@ function fetchAllAthleteActivities(token, page = 1, allActivities = []) {
  * Should activity be checked for laps? Must be longer than min distance and
  * starting or ending within allowed radius of park center
  *
+ * @param {Bool} trainer
  * @param {Bool} manual
  * @param {Array} start_latlng
  * @param {Array} end_latlng
@@ -59,12 +60,13 @@ function fetchAllAthleteActivities(token, page = 1, allActivities = []) {
  * @return {Bool}
  */
 function activityIsEligible({
+  trainer = false,
   manual = false,
   start_latlng = null,
   end_latlng = null,
   distance = 0,
 }) {
-  if (manual || distance < config.minDistance) {
+  if (manual || trainer || distance < config.minDistance) {
     return false;
   }
 

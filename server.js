@@ -1,10 +1,11 @@
-require('dotenv').config()
+require('dotenv').config();
+
+const mongoose = require('mongoose');
 const express = require('express');
 
 // Route handlers
 const handleAuthCallback = require('./server/handleAuthCallback');
 const renderApp = require('./server/renderApp');
-const devSaveData = require('./server/devSaveData');
 const showRiderData = require('./server/showRiderData');
 
 /* Express Setup */
@@ -14,12 +15,8 @@ app.get('/', renderApp);
 app.get('/auth-callback', handleAuthCallback);
 app.get('/by/:id', showRiderData);
 
-// Development routes
-if ('development' === process.env.NODE_ENV) {
-	app.get('/save', devSaveData);
-}
-
-
 const port = 'production' === process.env.NODE_ENV ? 8080 : 3000;
 
+console.log('Connecting to database');
+mongoose.connect(process.env.DB_URL);
 app.listen(port, () => console.log(`Example app listening on port ${port}`));

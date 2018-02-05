@@ -7,19 +7,37 @@ const config = require('../config');
  * @param {Object} activity
  * @return {Object|false}
  */
-function getLapsFromActivity({ id, start_date_local, segment_efforts = [] }) {
-  const lapCount = segment_efforts.reduce((acc, { segment }) =>
+function getActivityData(activity) {
+  const {
+    id,
+    start_date_local,
+    total_elevation_gain,
+    athlete,
+    start_latlng,
+    end_latlng,
+    segment_efforts,
+  } = activity;
+
+  let estimated_laps = segment_efforts.reduce((acc, { segment }) =>
     (segment.id === config.lapSegmentId ? (acc + 1) : acc), 0);
 
-  if (0 === lapCount) {
+  if (0 === estimated_laps) {
     return false;
   }
-  const date = start_date_local.split('T')[0];
+
+  if (config.addMakeupLap) {
+    estimated_laps++;
+  }
 
   return {
     _id: id,
-    date,
-    laps: (config.addMakeupLap ? (lapCount + 1) : lapCount),
+    start_date_local,
+    total_elevation_gain,
+    athlete_id: athlete.id,
+    start_latlng,
+    end_latlng,
+    segment_efforts,
+    estimated_laps,
   };
 }
 
@@ -44,15 +62,15 @@ function fetchActivityDetails(activityIds, token, idx = 0, allLaps) {
   })
   .then((response) => response.json())
   .then((activity) => {
-    const activityLaps = getLapsFromActivity(activity);
+    const activityLaps = getActivityData(activity);
     if(activityLaps) {
       allLaps.push(activityLaps);
     }
 
     if ((idx + 1) === fetchNum) {
-      return updatedLaps;
+      return allLaps;
     }
-    return fetchActivityDetails(activityIds, token, (idx + 1), updatedLaps);
+    return fetchActivityDetails(activityIds, token, (idx + 1), allLaps);
   });
 }
 
