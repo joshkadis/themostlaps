@@ -1,8 +1,7 @@
 require('isomorphic-fetch');
 const Athlete = require('./schema/athlete');
 const Activity = require('./schema/activity');
-const fetchAthleteActivities = require('../utils/fetchAthleteActivities');
-const fetchLapsFromActivities = require('../utils/fetchLapsFromActivities');
+const fetchAndSaveActivities = require('../utils/fetchAndSaveActivities');
 
 /**
  * Get query string for token request with oAuth code
@@ -75,6 +74,14 @@ module.exports = async (req, res) => {
 
     console.log(`Saved ${athleteDoc.get('_id')} to database`);
     res.send(`Importing laps for ${athleteDoc.get('athlete.firstname')} ${athleteDoc.get('athlete.lastname')}. This will take a few minutes.`);
+
+    const savedActivities = await fetchAndSaveActivities(athleteDoc.toJSON());
+
+    if (!savedActivities || !savedActivities.length) {
+      console.log(`User ${athleteDoc.get('_id')} has no activities`)
+      return;
+    }
+
   } catch (err) {
     console.log(err);
     res.send('An error occurred, sorry 😞');
