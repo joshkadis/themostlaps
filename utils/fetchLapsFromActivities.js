@@ -54,6 +54,9 @@ function getActivityData(activity) {
 function fetchActivityDetails(activityIds, token, idx = 0, allLaps) {
   const fetchNum = 'development' === process.env.NODE_ENV ? config.devFetchActivities : activityIds.length;
 
+  /**
+   * @todo Check database to see if activity already imported
+   */
   console.log(`Fetching ${(idx + 1)} of ${fetchNum}: ${activityIds[idx]}`)
   return fetch(`${config.apiUrl}/activities/${activityIds[idx]}`, {
     headers: {

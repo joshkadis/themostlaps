@@ -6,7 +6,14 @@ module.exports = {
   },
   allowedRadius: 50000,
   minDistance: 3300,
-  lapSegmentId: 5313629,
   addMakeupLap: true,
   devFetchActivities: 10,
+  lapSegmentId: 5313629, // Prospect Park Race Lap
+  sectionSegmentIds: [
+    613198, // Prospect Park hill
+    4435603, // Top of Prospect Park
+    4362776, // Prospect Pure Downhill
+    9699985, // Sprint between the lights
+    740668, // E Lake Drive
+  ],
 };

@@ -7,6 +7,7 @@ const express = require('express');
 const handleAuthCallback = require('./server/handleAuthCallback');
 const renderApp = require('./server/renderApp');
 const showRiderData = require('./server/showRiderData');
+const refreshAthlete = require('./server/refreshAthlete');
 
 /* Express Setup */
 const app = express();
@@ -14,6 +15,7 @@ const app = express();
 app.get('/', renderApp);
 app.get('/auth-callback', handleAuthCallback);
 app.get('/by/:id', showRiderData);
+app.get('/refresh/:id', refreshAthlete);
 
 const port = 'production' === process.env.NODE_ENV ? 8080 : 3000;
 
