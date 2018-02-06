@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const express = require('express');
 
 // Route handlers
-const handleAuthCallback = require('./server/handleAuthCallback');
+const onAuthCallback = require('./server/onAuthCallback');
 const renderApp = require('./server/renderApp');
 const showRiderData = require('./server/showRiderData');
 const refreshAthlete = require('./server/refreshAthlete');
@@ -13,7 +13,7 @@ const refreshAthlete = require('./server/refreshAthlete');
 const app = express();
 
 app.get('/', renderApp);
-app.get('/auth-callback', handleAuthCallback);
+app.get('/auth-callback', onAuthCallback);
 app.get('/by/:id', showRiderData);
 app.get('/refresh/:id', refreshAthlete);
 
