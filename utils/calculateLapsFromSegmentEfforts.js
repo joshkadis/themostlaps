@@ -10,20 +10,16 @@ const {
  * @return {Bool}
  */
 function allSectionsBeforeEndFirstLap(sectionsBeforeEndFirstLap) {
-  /**
-   * @todo Just needs to have enough segments before and getUnriddenSsctions == 0
-   */
+  // Need at least enough sections to make a lap
+  if (sectionsBeforeEndFirstLap.length < sectionSegmentIds.length) {
+    return false;
+  }
+
   // Last `sectionSegmentIds.length` segments before end of first lap
   // should constitute a whole lap
   const firstLapSections =
     sectionsBeforeEndFirstLap.slice((-1 * sectionSegmentIds.length));
-  firstLapSections.sort();
-
-  const sortedSections = [...sectionSegmentIds];
-  sortedSections.sort();
-
-  // Can use stringify here since we know the arrays only contain numbers
-  return JSON.stringify(firstLapSections) === JSON.stringify(sortedSections;
+  return getUnriddenSections(firstLapSections) === 0;
 }
 
 /**
