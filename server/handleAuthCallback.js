@@ -79,11 +79,13 @@ module.exports = (req, res) => {
 
     // Overwrite athlete data if it exists because
     // people change their names, etc.
+    const lastUpdated = new Date();
     Athlete.findByIdAndUpdate(
       athlete.athlete.id,
       {
         _id: athlete.athlete.id,
         status: 'ingesting',
+        last_updated: lastUpdated.toISOString(),
         ...athlete,
       },
       { upsert: true },
