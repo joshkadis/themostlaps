@@ -1,6 +1,7 @@
 require('isomorphic-fetch');
 const config = require('../config');
-
+const calculateLapsFromSegmentEfforts =
+  require('./calculateLapsFromSegmentEfforts');
 /**
  * Get laps data object from an activity
  *
@@ -18,15 +19,10 @@ function getActivityData(activity) {
     segment_efforts,
   } = activity;
 
-  let estimated_laps = segment_efforts.reduce((acc, { segment }) =>
-    (segment.id === config.lapSegmentId ? (acc + 1) : acc), 0);
+  const estimated_laps = calculateLapsFromSegmentEfforts(segment_efforts);
 
-  if (0 === estimated_laps) {
+  if (!estimated_laps) {
     return false;
-  }
-
-  if (config.addMakeupLap) {
-    estimated_laps++;
   }
 
   return {
