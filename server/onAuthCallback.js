@@ -1,12 +1,13 @@
 require('isomorphic-fetch');
-const {
-  createAthlete,
-  updateAthleteStats,
-} = require('../utils/athleteUtils');
+const { createAthlete } = require('../utils/athleteUtils');
 const {
   fetchAthleteHistory,
   saveAthleteHistory,
 } = require('../utils/athleteHistory');
+const {
+  compileStatsForActivities,
+  updateAthleteStats,
+} = require('../utils/athleteStats');
 
 /**
  * Get query string for token request with oAuth code

@@ -25,11 +25,6 @@ async function createAthlete(athlete) {
   return await Athlete.create(getAthleteModelFormat(athlete));
 };
 
-async function updateAthleteStats(athlete, stats) {
-  // @todo Update athlete model stats
-}
-
 module.exports = {
   createAthlete,
-  updateAthleteStats,
 };

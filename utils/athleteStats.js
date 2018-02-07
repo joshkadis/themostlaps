@@ -1,24 +1,53 @@
 const Athlete = require('../schema/Athlete');
 
 /**
+ * Compile stats for an array of activity documents
+ *
+ * @param {Array} activities
+ * @return {Object}
+ */
+function compileStatsForActivities(activities) {
+  return activities.reduce((acc, activity) => {
+    // Increment total
+    acc.total = acc.total + activity.get('laps');
+
+    // Increment year and month totals
+    const matches = /^(\d{4,4})-(\d{2,2})-/.exec(activity.get('start_date_local'));
+    if (matches) {
+      const yearKey = `_${matches[1]}`;
+      const monthKey = `${yearKey}_${matches[2]}`;
+      acc[yearKey] = (acc[yearKey] || 0) + activity.get('laps');
+      acc[monthKey] = (acc[monthKey] || 0) + activity.get('laps');
+    }
+
+    // Most laps in a single ride?
+    if (activity.get('laps') > acc.most) {
+      acc.most = activity.get('laps');
+    }
+
+    return acc;
+  }, {
+    total: 0,
+    most: 0,
+  });
+}
+
+/**
  * Update an athletes stats with new rides
  *
  * @param {Document} athleteDoc
- * @param {Array} activities
- * @param {Document} activities[]
- * @param {Bool} rebuild
+ * @param {Object} stats
  */
 
-module.exports = async (athleteDoc, activities, rebuild = false) => {
-  const stats = athleteDoc.get('stats') || {};
-
-  stats.totalLaps = (stats.totalLaps || 0) + activities.reduce((acc, activity) => {
-    return acc + (activity.get('estimated_laps') || 0);
-  }, 0);
-
-  const updatedDoc = await Athlete.findByIdAndUpdate(
+async function updateAthleteStats(athleteDoc, stats) {
+  return await Athlete.findByIdAndUpdate(
     athleteDoc.get('_id'),
     { stats },
-    { overwrite: true }
+    { new: true }
   );
+};
+
+module.exports = {
+  compileStatsForActivities,
+  updateAthleteStats,
 };
