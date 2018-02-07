@@ -1,4 +1,4 @@
-const Athlete = require('../server/schema/athlete');
+const Athlete = require('../schema/Athlete');
 
 /**
  * Update an athletes stats with new rides
