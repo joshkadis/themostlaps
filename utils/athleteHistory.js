@@ -74,6 +74,9 @@ function getActivitiesFromEfforts(efforts, source = 'signup') {
     // Increment laps for activity
     map[activity.id].laps = map[activity.id].laps + 1;
 
+    // save segment effort for v2+ features
+    map[activity.id].segment_efforts.push(effort);
+
     return map;
   }, {});
   return Object.values(activitiesMap);
