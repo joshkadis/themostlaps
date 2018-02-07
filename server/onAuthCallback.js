@@ -105,6 +105,6 @@ module.exports = async (req, res) => {
     res.send(`🙌 Here are your stats: ${JSON.stringify(stats)}`)
   } catch (err) {
     console.log(err);
-    res.send('We couldn\t update your stats, sorry 😞');
+    res.send('We couldn\'t update your stats, sorry 😞');
   }
 };
