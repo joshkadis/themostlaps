@@ -63,16 +63,18 @@ module.exports = async (req, res) => {
     }
 
     const lastUpdated = new Date();
+    // @todo If athlete already in database, just update last_updated and status
+    // If not, create and get athleteDoc
     const athleteDoc = await Athlete.findByIdAndUpdate(
       athlete.athlete.id,
       getAthleteModelFormat(athlete),
       { upsert: true }
     );
 
-    if (!athleteDoc) {
-      res.send('Failed to update athlete in database, sorry 😞');
-      return;
-    }
+    // if (!athleteDoc) {
+    //   res.send('Failed to update athlete in database, sorry 😞');
+    //   return;
+    // }
 
     console.log(`Saved ${athleteDoc.get('_id')} to database`);
     res.send(`Importing laps for ${athleteDoc.get('athlete.firstname')} ${athleteDoc.get('athlete.lastname')}. This will take a few minutes.`);
@@ -80,10 +82,11 @@ module.exports = async (req, res) => {
     const savedActivities = await fetchAndSaveActivities(athleteDoc.toJSON());
 
     if (!savedActivities || !savedActivities.length) {
-      console.log(`User ${athleteDoc.get('_id')} has no activities`)
+      console.log(`User ${athleteDoc.get('_id')} has no new activities`)
       return;
     }
 
+    updateAthleteStats(athleteDoc, savedActivities);
   } catch (err) {
     console.log(err);
     res.send('An error occurred, sorry 😞');
