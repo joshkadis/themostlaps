@@ -9,6 +9,7 @@ const athleteSchema = new Schema({
   athlete: Mixed,
   status: String,
   last_updated: String,
+  stats: Mixed,
 });
 
 const Athlete = mongoose.model('Athlete', athleteSchema);

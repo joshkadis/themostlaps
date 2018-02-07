@@ -2,6 +2,7 @@ require('isomorphic-fetch');
 const Athlete = require('./schema/athlete');
 const Activity = require('./schema/activity');
 const fetchAndSaveActivities = require('../utils/fetchAndSaveActivities');
+const updateAthleteStats = require('../utils/updateAthleteStats');
 
 /**
  * Get query string for token request with oAuth code
@@ -29,6 +30,7 @@ function getAthleteModelFormat(athlete) {
     _id: athlete.athlete.id,
     status: 'ingesting',
     last_updated: lastUpdated.toISOString(),
+    stats: {},
     ...athlete,
   };
 }
