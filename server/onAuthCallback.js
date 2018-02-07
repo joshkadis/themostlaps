@@ -1,8 +1,12 @@
 require('isomorphic-fetch');
-const Athlete = require('./schema/athlete');
-const Activity = require('./schema/activity');
-const fetchAndSaveActivities = require('../utils/fetchAndSaveActivities');
-const updateAthleteStats = require('../utils/updateAthleteStats');
+const {
+  createAthlete,
+  updateAthleteStats,
+} = require('../utils/athleteUtils');
+const {
+  fetchAthleteHistory,
+  saveAthleteHistory,
+} = require('../utils/athleteHistory');
 
 /**
  * Get query string for token request with oAuth code
@@ -19,23 +23,6 @@ function getTokenRequestBody(code) {
 }
 
 /**
- * Convert API response for ahlete to our model's format
- *
- * @param {Object} athlete
- * @return {Object}
- */
-function getAthleteModelFormat(athlete) {
-  const lastUpdated = new Date();
-  return {
-    _id: athlete.athlete.id,
-    status: 'ingesting',
-    last_updated: lastUpdated.toISOString(),
-    stats: {},
-    ...athlete,
-  };
-}
-
-/**
  * Handle post-authorization callback
  */
 module.exports = async (req, res) => {
@@ -44,6 +31,13 @@ module.exports = async (req, res) => {
     return;
   }
 
+  if (req.query.state !== 'signup') {
+    res.send(`Not sure what you're trying to do, sorry. 🤷‍`);
+    return;
+  }
+
+  // Authenticate
+  let athlete;
   try {
     const response = await fetch('https://www.strava.com/oauth/token', {
       method: 'POST',
@@ -51,44 +45,66 @@ module.exports = async (req, res) => {
     });
 
     if (200 !== response.status) {
-      res.send('could not fetch token for athlete');
+      console.log(response);
+      res.send('Authentication failed, please try again later 🙅');
       return;
     }
 
-    const athlete = await response.json();
+    athlete = await response.json();
 
     if (!athlete || !athlete.access_token) {
-      res.send('could not parse athlete token response');
+      console.log(athlete);
+      res.send('Authentication failed, please try again later 🙅');
       return;
     }
-
-    const lastUpdated = new Date();
-    // @todo If athlete already in database, just update last_updated and status
-    // If not, create and get athleteDoc
-    const athleteDoc = await Athlete.findByIdAndUpdate(
-      athlete.athlete.id,
-      getAthleteModelFormat(athlete),
-      { upsert: true }
-    );
-
-    // if (!athleteDoc) {
-    //   res.send('Failed to update athlete in database, sorry 😞');
-    //   return;
-    // }
-
-    console.log(`Saved ${athleteDoc.get('_id')} to database`);
-    res.send(`Importing laps for ${athleteDoc.get('athlete.firstname')} ${athleteDoc.get('athlete.lastname')}. This will take a few minutes.`);
-
-    const savedActivities = await fetchAndSaveActivities(athleteDoc.toJSON());
-
-    if (!savedActivities || !savedActivities.length) {
-      console.log(`User ${athleteDoc.get('_id')} has no new activities`)
-      return;
-    }
-
-    updateAthleteStats(athleteDoc, savedActivities);
   } catch (err) {
     console.log(err);
-    res.send('An error occurred, sorry 😞');
+    res.send('Authentication failed, please try again later 🙅');
+    return;
+  }
+
+  // Create athlete in database
+  let athleteDoc;
+  try {
+    athleteDoc = await createAthlete(athlete);
+    console.log(`Saved ${athleteDoc.get('_id')} to database`);
+  } catch (err) {
+    console.log(err);
+    res.send('Looks like you\'re already in the database? 🕵');
+    return;
+  }
+
+  // Fetch athlete history
+  let athleteHistory;
+  try {
+    athleteHistory = await fetchAthleteHistory(athleteDoc);
+    if (!athleteHistory || !athleteHistory.length) {
+      res.send(`Looks like ${athleteDoc.get('athlete.firstname')} ${athleteDoc.get('athlete.lastname')} has never ridden laps! 😱`);
+      return;
+    }
+  } catch (err) {
+    console.log(err);
+    res.send('Sorry, we couldn\'t find your laps history. 🕵')
+    return;
+  }
+
+  // Validate and save athlete history
+  let savedActivities;
+  try {
+    savedActivities = await saveAthleteHistory(athleteHistory);
+  } catch (err) {
+    console.log(err);
+    res.send('We couldn\t save your rides history, sorry 😞');
+    return;
+  }
+
+  // Compile and update stats
+  try {
+    const stats = compileStatsForActivities(savedActivities);
+    const updated = await updateAthleteStats(athleteDoc, stats);
+    res.send(`🙌 Here are your stats: ${JSON.stringify(stats)}`)
+  } catch (err) {
+    console.log(err);
+    res.send('We couldn\t update your stats, sorry 😞');
   }
 };

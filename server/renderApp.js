@@ -7,9 +7,10 @@ module.exports = (req, res) => {
     'response_type=code',
     'scope=view_private',
     `redirect_uri=${encodeURIComponent(host + '/auth-callback')}`,
+    'state=signup',
   ];
 
   const linkUrl = 'https://www.strava.com/oauth/authorize?' + params.join('&');
 
-  res.send(`<a href="${linkUrl}">authorize</a>`)
+  res.send(`<a href="${linkUrl}">Sign Up</a>`)
 }
