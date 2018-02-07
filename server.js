@@ -16,8 +16,7 @@ app.get('/', renderApp);
 app.get('/auth-callback', onAuthCallback);
 app.get('/by/:id', showRiderData);
 
-const port = 'production' === process.env.NODE_ENV ? 8080 : 3000;
-
 console.log('Connecting to database');
 mongoose.connect(process.env.MONGODB_URI);
-app.listen(port, () => console.log(`Example app listening on port ${port}`));
+app.listen(process.env.PORT,
+  () => console.log(`Example app listening on port ${port}`));
