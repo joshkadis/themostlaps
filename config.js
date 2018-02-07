@@ -6,7 +6,7 @@ module.exports = {
   },
   allowedRadius: 50000,
   minDistance: 3300,
-  addMakeupLap: true,
+  addMakeupLap: true, // Avoids excess API calls when ingesting new user
   devFetchActivities: 10,
   lapSegmentId: 5313629, // Prospect Park Race Lap
   sectionSegmentIds: [
