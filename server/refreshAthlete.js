@@ -1,4 +1,4 @@
-const Activity = require('./schema/activity');
+const Activity = require('../schema/Activity');
 
 module.exports = (req, res) => {
   if (!req.params.id || isNaN(parseInt(req.params.id, 10))) {

@@ -9,6 +9,7 @@ const athleteSchema = new Schema({
   athlete: Mixed,
   status: String,
   last_updated: String,
+  created: String,
   stats: Mixed,
 });
 
