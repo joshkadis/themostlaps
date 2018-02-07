@@ -15,7 +15,6 @@ const app = express();
 app.get('/', renderApp);
 app.get('/auth-callback', onAuthCallback);
 app.get('/by/:id', showRiderData);
-app.get('/refresh/:id', refreshAthlete);
 
 const port = 'production' === process.env.NODE_ENV ? 8080 : 3000;
 
