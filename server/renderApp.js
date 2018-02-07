@@ -1,6 +1,8 @@
+const { prodDomain } = require('../config');
+
 module.exports = (req, res) => {
   const host = 'production' === process.env.NODE_ENV ?
-    'https://themostlaps.com' : 'http://localhost:3000';
+    `https://${prodDomain}` : 'http://localhost:3000';
 
   const params = [
     `client_id=${process.env.CLIENT_ID}`,
