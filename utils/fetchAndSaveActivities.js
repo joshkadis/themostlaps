@@ -21,7 +21,7 @@ const shouldCreateActivity = async (activity) => {
 
   const foundActivity = await Activity.findById(activity._id);
   if (foundActivity) {
-    console.log(`Already saved activity ${activityId}`);
+    console.log(`Already saved activity ${activity._id}`);
     return false;
   }
 
@@ -48,8 +48,19 @@ module.exports = async ({ access_token }) => {
   }
 
   // Filter out invalid or already saved activities
-  const filteredActivities =
-    activities.filter((activity) => shouldCreateActivity(activity));
+  const filteredActivities = [];
+  for (let i = 0; i < activities.length; i++) {
+    const shouldCreate = await shouldCreateActivity(activities[i]);
+    if (shouldCreate) {
+      filteredActivities.push(activities[i]);
+    }
+  }
 
-  return Activity.create(filteredActivities);
+  debugger;
+  try {
+    return await Activity.create(filteredActivities);
+  } catch (err) {
+    console.log(err);
+    return false;
+  }
 };
