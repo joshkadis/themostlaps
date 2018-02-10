@@ -8,10 +8,10 @@ const Athlete = require('../schema/Athlete');
  */
 function compileStatsForActivities(activities) {
   return activities.reduce((acc, activity) => {
-    // Increment total
-    acc.total = acc.total + activity.get('laps');
+    // Increment allTime total
+    acc.allTime = acc.allTime + activity.get('laps');
 
-    // Increment year and month totals
+    // Increment year and month allTimes
     const matches = /^(\d{4,4})-(\d{2,2})-/.exec(activity.get('start_date_local'));
     if (matches) {
       const yearKey = `_${matches[1]}`;
@@ -21,14 +21,14 @@ function compileStatsForActivities(activities) {
     }
 
     // Most laps in a single ride?
-    if (activity.get('laps') > acc.most) {
-      acc.most = activity.get('laps');
+    if (activity.get('laps') > acc.single) {
+      acc.single = activity.get('laps');
     }
 
     return acc;
   }, {
-    total: 0,
-    most: 0,
+    allTime: 0,
+    single: 0,
   });
 }
 
