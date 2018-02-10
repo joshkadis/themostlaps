@@ -1,5 +1,8 @@
 .DS_Store
 .scratchpad
+.db_vars
+/activities.json
+/athletes.json
 
 # Logs
 logs
