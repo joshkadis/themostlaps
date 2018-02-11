@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { prodDomain } from '../config';
+import { prodDomain, lapSegmentId } from '../config';
 
 function getSignupLinkUrl() {
   const host = 'production' === process.env.NODE_ENV ?
@@ -19,7 +19,7 @@ function getSignupLinkUrl() {
 export default () => (
   <div>
     <p>
-      <Link as="/prospectpark" href="/park">
+      <Link as="/prospectpark" href={`/park?segment=${lapSegmentId}`}>
         <a>Prospect Park</a>
       </Link>
     </p>
