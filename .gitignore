@@ -5,7 +5,8 @@
 /athletes.json
 
 # Next.js
-.next
+# track this dir until Next bugfix is in production
+# .next/
 
 # Logs
 logs
