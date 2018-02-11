@@ -7,6 +7,7 @@
     "start": "NODE_ENV=production node server.js",
     "dev": "NODE_ENV=development node --inspect server.js",
     "build": "next build",
+    "heroku-postbuild": "next build",
     "test": "jest"
   },
   "repository": {
