@@ -1,8 +1,6 @@
 require('dotenv').config();
-
 const mongoose = require('mongoose');
 const express = require('express');
-const { prodDomain } = require('./config');
 
 // Route handlers
 const onAuthCallback = require('./server/onAuthCallback');
@@ -10,6 +8,7 @@ const renderApp = require('./server/renderApp');
 const showRiderData = require('./server/showRiderData');
 
 // API getters
+const validateApiRequest = require('./api/validateApiRequest');
 const getRanking = require('./api/getRanking');
 
 /* Express Setup */
@@ -23,15 +22,9 @@ app.get('/by/:id', showRiderData);
  * API routing
  */
 app.get('/api/ranking/:type/:segmentId', async (req, res) => {
-  if ((req.hostname === 'localhost' && process.env.ALLOW_LOCALHOST !== 'true') ||
-    (req.hostname !== prodDomain && req.hostname !== 'localhost')
-  ) {
-    res.status(403).json({ error: `Host ${req.hostname} not allowed to make API requests` });
-    return;
-  }
-
-  if (!req.query.key || req.query.key !== process.env.API_KEY) {
-    res.status(403).json({ error: 'Missing or invalid API key' });
+  const validation = validateApiRequest(req.hostname, req.query.key || null);
+  if (validation.error) {
+    res.status(403).json(error);
     return;
   }
 

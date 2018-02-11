@@ -1,11 +1,7 @@
 module.exports = {
   rankingTypes: [
     'allTime',
-    'year',
-    'month',
+    'timePeriod',
     'single',
   ],
-  rankingTypeFilters: {
-    allTime: { $gte: 999 },
-  },
 };
