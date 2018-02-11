@@ -57,6 +57,13 @@ app.prepare()
     });
 
     /**
+     * Catchall handler
+     */
+    server.get('*', (req, res) => {
+      return handle(req, res)
+    })
+
+    /**
      * Connect to database and start listening
      */
     console.log('Connecting to database');
