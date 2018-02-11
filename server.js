@@ -5,8 +5,6 @@ const next = require('next');
 
 // Route handlers
 const onAuthCallback = require('./server/onAuthCallback');
-const renderApp = require('./server/renderApp');
-const showRiderData = require('./server/showRiderData');
 
 // API getters
 const validateApiRequest = require('./api/validateApiRequest');
@@ -24,9 +22,7 @@ app.prepare()
     /**
      * Basic routing
      */
-    server.get('/', renderApp);
     server.get('/auth-callback', onAuthCallback);
-    server.get('/by/:id', showRiderData);
 
     /**
      * Next.js routing
