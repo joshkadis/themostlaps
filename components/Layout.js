@@ -9,7 +9,7 @@ import * as styles from './Layout.css';
 export default ({ children }) => (
   <div>
     <Head>
-      <link rel="stylesheet" href="/_next/static/styles.css" />
+      <link rel="stylesheet" href="/_next/static/style.css" />
     </Head>
     <Header />
     <div className={styles.main}>
