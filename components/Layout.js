@@ -1,5 +1,6 @@
 import Header from './Header';
 import Footer from './Footer';
+import * as styles from './Layout.css';
 
 /**
  * Page layout
@@ -7,7 +8,7 @@ import Footer from './Footer';
 export default ({ children }) => (
   <div>
     <Header />
-    <div class="main">
+    <div className={styles.main}>
       {children}
     </div>
     <Footer />
