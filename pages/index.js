@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Layout from '../components/Layout';
 import { stravaClientId, lapSegmentId } from '../config';
 import { getEnvOrigin } from '../utils/envUtils';
 
@@ -15,7 +16,7 @@ function getSignupLinkUrl() {
 }
 
 export default () => (
-  <div>
+  <Layout>
     <p>
       <Link as="/prospectpark" href={`/park?segment=${lapSegmentId}`}>
         <a>Prospect Park</a>
@@ -24,5 +25,5 @@ export default () => (
     <p>
       <a href={getSignupLinkUrl()}>Sign Up</a>
     </p>
-  </div>
+  </Layout>
 );
