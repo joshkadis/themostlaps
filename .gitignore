@@ -4,6 +4,9 @@
 /activities.json
 /athletes.json
 
+# Next.js
+.next
+
 # Logs
 logs
 *.log

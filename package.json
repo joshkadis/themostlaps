@@ -6,6 +6,7 @@
   "scripts": {
     "start": "NODE_ENV=production node server.js",
     "dev": "NODE_ENV=development node --inspect server.js",
+    "build": "next build",
     "test": "jest"
   },
   "repository": {
@@ -23,7 +24,11 @@
     "express": "^4.16.2",
     "geolib": "^2.0.24",
     "isomorphic-fetch": "^2.2.1",
-    "mongoose": "^5.0.3"
+    "isomorphic-unfetch": "^2.0.0",
+    "mongoose": "^5.0.3",
+    "next": "^5.0.0",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0"
   },
   "devDependencies": {
     "jest": "^22.1.4"
