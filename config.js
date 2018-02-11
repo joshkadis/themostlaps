@@ -17,5 +17,6 @@ module.exports = {
     740668, // E Lake Drive
   ],
   prodDomain: 'themostlaps.herokuapp.com',
+  stravaClientId: 22415,
 };
 

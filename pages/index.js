@@ -1,15 +1,13 @@
 import Link from 'next/link';
-import { prodDomain, lapSegmentId } from '../config';
+import { stravaClientId, lapSegmentId } from '../config';
+import { getEnvOrigin } from '../utils/envUtils';
 
 function getSignupLinkUrl() {
-  const host = 'production' === process.env.NODE_ENV ?
-    `https://${prodDomain}` : 'http://localhost:3000';
-
   const params = [
-    `client_id=${process.env.CLIENT_ID}`,
+    `client_id=${stravaClientId}`,
     'response_type=code',
     'scope=view_private',
-    `redirect_uri=${encodeURIComponent(host + '/auth-callback')}`,
+    `redirect_uri=${encodeURIComponent(getEnvOrigin() + '/auth-callback')}`,
     'state=signup',
   ];
 
