@@ -1,5 +1,6 @@
 :root {
   --purple: #6100FF;
+  --purpleLight: color(var(--purple) lightness(65%));
   --yellow: #FFD323;
 }
 
