@@ -29,6 +29,8 @@
     "isomorphic-unfetch": "^2.0.0",
     "mongoose": "^5.0.3",
     "next": "canary",
+    "postcss-cssnext": "^3.1.0",
+    "postcss-import": "^11.1.0",
     "react": "^16.2.0",
     "react-dom": "^16.2.0"
   },
