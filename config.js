@@ -18,5 +18,6 @@ module.exports = {
   ],
   prodDomain: 'themostlaps.herokuapp.com',
   stravaClientId: 22415,
+  breakpointPx: 800,
 };
 

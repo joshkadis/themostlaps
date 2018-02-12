@@ -3,6 +3,13 @@
   --purpleLight: color(var(--purple) lightness(65%));
   --yellow: #FFD323;
   --headerGradient: linear-gradient(to right, var(--purple), var(--yellow));
+  --fadeLink: {
+    color: white;
+    transition: color ease-in-out .3s;
+    &:hover {
+      color: var(--purpleLight);
+    }
+  };
 }
 
 @custom-media --smallViewport (max-width: 799px);

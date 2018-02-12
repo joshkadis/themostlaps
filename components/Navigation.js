@@ -1,9 +1,22 @@
 import React, { Component } from 'react';
 import Link from 'next/link';
 import classNames from 'classnames';
-import { lapSegmentId } from '../config';
+import { lapSegmentId, breakpointPx } from '../config';
 import * as styles from './Navigation.css';
 import { MenuSvg } from './lib/svg';
+
+/**
+ * Determine if nav should be shown, isomorphically
+ */
+function shouldShowNav() {
+  // Show by default from server
+  if ('undefined' === typeof window || !window.innerWidth) {
+    return true;
+  }
+
+  // Hide for small viewport
+  return window.innerWidth >= breakpointPx;
+}
 
 class Navigation extends Component {
   constructor(props) {
@@ -19,6 +32,14 @@ class Navigation extends Component {
     this.linksContainer.classList.toggle(styles.hidden);
   }
 
+  componentDidMount() {
+    if (shouldShowNav()) {
+      this.linksContainer.classList.remove(styles.hidden);
+    } else {
+      this.linksContainer.classList.add(styles.hidden);
+    }
+  }
+
   render() {
     return (<div>
       <MenuSvg
@@ -26,7 +47,7 @@ class Navigation extends Component {
         onClickHandler={this.toggleNavLinksContainer}
       />
       <nav
-        className={classNames(styles.linksContainer, styles.hidden)}
+        className={classNames(styles.linksContainer, { [styles.hidden]: shouldShowNav() })}
         ref={(el) => { this.linksContainer = el; }}
         onClick={this.toggleNavLinksContainer}
       >

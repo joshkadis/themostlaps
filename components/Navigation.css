@@ -1,16 +1,12 @@
 @import '../styles/vars';
 
 .link {
+  @apply --fadeLink;
+
   background-color: transparent;
-  color: white;
   margin-right: 0.5rem;
   padding: 0.5rem;
   text-decoration: none;
-
-  &:hover {
-    color: var(--purpleLight);
-    text-decoration: underline;
-  }
 }
 
 .ctaLink {

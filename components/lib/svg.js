@@ -2,8 +2,8 @@
  * Tried various SVG loaders and couldn't get them working
  * Just doing this for now.
  */
-export const KadiscoSvg = () => (
-  <svg preserveAspectRatio="true" viewBox="0 0 200 266" width="200" height="266">
+export const KadiscoSvg = ({ className }) => (
+  <svg className={className || ''} preserveAspectRatio="true" viewBox="0 0 200 266" width="200" height="266">
     <title>Kadisco</title>
       <g>
         <g id="svg_1" stroke="null">
