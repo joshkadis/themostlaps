@@ -1,7 +1,7 @@
 @import '../styles/vars';
 
 .header {
-  background: linear-gradient(to right, var(--purple), var(--yellow));
+  background: var(--headerGradient);
   align-items: center;
   display: flex;
   justify-content: space-between;
@@ -15,4 +15,8 @@
   font-style: italic;
   font-weight: 800;
   text-transform: uppercase;
+
+  @media (--smallViewport) {
+    font-size: 1.5rem;
+  }
 }

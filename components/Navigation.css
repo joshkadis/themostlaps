@@ -3,8 +3,8 @@
 .link {
   background-color: transparent;
   color: white;
-  margin-right: 0.5em;
-  padding: 0.5em;
+  margin-right: 0.5rem;
+  padding: 0.5rem;
   text-decoration: none;
 
   &:hover {
@@ -18,9 +18,45 @@
   border-radius: 5px;
   cursor: pointer;
   font-weight: 600;
+  transition: background-color ease-in-out .3s;
   &:hover {
     background-color: var(--purpleLight);
     color: white;
     text-decoration: none;
+  }
+}
+
+.linksContainer {
+  @media (--smallViewport) {
+    background: var(--headerGradient);
+    padding: 1rem;
+    position: absolute;
+    right: 0;
+    top: 60px;
+    width: 100%;
+
+    & .link {
+      display: block;
+      margin-top: 1rem;
+    }
+  }
+}
+
+.hidden {
+  display: none;
+}
+
+.menu {
+  cursor: pointer;
+  display: none;
+  fill: rgba(255, 255, 255, 1);
+  transition: fill ease-in-out .3s;
+
+  &:hover {
+    fill: var(--purpleLight);
+  }
+
+  @media (--smallViewport) {
+    display: inherit;
   }
 }

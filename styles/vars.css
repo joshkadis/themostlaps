@@ -2,5 +2,7 @@
   --purple: #6100FF;
   --purpleLight: color(var(--purple) lightness(65%));
   --yellow: #FFD323;
+  --headerGradient: linear-gradient(to right, var(--purple), var(--yellow));
 }
 
+@custom-media --smallViewport (max-width: 799px);
