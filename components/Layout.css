@@ -1,6 +1,7 @@
 @import '../styles/reset';
+@import '../styles/typography';
 @import '../styles/vars';
 
 .main {
-  background-color: var(--backgroundColor);
+
 }
