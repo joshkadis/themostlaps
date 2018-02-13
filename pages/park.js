@@ -1,9 +1,10 @@
 import fetch from 'isomorphic-unfetch';
 import Link from 'next/link';
+import Layout from '../components/Layout';
 import { getEnvOrigin } from '../utils/envUtils';
 
 const Park = ({ allTime }) => (
-  <div>
+  <Layout>
     <h1>All Time Ranking</h1>
     {allTime.map(({ _id, athlete, stats }) => (
       <p key={_id}>{`${athlete.firstname} ${athlete.lastname}: ${stats.allTime} laps`}</p>
@@ -11,7 +12,7 @@ const Park = ({ allTime }) => (
     <Link href="/">
       <a>Home</a>
     </Link>
-  </div>
+  </Layout>
 );
 
 Park.getInitialProps = async function(context) {
