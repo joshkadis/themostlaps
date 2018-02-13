@@ -8,6 +8,7 @@ const {
   compileStatsForActivities,
   updateAthleteStats,
 } = require('../utils/athleteStats');
+const getInternalErrorMessage = require('../utils/internalErrors');
 
 /**
  * Get query string for token request with oAuth code
@@ -24,17 +25,33 @@ function getTokenRequestBody(code) {
 }
 
 /**
+ * Get response object for error code
+ *
+ * @param {Number} code
+ * @param {Any} errData Optional error data
+ * @param {Object} athlete Optional athlete data if we have it
+ * @return {Object}
+ */
+function getErrorResponseObject(code, errData = null, athlete = false) {
+  return {
+    error: code,
+    errorMsg: getInternalErrorMessage(code, errData),
+    athlete,
+  }
+}
+
+/**
  * Handle post-authorization callback
+ * @param {Request} req
+ * @param {Response} res
+ * @return {Object} result
+ * @return {Number|Bool} result.error Internal error code or false
+ * @return {String} result.errorMsg
+ * @return {Object} result.athlete Athlete info for onboarding next steps
  */
 module.exports = async (req, res) => {
   if (req.query.error) {
-    res.send(`Error ${req.query.error}`);
-    return;
-  }
-
-  if (req.query.state !== 'signup') {
-    res.send(`Not sure what you're trying to do, sorry. 🤷‍`);
-    return;
+    return getErrorResponseObject(1, req.query.error);
   }
 
   // Authenticate
@@ -47,21 +64,18 @@ module.exports = async (req, res) => {
 
     if (200 !== response.status) {
       console.log(response);
-      res.send('Authentication failed, please try again later 🙅');
-      return;
+      return getErrorResponseObject(2);
     }
 
     athlete = await response.json();
 
     if (!athlete || !athlete.access_token) {
       console.log(athlete);
-      res.send('Authentication failed, please try again later 🙅');
-      return;
+      return getErrorResponseObject(3);
     }
   } catch (err) {
     console.log(err);
-    res.send('Authentication failed, please try again later 🙅');
-    return;
+    return getErrorResponseObject(4);
   }
 
   // Create athlete in database
@@ -71,8 +85,7 @@ module.exports = async (req, res) => {
     console.log(`Saved ${athleteDoc.get('_id')} to database`);
   } catch (err) {
     console.log(err);
-    res.send('Looks like you\'re already in the database? 🕵');
-    return;
+    return getErrorResponseObject(5);
   }
 
   // Fetch athlete history
@@ -80,13 +93,11 @@ module.exports = async (req, res) => {
   try {
     athleteHistory = await fetchAthleteHistory(athleteDoc);
     if (!athleteHistory || !athleteHistory.length) {
-      res.send(`Looks like ${athleteDoc.get('athlete.firstname')} ${athleteDoc.get('athlete.lastname')} has never ridden laps! 😱`);
-      return;
+      return getErrorResponseObject(6);
     }
   } catch (err) {
     console.log(err);
-    res.send('Sorry, we couldn\'t find your laps history. 🕵')
-    return;
+    return getErrorResponseObject(7);
   }
 
   // Validate and save athlete history
@@ -95,17 +106,25 @@ module.exports = async (req, res) => {
     savedActivities = await saveAthleteHistory(athleteHistory);
   } catch (err) {
     console.log(err);
-    res.send('We couldn\t save your rides history, sorry 😞');
-    return;
+    return getErrorResponseObject(8);
   }
 
   // Compile and update stats
   try {
     const stats = compileStatsForActivities(savedActivities);
     const updated = await updateAthleteStats(athleteDoc, stats);
-    res.send(`🙌 Here are your stats: ${JSON.stringify(stats)}`)
+    return {
+      error: false,
+      errorMsg: '',
+      athlete: {
+        id: athleteDoc.get('_id');
+        firstname: athleteDoc.get('athlete.firstname'),
+        email: athleteDoc.get('athlete.email'),
+        allTime: athleteDoc.get('stats.allTime'),
+      }
+    }
   } catch (err) {
     console.log(err);
-    res.send('We couldn\'t update your stats, sorry 😞');
+    return getErrorResponseObject(9);
   }
 };

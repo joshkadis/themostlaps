@@ -22,7 +22,28 @@ app.prepare()
     /**
      * Basic routing
      */
-    server.get('/auth-callback', onAuthCallback);
+    server.get('/auth-callback', (req, res) => {
+      const authResult = await onAuthCallback(req, res);
+
+      if (authResult.error || !authResult.athlete) {
+        const redirectQuery = `autherror=${authResult.error}`;
+        console.log(`Auth error ${authResult.error}: ${authResult.errorMsg}`);
+      } else {
+        const redirectQuery = [
+          'authsuccess=true&'
+          `id=${encodeURIComponent(authResult.athlete.id)}&`
+          `firstname=${encodeURIComponent(authResult.athlete.firstname)}`
+          `email=${encodeURIComponent(authResult.athlete.email)}`,
+          `allTime=${encodeURIComponent(authResult.athlete.allTime)}&`
+        ].join('');
+      }
+
+      const redirectTo = req.query.state ?
+        decodeURIComponent(req.query.state) :
+        '/';
+
+      res.redirect(303, `${redirectTo}?${redirectQuery}`);
+    });
 
     /**
      * Next.js routing
