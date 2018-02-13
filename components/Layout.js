@@ -27,6 +27,12 @@ class Layout extends Component {
     this.setState({ modalIsOpen: false });
   }
 
+  componentWillMount() {
+    if (this.props.autherror) {
+      this.setState({ modalIsOpen: true });
+    }
+  }
+
   // Only need this client-side
   componentDidMount() {
     Modal.setAppElement('#__next');
@@ -60,6 +66,10 @@ class Layout extends Component {
           >
             <CloseSvg />
           </button>
+          <div>
+            {!!this.props.autherror &&
+              <p>Auth error code: {this.props.autherror}</p>}
+          </div>
         </Modal>
       </div>
     );
