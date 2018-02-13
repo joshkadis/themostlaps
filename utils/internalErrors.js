@@ -5,29 +5,29 @@
  * @param {Any} data Optional data to include w error message
  * @return {String}
  */
-export default (code = 0, data = '') => {
+module.exports = (code = 0, data = '') => {
   switch (code) {
-    case 1:
+    case 10:
       return `Request error: ${data}`;
 
-    case 2:
-    case 3:
-    case 4:
+    case 20:
+    case 30:
+    case 40:
       return 'Authentication failed, please try again later 🙅';
 
-    case 5:
-      return 'Looks like you\'re already in the database? 🕵';
+    case 50:
+      return 'Looks like you\'re already in the database. 🕵';
 
-    case 6:
+    case 60:
       return 'Looks like you have never ridden laps! 😱';
 
-    case 7:
+    case 70:
       return 'Sorry, we couldn\'t find your laps history. 🕵';
 
-    case 8:
+    case 80:
       return 'We\'re having troubling saving your laps history, sorry 😞';
 
-    case 9:
+    case 90:
       return 'We couldn\'t update your stats, sorry 😞';
 
     default:

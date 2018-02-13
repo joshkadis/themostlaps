@@ -49,9 +49,9 @@ function getErrorResponseObject(code, errData = null, athlete = false) {
  * @return {String} result.errorMsg
  * @return {Object} result.athlete Athlete info for onboarding next steps
  */
-module.exports = async (req, res) => {
+async function onAuthCallback(req, res) {
   if (req.query.error) {
-    return getErrorResponseObject(1, req.query.error);
+    return getErrorResponseObject(10, req.query.error);
   }
 
   // Authenticate
@@ -64,18 +64,18 @@ module.exports = async (req, res) => {
 
     if (200 !== response.status) {
       console.log(response);
-      return getErrorResponseObject(2);
+      return getErrorResponseObject(20);
     }
 
     athlete = await response.json();
 
     if (!athlete || !athlete.access_token) {
       console.log(athlete);
-      return getErrorResponseObject(3);
+      return getErrorResponseObject(30);
     }
   } catch (err) {
     console.log(err);
-    return getErrorResponseObject(4);
+    return getErrorResponseObject(40);
   }
 
   // Create athlete in database
@@ -85,7 +85,8 @@ module.exports = async (req, res) => {
     console.log(`Saved ${athleteDoc.get('_id')} to database`);
   } catch (err) {
     console.log(err);
-    return getErrorResponseObject(5);
+    const errCode = -1 !== err.message.indexOf('duplicate key') ? 50 : 80;
+    return getErrorResponseObject(errCode);
   }
 
   // Fetch athlete history
@@ -93,11 +94,11 @@ module.exports = async (req, res) => {
   try {
     athleteHistory = await fetchAthleteHistory(athleteDoc);
     if (!athleteHistory || !athleteHistory.length) {
-      return getErrorResponseObject(6);
+      return getErrorResponseObject(60);
     }
   } catch (err) {
     console.log(err);
-    return getErrorResponseObject(7);
+    return getErrorResponseObject(70);
   }
 
   // Validate and save athlete history
@@ -106,7 +107,7 @@ module.exports = async (req, res) => {
     savedActivities = await saveAthleteHistory(athleteHistory);
   } catch (err) {
     console.log(err);
-    return getErrorResponseObject(8);
+    return getErrorResponseObject(80);
   }
 
   // Compile and update stats
@@ -117,7 +118,7 @@ module.exports = async (req, res) => {
       error: false,
       errorMsg: '',
       athlete: {
-        id: athleteDoc.get('_id');
+        id: athleteDoc.get('_id'),
         firstname: athleteDoc.get('athlete.firstname'),
         email: athleteDoc.get('athlete.email'),
         allTime: athleteDoc.get('stats.allTime'),
@@ -125,6 +126,8 @@ module.exports = async (req, res) => {
     }
   } catch (err) {
     console.log(err);
-    return getErrorResponseObject(9);
+    return getErrorResponseObject(90);
   }
 };
+
+module.exports = onAuthCallback;

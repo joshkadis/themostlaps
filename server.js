@@ -20,9 +20,9 @@ app.prepare()
     const server = express();
 
     /**
-     * Basic routing
+     * Auth callback, ingest and redirect
      */
-    server.get('/auth-callback', (req, res) => {
+    server.get('/auth-callback', async (req, res) => {
       const authResult = await onAuthCallback(req, res);
 
       if (authResult.error || !authResult.athlete) {
