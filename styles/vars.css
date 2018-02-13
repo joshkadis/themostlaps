@@ -10,6 +10,20 @@
       color: var(--purpleLight);
     }
   };
+  --button: {
+    background-color: var(--purple);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 600;
+    transition: background-color ease-in-out .3s;
+    &:hover {
+      background-color: var(--purpleLight);
+      color: white;
+      text-decoration: none;
+    }
+  };
 }
 
 @custom-media --smallViewport (max-width: 799px);
