@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import Modal from 'react-modal';
+import { CloseSvg } from './lib/svg';
+import * as styles from './SignUpLink.css';
 
 class SignUpLink extends Component {
   constructor(props) {
@@ -37,9 +39,16 @@ class SignUpLink extends Component {
         isOpen={this.state.modalIsOpen}
         onRequestClose={this.handleCloseModal}
         contentLabel="Sign Up"
+        className={styles.modalContent}
+        overlayClassName={styles.overlay}
       >
-        <h2>hello moto</h2>
-        <button onClick={this.handleCloseModal}>Close Modal</button>
+        <button
+          aria-label="Close Modal"
+          className={styles.closeModal}
+          onClick={this.handleCloseModal}
+        >
+          <CloseSvg />
+        </button>
       </Modal>
     </div>
     );
