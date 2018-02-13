@@ -4,6 +4,7 @@ import classNames from 'classnames';
 import { lapSegmentId, breakpointPx } from '../config';
 import * as styles from './Navigation.css';
 import { MenuSvg } from './lib/svg';
+import SignUpLink from './SignUpLink';
 
 /**
  * Determine if nav should be shown, isomorphically
@@ -20,12 +21,12 @@ function shouldShowNav() {
 
 class Navigation extends Component {
   constructor(props) {
-    super();
+    super(props);
     this.toggleNavLinksContainer = this.toggleNavLinksContainer.bind(this);
   }
 
   toggleNavLinksContainer(evt) {
-    if (!this.linksContainer) {
+    if (!this.linksContainer || shouldShowNav()) {
       return;
     }
 
@@ -60,9 +61,7 @@ class Navigation extends Component {
         <Link href="/help">
           <a className={styles.link}>Help</a>
         </Link>
-        <span className={classNames(styles.link, styles.ctaLink)}>
-          Post Your Laps
-        </span>
+        <SignUpLink className={classNames(styles.link, styles.ctaLink)} />
       </nav>
     </div>);
   }
