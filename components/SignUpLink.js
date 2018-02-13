@@ -3,22 +3,22 @@ import * as styles from './SignUpLink.css';
 import { stravaClientId } from '../config';
 import { getEnvOrigin } from '../utils/envUtils';
 
-function getSignupLinkUrl() {
+function getSignupLinkUrl(pathname = '/') {
   const params = [
     `client_id=${stravaClientId}`,
     'response_type=code',
     'scope=view_private',
     `redirect_uri=${encodeURIComponent(getEnvOrigin() + '/auth-callback')}`,
-    'state=signup',
+    `state=${encodeURIComponent(pathname)}`,
   ];
 
   return 'https://www.strava.com/oauth/authorize?' + params.join('&');
 }
 
-export default ({ className }) => (
+export default ({ className, pathname }) => (
   <a
     className={className || ''}
-    href={getSignupLinkUrl()}
+    href={getSignupLinkUrl(pathname)}
   >
     <img
       className={styles.connectButton}

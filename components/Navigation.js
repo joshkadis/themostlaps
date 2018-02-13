@@ -61,7 +61,10 @@ class Navigation extends Component {
         <Link href="/help">
           <a className={styles.link}>Help</a>
         </Link>
-        <SignUpLink className={styles.link} />
+        <SignUpLink
+          className={styles.link}
+          pathname={this.props.pathname}
+        />
       </nav>
     </div>);
   }

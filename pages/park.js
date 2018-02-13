@@ -3,8 +3,11 @@ import Link from 'next/link';
 import Layout from '../components/Layout';
 import { getEnvOrigin } from '../utils/envUtils';
 
-const Park = ({ allTime }) => (
-  <Layout>
+const Park = ({ allTime, query, url }) => (
+  <Layout
+    url={url}
+    query={query}
+  >
     <h1>All Time Ranking</h1>
     {allTime.map(({ _id, athlete, stats }) => (
       <p key={_id}>{`${athlete.firstname} ${athlete.lastname}: ${stats.allTime} laps`}</p>
@@ -15,16 +18,18 @@ const Park = ({ allTime }) => (
   </Layout>
 );
 
-Park.getInitialProps = async function(context) {
-  if (!context.query.segment || isNaN(context.query.segment)) {
-    return { allTime: [] };
+Park.getInitialProps = async function({ url, query }) {
+  let allTime = []
+  if (query.segment && !isNaN(query.segment)) {
+    const response = await fetch(`${getEnvOrigin()}/api/ranking/allTime/${query.segment}`);
+    const ranking = await response.json();
+    allTime = !ranking.error ? ranking.ranking : [];
   }
 
-  const response = await fetch(`${getEnvOrigin()}/api/ranking/allTime/${context.query.segment}`);
-  const ranking = await response.json();
-
   return {
-    allTime: !ranking.error ? ranking.ranking : [],
+    allTime,
+    query,
+    url,
   };
 }
 
