@@ -18,7 +18,9 @@ const Park = ({ allTime, query, url }) => (
   </Layout>
 );
 
-Park.getInitialProps = async function({ url, query }) {
+Park.getInitialProps = async function(context) {
+  const { url, query } = context;
+
   let allTime = []
   if (query.segment && !isNaN(query.segment)) {
     const response = await fetch(`${getEnvOrigin()}/api/ranking/allTime/${query.segment}`);

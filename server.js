@@ -25,11 +25,12 @@ app.prepare()
     server.get('/auth-callback', async (req, res) => {
       const authResult = await onAuthCallback(req, res);
 
+      let redirectQuery;
       if (authResult.error || !authResult.athlete) {
-        const redirectQuery = `autherror=${authResult.error}`;
+        redirectQuery = `autherror=${authResult.error}`;
         console.log(`Auth error ${authResult.error}: ${authResult.errorMsg}`);
       } else {
-        const redirectQuery = [
+        redirectQuery = [
           'authsuccess=true&'
           `id=${encodeURIComponent(authResult.athlete.id)}&`
           `firstname=${encodeURIComponent(authResult.athlete.firstname)}`
@@ -50,7 +51,7 @@ app.prepare()
      */
     server.get('/prospectpark', (req, res) => {
       const { lapSegmentId } = require('./config');
-      app.render(req, res, '/park', { segment: lapSegmentId });
+      app.render(req, res, '/park', Object.assign(req.query, { segment: lapSegmentId }));
     });
 
     /**
