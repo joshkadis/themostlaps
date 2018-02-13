@@ -1,7 +1,23 @@
 import React, { Component } from 'react';
 import Modal from 'react-modal';
+import Markdown from 'react-markdown';
 import { CloseSvg } from './lib/svg';
 import * as styles from './SignUpLink.css';
+import modalMarkdown from 'raw-loader!../copy/modal.md';
+import { stravaClientId } from '../config';
+import { getEnvOrigin } from '../utils/envUtils';
+
+function getSignupLinkUrl() {
+  const params = [
+    `client_id=${stravaClientId}`,
+    'response_type=code',
+    'scope=view_private',
+    `redirect_uri=${encodeURIComponent(getEnvOrigin() + '/auth-callback')}`,
+    'state=signup',
+  ];
+
+  return 'https://www.strava.com/oauth/authorize?' + params.join('&');
+}
 
 class SignUpLink extends Component {
   constructor(props) {
@@ -49,6 +65,21 @@ class SignUpLink extends Component {
         >
           <CloseSvg />
         </button>
+
+        <Markdown
+          className={styles.markdownContainer}
+          source={modalMarkdown}
+        />
+
+        <div className={styles.connectButtonContainer}>
+          <a href={getSignupLinkUrl()}>
+            <img
+              className={styles.connectButton}
+              src="/static/btn_strava_connectwith_orange@2x.png"
+              alt="Connect with Strava"
+            />
+          </a>
+        </div>
       </Modal>
     </div>
     );

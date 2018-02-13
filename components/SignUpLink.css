@@ -16,16 +16,15 @@
   outline: none;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 2em;
+  padding: 4em 2em 2em;
 
   /* Layout */
   position: absolute;
-  height: 700px;
   left: 50%;
   max-height: 90%;
   max-width: 90%;
-  top: 50%;
-  transform: translate(-50%, -50%);
+  top: 5%;
+  transform: translateX(-50%);
   width: 400px;
 }
 
@@ -49,4 +48,22 @@
   &:hover svg {
     fill: var(--purpleLight);
   };
+}
+
+.connectButton {
+  max-width: 200px;
+  height: auto;
+}
+
+.connectButtonContainer {
+  margin-top: 2em;
+  text-align: center;
+}
+
+.markdownContainer {
+  @media (--smallViewport) {
+    & h2 {
+      font-size: 1.4rem;
+    }
+  }
 }
