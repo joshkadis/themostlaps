@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import Head from 'next/head';
 import Header from './Header';
 import Footer from './Footer';
 import * as styles from './Layout.css';
 import Modal from 'react-modal';
 import { CloseSvg } from './lib/svg';
+import numberOrNullProp from '../utils/numberOrNullProp';
 
 /**
  * Page layout
@@ -47,7 +49,7 @@ class Layout extends Component {
           <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no, maximum-scale=1" />
           <link rel="stylesheet" href="/_next/static/style.css" />
         </Head>
-        <Header pathname={this.props.url.asPath || '/'} />
+        <Header pathname={this.props.pathname} />
         <div className={styles.main}>
           {this.props.children}
         </div>
@@ -76,5 +78,14 @@ class Layout extends Component {
   }
 }
 
-export default Layout;
+Layout.defaultProps = {
+  autherror: null,
+};
 
+Layout.propTypes = {
+  autherror: numberOrNullProp,
+  pathname: PropTypes.string.isRequired,
+  children: PropTypes.node.isRequired,
+};
+
+export default Layout;

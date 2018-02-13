@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import Link from 'next/link';
 import classNames from 'classnames';
 import { lapSegmentId, breakpointPx } from '../config';
@@ -69,5 +70,9 @@ class Navigation extends Component {
     </div>);
   }
 };
+
+Navigation.propTypes = {
+  pathname: PropTypes.string.isRequired,
+}
 
 export default Navigation;

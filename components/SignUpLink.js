@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import * as styles from './SignUpLink.css';
 import { stravaClientId } from '../config';
 import { getEnvOrigin } from '../utils/envUtils';
@@ -15,9 +16,9 @@ function getSignupLinkUrl(pathname = '/') {
   return 'https://www.strava.com/oauth/authorize?' + params.join('&');
 }
 
-export default ({ className, pathname }) => (
+const SignupLink = ({ className, pathname }) => (
   <a
-    className={className || ''}
+    className={className}
     href={getSignupLinkUrl(pathname)}
   >
     <img
@@ -27,3 +28,14 @@ export default ({ className, pathname }) => (
     />
   </a>
 );
+
+SignupLink.defaultProps = {
+  className: '',
+};
+
+SignupLink.propTypes = {
+  className: PropTypes.string.isRequired,
+  pathname: PropTypes.string.isRequired,
+};
+
+export default SignupLink;

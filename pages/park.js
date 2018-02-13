@@ -1,11 +1,13 @@
 import fetch from 'isomorphic-unfetch';
+import PropTypes from 'prop-types';
 import Link from 'next/link';
 import Layout from '../components/Layout';
 import { getEnvOrigin } from '../utils/envUtils';
+import { getPathnameFromContext } from '../utils';
 
-const Park = ({ allTime, query, url }) => (
+const Park = ({ allTime, query, pathname }) => (
   <Layout
-    url={url}
+    pathname={pathname}
     query={query}
   >
     <h1>All Time Ranking</h1>
@@ -19,7 +21,7 @@ const Park = ({ allTime, query, url }) => (
 );
 
 Park.getInitialProps = async function(context) {
-  const { url, query } = context;
+  const { query } = context;
 
   let allTime = []
   if (query.segment && !isNaN(query.segment)) {
@@ -31,8 +33,20 @@ Park.getInitialProps = async function(context) {
   return {
     allTime,
     query,
-    url,
+    pathname: getPathnameFromContext(context),
   };
 }
+
+Park.defaultProps = {
+  allTime: [],
+  query: {},
+  pathname: '/',
+}
+
+Park.propTypes = {
+  allTime: PropTypes.array.isRequired,
+  query: PropTypes.object.isRequired,
+  pathname: PropTypes.string.isRequired,
+};
 
 export default Park;
