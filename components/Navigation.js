@@ -61,7 +61,7 @@ class Navigation extends Component {
         <Link href="/help">
           <a className={styles.link}>Help</a>
         </Link>
-        <SignUpLink className={classNames(styles.link, styles.ctaLink)} />
+        <SignUpLink className={styles.link} />
       </nav>
     </div>);
   }

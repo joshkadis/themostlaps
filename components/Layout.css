@@ -5,3 +5,53 @@
 .main {
 
 }
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.75);
+}
+
+.modalContent {
+  background: #fff;
+  border: 1px solid var(--purpleLight);
+  border-radius: 4px;
+  outline: none;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 4em 2em 2em;
+
+  /* Layout */
+  position: absolute;
+  left: 50%;
+  max-height: 90%;
+  max-width: 90%;
+  top: 5%;
+  transform: translateX(-50%);
+  width: 400px;
+}
+
+.closeModal {
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  right: 1.5em;
+  top: 1.5em;
+
+  & svg {
+    fill: var(--purple);
+    height: 1.5em;
+    transition: fill ease-in-out .3s;
+    width: 1.5em;
+  }
+
+  &:hover svg {
+    fill: var(--purpleLight);
+  };
+}
