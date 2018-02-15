@@ -5,7 +5,7 @@ import classNames from 'classnames';
 import { lapSegmentId, breakpointPx } from '../config';
 import * as styles from './Navigation.css';
 import { MenuSvg } from './lib/svg';
-import SignUpLink from './SignUpLink';
+import ConnectWithStravaButton from './ConnectWithStravaButton';
 
 /**
  * Determine if nav should be shown, isomorphically
@@ -62,7 +62,7 @@ class Navigation extends Component {
         <Link href="/help">
           <a className={styles.link}>Help</a>
         </Link>
-        <SignUpLink
+        <ConnectWithStravaButton
           className={styles.link}
           pathname={this.props.pathname}
         />

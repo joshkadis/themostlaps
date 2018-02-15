@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import * as styles from './SignUpLink.css';
+import * as styles from './ConnectWithStravaButton.css';
 import { stravaClientId } from '../config';
 import { getEnvOrigin } from '../utils/envUtils';
 
-function getSignupLinkUrl(pathname = '/') {
+function getStravaAuthUrl(pathname = '/') {
   const params = [
     `client_id=${stravaClientId}`,
     'response_type=code',
@@ -16,10 +16,10 @@ function getSignupLinkUrl(pathname = '/') {
   return 'https://www.strava.com/oauth/authorize?' + params.join('&');
 }
 
-const SignupLink = ({ className, pathname }) => (
+const ConnectWithStravaButton = ({ className, pathname }) => (
   <a
     className={className}
-    href={getSignupLinkUrl(pathname)}
+    href={getStravaAuthUrl(pathname)}
   >
     <img
       className={styles.connectButton}
@@ -29,13 +29,13 @@ const SignupLink = ({ className, pathname }) => (
   </a>
 );
 
-SignupLink.defaultProps = {
+ConnectWithStravaButton.defaultProps = {
   className: '',
 };
 
-SignupLink.propTypes = {
+ConnectWithStravaButton.propTypes = {
   className: PropTypes.string.isRequired,
   pathname: PropTypes.string.isRequired,
 };
 
-export default SignupLink;
+export default ConnectWithStravaButton;
