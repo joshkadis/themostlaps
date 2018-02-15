@@ -7,6 +7,8 @@ import * as styles from './Layout.css';
 import Modal from 'react-modal';
 import { CloseSvg } from './lib/svg';
 import numberOrNullProp from '../utils/numberOrNullProp';
+import AuthError from './AuthError';
+import AuthSuccess from './AuthSuccess';
 
 /**
  * Page layout
@@ -29,8 +31,12 @@ class Layout extends Component {
     this.setState({ modalIsOpen: false });
   }
 
+  queryHasAuthError(query = {}) {
+    return query.autherror && !isNaN(query.autherror);
+  }
+
   componentWillMount() {
-    if (this.props.autherror) {
+    if (this.queryHasAuthError(this.props.query) || this.props.query.authsuccess) {
       this.setState({ modalIsOpen: true });
     }
   }
@@ -41,6 +47,10 @@ class Layout extends Component {
   }
 
   render() {
+    const authCode = this.queryHasAuthError(this.props.query) ?
+      parseInt(this.props.query.autherror, 10) :
+      null;
+
     return (
       <div>
         <Head>
@@ -69,8 +79,15 @@ class Layout extends Component {
             <CloseSvg />
           </button>
           <div>
-            {!!this.props.autherror &&
-              <p>Auth error code: {this.props.autherror}</p>}
+            {authCode ?
+              <AuthError code={authCode} /> :
+              <AuthSuccess
+                id={parseInt(this.props.query.id, 10)}
+                firstname={this.props.query.firstname}
+                email={this.props.query.email}
+                allTime={parseInt(this.props.query.allTime, 10)}
+              />
+            }
           </div>
         </Modal>
       </div>
