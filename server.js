@@ -27,8 +27,8 @@ app.prepare()
 
       let redirectQuery;
       if (authResult.error || !authResult.athlete) {
-        redirectQuery = `autherror=${authResult.error}`;
-        console.log(`Auth error ${authResult.error}: ${authResult.errorMsg}`);
+        redirectQuery = `autherror=${authResult.error || 99}`;
+        console.log(`Auth error ${authResult.error}: ${authResult.errorMsg || 'unknown error'}`);
       } else {
         redirectQuery = [
           'authsuccess=true&'
