@@ -6,13 +6,14 @@
   margin-right: 1.5rem;
   text-decoration: none;
 
-  &:last-of-type {
-    margin-right: 0;
-  }
-
   @media (--smallViewport) {
     margin: 1rem 0 0;
   }
+}
+
+.ctaLink {
+  @apply --button;
+  padding: 0.5rem;
 }
 
 .linksContainer {

@@ -5,7 +5,7 @@ import classNames from 'classnames';
 import { lapSegmentId, breakpointPx } from '../config';
 import * as styles from './Navigation.css';
 import { MenuSvg } from './lib/svg';
-import ConnectWithStravaButton from './ConnectWithStravaButton';
+import { modalControlsShape } from '../utils/propTypes';
 
 /**
  * Determine if nav should be shown, isomorphically
@@ -62,10 +62,12 @@ class Navigation extends Component {
         <Link href="/help">
           <a className={styles.link}>Help</a>
         </Link>
-        <ConnectWithStravaButton
-          className={styles.link}
-          pathname={this.props.pathname}
-        />
+        <button
+          className={classNames(styles.link, styles.ctaLink)}
+          onClick={this.props.modalControls.open}
+        >
+          Sign Up
+        </button>
       </nav>
     </div>);
   }
@@ -73,6 +75,7 @@ class Navigation extends Component {
 
 Navigation.propTypes = {
   pathname: PropTypes.string.isRequired,
+  modalControls: PropTypes.shape(modalControlsShape).isRequired,
 }
 
 export default Navigation;

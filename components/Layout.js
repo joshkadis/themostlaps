@@ -47,7 +47,7 @@ class Layout extends Component {
   }
 
   render() {
-    const authCode = this.queryHasAuthError(this.props.query) ?
+    const authErrorCode = this.queryHasAuthError(this.props.query) ?
       parseInt(this.props.query.autherror, 10) :
       null;
 
@@ -59,7 +59,13 @@ class Layout extends Component {
           <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no, maximum-scale=1" />
           <link rel="stylesheet" href="/_next/static/style.css" />
         </Head>
-        <Header pathname={this.props.pathname} />
+        <Header
+          pathname={this.props.pathname}
+          modalControls={{
+            open: this.handleOpenModal,
+            close: this.handleCloseModal,
+          }}
+        />
         <div className={styles.main}>
           {this.props.children}
         </div>
@@ -79,8 +85,8 @@ class Layout extends Component {
             <CloseSvg />
           </button>
           <div>
-            {authCode ?
-              <AuthError code={authCode} /> :
+            {authErrorCode ?
+              <AuthError code={authErrorCode} /> :
               <AuthSuccess
                 id={parseInt(this.props.query.id, 10)}
                 firstname={this.props.query.firstname}
