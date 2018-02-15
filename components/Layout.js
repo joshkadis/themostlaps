@@ -78,12 +78,8 @@ class Layout extends Component {
   }
 }
 
-Layout.defaultProps = {
-  autherror: null,
-};
-
 Layout.propTypes = {
-  autherror: numberOrNullProp,
+  query: PropTypes.object.isRequired,
   pathname: PropTypes.string.isRequired,
   children: PropTypes.node.isRequired,
 };
