@@ -16,4 +16,9 @@
   @media (--smallViewport) {
     max-width: 240px;
   }
+
+  /* fake transparent center on top of header gradient */
+  & :global #fill-white {
+    fill: rgb(171, 110, 210);
+  }
 }
