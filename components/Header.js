@@ -2,16 +2,16 @@ import PropTypes from 'prop-types';
 import Navigation from './Navigation';
 import * as styles from './Header.css';
 import { modalControlsShape } from '../utils/propTypes';
+import { TML_Horizontal } from './lib/svg';
 
-const Header = ({ pathname, modalControls }) => (
+const Header = ({ modalControls }) => (
   <header className={styles.header}>
-    <span className={styles.logo}>The Most Laps</span>
-    <Navigation pathname={pathname} modalControls={modalControls}/>
+    <TML_Horizontal className={styles.logo}/>
+    <Navigation modalControls={modalControls}/>
   </header>
 );
 
 Header.propTypes = {
-  pathname: PropTypes.string.isRequired,
   modalControls: PropTypes.shape(modalControlsShape).isRequired,
 };
 

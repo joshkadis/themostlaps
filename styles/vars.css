@@ -2,7 +2,7 @@
   --purple: #6100FF;
   --purpleLight: color(var(--purple) lightness(65%));
   --yellow: #FFD323;
-  --headerGradient: linear-gradient(to right, var(--purple), var(--yellow));
+  --headerGradient: linear-gradient(to right, var(--purpleLight), var(--yellow));
   --fadeLink: {
     color: white;
     transition: color ease-in-out .3s;
