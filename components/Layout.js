@@ -9,7 +9,7 @@ import { CloseSvg } from './lib/svg';
 import numberOrNullProp from '../utils/numberOrNullProp';
 import AuthError from './AuthError';
 import AuthSuccess from './AuthSuccess';
-
+import ConnectWithStravaButton from './ConnectWithStravaButton';
 /**
  * Page layout
  */
@@ -20,6 +20,7 @@ class Layout extends Component {
     this.handleCloseModal = this.handleCloseModal.bind(this);
     this.state = {
       modalIsOpen: false,
+      modalState: 'signup',
     };
   }
 
@@ -28,17 +29,40 @@ class Layout extends Component {
   }
 
   handleCloseModal() {
-    this.setState({ modalIsOpen: false });
+    this.setState({
+      modalIsOpen: false,
+      modalState: 'signup',
+    });
   }
 
   queryHasAuthError(query = {}) {
     return query.autherror && !isNaN(query.autherror);
   }
 
-  componentWillMount() {
-    if (this.queryHasAuthError(this.props.query) || this.props.query.authsuccess) {
-      this.setState({ modalIsOpen: true });
+  getModalStateFromProps(props) {
+    if (this.queryHasAuthError(props.query)) {
+      return 'error';
+    } else if (props.query && props.query.authsuccess) {
+      return 'success';
     }
+    return 'signup';
+  }
+
+  componentWillMount() {
+    const modalState = this.getModalStateFromProps(this.props);
+    this.setState({
+      modalIsOpen: (modalState !== 'signup'),
+      modalState,
+    });
+  }
+
+  componentWillReceiveProps(nextProps) {
+    // @todo Refactor above into single method
+    const modalState = this.getModalStateFromProps(nextProps);
+    this.setState({
+      modalIsOpen: (modalState !== 'signup'),
+      modalState,
+    });
   }
 
   // Only need this client-side
@@ -60,7 +84,6 @@ class Layout extends Component {
           <link rel="stylesheet" href="/_next/static/style.css" />
         </Head>
         <Header
-          pathname={this.props.pathname}
           modalControls={{
             open: this.handleOpenModal,
             close: this.handleCloseModal,
@@ -85,15 +108,19 @@ class Layout extends Component {
             <CloseSvg />
           </button>
           <div>
-            {authErrorCode ?
-              <AuthError code={authErrorCode} /> :
+            {!!authErrorCode &&
+              <AuthError code={authErrorCode} />}
+
+            {!!this.props.query.authsuccess &&
               <AuthSuccess
                 id={parseInt(this.props.query.id, 10)}
                 firstname={this.props.query.firstname}
                 email={this.props.query.email}
                 allTime={parseInt(this.props.query.allTime, 10)}
-              />
-            }
+              />}
+
+            {(!authErrorCode && !this.props.query.authsuccess) &&
+              <ConnectWithStravaButton pathname={this.props.pathname} />}
           </div>
         </Modal>
       </div>
@@ -101,9 +128,14 @@ class Layout extends Component {
   }
 }
 
+Layout.defaultProps = {
+  query: {},
+  pathname: '/',
+}
+
 Layout.propTypes = {
-  query: PropTypes.object.isRequired,
-  pathname: PropTypes.string.isRequired,
+  query: PropTypes.object,
+  pathname: PropTypes.string,
   children: PropTypes.node.isRequired,
 };
 

@@ -74,7 +74,6 @@ class Navigation extends Component {
 };
 
 Navigation.propTypes = {
-  pathname: PropTypes.string.isRequired,
   modalControls: PropTypes.shape(modalControlsShape).isRequired,
 }
 
