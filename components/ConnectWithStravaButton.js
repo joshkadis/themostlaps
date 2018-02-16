@@ -23,7 +23,7 @@ const ConnectWithStravaButton = ({ className, pathname }) => (
   >
     <img
       className={styles.connectButton}
-      src="/static/btn_strava_connectwith_orange@2x.png"
+      src="/static/img/btn_strava_connectwith_orange@2x.png"
       alt="Connect with Strava"
     />
   </a>

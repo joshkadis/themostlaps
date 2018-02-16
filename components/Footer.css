@@ -13,10 +13,22 @@
   & a {
     @apply --fadeLink;
   }
+
+  & > * {
+    margin-right: 1rem;
+  }
+
+  &:last-child {
+    margin-right: 0;
+  }
 }
 
 .kadiscoSvg {
   height: 50px;
   width: auto;
-  margin-right: 1rem;
+}
+
+.stravaCredit {
+  height: 50px;
+  width: auto;
 }
