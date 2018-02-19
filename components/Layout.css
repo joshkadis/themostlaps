@@ -2,8 +2,35 @@
 @import '../styles/typography';
 @import '../styles/vars';
 
-.main {
+:global(#__next > *:nth-child(1)) {
+  display: flex;
+  flex-direction: column;
+}
 
+:root {
+  --layoutSpacing: 1.5rem;
+  --layoutBgPos: calc(-1 * var(--layoutSpacing));
+}
+
+.main {
+  margin: var(--layoutSpacing);
+  padding: var(--layoutSpacing);
+  flex-grow: 10;
+  position: relative;
+  background-color: rgba(255,255,255,.6);
+}
+
+.mainBackground {
+  background-image: url('/static/img/bg-img-3.jpg');
+  background-size: cover;
+  background-position: left;
+  opacity: 1;
+  top: var(--layoutBgPos);
+  right: var(--layoutBgPos);
+  bottom: var(--layoutBgPos);
+  left: var(--layoutBgPos);
+  position: absolute;
+  z-index: -999;
 }
 
 .overlay {

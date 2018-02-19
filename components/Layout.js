@@ -67,7 +67,14 @@ class Layout extends Component {
 
   // Only need this client-side
   componentDidMount() {
-    Modal.setAppElement('#__next');
+    const nextEl = document.getElementById('__next');
+    if (!nextEl) {
+      return;
+    }
+
+    Modal.setAppElement(nextEl);
+    nextEl.firstElementChild.style.minHeight =
+      `${window.innerHeight}px`;
   }
 
   render() {
@@ -81,7 +88,8 @@ class Layout extends Component {
           <meta charset="utf-8" />
           <meta http-equiv="x-ua-compatible" content="ie=edge" />
           <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no, maximum-scale=1" />
-          <link href="https://fonts.googleapis.com/css?family=Arvo:400,700" rel="stylesheet" />          <link rel="stylesheet" href="/_next/static/style.css" />
+          <link href="https://fonts.googleapis.com/css?family=Arvo:400,700" rel="stylesheet" />
+          <link rel="stylesheet" href="/_next/static/style.css" />
         </Head>
         <Header
           modalControls={{
@@ -90,6 +98,7 @@ class Layout extends Component {
           }}
         />
         <div className={styles.main}>
+          <div className={styles.mainBackground} />
           {this.props.children}
         </div>
         <Footer />
