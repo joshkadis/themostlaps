@@ -1,7 +1,8 @@
 @import './vars.css';
 
 body {
-  font: 16px/1.5 system-ui;
+  font: 16px/1.5 'Arvo', serif;
+  font-weight: 400;
 }
 
 h2 {
