@@ -67,14 +67,7 @@ class Layout extends Component {
 
   // Only need this client-side
   componentDidMount() {
-    const nextEl = document.getElementById('__next');
-    if (!nextEl) {
-      return;
-    }
-
-    Modal.setAppElement(nextEl);
-    nextEl.firstElementChild.style.minHeight =
-      `${window.innerHeight}px`;
+    Modal.setAppElement('#__next');
   }
 
   render() {
