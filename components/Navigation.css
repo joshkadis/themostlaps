@@ -23,14 +23,15 @@
 
   @media (--smallViewport) {
     background: var(--headerGradient);
-    padding: 1rem;
+    padding: 0 1rem 1rem;
     position: absolute;
     right: 0;
-    top: 60px;
+    top: 100%;
     width: 100%;
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-end;
+    z-index: 999;
   }
 }
 
