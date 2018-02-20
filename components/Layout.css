@@ -17,7 +17,7 @@
   padding: var(--layoutSpacing);
   flex-grow: 10;
   position: relative;
-  background-color: rgba(255,255,255,.6);
+  background-color: rgba(255,255,255,.8);
 }
 
 .mainBackground {
