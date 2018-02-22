@@ -1,31 +1,36 @@
 @import '../styles/vars';
 
+:root {
+  --headerVertPadding: .5rem;
+  --headerLogoHeight: 60px;
+  --headerLogoHeightSmall: 48px;
+  --headerHeight: calc((2 * var(--headerVertPadding)) + var(--headerLogoHeight));
+  --headerHeightSmall: calc((2 * var(--headerVertPadding)) + var(--headerLogoHeightSmall));
+}
+
 .header {
   background: var(--headerGradient);
   align-items: center;
   display: flex;
   justify-content: space-between;
-  padding: .5rem 2rem;
+  padding: var(--headerVertPadding) 2rem;
   position: relative;
-
+  height: var(--headerHeight);
   @media (--smallViewport) {
-    padding: .5rem 1rem;
+    padding: var(--headerVertPadding) 1rem;
+    height: var(--headerHeightSmall);
   }
 }
 
 .logo {
-  width: 300px;
-  max-width: 65%;
-  height: auto;
   line-height: 0;
 
-  @media (--smallViewport) {
-    max-width: 240px;
-  }
-
   & > svg {
-    width: 100%;
-    height: auto;
+    width: auto;
+    height: var(--headerLogoHeight);
+    @media (--smallViewport) {
+      height: var(--headerLogoHeightSmall);
+    }
   }
 
   /* fake transparent center on top of header gradient */
