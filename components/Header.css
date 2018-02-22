@@ -5,8 +5,12 @@
   align-items: center;
   display: flex;
   justify-content: space-between;
-  padding: .5rem 1rem; /* @todo Responsive padding */
+  padding: .5rem 2rem;
   position: relative;
+
+  @media (--smallViewport) {
+    padding: .5rem 1rem;
+  }
 }
 
 .logo {

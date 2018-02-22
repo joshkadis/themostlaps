@@ -37,7 +37,9 @@
 }
 
 .hidden {
-  display: none;
+  @media (--smallViewport) {
+    display: none;
+  }
 }
 
 .menu {
