@@ -1,6 +1,7 @@
 :root {
   --purple: #6100FF;
   --purpleLight: color(var(--purple) lightness(65%));
+  --purpleDark: #450082;
   --yellow: #FFD323;
   --headerGradient: linear-gradient(to right, var(--purpleLight), var(--yellow));
   --fadeLink: {

@@ -5,20 +5,41 @@
   align-items: center;
   display: flex;
   justify-content: space-between;
-  padding: 1rem;
+  padding: 1rem 1rem 1rem 2rem; /* @todo Responsive padding */
   position: relative;
 }
 
 .logo {
-  width: 500px;
+  width: 300px;
   max-width: 65%;
   height: auto;
   @media (--smallViewport) {
     max-width: 240px;
   }
 
+  & > svg {
+    width: 100%;
+    height: auto;
+  }
+
   /* fake transparent center on top of header gradient */
   & :global #fill-white {
     fill: rgb(171, 110, 210);
+  }
+
+  & :global #Horizontal-Text {
+    fill: var(--purpleDark);
+  }
+
+  & :global #fill-white,
+  & :global #Horizontal-Text {
+    transition: fill ease-in-out .5s;
+  }
+
+  &:hover {
+    & :global #fill-white,
+    & :global #Horizontal-Text {
+      fill: white;
+    }
   }
 }
