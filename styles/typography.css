@@ -1,7 +1,7 @@
 @import './vars.css';
 
 body {
-  font: 16px/1.5 'Arvo', serif;
+  font: var(--baseSize)/1.5 'Arvo', serif;
   font-weight: 400;
 }
 

@@ -1,4 +1,5 @@
 :root {
+  --baseSize: 16px;
   --purple: #6100FF;
   --purpleLight: color(var(--purple) lightness(65%));
   --purpleDark: #450082;

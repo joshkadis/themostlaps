@@ -1,5 +1,10 @@
 @import '../styles/vars';
 
+:root {
+  --footerInnerHeight: 24px;
+  --footerHeight: calc(var(--baseSize) + var(--footerInnerHeight));
+}
+
 .footer {
   align-items: flex-end;
   background: var(--headerGradient);
@@ -9,6 +14,10 @@
   justify-content: center;
   padding: 0.5rem;
   text-align: center;
+
+  /* prevent collapse in wide, short window */
+  height: var(--footerHeight);
+  min-height: var(--footerHeight);
 
   & a {
     @apply --fadeLink;
@@ -23,12 +32,7 @@
   }
 }
 
-.kadiscoSvg {
-  height: 50px;
-  width: auto;
-}
-
 .stravaCredit {
-  height: auto;
-  width: 130px;
+  height: var(--footerInnerHeight);
+  width: auto;
 }

@@ -4,8 +4,8 @@
   --headerVertPadding: .5rem;
   --headerLogoHeight: 60px;
   --headerLogoHeightSmall: 48px;
-  --headerHeight: calc((2 * var(--headerVertPadding)) + var(--headerLogoHeight));
-  --headerHeightSmall: calc((2 * var(--headerVertPadding)) + var(--headerLogoHeightSmall));
+  --headerHeight: calc(var(--baseSize) + var(--headerLogoHeight));
+  --headerHeightSmall: calc(var(--baseSize) + var(--headerLogoHeightSmall));
 }
 
 .header {
@@ -15,10 +15,15 @@
   justify-content: space-between;
   padding: var(--headerVertPadding) 2rem;
   position: relative;
+
+  /* Prevent collapse in wide, short window */
   height: var(--headerHeight);
+  min-height: var(--headerHeight);
+
   @media (--smallViewport) {
     padding: var(--headerVertPadding) 1rem;
     height: var(--headerHeightSmall);
+    min-height: var(--headerHeightSmall);
   }
 }
 
