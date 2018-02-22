@@ -1,7 +1,7 @@
 @import '../styles/vars';
 
 .footer {
-  align-items: center;
+  align-items: flex-end;
   background: var(--headerGradient);
   color: white;
   display: flex;
@@ -29,6 +29,6 @@
 }
 
 .stravaCredit {
-  height: 50px;
-  width: auto;
+  height: auto;
+  width: 130px;
 }
