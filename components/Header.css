@@ -5,7 +5,7 @@
   align-items: center;
   display: flex;
   justify-content: space-between;
-  padding: 1rem 1rem 1rem 2rem; /* @todo Responsive padding */
+  padding: .5rem 1rem; /* @todo Responsive padding */
   position: relative;
 }
 
@@ -13,6 +13,8 @@
   width: 300px;
   max-width: 65%;
   height: auto;
+  line-height: 0;
+
   @media (--smallViewport) {
     max-width: 240px;
   }

@@ -14,6 +14,7 @@
 .ctaLink {
   @apply --button;
   padding: 0.5rem;
+  margin-right: 0;
 }
 
 .linksContainer {
