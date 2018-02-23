@@ -36,13 +36,19 @@ function compileStatsForActivities(activities) {
  * Update an athletes stats with new rides
  *
  * @param {Document} athleteDoc
+ * @param {String} status Defaults to 'ready'
  * @param {Object} stats
  */
 
-async function updateAthleteStats(athleteDoc, stats) {
+async function updateAthleteStats(athleteDoc, stats, status = 'ready') {
+  const currentDate = new Date();
   return await Athlete.findByIdAndUpdate(
     athleteDoc.get('_id'),
-    { stats },
+    {
+      last_updated: currentDate.toISOString(),
+      stats,
+      status,
+    },
     { new: true }
   );
 };
