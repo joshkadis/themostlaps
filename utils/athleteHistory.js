@@ -1,4 +1,5 @@
 require('isomorphic-fetch');
+const querystring = require('querystring');
 const { apiUrl, lapSegmentId, addMakeupLap } = require('../config');
 const Activity = require('../schema/Activity');
 
@@ -11,12 +12,13 @@ const Activity = require('../schema/Activity');
  * @return {Array}
  */
 async function getLapEffortsHistory(token, athleteId, page = 1, allEfforts = []) {
-  const url = [
-    `${apiUrl}/segments/${lapSegmentId}/all_efforts?`,
-    `athlete_id=${encodeURIComponent(athleteId)}&`,
-    'per_page=200&',
-    `page=${encodeURIComponent(page)}`,
-  ].join('');
+  const params = querystring.stringify({
+    athlete_id: athleteId,
+    per_page: 200,
+    page,
+  });
+
+  const url = `${apiUrl}/segments/${lapSegmentId}/all_efforts?${params}`;
   console.log(`Fetching ${url}`)
 
   const response = await fetch(url, { headers: {

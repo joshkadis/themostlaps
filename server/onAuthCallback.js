@@ -1,4 +1,5 @@
 require('isomorphic-fetch');
+const querystring = require('querystring');
 const { createAthlete } = require('../utils/athleteUtils');
 const {
   fetchAthleteHistory,
@@ -17,11 +18,11 @@ const getInternalErrorMessage = require('../utils/internalErrors');
  * @return {String}
  */
 function getTokenRequestBody(code) {
-  return [
-    `client_id=${process.env.CLIENT_ID}`,
-    `client_secret=${process.env.CLIENT_SECRET}`,
-    `code=${code}`,
-  ].join('&');
+  return querystring.stringify({
+    client_id: process.env.CLIENT_ID,
+    client_secret: process.env.CLIENT_SECRET,
+    code,
+  });
 }
 
 /**

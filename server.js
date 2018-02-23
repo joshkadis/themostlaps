@@ -1,4 +1,5 @@
 require('dotenv').config();
+const querystring = require('querystring');
 const mongoose = require('mongoose');
 const express = require('express');
 const next = require('next');
@@ -27,23 +28,25 @@ app.prepare()
 
       let redirectQuery;
       if (authResult.error || !authResult.athlete) {
-        redirectQuery = `autherror=${authResult.error || 99}`;
+        redirectQuery = {
+          autherror: authResult.error || 99
+        };
         console.log(`Auth error ${authResult.error}: ${authResult.errorMsg || 'unknown error'}`);
       } else {
-        redirectQuery = [
-          'authsuccess=true&'
-          `id=${encodeURIComponent(authResult.athlete.id)}&`
-          `firstname=${encodeURIComponent(authResult.athlete.firstname)}`
-          `email=${encodeURIComponent(authResult.athlete.email)}`,
-          `allTime=${encodeURIComponent(authResult.athlete.allTime)}&`
-        ].join('');
+        redirectQuery = {
+          authsuccess: 'true',
+          id: authResult.athlete.id,
+          firstname: authResult.athlete.firstname,
+          email: authResult.athlete.email,
+          allTime: authResult.athlete.allTime,
+        };
       }
 
       const redirectTo = req.query.state ?
         decodeURIComponent(req.query.state) :
         '/';
 
-      res.redirect(303, `${redirectTo}?${redirectQuery}`);
+      res.redirect(303, `${redirectTo}?${querystring.stringify(redirectQuery)}`);
     });
 
     /**
