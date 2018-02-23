@@ -65,7 +65,7 @@ function getActivitiesFromEfforts(efforts, source = 'signup') {
       map[activity.id] = {
         _id: activity.id,
         added_date: added.toISOString(),
-        athlete: athlete.id,
+        athlete_id: athlete.id,
         laps: addMakeupLap ? 1 : 0,
         segment_efforts: [],
         source,
