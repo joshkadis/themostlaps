@@ -35,7 +35,6 @@ const deleteUser = (id) => {
   });
 };
 
-
 const argv = require('yargs')
   .usage('$0 <cmd> [args]')
   .command(
