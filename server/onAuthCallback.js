@@ -118,10 +118,10 @@ async function onAuthCallback(req, res) {
       error: false,
       errorMsg: '',
       athlete: {
-        id: athleteDoc.get('_id'),
-        firstname: athleteDoc.get('athlete.firstname'),
-        email: athleteDoc.get('athlete.email'),
-        allTime: athleteDoc.get('stats.allTime'),
+        id: updated.get('_id'),
+        firstname: updated.get('athlete.firstname'),
+        email: updated.get('athlete.email'),
+        allTime: updated.get('stats.allTime'),
       }
     }
   } catch (err) {
