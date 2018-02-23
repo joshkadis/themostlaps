@@ -32,12 +32,14 @@
     "next": "canary",
     "postcss-cssnext": "^3.1.0",
     "postcss-import": "^11.1.0",
+    "prompt": "^1.0.0",
     "prop-types": "^15.6.0",
     "raw-loader": "^0.5.1",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "react-markdown": "^3.2.0",
-    "react-modal": "^3.1.13"
+    "react-modal": "^3.1.13",
+    "yargs": "^11.0.0"
   },
   "devDependencies": {
     "jest": "^22.1.4"
