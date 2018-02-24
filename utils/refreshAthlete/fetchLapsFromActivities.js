@@ -19,9 +19,9 @@ function getActivityData(activity) {
     segment_efforts,
   } = activity;
 
-  const estimated_laps = calculateLapsFromSegmentEfforts(segment_efforts);
+  const laps = calculateLapsFromSegmentEfforts(segment_efforts);
 
-  if (!estimated_laps) {
+  if (!laps) {
     return false;
   }
 
@@ -33,7 +33,7 @@ function getActivityData(activity) {
     start_latlng,
     end_latlng,
     segment_efforts,
-    estimated_laps,
+    laps,
   };
 }
 

@@ -77,7 +77,10 @@ const argv = require('yargs')
       const after = daysAgoTimestamp(daysago);
       await doCommand(
         `Enter admin code to refresh user ${user}.`,
-        () => refreshAthlete(user, after)
+        async () => {
+          await refreshAthlete(user, after);
+          process.exit(0);
+        }
       );
     }
   )
