@@ -47,30 +47,26 @@ function getActivityData(activity) {
  * @param {Object} allLaps
  * @return {Object}
  */
-function fetchActivityDetails(activityIds, token, idx = 0, allLaps) {
+async function fetchActivityDetails(activityIds, token, idx = 0, allLaps) {
   const fetchNum = 'development' === process.env.NODE_ENV ? config.devFetchActivities : activityIds.length;
 
-  /**
-   * @todo Check database to see if activity already imported
-   */
   console.log(`Fetching ${(idx + 1)} of ${fetchNum}: ${activityIds[idx]}`)
-  return fetch(`${config.apiUrl}/activities/${activityIds[idx]}`, {
+  const response = await fetch(`${config.apiUrl}/activities/${activityIds[idx]}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
-  })
-  .then((response) => response.json())
-  .then((activity) => {
-    const activityLaps = getActivityData(activity);
-    if(activityLaps) {
-      allLaps.push(activityLaps);
-    }
-
-    if ((idx + 1) === fetchNum) {
-      return allLaps;
-    }
-    return fetchActivityDetails(activityIds, token, (idx + 1), allLaps);
   });
+  const activity = await response.json();
+
+  const activityLaps = getActivityData(activity);
+  if(activityLaps) {
+    allLaps.push(activityLaps);
+  }
+
+  if ((idx + 1) === fetchNum) {
+    return allLaps;
+  }
+  return await fetchActivityDetails(activityIds, token, (idx + 1), allLaps);
 }
 
 /**
@@ -81,6 +77,5 @@ function fetchActivityDetails(activityIds, token, idx = 0, allLaps) {
  * @return {Array}
  */
 module.exports = async (activityIds, token) => {
-  return fetchActivityDetails(activityIds, token, 0, [])
-    .then((laps) => laps);
+  return await fetchActivityDetails(activityIds, token, 0, []);
 };

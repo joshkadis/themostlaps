@@ -33,7 +33,7 @@ function distFromParkCenter(latlng = null) {
  * @param {Array} allActivities
  * @return {Promise}
  */
-function fetchAllAthleteActivities(
+async function fetchAllAthleteActivities(
   token,
   afterTimestamp,
   page = 1,
@@ -41,23 +41,23 @@ function fetchAllAthleteActivities(
 ) {
   const url = `${config.apiUrl}/athlete/activities?after=${afterTimestamp}&page=${page}`;
   console.log(`Fetching ${url}`)
-  return fetch(url, {
+  const response = await fetch(url, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
-  })
-  .then((response) => response.json())
-  .then((activities) => {
-    if (!activities.length) {
-      return allActivities;
-    }
-    return fetchAllAthleteActivities(
-      token,
-      afterTimestamp,
-      (page + 1),
-      allActivities.concat(activities)
-    );
   });
+  const activities = await response.json();
+
+  if (!activities.length) {
+    return allActivities;
+  }
+
+  return await fetchAllAthleteActivities(
+    token,
+    afterTimestamp,
+    (page + 1),
+    allActivities.concat(activities)
+  );
 }
 
 /**
@@ -83,9 +83,6 @@ async function activityIsEligible({
   const exists = await Activity.findById(id);
   if (exists) {
     return false;
-    console.log(`Activity ${id} already saved`);
-  } else {
-    console.log(`Activity ${id} not already saved`);
   }
 
   if (manual || trainer || distance < config.minDistance) {
@@ -104,19 +101,15 @@ async function activityIsEligible({
  * @return {Array}
  */
 module.exports = async (token, afterTimestamp) => {
-  return fetchAllAthleteActivities(token, afterTimestamp)
-    .then(async (activities) => {
-      const eligibleActivities = [];
-      for (let i = 0; i < activities.length; i++) {
-        const isEligible = await activityIsEligible(activities[i]);
-        if (isEligible) {
-          eligibleActivities.push(activities[i]);
-        }
-      }
-      console.log(`Activities: ${activities.length} total; ${eligibleActivities.length} eligible`);
-      return eligibleActivities;
-    })
-    .then((activities) => {
-      return activities.map(({ id }) => id);
-    });
+  const activities = await fetchAllAthleteActivities(token, afterTimestamp);
+
+  const eligibleActivities = [];
+  for (let i = 0; i < activities.length; i++) {
+    const isEligible = await activityIsEligible(activities[i]);
+    if (isEligible) {
+      eligibleActivities.push(activities[i]);
+    }
+  }
+  console.log(`Activities: ${activities.length} total; ${eligibleActivities.length} eligible`);
+  return eligibleActivities.map(({ id }) => id);
 }
