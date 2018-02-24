@@ -11,6 +11,21 @@ function getPathnameFromContext(context = {}) {
     '/';
 };
 
+/**
+ * Get timestamp in seconds from ISO Date string
+ *
+ * @param {String} dateString
+ * @return {Int|Null} Integer or null if malformed input
+ */
+function getTimestampFromISO(dateString) {
+  const dateObj = new Date(dateString);
+  if (isNaN(dateObj.valueOf())) {
+    return null;
+  }
+  return Math.floor(dateObj.valueOf() / 1000);
+}
+
 module.exports = {
   getPathnameFromContext,
+  getTimestampFromISO,
 };

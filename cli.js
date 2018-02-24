@@ -3,6 +3,14 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const promptly = require('promptly');
 const deleteUser = require('./cli/deleteUser');
+const { daysAgoTimestamp } = require('./cli/utils');
+const refreshAthlete = require('./utils/refreshAthlete');
+
+function userPositional(yargs) {
+  yargs.positional('user', {
+    type: 'number',
+  });
+}
 
 /**
  * Prompt for admin code then connect and run command
@@ -26,17 +34,25 @@ async function doCommand(prompt, callback) {
 const argv = require('yargs')
   .usage('$0 <cmd> [args]')
   .command(
-    'delete [user]',
+    'delete user',
     false,
-    (yargs) => {
-      yargs.positional('user', {
-        type: 'number',
-      });
-    },
+    userPositional,
     async ({ user }) => {
       await doCommand(
         `Enter the admin code to delete user ${user}.`,
         () => deleteUser(user)
+      );
+    }
+  )
+  .command(
+    'refresh user [--daysago <DAYS>]',
+    false,
+    userPositional,
+    async ({ user, daysago }) => {
+      const after = daysAgoTimestamp(daysago);
+      await doCommand(
+        `Enter the admin code to refresh user ${user}.`,
+        () => refreshAthlete(user, after)
       );
     }
   )
