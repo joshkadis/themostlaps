@@ -3,10 +3,17 @@ const Athlete = require('../schema/Athlete');
 /**
  * Compile stats for an array of activity documents
  *
- * @param {Array} activities
+ * @param {Array} activities Array of Activity documents
+ * @param {Object} initial Optional initial stats value
  * @return {Object}
  */
-function compileStatsForActivities(activities) {
+function compileStatsForActivities(
+  activities,
+  initial = {
+    allTime: 0,
+    single: 0,
+  },
+) {
   return activities.reduce((acc, activity) => {
     // Increment allTime total
     acc.allTime = acc.allTime + activity.get('laps');
@@ -26,10 +33,7 @@ function compileStatsForActivities(activities) {
     }
 
     return acc;
-  }, {
-    allTime: 0,
-    single: 0,
-  });
+  }, initial);
 }
 
 /**

@@ -3,6 +3,7 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const promptly = require('promptly');
 const deleteUser = require('./cli/deleteUser');
+const deleteUserActivities = require('./cli/deleteUserActivities');
 const { daysAgoTimestamp } = require('./cli/utils');
 const refreshAthlete = require('./utils/refreshAthlete');
 
@@ -39,8 +40,32 @@ const argv = require('yargs')
     userPositional,
     async ({ user }) => {
       await doCommand(
-        `Enter the admin code to delete user ${user}.`,
+        `Enter admin code to delete user ${user}.`,
         () => deleteUser(user)
+      );
+    }
+  )
+  .command(
+    'deleteactivities user daysago',
+    false,
+    (yargs) => {
+      yargs.positional('user', {
+        type: 'number',
+      });
+      yargs.positional('daysago', {
+        type: 'number',
+      });
+    },
+    async ({ user, daysago }) => {
+      if (0 === daysago) {
+        console.log('daysago must be >=1')
+        process.exit(0);
+      }
+
+      const after = daysAgoTimestamp(daysago);
+      await doCommand(
+        `Enter admin code to delete activities for user ${user} from last ${daysago} days.`,
+        () => deleteUserActivities(user, after)
       );
     }
   )
@@ -51,7 +76,7 @@ const argv = require('yargs')
     async ({ user, daysago }) => {
       const after = daysAgoTimestamp(daysago);
       await doCommand(
-        `Enter the admin code to refresh user ${user}.`,
+        `Enter admin code to refresh user ${user}.`,
         () => refreshAthlete(user, after)
       );
     }

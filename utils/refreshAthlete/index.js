@@ -32,7 +32,7 @@ module.exports = async (id, after = false) => {
 
   // Save activities to database
 
-  // Merge into user document's status
+  // Merge into user document's stats
 
   // Update user stats and last_updated
 };
