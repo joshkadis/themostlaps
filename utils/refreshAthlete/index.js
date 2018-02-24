@@ -17,7 +17,6 @@ const {
 module.exports = async (id, after = false) => {
   // Get user document
   const athlete = await Athlete.findById(id);
-  const oldTotal = athlete.get('stats.allTime');
 
   // Fetch activities since user document's last_updated
   const eligibleActivities = await fetchAthleteActivities(
@@ -61,7 +60,7 @@ module.exports = async (id, after = false) => {
 
   // Merge into user document's stats
   const stats = compileStatsForActivities(filtered, athlete.toJSON().stats);
-  console.log(`Found ${stats.allTime - oldTotal} new laps`);
+  console.log(`Found ${stats.allTime - athlete.get('stats.allTime')} new laps`);
 
   // Update user stats and last_updated
   await updateAthleteStats(athlete, stats);
