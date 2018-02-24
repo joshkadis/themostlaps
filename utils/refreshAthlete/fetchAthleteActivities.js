@@ -1,5 +1,6 @@
 require('isomorphic-fetch');
 const getDistance = require('geolib').getDistance;
+const Activity = require('../../schema/Activity');
 const config = require('../../config');
 
 /**
@@ -63,6 +64,7 @@ function fetchAllAthleteActivities(
  * Should activity be checked for laps? Must be longer than min distance and
  * starting or ending within allowed radius of park center
  *
+ * @param {Int} id
  * @param {Bool} trainer
  * @param {Bool} manual
  * @param {Array} start_latlng
@@ -70,13 +72,22 @@ function fetchAllAthleteActivities(
  * @param {Float} distance
  * @return {Bool}
  */
-function activityIsEligible({
+async function activityIsEligible({
+  id = 0,
   trainer = false,
   manual = false,
   start_latlng = null,
   end_latlng = null,
   distance = 0,
 }) {
+  const exists = await Activity.findById(id);
+  if (exists) {
+    return false;
+    console.log(`Activity ${id} already saved`);
+  } else {
+    console.log(`Activity ${id} not already saved`);
+  }
+
   if (manual || trainer || distance < config.minDistance) {
     return false;
   }
@@ -94,13 +105,18 @@ function activityIsEligible({
  */
 module.exports = async (token, afterTimestamp) => {
   return fetchAllAthleteActivities(token, afterTimestamp)
-    .then((activities) => {
-      console.log(`Found ${activities.length} total activities`);
-      return activities.filter((activity) => activityIsEligible(activity));
+    .then(async (activities) => {
+      const eligibleActivities = [];
+      for (let i = 0; i < activities.length; i++) {
+        const isEligible = await activityIsEligible(activities[i]);
+        if (isEligible) {
+          eligibleActivities.push(activities[i]);
+        }
+      }
+      console.log(`Activities: ${activities.length} total; ${eligibleActivities.length} eligible`);
+      return eligibleActivities;
     })
     .then((activities) => {
-      const msg = `${activities.length} activities within allowed radius and min. distance`;
-      console.log(msg);
       return activities.map(({ id }) => id);
     });
 }

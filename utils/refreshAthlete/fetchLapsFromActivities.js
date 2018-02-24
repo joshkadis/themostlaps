@@ -73,7 +73,6 @@ function fetchActivityDetails(activityIds, token, idx = 0, allLaps) {
   });
 }
 
-
 /**
  * Iterate over array of activities and fetch laps for each one
  *
