@@ -1,21 +1,15 @@
 const Athlete = require('../schema/Athlete');
 const apiConfig = require('./apiConfig');
-const { lapSegmentId } = require('../config');
 
 /**
  * Validate ranking type and segment ID
  * @param {String} rankingType
- * @param {Number} segmentId
  * @param {String} filter
  * @return {Object}
  */
-function validateInput(rankingType, segmentId, filter = '') {
+function validateInput(rankingType, filter = '') {
   if (apiConfig.rankingTypes.indexOf(rankingType) === -1) {
     return { error: `Invalid ranking type: ${rankingType}` };
-  }
-
-  if (lapSegmentId !== segmentId){
-    return { error: `Invalid segment ID: ${segmentId}` };
   }
 
   // Matches _YYYY_MM or _YYYY format
@@ -35,11 +29,10 @@ function validateInput(rankingType, segmentId, filter = '') {
  * Get ranking for API request
  *
  * @param {String} rankingType
- * @param {Number} segmentId
  * @param {String} filter
  */
-async function getRanking(rankingType = null, segmentId = null, filter = false) {
-  const validation = validateInput(rankingType, segmentId, filter);
+async function getRanking(rankingType = null, filter = false) {
+  const validation = validateInput(rankingType, filter);
   if (validation.error) {
     return validation;
   }
@@ -57,7 +50,6 @@ async function getRanking(rankingType = null, segmentId = null, filter = false) 
   return { error: false, data: {
     rankingType,
     filter,
-    segmentId,
     ranking,
   } };
 }

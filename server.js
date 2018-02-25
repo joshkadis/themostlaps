@@ -8,10 +8,7 @@ const scheduleNightlyRefresh = require('./utils/scheduleNightlyRefresh');
 
 // Route handlers
 const onAuthCallback = require('./server/onAuthCallback');
-
-// API getters
-const validateApiRequest = require('./api/validateApiRequest');
-const getRanking = require('./api/getRanking');
+const initAPIRoutes = require('./api/initAPIRoutes');
 
 // Next.js setup
 const app = next({ dev: process.env.NODE_ENV !== 'production' });
@@ -62,22 +59,7 @@ app.prepare()
     /**
      * API routing
      */
-    server.get('/api/ranking/:type/:segmentId', async (req, res) => {
-      const validation = validateApiRequest(req.hostname, req.query.key || null);
-      if (validation.error) {
-        res.status(403).json(error);
-        return;
-      }
-
-      const responseData = await getRanking(
-        req.params.type,
-        parseInt(req.params.segmentId, 10),
-        req.query.filter
-      );
-
-      const status = responseData.error ? 500 : 200;
-      res.status(status).json(responseData.error ? responseData : responseData.data);
-    });
+    initAPIRoutes(server);
 
     /**
      * Catchall handler
