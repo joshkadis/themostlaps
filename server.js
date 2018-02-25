@@ -51,10 +51,6 @@ app.prepare()
     /**
      * Next.js routing
      */
-    server.get('/prospectpark', (req, res) => {
-      const { lapSegmentId } = require('./config');
-      app.render(req, res, '/park', Object.assign(req.query, { segment: lapSegmentId }));
-    });
 
     /**
      * API routing
