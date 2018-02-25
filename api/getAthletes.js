@@ -1,12 +1,12 @@
 const Athlete = require('../schema/Athlete');
 
-const fields = [
+const defaultFields = [
   'id',
   'athlete.firstname',
   'athlete.lastname',
   'athlete.profile',
   'stats',
-].join(' ');
+];
 
 /**
  * Parse CSV string of athlete IDs from URL
@@ -30,15 +30,19 @@ function parseIdsString(idsString) {
  * Get data for athletes API request
  *
  * @param {String} idsString Comma-separated string of athlete ids
- * @return {Object} key-value pairs as athleteId: { data }
+ * @param {Array} fields Array of fields to return in Query results
+ * @return {Array}
  */
-async function getAthletes(idsString = '') {
+async function getAthletes(idsString = '', fields = defaultFields) {
   const athleteIds = parseIdsString(idsString);
   if (!athleteIds.length) {
-    return { error: 'Missing athlete ids' };
+    return { error: 'Requires at least one numeric id' };
   }
 
-  const athletes = await Athlete.find({ _id: { $in: athleteIds } }, fields);
+  const athletes = await Athlete.find(
+    { _id: { $in: athleteIds } },
+    fields.join(' ')
+  );
 
   return {
     error: false,
