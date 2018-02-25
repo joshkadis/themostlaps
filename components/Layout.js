@@ -92,7 +92,9 @@ class Layout extends Component {
         />
         <div className={styles.main}>
           <div className={styles.mainBackground} />
-          {this.props.children}
+          <div className={styles.mainContainer}>
+            {this.props.children}
+          </div>
         </div>
         <Footer />
         <Modal

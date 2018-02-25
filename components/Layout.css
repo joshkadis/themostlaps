@@ -24,10 +24,14 @@
 }
 
 .main {
-  margin: var(--layoutSpacing);
-  padding: var(--layoutSpacing);
   flex-grow: 10;
   position: relative;
+}
+
+.mainContainer {
+  margin: var(--layoutSpacing) auto;
+  max-width: 700px;
+  padding: var(--layoutSpacing);
   background-color: rgba(255,255,255,.8);
 
   @media (--smallViewport) {
