@@ -1,7 +1,7 @@
 const validateApiRequest = require('./validateApiRequest');
 const getRanking = require('./getRanking');
 const getAthletes = require('./getAthletes');
-
+const getTotals = require('./getTotals');
 
 /**
  * Validate and fetch data for API request
@@ -29,17 +29,15 @@ async function handleAPIRequest(req, res, fetchData) {
  * @param {Express} server
  */
 async function initAPIRoutes(server) {
-
-  server.get('/api/totals', (req, res) => {
-
+  server.get('/api/totals', async (req, res) => {
+    await handleAPIRequest(req, res, async () => {
+      return await getTotals();
+    });
   });
 
   server.get('/api/ranking/:type', async (req, res) => {
     await handleAPIRequest(req, res, async ({ params, query }) => {
-      return await getRanking(
-        params.type,
-        (query.filter || false)
-      );
+      return await getRanking(params.type, (query.filter || false));
     });
   });
 
