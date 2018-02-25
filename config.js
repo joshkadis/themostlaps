@@ -21,7 +21,7 @@ module.exports = {
   breakpointPx: 800,
   refreshSchedule: {
     hour: 20,
-    minute: 10,
+    minute: 24,
   },
 };
 
