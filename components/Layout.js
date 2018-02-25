@@ -25,6 +25,9 @@ class Layout extends Component {
   }
 
   handleOpenModal() {
+    if ('#signup' !== window.location.hash) {
+      window.location.hash = '#signup';
+    }
     this.setState({ modalIsOpen: true });
   }
 
