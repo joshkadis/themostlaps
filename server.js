@@ -4,6 +4,8 @@ const mongoose = require('mongoose');
 const express = require('express');
 const next = require('next');
 
+const scheduleNightlyRefresh = require('./utils/scheduleNightlyRefresh');
+
 // Route handlers
 const onAuthCallback = require('./server/onAuthCallback');
 
@@ -11,7 +13,7 @@ const onAuthCallback = require('./server/onAuthCallback');
 const validateApiRequest = require('./api/validateApiRequest');
 const getRanking = require('./api/getRanking');
 
-/* Next.js Setup */
+// Next.js setup
 const app = next({ dev: process.env.NODE_ENV !== 'production' });
 const handle = app.getRequestHandler();
 
@@ -87,10 +89,15 @@ app.prepare()
     /**
      * Connect to database and start listening
      */
-    console.log('Connecting to database');
     mongoose.connect(process.env.MONGODB_URI);
-    server.listen(process.env.PORT,
-      () => console.log(`App listening on port ${process.env.PORT}`));
+    const db = mongoose.connection;
+    db.once('open', () => {
+      console.log('Connected to database');
+      server.listen(process.env.PORT, () => {
+        console.log(`App listening on port ${process.env.PORT}`);
+        scheduleNightlyRefresh();
+      });
+    });
   })
   .catch((err) => {
     console.log(err);
