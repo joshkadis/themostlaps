@@ -11,17 +11,18 @@ const {
 /**
  * Get athlete's laps since last_update and update their stats
  *
- * @param {Number} id
+ * @param {Number|Document} athlete ID or Document
  * @param {Number} after Optional UTC *seconds* to override last_updated
  */
-module.exports = async (id, after = false) => {
+module.exports = async (athlete, after = false) => {
   // Get user document
-  const athlete = await Athlete.findById(id);
+  const athleteDoc = 'number' === typeof athlete ?
+    await Athlete.findById(athlete) : athlete;
 
   // Fetch activities since user document's last_updated
   const eligibleActivities = await fetchAthleteActivities(
-    athlete.get('access_token'),
-    after || getTimestampFromISO(athlete.get('last_updated'))
+    athleteDoc.get('access_token'),
+    after || getTimestampFromISO(athleteDoc.get('last_updated'))
   );
 
   if (!eligibleActivities.length) {
@@ -31,7 +32,7 @@ module.exports = async (id, after = false) => {
   // Add new activities to database
   const activitiesWithLaps = await fetchLapsFromActivities(
     eligibleActivities,
-    athlete.get('access_token')
+    athleteDoc.get('access_token')
   );
 
   if (!activitiesWithLaps.length) {
@@ -59,10 +60,10 @@ module.exports = async (id, after = false) => {
   }
 
   // Merge into user document's stats
-  const stats = compileStatsForActivities(filtered, athlete.toJSON().stats);
-  console.log(`Found ${stats.allTime - athlete.get('stats.allTime')} new laps`);
+  const stats = compileStatsForActivities(filtered, athleteDoc.toJSON().stats);
+  console.log(`Found ${stats.allTime - athleteDoc.get('stats.allTime')} new laps`);
 
   // Update user stats and last_updated
-  await updateAthleteStats(athlete, stats);
+  await updateAthleteStats(athleteDoc, stats);
   return true;
 };
