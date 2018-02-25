@@ -53,8 +53,8 @@ class Navigation extends Component {
         ref={(el) => { this.linksContainer = el; }}
         onClick={this.toggleNavLinksContainer}
       >
-        <Link as="/prospectpark" href={`/park?segment=${lapSegmentId}`}>
-          <a className={styles.link}>Prospect Park</a>
+        <Link href="/rankings">
+          <a className={styles.link}>Rankings</a>
         </Link>
         <Link href="/about">
           <a className={styles.link}>About</a>
