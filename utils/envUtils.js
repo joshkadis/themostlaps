@@ -1,6 +1,6 @@
-import { prodDomain } from '../config';
+const { prodDomain } = require('../config');
 
-export function isProduction() {
+function isProduction() {
   if ('undefined' !== typeof window && window.location) {
     return prodDomain === window.location.host;
   }
@@ -8,10 +8,15 @@ export function isProduction() {
   return 'production' === process.env.NODE_ENV;
 }
 
-export function getEnvOrigin() {
+function getEnvOrigin() {
   if ('undefined' !== typeof window && window.location) {
     return window.location.origin;
   }
 
   return isProduction() ? `https://${prodDomain}` : `http://localhost:${process.env.PORT}`;
+}
+
+module.exports = {
+  isProduction,
+  getEnvOrigin,
 };
