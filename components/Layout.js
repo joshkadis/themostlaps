@@ -29,6 +29,7 @@ class Layout extends Component {
   }
 
   handleCloseModal() {
+    window.location.hash = '';
     this.setState({
       modalIsOpen: false,
       modalState: 'signup',
@@ -68,6 +69,16 @@ class Layout extends Component {
   // Only need this client-side
   componentDidMount() {
     Modal.setAppElement('#__next');
+
+    if ('#signup' === window.location.hash) {
+      this.handleOpenModal();
+    }
+
+    window.addEventListener('hashchange', () => {
+      if ('#signup' === window.location.hash) {
+        this.handleOpenModal();
+      }
+    });
   }
 
   render() {
