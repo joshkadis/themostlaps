@@ -6,7 +6,6 @@ import classNames from 'classnames';
 import Layout from '../components/Layout';
 import pageContent from 'raw-loader!../copy/home.md';
 import { getPathnameFromContext, APIRequest } from '../utils';
-import * as styles from './index.css';
 import * as navStyles from '../components/Navigation.css';
 import {
   getMonthKey,
@@ -20,9 +19,10 @@ const Index = ({ pathname, query, siteTotals }) => (
   <Layout
     pathname={pathname}
     query={query}
+    style={{ textAlign: 'center' }}
   >
-    <Markdown className={styles.content} source={pageContent} />
-    <div className={styles.siteTotals}>
+    <Markdown source={pageContent} />
+    <div>
       <p>The Most Laps has logged...</p>
 
       {!!siteTotals[getMonthKey()] &&
@@ -38,8 +38,14 @@ const Index = ({ pathname, query, siteTotals }) => (
       }
 
       <button
-        className={classNames(navStyles.link, navStyles.ctaLink, styles.ctaLink)}
+        className={classNames(navStyles.link, navStyles.ctaLink)}
         onClick={triggerModalOpen}
+        style={{
+          marginTop: '1rem',
+          fontSize: '1.25rem',
+          padding: '0.7rem',
+          letterSpacing: '1px',
+        }}
       >
         Add Your Laps
       </button>

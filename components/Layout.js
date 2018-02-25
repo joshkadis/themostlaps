@@ -90,7 +90,7 @@ class Layout extends Component {
       null;
 
     return (
-      <div>
+      <div style={this.props.style}>
         <Head>
           <meta charset="utf-8" />
           <meta http-equiv="x-ua-compatible" content="ie=edge" />
@@ -149,12 +149,14 @@ class Layout extends Component {
 Layout.defaultProps = {
   query: {},
   pathname: '/',
+  style: {},
 }
 
 Layout.propTypes = {
   query: PropTypes.object,
   pathname: PropTypes.string,
   children: PropTypes.node.isRequired,
+  style: PropTypes.object,
 };
 
 export default Layout;
