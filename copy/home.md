@@ -1,7 +1,7 @@
-## Lorem ipsum Enim Excepteur
+# Do you ride laps?
 
-Lorem ipsum Enim Excepteur consectetur dolor dolor velit aliquip ut laboris labore ex officia anim aute enim quis sit ad tempor
+Riding in Brooklyn is all about [laps in Prospect Park][1]. You know this because you ride _a lot_ of them. Ever wonder how many? Ever wonder who rides the most?
 
-Lorem ipsum Enim Excepteur consectetur dolor dolor velit aliquip ut laboris labore ex officia anim aute enim quis sit ad tempor in ut ullamco elit dolor nisi adipisicing ut veniam ea dolore pariatur est nostrud id est veniam esse qui irure magna cupidatat enim enim nulla dolore adipisicing ad laboris Duis ea sed consectetur ut incididunt tempor qui in Duis dolor reprehenderit magna eiusmod eiusmod fugiat labore reprehenderit sed laborum velit irure consectetur ma
+## It's time to find out how many.
 
-Lorem ipsum Enim Excepteur consectetur dolor dolor velit aliquip ut laboris labore ex officia anim aute enim quis sit ad tempor in ut ullamco elit dolor nisi adipisicing ut veniam ea dolore pariatur est nostrud id est veniam esse qui irure magna cupidatat enim enim nulla dolore adipisicing ad laboris Duis ea sed consectetur ut incididunt tempor qui in Duis dolor reprehenderit magna eiusmod eiusmod fugiat labore reprehenderit sed laborum velit irure consectetur ma
+[1]: https://www.strava.com/segments/5313629

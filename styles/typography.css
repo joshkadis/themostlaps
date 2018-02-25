@@ -5,6 +5,17 @@ body {
   font-weight: 400;
 }
 
+h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  text-align: center;
+
+  @media (--smallViewport) {
+    font-size: 1.7rem;
+  }
+}
+
 h2 {
   font-size: 1.75rem;
   font-weight: 700;
@@ -17,4 +28,20 @@ h2 {
 
 p {
   margin-bottom: 1rem;
+
+  &:global(.big) {
+    font-size: 20px;
+  }
+
+  &:global(.bigger) {
+    font-size: 24px;
+  }
+
+  &:global(.biggest) {
+    font-size: 28px;
+  }
+}
+
+strong {
+  font-weight: 700;
 }
