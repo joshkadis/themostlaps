@@ -26,15 +26,15 @@ const Index = ({ pathname, query, siteTotals }) => (
       <p>The Most Laps has logged...</p>
 
       {!!siteTotals[getMonthKey()] &&
-        <p className="big"><strong>{siteTotals[getMonthKey()]} laps this month.</strong></p>
+        <p className=""><strong>{siteTotals[getMonthKey()]} laps this month.</strong></p>
       }
 
       {!!siteTotals[getYearKey()] &&
-        <p className="bigger"><strong>{siteTotals[getYearKey()]} laps this year.</strong></p>
+        <p className="big"><strong>{siteTotals[getYearKey()]} laps this year.</strong></p>
       }
 
       {!!siteTotals.allTime &&
-        <p className="biggest"><strong>{siteTotals.allTime} laps all time.</strong></p>
+        <p className="bigger"><strong>{siteTotals.allTime} laps all time.</strong></p>
       }
 
       <button

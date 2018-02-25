@@ -1,6 +1,7 @@
 @import './vars.css';
 
 body {
+  color: #000;
   font: var(--baseSize)/1.5 'Arvo', serif;
   font-weight: 400;
 }
@@ -30,18 +31,26 @@ p {
   margin-bottom: 1rem;
 
   &:global(.big) {
-    font-size: 20px;
+    font-size: 1.25rem;
   }
 
   &:global(.bigger) {
-    font-size: 24px;
+    font-size: 1.5rem;
   }
 
   &:global(.biggest) {
-    font-size: 28px;
+    font-size: 1.75rem;
   }
 }
 
 strong {
   font-weight: 700;
+}
+
+a {
+  color: var(--purple);
+  &:hover {
+    color: var(--purpleDark);
+    text-decoration: none;
+  }
 }
