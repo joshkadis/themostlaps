@@ -2,22 +2,13 @@ const { scheduleJob } = require('node-schedule');
 const { refreshSchedule } = require('../config');
 const Athlete = require('../schema/Athlete');
 const refreshAthlete = require('../utils/refreshAthlete');
-
-/**
- * Convert int to min. 2-digit string for logging
- */
-const timePart = (part) => {
-  if (part >= 10) {
-    return part.toString();
-  }
-  return `0${part}`;
-};
+const { timePartString } = require('./dateTimeUtils');
 
 /**
  * Nightly refresh of activities and stats
  */
 async function scheduleNightlyRefresh() {
-  console.log(`Scheduling refresh for ${timePart(refreshSchedule.hour)}h${timePart(refreshSchedule.minute)} GMT`)
+  console.log(`Scheduling refresh for ${timePartString(refreshSchedule.hour)}h${timePartString(refreshSchedule.minute)} GMT`)
   const job = scheduleJob(refreshSchedule, async () => {
     console.log('Refreshing athletes and stats');
     const athletes = await Athlete.find({});
