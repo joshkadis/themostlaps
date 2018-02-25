@@ -1,9 +1,6 @@
-module.exports = ({ file, options }) => {
-  console.log(file, options);
-  return {
-    plugins: {
-      'postcss-import': { root: file.dirname },
-      'postcss-cssnext': options,
-    }
-  };
-};
+module.exports = ({ file, options }) => ({
+  plugins: {
+    'postcss-import': { root: file.dirname },
+    'postcss-cssnext': options,
+  }
+});
