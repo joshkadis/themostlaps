@@ -9,6 +9,7 @@ const scheduleNightlyRefresh = require('./utils/scheduleNightlyRefresh');
 // Route handlers
 const onAuthCallback = require('./server/onAuthCallback');
 const initAPIRoutes = require('./api/initAPIRoutes');
+const getRankingParams = require('./utils/getRankingParams');
 
 // Next.js setup
 const app = next({ dev: process.env.NODE_ENV !== 'production' });
@@ -51,6 +52,15 @@ app.prepare()
     /**
      * Next.js routing
      */
+    server.get(/\/ranking\/(allTime|single|[\d]{4,4})?\/?(\d{2,2})?$/, (req, res) => {
+      const params = getRankingParams(req.params);
+      if (!params.type) {
+        res.statusCode = 404;
+        app.render(req, res, '/_error', {});
+      } else {
+        app.render(req, res, '/ranking', params);
+      }
+    });
 
     /**
      * API routing
