@@ -17,7 +17,7 @@ const timePart = (part) => {
  * Nightly refresh of activities and stats
  */
 async function scheduleNightlyRefresh() {
-  console.log(`Scheduling refresh for ${timePart(refreshSchedule.hour)}h${timePart(refreshSchedule.minute)}`)
+  console.log(`Scheduling refresh for ${timePart(refreshSchedule.hour)}h${timePart(refreshSchedule.minute)} GMT`)
   const job = scheduleJob(refreshSchedule, async () => {
     console.log('Refreshing athletes and stats');
     const athletes = await Athlete.find({});
