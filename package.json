@@ -35,6 +35,7 @@
     "postcss-import": "^11.1.0",
     "promptly": "^3.0.3",
     "prop-types": "^15.6.0",
+    "query-string": "^5.1.0",
     "raw-loader": "^0.5.1",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
