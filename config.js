@@ -20,8 +20,8 @@ module.exports = {
   stravaClientId: 22415,
   breakpointPx: 800,
   refreshSchedule: {
-    hour: 20,
-    minute: 24,
+    hour: 1,
+    minute: 26,
   },
 };
 
