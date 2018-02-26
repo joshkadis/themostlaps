@@ -1,12 +1,17 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Select from 'react-select';
-import rankingsOptions from '../config/rankingsOpts';
+import Router from 'next/router';
+import { stringify } from 'query-string';
+import { primaryOptions, secondaryOptions } from '../config/rankingsOpts';
+import { timePartString } from '../utils/dateTimeUtils';
 
 class RankingSelector extends Component {
   constructor(props) {
     super(props);
-    this.onChangeSelect = this.onChangeSelect.bind(this);
+    this.onChangePrimary = this.onChangePrimary.bind(this);
+    this.onChangeSecondary = this.onChangeSecondary.bind(this);
+    this.onClickButton = this.onClickButton.bind(this);
     this.state = {
       type: false,
       year: null,
@@ -22,8 +27,35 @@ class RankingSelector extends Component {
     this.setState(current);
   }
 
-  onChangeSelect(evt) {
-    debugger;
+  onChangePrimary({ value }) {
+    const parts = value.split('.');
+    const newState = {
+      type: parts[0],
+      year: ('timePeriod' == parts[0] && parts.length > 1) ?
+        parts[1] : null,
+    };
+
+    if ('timePeriod' !== parts[0]) {
+      newState.month = null;
+    }
+
+    this.setState(newState);
+  }
+
+  onChangeSecondary({ value }) {
+    this.setState({
+      month: value,
+    });
+  }
+
+  onClickButton() {
+    const { type, year, month } = this.state;
+    let pathname = `/ranking/${'timePeriod' === type ? year : type}`;
+    if ('timePeriod' === type && month) {
+      pathname = `${pathname}/${timePartString(month)}`;
+    }
+
+    Router.push(`/ranking?${stringify(this.state)}`, pathname);
   }
 
   render() {
@@ -33,10 +65,25 @@ class RankingSelector extends Component {
       <div>
         <Select
           name="primary"
+          onChange={this.onChangePrimary}
+          options={primaryOptions}
           value={`${type}${year ? '.' + year : ''}`}
-          onChange={this.onChangeSelect}
-          options={rankingsOptions}
+          clearable={false}
+          searchable={false}
         />
+
+        {type === 'timePeriod' && <Select
+          name="secondary"
+          value={month}
+          onChange={this.onChangeSecondary}
+          options={secondaryOptions}
+          clearable={false}
+          searchable={false}
+        />}
+
+        <button onClick={this.onClickButton}>
+          Go
+        </button>
       </div>
     );
   };
