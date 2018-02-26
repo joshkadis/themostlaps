@@ -20,20 +20,23 @@ class SignupModal extends Component {
 
   render() {
     return (
-      <div>
-        <h2>🚴 Let's get started ! 🚴</h2>
-        <ConnectWithStravaButton
-          pathname={this.props.pathname}
-          shouldSubscribe={this.state.subscribeChecked}
-        />
-        <div>
-          <input
-            name="subscribe"
-            type="checkbox"
-            checked={this.state.subscribeChecked}
-            onChange={this.onChangeSubscribe}
+      <div className={styles.container}>
+        <div className={styles.main}>
+          <h2>🚴 Let's get started ! 🚴</h2>
+          <ConnectWithStravaButton
+            pathname={this.props.pathname}
+            shouldSubscribe={this.state.subscribeChecked}
           />
-          <label htmlFor="subscribe">I'd like to receive occasional laps-related emails</label>
+          <p className={styles.subscribeContainer}>
+            <input
+              id="subscribe"
+              name="subscribe"
+              type="checkbox"
+              checked={this.state.subscribeChecked}
+              onChange={this.onChangeSubscribe}
+            />
+            <label htmlFor="subscribe">Send me occasional laps-related emails.</label>
+          </p>
         </div>
         <Markdown source={pageContent} />
       </div>
