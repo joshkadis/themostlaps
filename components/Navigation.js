@@ -60,9 +60,6 @@ class Navigation extends Component {
         <Link href="/about">
           <a className={styles.link}>About</a>
         </Link>
-        <Link href="/help">
-          <a className={styles.link}>Help</a>
-        </Link>
         <Button
           onClick={this.props.modalControls.open}
         >
