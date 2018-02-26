@@ -70,9 +70,9 @@ class RankingSelector extends Component {
     this.setState(newState);
   }
 
-  onChangeSecondary({ value }) {
+  onChangeSecondary(evt) {
     this.setState({
-      month: value,
+      month: (evt && evt.value) ? evt.value : null,
     });
   }
 
@@ -100,6 +100,7 @@ class RankingSelector extends Component {
             value={`${type}${year ? '.' + year : ''}`}
             clearable={false}
             searchable={false}
+            autoBlur={true}
           />
           {type === 'timePeriod' && (
             <Select
@@ -108,8 +109,9 @@ class RankingSelector extends Component {
               value={month}
               onChange={this.onChangeSecondary}
               options={filterSecondaryOptions(year)}
-              clearable={false}
               searchable={false}
+              autoBlur={true}
+              ref={(el) => this.secondarySelect = el}
             />
           )}
         </div>
