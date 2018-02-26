@@ -31,7 +31,7 @@ const Ranking = ({ ranking, statsKey, query, pathname }) => (
     {!!ranking.length ? (
       <table className={styles['ranking-row__table']}>
         <tbody>
-          {ranking.map(({ _id, athlete, stats }, idx) => (
+          {ranking.map(({ _id, athlete, stats = {} }, idx) => (
             <RankingRow
               key={_id}
               athleteId={_id}
@@ -39,7 +39,7 @@ const Ranking = ({ ranking, statsKey, query, pathname }) => (
               firstname={athlete.firstname}
               lastname={athlete.lastname}
               img={athlete.profile}
-              value={stats[statsKey]}
+              value={stats[statsKey] || 0}
             />
           ))}
         </tbody>

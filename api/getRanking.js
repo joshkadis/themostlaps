@@ -41,7 +41,7 @@ async function getRanking(rankingType = null, filter = false) {
   const statsKey = 'timePeriod' === rankingType ? filter : rankingType;
 
   const ranking = await Athlete.find(
-    {},
+    { [`stats.${statsKey}`]: { $gt: 0 } },
     defaultAthleteFields.join(' ').replace('stats', `stats.${statsKey}`),
     {
       limit: 20,
