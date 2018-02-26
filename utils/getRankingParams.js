@@ -1,3 +1,4 @@
+const { startYear } = require('../config/rankingsOpts');
 /**
  * Get under-the-hood params from /ranking route
  *
@@ -16,8 +17,9 @@ function getRankingParams(reqParams = {}) {
     params.type = 'allTime';
   } else if (/\d{4,4}/.test(reqParams[0])) {
     const year = parseInt(reqParams[0], 10);
-    // Year must be in range 2012-2018
-    if (year > 2011 && year < 2019) {
+    // Year must be in range
+    const current = new Date();
+    if (year >= startYear && year <= current.getFullYear()) {
       params.type = 'timePeriod';
       params.year = year;
     }
