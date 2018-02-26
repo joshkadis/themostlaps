@@ -57,7 +57,7 @@ class Navigation extends Component {
         <Link href="/ranking">
           <a className={styles.link}>Rankings</a>
         </Link>
-        <Link href="/about">
+        <Link href="/page?pageName=about" as="/about">
           <a className={styles.link}>About</a>
         </Link>
         <Button

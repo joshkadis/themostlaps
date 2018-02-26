@@ -69,6 +69,10 @@ app.prepare()
       }
     });
 
+    server.get(/^\/(terms|privacy|about)$/, (req, res) => {
+      app.render(req, res, '/page', Object.assign(req.query, { pageName: req.params[0] }));
+    })
+
     /**
      * API routing
      */
