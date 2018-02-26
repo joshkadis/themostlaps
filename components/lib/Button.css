@@ -1,0 +1,9 @@
+@import '../../styles/vars';
+
+.button {
+  @apply --fadeLink;
+  @apply --button;
+
+  text-decoration: none;
+  padding: 0.5rem;
+}

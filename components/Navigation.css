@@ -8,13 +8,10 @@
 
   @media (--smallViewport) {
     margin: 1rem 0 0;
+    &:last-of-type {
+      margin-bottom: 1rem;
+    }
   }
-}
-
-.ctaLink {
-  @apply --button;
-  padding: 0.5rem;
-  margin-right: 0;
 }
 
 .linksContainer {

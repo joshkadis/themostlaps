@@ -2,8 +2,8 @@ import Link from 'next/link';
 import PropTypes from 'prop-types';
 import Markdown from 'react-markdown';
 import classNames from 'classnames';
-
 import Layout from '../components/Layout';
+import Button from '../components/lib/Button';
 import pageContent from 'raw-loader!../copy/home.md';
 import { getPathnameFromContext, APIRequest } from '../utils';
 import * as navStyles from '../components/Navigation.css';
@@ -37,8 +37,7 @@ const Index = ({ pathname, query, siteTotals }) => (
         <p className="bigger"><strong>{siteTotals.allTime} laps all time.</strong></p>
       }
 
-      <button
-        className={classNames(navStyles.link, navStyles.ctaLink)}
+      <Button
         onClick={triggerModalOpen}
         style={{
           marginTop: '1rem',
@@ -48,7 +47,7 @@ const Index = ({ pathname, query, siteTotals }) => (
         }}
       >
         Add Your Laps
-      </button>
+      </Button>
     </div>
   </Layout>
 );

@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Link from 'next/link';
 import classNames from 'classnames';
+import Button from './lib/Button';
 import { lapSegmentId, breakpointPx } from '../config';
 import * as styles from './Navigation.css';
 import { MenuSvg } from './lib/svg';
@@ -62,12 +63,11 @@ class Navigation extends Component {
         <Link href="/help">
           <a className={styles.link}>Help</a>
         </Link>
-        <button
-          className={classNames(styles.link, styles.ctaLink)}
+        <Button
           onClick={this.props.modalControls.open}
         >
           Sign Up
-        </button>
+        </Button>
       </nav>
     </div>);
   }
