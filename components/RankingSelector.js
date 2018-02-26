@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Select from 'react-select';
 import rankingsOptions from '../config/rankingsOpts';
-import '!style-loader!css-loader!react-select/dist/react-select.css';
 
 class RankingSelector extends Component {
   constructor(props) {

@@ -96,6 +96,7 @@ class Layout extends Component {
           <meta http-equiv="x-ua-compatible" content="ie=edge" />
           <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no, maximum-scale=1" />
           <link href="https://fonts.googleapis.com/css?family=Arvo:400,700" rel="stylesheet" />
+          <link rel="stylesheet" href="/static/css/react-select.css" />
           <link rel="stylesheet" href="/_next/static/style.css" />
         </Head>
         <Header
