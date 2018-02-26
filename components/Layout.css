@@ -44,19 +44,12 @@
   background-size: cover;
   background-position: left;
   opacity: 1;
-  top: var(--layoutBgPos);
-  right: var(--layoutBgPos);
-  bottom: var(--layoutBgPos);
-  left: var(--layoutBgPos);
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   position: absolute;
   z-index: -999;
-
-  @media (--smallViewport) {
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-  }
 }
 
 .overlay {
