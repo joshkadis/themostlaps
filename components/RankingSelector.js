@@ -3,8 +3,29 @@ import PropTypes from 'prop-types';
 import Select from 'react-select';
 import Router from 'next/router';
 import { stringify } from 'query-string';
+import classNames from 'classnames';
+import Button from './lib/Button';
 import { primaryOptions, secondaryOptions } from '../config/rankingsOpts';
 import { timePartString } from '../utils/dateTimeUtils';
+import * as styles from './RankingSelector.css';
+
+/**
+ * If selected year is current year, remove future months from secondaryOptions
+ *
+ * @param {String} year As numeric string
+ * @return {Array}
+ */
+function filterSecondaryOptions(year) {
+  const current = new Date();
+  if (parseInt(year, 10) !== current.getFullYear()) {
+    return secondaryOptions;
+  }
+
+  // Get 1-based month
+  const currentMonth = current.getMonth() + 1;
+  return secondaryOptions.filter(({ value }) =>
+    (value === null || parseInt(value, 10) <= currentMonth));
+}
 
 class RankingSelector extends Component {
   constructor(props) {
@@ -37,6 +58,14 @@ class RankingSelector extends Component {
 
     if ('timePeriod' !== parts[0]) {
       newState.month = null;
+    } else {
+      // Reset if future month
+      const current = new Date();
+      if (parseInt(parts[1], 10) === current.getFullYear() &&
+        parseInt(this.state.month, 10) > (current.getMonth() + 1)
+      ) {
+        newState.month = null;
+      }
     }
 
     this.setState(newState);
@@ -62,28 +91,35 @@ class RankingSelector extends Component {
     const { type, year, month } = this.state;
 
     return (
-      <div>
-        <Select
-          name="primary"
-          onChange={this.onChangePrimary}
-          options={primaryOptions}
-          value={`${type}${year ? '.' + year : ''}`}
-          clearable={false}
-          searchable={false}
-        />
-
-        {type === 'timePeriod' && <Select
-          name="secondary"
-          value={month}
-          onChange={this.onChangeSecondary}
-          options={secondaryOptions}
-          clearable={false}
-          searchable={false}
-        />}
-
-        <button onClick={this.onClickButton}>
+      <div className={styles.container}>
+        <div className={styles.selectsContainer}>
+          <Select
+            className={classNames(styles.select, styles.selectPrimary)}
+            name="primary"
+            onChange={this.onChangePrimary}
+            options={primaryOptions}
+            value={`${type}${year ? '.' + year : ''}`}
+            clearable={false}
+            searchable={false}
+          />
+          {type === 'timePeriod' && (
+            <Select
+              className={classNames(styles.select, styles.selectSecondary)}
+              name="secondary"
+              value={month}
+              onChange={this.onChangeSecondary}
+              options={filterSecondaryOptions(year)}
+              clearable={false}
+              searchable={false}
+            />
+          )}
+        </div>
+        <Button
+          className={styles.button}
+          onClick={this.onClickButton}
+        >
           Go
-        </button>
+        </Button>
       </div>
     );
   };
