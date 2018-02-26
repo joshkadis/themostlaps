@@ -56,7 +56,7 @@ Ranking.getInitialProps = async function(context) {
 
   const apiQueryParams = {};
   if ('timePeriod' === queryType) {
-    apiQueryParams.filter = query.month ? `_${query.year}_${query.month}` : `_${query.year}`;
+    apiQueryParams.filter = query.month ? `_${query.year}_${timePartString(query.month)}` : `_${query.year}`;
   }
 
   return APIRequest(`/ranking/${queryType}`, apiQueryParams, [])
