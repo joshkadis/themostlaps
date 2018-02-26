@@ -13,7 +13,7 @@ function getRankingName({ type, year, month }) {
       return 'Single Ride';
 
     case 'timePeriod':
-      return month ? `${getMonthName(month)} ${year}` : year;
+      return month ? `${getMonthName(parseInt(month, 10))} ${year}` : year;
 
     case 'allTime':
     default:
