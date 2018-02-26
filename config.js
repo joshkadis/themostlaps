@@ -23,5 +23,12 @@ module.exports = {
     hour: 8, // GMT
     minute: 0,
   },
+  defaultAthleteFields: [
+    'id',
+    'athlete.firstname',
+    'athlete.lastname',
+    'athlete.profile',
+    'stats',
+  ],
 };
 

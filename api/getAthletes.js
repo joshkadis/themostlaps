@@ -1,12 +1,5 @@
 const Athlete = require('../schema/Athlete');
-
-const defaultFields = [
-  'id',
-  'athlete.firstname',
-  'athlete.lastname',
-  'athlete.profile',
-  'stats',
-];
+const { defaultAthleteFields } = require('../config');
 
 /**
  * Parse CSV string of athlete IDs from URL
@@ -33,7 +26,7 @@ function parseIdsString(idsString) {
  * @param {Array} fields Array of fields to return in Query results
  * @return {Array}
  */
-async function getAthletes(idsString = '', fields = defaultFields) {
+async function getAthletes(idsString = '', fields = defaultAthleteFields) {
   const athleteIds = parseIdsString(idsString);
   if (!athleteIds.length) {
     return { error: 'Requires at least one numeric id' };

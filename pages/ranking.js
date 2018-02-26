@@ -1,18 +1,46 @@
 import PropTypes from 'prop-types';
 import Layout from '../components/Layout';
+import RankingRow from '../components/RankingRow';
 import { getEnvOrigin } from '../utils/envUtils';
 import { getPathnameFromContext, APIRequest } from '../utils';
-import { timePartString } from '../utils/dateTimeUtils';
+import { timePartString, getMonthName } from '../utils/dateTimeUtils';
+import * as styles from '../components/RankingRow.css';
+
+function getRankingName({ type, year, month }) {
+  switch (type) {
+    case 'single':
+      return 'Single Ride';
+
+    case 'timePeriod':
+      return month ? `${getMonthName(month)} ${year}` : year;
+
+    case 'allTime':
+    default:
+      return 'All Time';
+  }
+}
 
 const Ranking = ({ ranking, statsKey, query, pathname }) => (
   <Layout
     pathname={pathname}
     query={query}
   >
-    <h1>Ranking</h1>
-    {ranking.map(({ _id, athlete, stats }) => (
-      <p key={_id}>{`${athlete.firstname} ${athlete.lastname}: ${stats[statsKey]} laps`}</p>
-    ))}
+    <h1>{getRankingName(query)} Ranking</h1>
+    <table className={styles.table}>
+      <tbody>
+        {ranking.map(({ _id, athlete, stats }, idx) => (
+          <RankingRow
+            key={_id}
+            athleteId={_id}
+            rank={(idx + 1)}
+            firstname={athlete.firstname}
+            lastname={athlete.lastname}
+            img={athlete.profile}
+            value={stats[statsKey]}
+          />
+        ))}
+      </tbody>
+    </table>
   </Layout>
 );
 

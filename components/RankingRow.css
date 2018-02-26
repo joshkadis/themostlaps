@@ -1,0 +1,55 @@
+@import '../styles/vars';
+
+.table {
+  width: 100%;
+
+  & :global(tr) {
+    background-color: white;
+    border-bottom: 1px solid var(--purple);
+
+    &:nth-of-type(1) {
+    border-top: 1px solid var(--purple);
+    }
+
+    &:nth-of-type(even) {
+      background-color: color(var(--purple) lightness(97%));
+    }
+  }
+
+  & :global(td) {
+    padding: 1rem;
+    vertical-align: middle;
+
+    &:last-of-type {
+      text-align: right;
+    }
+
+    @media (--smallViewport) {
+      padding: .7rem;
+    }
+
+  }
+}
+
+.avatar {
+  max-width: 48px;
+  border-radius: 50%;
+
+  @media (--smallViewport) {
+    max-width: 36px;
+  }
+}
+
+.athleteCell {
+  display: flex;
+  align-items: center;
+}
+
+.first {
+  font-weight: bold;
+  color: var(--purple);
+}
+
+.name {
+  margin-left: .7rem;
+}

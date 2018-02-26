@@ -31,8 +31,33 @@ function getMonthKey() {
   return `_${current.getFullYear()}_${timePartString(current.getMonth() + 1)}`;
 }
 
+/**
+ * Get month name from 1-12 index, not 0-11
+ *
+ * @param {Int} idx
+ * @return {String}
+ */
+function getMonthName(idx) {
+  switch (idx) {
+    case 1: return 'January';
+    case 2: return 'February';
+    case 3: return 'March';
+    case 4: return 'April';
+    case 5: return 'May';
+    case 6: return 'June';
+    case 7: return 'July';
+    case 8: return 'August';
+    case 9: return 'September';
+    case 10: return 'October';
+    case 11: return 'November';
+    case 12: return 'December';
+    default: return 'January';
+  }
+}
+
 module.exports = {
   timePartString,
   getYearKey,
   getMonthKey,
+  getMonthName,
 };

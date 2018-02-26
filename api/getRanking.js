@@ -1,5 +1,6 @@
 const Athlete = require('../schema/Athlete');
 const apiConfig = require('./apiConfig');
+const { defaultAthleteFields } = require('../config');
 
 /**
  * Validate ranking type and segment ID
@@ -41,10 +42,11 @@ async function getRanking(rankingType = null, filter = false) {
 
   const ranking = await Athlete.find(
     {},
-    `id athlete.firstname athlete.lastname stats.${statsKey}`,
+    defaultAthleteFields.join(' ').replace('stats', `stats.${statsKey}`),
     {
       limit: 20,
-      sort: { [`stats.${statsKey}`]: -1 } },
+      sort: { [`stats.${statsKey}`]: -1 }
+    }
   );
 
   return { error: false, data: {

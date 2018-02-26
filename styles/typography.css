@@ -29,17 +29,26 @@ h2 {
 
 p {
   margin-bottom: 1rem;
+}
 
-  &:global(.big) {
-    font-size: 1.25rem;
+:global(.big) {
+  font-size: 1.25rem;
+  @media (--smallViewport) {
+    font-size: 1.15rem;
   }
+}
 
-  &:global(.bigger) {
+:global(.bigger) {
+  font-size: 1.5rem;
+  @media (--smallViewport) {
+    font-size: 1.3rem;
+  }
+}
+
+:global(.biggest) {
+  font-size: 1.75rem;
+  @media (--smallViewport) {
     font-size: 1.5rem;
-  }
-
-  &:global(.biggest) {
-    font-size: 1.75rem;
   }
 }
 
