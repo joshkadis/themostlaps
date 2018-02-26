@@ -37,19 +37,18 @@ async function getRanking(rankingType = null, filter = false) {
     return validation;
   }
 
-  const findStatsKey = 'timePeriod' === rankingType ? filter : rankingType;
+  const statsKey = 'timePeriod' === rankingType ? filter : rankingType;
 
   const ranking = await Athlete.find(
     {},
-    `id athlete.firstname athlete.lastname stats.${findStatsKey}`,
+    `id athlete.firstname athlete.lastname stats.${statsKey}`,
     {
       limit: 20,
-      sort: { [`stats.${findStatsKey}`]: -1 } },
+      sort: { [`stats.${statsKey}`]: -1 } },
   );
 
   return { error: false, data: {
-    rankingType,
-    filter,
+    statsKey,
     ranking,
   } };
 }
