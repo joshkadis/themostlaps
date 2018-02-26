@@ -1,0 +1,1 @@
+Once you're in, we'll get your laps history and update your stats every night. [Learn more][1] about what data we store (it's not much).

@@ -9,7 +9,7 @@ import { CloseSvg } from './lib/svg';
 import numberOrNullProp from '../utils/numberOrNullProp';
 import AuthError from './AuthError';
 import AuthSuccess from './AuthSuccess';
-import ConnectWithStravaButton from './ConnectWithStravaButton';
+import SignupModal from './SignupModal';
 /**
  * Page layout
  */
@@ -139,7 +139,7 @@ class Layout extends Component {
               />}
 
             {(!authErrorCode && !this.props.query.authsuccess) &&
-              <ConnectWithStravaButton pathname={this.props.pathname} />}
+              <SignupModal pathname={this.props.pathname} />}
           </div>
         </Modal>
       </div>
