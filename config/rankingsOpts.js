@@ -18,7 +18,7 @@ for (let yr = current.getFullYear(); yr >= startYear; yr--) {
 
 secondaryOptions = [{
   value: null,
-  label: 'none',
+  label: 'clear month',
 }];
 for (let mo = 1; mo <= 12; mo++) {
   secondaryOptions.push({
