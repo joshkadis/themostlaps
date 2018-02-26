@@ -6,6 +6,7 @@ const deleteUser = require('./cli/deleteUser');
 const deleteUserActivities = require('./cli/deleteUserActivities');
 const { daysAgoTimestamp } = require('./cli/utils');
 const refreshAthlete = require('./utils/refreshAthlete');
+const subscribeToMailingList = require('./utils/subscribeToMailingList');
 
 function userPositional(yargs) {
   yargs.positional('user', {
@@ -79,6 +80,25 @@ const argv = require('yargs')
         `Enter admin code to refresh user ${user}.`,
         async () => {
           await refreshAthlete(user, after);
+          process.exit(0);
+        }
+      );
+    }
+  )
+  .command(
+    'subscribe email [--newsletter]',
+    false,
+    (yargs) => {
+      yargs.positional('email', {
+        type: 'string',
+      });
+    },
+    async (argv) => {
+      const newsletter = !!argv.newsletter;
+      await doCommand(
+        `Enter admin code to subscribe ${argv.email} to the email list${newsletter ? ' AND the newsletter' : ''}.`,
+        async () => {
+          await subscribeToMailingList(argv.email, newsletter);
           process.exit(0);
         }
       );

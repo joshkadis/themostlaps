@@ -5,7 +5,7 @@ const express = require('express');
 const next = require('next');
 
 const scheduleNightlyRefresh = require('./utils/scheduleNightlyRefresh');
-
+const subscribeToMailingList = require('./utils/subscribeToMailingList');
 // Route handlers
 const onAuthCallback = require('./server/onAuthCallback');
 const initAPIRoutes = require('./api/initAPIRoutes');
@@ -42,11 +42,18 @@ app.prepare()
         };
       }
 
-      const redirectTo = req.query.state ?
-        decodeURIComponent(req.query.state) :
-        '/';
+      const stateParam = req.query.state ?
+        decodeURIComponent(req.query.state).split('|') :
+        ['/'];
 
-      res.redirect(303, `${redirectTo}?${querystring.stringify(redirectQuery)}`);
+      if (redirectQuery.authsuccess) {
+        subscribeToMailingList(
+          authResult.athlete.email,
+          (stateParam.length > 1 && stateParam[1] === 'shouldSubscribe') // Add to newsletter segment?
+        );
+      }
+
+      res.redirect(303, `${stateParam[0]}?${querystring.stringify(redirectQuery)}`);
     });
 
     /**
