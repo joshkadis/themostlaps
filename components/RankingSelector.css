@@ -1,19 +1,19 @@
-.container {
+.ranking-selector__container {
   display: flex;
   justify-content: center;
   align-items: flex-start;
   margin: 0 auto 1rem auto;
 }
 
-.selectsContainer {
+.ranking-selector__container--selects {
   margin-right: 1rem;
 }
 
-.button {
+.ranking-selector__button {
   padding-left: 1.5rem;
   padding-right: 1.5rem;
 }
 
-.select {
+.ranking-selector__select {
   width: 225px;
 }

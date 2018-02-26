@@ -1,6 +1,6 @@
 @import '../styles/vars';
 
-.table {
+.ranking-row__table {
   width: 100%;
 
   & :global(tr) {
@@ -31,7 +31,7 @@
   }
 }
 
-.avatar {
+.ranking-row__avatar {
   max-width: 48px;
   border-radius: 50%;
 
@@ -40,16 +40,16 @@
   }
 }
 
-.athleteCell {
+.ranking-row__athlete {
   display: flex;
   align-items: center;
 }
 
-.first {
+.ranking-row__first {
   font-weight: bold;
   color: var(--purple);
 }
 
-.name {
+.ranking-row__name {
   margin-left: .7rem;
 }

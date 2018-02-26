@@ -5,7 +5,7 @@ import RankingSelector from '../components/RankingSelector';
 import { getEnvOrigin } from '../utils/envUtils';
 import { getPathnameFromContext, APIRequest } from '../utils';
 import { timePartString, getMonthName } from '../utils/dateTimeUtils';
-import * as styles from '../components/RankingRow.css';
+import * as styles from '../components/Layout.css';
 
 function getRankingName({ type, year, month }) {
   switch (type) {
@@ -29,7 +29,7 @@ const Ranking = ({ ranking, statsKey, query, pathname }) => (
     <h1>{getRankingName(query)} Ranking</h1>
     <RankingSelector current={query} />
     {!!ranking.length ? (
-      <table className={styles.table}>
+      <table className={styles['ranking-row__table']}>
         <tbody>
           {ranking.map(({ _id, athlete, stats }, idx) => (
             <RankingRow

@@ -3,11 +3,10 @@ import PropTypes from 'prop-types';
 import Select from 'react-select';
 import Router from 'next/router';
 import { stringify } from 'query-string';
-import classNames from 'classnames';
 import Button from './lib/Button';
 import { primaryOptions, secondaryOptions } from '../config/rankingsOpts';
 import { timePartString } from '../utils/dateTimeUtils';
-import * as styles from './RankingSelector.css';
+import * as styles from './Layout.css';
 
 /**
  * If selected year is current year, remove future months from secondaryOptions
@@ -91,10 +90,10 @@ class RankingSelector extends Component {
     const { type, year, month } = this.state;
 
     return (
-      <div className={styles.container}>
-        <div className={styles.selectsContainer}>
+      <div className={styles['ranking-selector__container']}>
+        <div className={styles['ranking-selector__container--selects']}>
           <Select
-            className={classNames(styles.select, styles.selectPrimary)}
+            className={styles['ranking-selector__select']}
             name="primary"
             onChange={this.onChangePrimary}
             options={primaryOptions}
@@ -104,7 +103,7 @@ class RankingSelector extends Component {
           />
           {type === 'timePeriod' && (
             <Select
-              className={classNames(styles.select, styles.selectSecondary)}
+              className={styles['ranking-selector__select']}
               name="secondary"
               value={month}
               onChange={this.onChangeSecondary}
@@ -115,7 +114,7 @@ class RankingSelector extends Component {
           )}
         </div>
         <Button
-          className={styles.button}
+          className={styles['ranking-selector__button']}
           onClick={this.onClickButton}
         >
           Go

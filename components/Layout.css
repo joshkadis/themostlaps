@@ -1,6 +1,8 @@
 @import '../styles/reset';
 @import '../styles/typography';
 @import '../styles/vars';
+@import './RankingSelector.css';
+@import './RankingRow.css';
 
 @media (--largeViewport) {
   :global(html),

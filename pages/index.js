@@ -6,7 +6,6 @@ import Layout from '../components/Layout';
 import Button from '../components/lib/Button';
 import pageContent from 'raw-loader!../copy/home.md';
 import { getPathnameFromContext, APIRequest } from '../utils';
-import * as navStyles from '../components/Navigation.css';
 import {
   getMonthKey,
   getYearKey,
