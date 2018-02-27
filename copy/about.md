@@ -2,7 +2,7 @@
 
 #### Who made this?
 
-The Most Laps was conceived, designed, and built by [Josh Kadis][1], a cyclist, developer, and product manager from Brooklyn. Josh is looking for a job, hint hint...
+The Most Laps was conceived, designed, and built by [Josh Kadis][1], a cyclist, developer, and product manager from Brooklyn. Josh is currently looking for a job...
 
 In case you were wondering, it's an isomorphic React web application with a MongoDB database.
 
@@ -19,6 +19,8 @@ Because of performance constraints during your initial setup, we give you the be
 #### What personal data is stored?
 
 From your Strava profile, we store your user id, first and last names, a link to your profile photo, and your email address. Unless you subscribe to our [newsletter][4], we will _only_ use your email address for administrative purposes. We'll never share it with anyone.
+
+We also store, of course, the authentication token used to fetch your rides from the Strava API. However, this is only used "behind the scenes" on our server. It is never exposed to your browser.
 
 #### What about private rides?
 
