@@ -4,6 +4,7 @@ import Markdown from 'react-markdown';
 import * as styles from './SignupModal.css';
 import ConnectWithStravaButton from './ConnectWithStravaButton';
 import pageContent from 'raw-loader!../copy/signupModal.md';
+import convertMarkdownLink from './lib/convertMarkdownLink';
 
 class SignupModal extends Component {
   constructor(props) {
@@ -38,7 +39,11 @@ class SignupModal extends Component {
             <label htmlFor="subscribe">Send me occasional laps-related emails.</label>
           </p>
         </div>
-        <Markdown source={pageContent} />
+        <Markdown
+          source={pageContent}
+          escapeHtml={false}
+          renderers={{ link: convertMarkdownLink }}
+        />
       </div>
     );
   }

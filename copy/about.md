@@ -39,5 +39,5 @@ Check out our [Privacy Statement](/privacy) and [Terms of Service](/terms)
 [1]: https://kadisco.com
 [2]: https://developers.strava.com/docs/reference/#api-SegmentEfforts-getEffortsBySegmentId
 [3]: https://www.strava.com/segments/5313629
-[4]: http://eepurl.com/dl6VVT
+[4]: https://eepurl.com/dl6VVT
 [5]: https://www.strava.com/settings/apps
