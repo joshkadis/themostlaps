@@ -7,7 +7,6 @@
 
 .footer {
   align-items: flex-end;
-  background: var(--headerGradient);
   color: white;
   display: flex;
   font-size: .8rem;

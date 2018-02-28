@@ -9,7 +9,6 @@
 }
 
 .header {
-  background: var(--headerGradient);
   align-items: center;
   display: flex;
   justify-content: space-between;

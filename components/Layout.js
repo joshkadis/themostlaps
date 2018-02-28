@@ -106,7 +106,6 @@ class Layout extends Component {
           }}
         />
         <div className={styles.main}>
-          <div className={styles.mainBackground} />
           <div className={styles.mainContainer}>
             {this.props.children}
           </div>
