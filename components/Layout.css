@@ -5,16 +5,14 @@
 @import './RankingRow.css';
 @import '../pages/index.css';
 
-@media (--largeViewport) {
-  :global(html),
-  :global(body),
-  :global(#__next),
-  :global(#__next > *:nth-child(1)) {
-    display: flex;
-    height: 100%;
-    flex-direction: column;
-    overflow-y: visible;
-  }
+:global(html),
+:global(body),
+:global(#__next),
+:global(#__next > *:nth-child(1)) {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  overflow-y: visible;
 }
 
 :global body {
