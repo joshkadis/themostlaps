@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import Layout from '../components/Layout';
 import Button from '../components/lib/Button';
+import { LapPath } from '../components/lib/svg';
 import { getPathnameFromContext, APIRequest } from '../utils';
 import { triggerModalOpen } from '../utils/modal';
 import * as styles from '../components/Layout.css';
