@@ -7,9 +7,11 @@ import * as styles from './Layout.css';
 import Modal from 'react-modal';
 import { CloseSvg } from './lib/svg';
 import numberOrNullProp from '../utils/numberOrNullProp';
-import AuthError from './AuthError';
-import AuthSuccess from './AuthSuccess';
-import SignupModal from './SignupModal';
+import ModalContents from './ModalContents';
+import Signup from './modal/Signup';
+import AuthSuccess from './modal/AuthSuccess';
+import AuthError from './modal/AuthError';
+import { modalTitles } from '../config';
 /**
  * Page layout
  */
@@ -22,34 +24,6 @@ class Layout extends Component {
       modalIsOpen: false,
       modalState: 'signup',
     };
-  }
-
-  handleOpenModal() {
-    if ('#signup' !== window.location.hash) {
-      window.location.hash = '#signup';
-    }
-    this.setState({ modalIsOpen: true });
-  }
-
-  handleCloseModal() {
-    window.location.hash = '';
-    this.setState({
-      modalIsOpen: false,
-      modalState: 'signup',
-    });
-  }
-
-  queryHasAuthError(query = {}) {
-    return query.autherror && !isNaN(query.autherror);
-  }
-
-  getModalStateFromProps(props) {
-    if (this.queryHasAuthError(props.query)) {
-      return 'error';
-    } else if (props.query && props.query.authsuccess) {
-      return 'success';
-    }
-    return 'signup';
   }
 
   componentWillMount() {
@@ -84,13 +58,74 @@ class Layout extends Component {
     });
   }
 
+  handleOpenModal() {
+    if ('#signup' !== window.location.hash) {
+      window.location.hash = '#signup';
+    }
+    this.setState({ modalIsOpen: true });
+  }
+
+  handleCloseModal() {
+    window.location.hash = '';
+    this.setState({
+      modalIsOpen: false,
+      modalState: 'signup',
+    });
+  }
+
+  getModalStateFromProps({ query }) {
+    if (query.autherror && !isNaN(query.autherror)) {
+      return 'error';
+    } else if (query.authsuccess) {
+      return 'success';
+    }
+    return 'signup';
+  }
+
+  getModalTitle(props) {
+    switch(this.getModalStateFromProps(props)) {
+      case 'error':
+        return modalTitles.error;
+
+      case 'success':
+        return modalTitles.success;
+
+      case 'signup':
+      default:
+        return modalTitles.signup;
+    }
+  }
+
+  getModalContents(props) {
+    const { query, pathname } = props;
+    switch(this.getModalStateFromProps(props)) {
+      case 'error':
+        return <AuthError code={parseInt(query.autherror, 10)} />
+
+      case 'success':
+        return <AuthSuccess
+          id={parseInt(props.query.id, 10)}
+          firstname={props.query.firstname}
+          allTime={parseInt(props.query.allTime, 10)}
+        />
+
+      case 'signup':
+      default:
+        return <Signup pathname={pathname} />;
+    }
+  }
+
   render() {
-    const authErrorCode = this.queryHasAuthError(this.props.query) ?
-      parseInt(this.props.query.autherror, 10) :
-      null;
+    // Use aria-hidden for main content area if server is rendering with modal open
+    // In client, we rely on Modal.setAppElement()
+    const shouldHideDuringRender = 'undefined' === typeof document &&
+      this.state.modalIsOpen;
 
     return (
-      <div style={this.props.style}>
+      <div
+        style={this.props.style}
+        aria-hidden={shouldHideDuringRender ? 'true' : null}
+      >
         <Head>
           <meta charset="utf-8" />
           <meta http-equiv="x-ua-compatible" content="ie=edge" />
@@ -125,21 +160,9 @@ class Layout extends Component {
           >
             <CloseSvg />
           </button>
-          <div>
-            {!!authErrorCode &&
-              <AuthError code={authErrorCode} />}
-
-            {!!this.props.query.authsuccess &&
-              <AuthSuccess
-                id={parseInt(this.props.query.id, 10)}
-                firstname={this.props.query.firstname}
-                email={this.props.query.email}
-                allTime={parseInt(this.props.query.allTime, 10)}
-              />}
-
-            {(!authErrorCode && !this.props.query.authsuccess) &&
-              <SignupModal pathname={this.props.pathname} />}
-          </div>
+          <ModalContents title={this.getModalTitle(this.props)}>
+            {this.getModalContents(this.props)}
+          </ModalContents>
         </Modal>
       </div>
     );

@@ -30,5 +30,10 @@ module.exports = {
     'athlete.profile',
     'stats',
   ],
+  modalTitles: {
+    error: '😞 We\'re sorry. 😞',
+    success: '🎉 You\'re all set! 🎉',
+    signup: '🚴 Let\'s get started ! 🚴',
+  },
 };
 

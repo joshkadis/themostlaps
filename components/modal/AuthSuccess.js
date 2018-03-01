@@ -9,7 +9,6 @@ const AuthSuccess = ({ id, email, firstname, allTime }) => (
   <div>
     <h2>🎉{allTime} laps!🎉</h2>
     <p>Thanks for signing up, {firstname}. Next, you can...</p>
-    <p>Join our email list {renderSubscribeForm(email)}</p>
     <p>Read <Link href="/about"><a>about</a></Link> how this thing works and what data we store.</p>
     <p>Check out <Link href={`/athlete?id=${id}`} as={`/rider/${id}`}><a>your full stats page</a></Link>.</p>
     <p>Crush laps</p>
@@ -20,7 +19,6 @@ const AuthSuccess = ({ id, email, firstname, allTime }) => (
 
 AuthSuccess.propTypes = {
   id: PropTypes.number.isRequired,
-  email: PropTypes.string.isRequired,
   firstname: PropTypes.string.isRequired,
   allTime: PropTypes.number.isRequired,
 };
