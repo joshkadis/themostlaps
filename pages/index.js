@@ -17,16 +17,18 @@ const delay = {
   interstitial: 2200,
 };
 
-function unhideChildElements(id) {
+function unhideChildElements(id, useDelay = true) {
   if (typeof document === 'undefined') {
     return;
   }
   document
     .querySelectorAll(`#${id} [data-animated]`)
     .forEach((el) => {
+      const attr = el.getAttribute('data-animated');
+      const elDelay = (useDelay && attr && delay[attr]) ? delay[attr] : 0;
       setTimeout(() => {
         el.classList.add('home__block--active');
-      }, delay[el.getAttribute('data-animated') || 0])
+      }, elDelay)
     });
 }
 
