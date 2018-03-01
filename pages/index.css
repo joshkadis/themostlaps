@@ -1,11 +1,13 @@
 @import '../styles/vars';
 
+
 .home__background {
   position: absolute;
   top: 5%;
   right: 5%;
   bottom: 5%;
   left: 5%;
+  opacity: .25;
 }
 
 .home__background--svg {
@@ -16,52 +18,37 @@
   left: 50%;
   transform: translateX(-50%);
 }
-
+/**
+ * @todo Use keyframe animate to avoid setTimeout
+ * @todo Vertically center content in page
+ */
 .home__block {
-  display: none;
-  opacity: 0;
-}
-
-.home__block--big {
-  display: none;
-  opacity: 0;
-  font-size: 3rem;
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: 2px;
   margin-bottom: .75rem;
+  opacity: 1;
+  transition: opacity ease-in 1s;
 
   &:nth-of-type(2) {
     margin-bottom: 2.5rem;
   }
 }
 
-.home__block--one {
-  margin-bottom: .75rem;
+.home__big {
+  font-size: 3rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 2px;
+
+  @media (--largeViewport) {
+    display: block;
+  }
 }
 
-.home__block--two {
-  margin-bottom: 2.5rem;
-}
-
-:global(.home__block--active) {
-  display: block;
-  opacity: 1;
-  animation: fadeIn 1s linear;
-  animation-iteration-count: 1;
-}
-
-@keyframes fadeIn {
-  0% {
+.home__mobilespacer {
+  @media (--largeViewport) {
     display: none;
-    opacity: 0;
   }
-  1% {
-    display: block;
-    opacity: 0;
-  }
-  100% {
-    display: block;
-    opacity: 1;
-  }
+}
+
+.home__transparent {
+  opacity: 0;
 }

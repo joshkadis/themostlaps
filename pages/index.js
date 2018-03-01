@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import Layout from '../components/Layout';
-import Button from '../components/lib/Button';
 import { LapPath } from '../components/lib/svg';
 import { getPathnameFromContext, APIRequest } from '../utils';
-import { triggerModalOpen } from '../utils/modal';
 import * as styles from '../components/Layout.css';
+import HomePrimary from '../components/home/HomePrimary';
 
 const delay = {
   startup: 1000,
@@ -33,33 +33,36 @@ function unhideChildElements(id, useDelay = true) {
     });
 }
 
-function playAnimation() {
-  if (typeof document === 'undefined') {
+/**
+ * Insert animated text into DOM after page load
+ *
+ * @param {DOMElement} container
+ */
+function playAnimation(container = null) {
+  if (typeof window === 'undefined' || !container) {
     return;
   }
 
+  container.innerHtml = '';
+
   // Unhide first set of elements
   setTimeout(() => {
-    unhideChildElements('home-primary');
+    ReactDOM.render(<HomePrimary />, container);
   }, delay.startup);
 
-  // Unhide second set of elements
-  const secondaryDelay = delay.startup + delay.three + delay.transition + delay.interstitial;
-  setTimeout(() => {
-    document.getElementById('home-primary').style.display = 'none';
-    unhideChildElements('home-secondary');
-  }, secondaryDelay)
 }
 
 class Index extends Component {
   componentDidMount() {
-    console.log('MOUNTED');
-    playAnimation();
+    if (this.animateContainer) {
+      playAnimation(this.animateContainer);
+    }
   }
 
   componentDidUpdate() {
-    console.log('UPDATED');
-    playAnimation();
+    if (this.animateContainer) {
+      playAnimation(this.animateContainer);
+    }
   }
 
   render() {
@@ -70,83 +73,16 @@ class Index extends Component {
         query={query}
         style={{ textAlign: 'center' }}
       >
-        <div className={styles['home__background']}>
+        <div
+          className={classNames(
+            styles['home__background']
+          )}
+        >
           <LapPath className={styles['home__background--svg']} />
         </div>
-
-        <div style={{display:'none'}} id="home-primary">
-          <p
-            data-animated="one"
-            className={classNames(
-              styles['home__block--big'],
-              styles['home__block--one'],
-            )}
-          >
-            Who has the KOM
-          </p>
-          <p
-            data-animated="two"
-            className={classNames(
-              styles['home__block--big'],
-              styles['home__block--two'],
-            )}
-            >
-            for Prospect Park?
-          </p>
-          <p
-            data-animated="three"
-            className={classNames(
-              'bigger',
-              styles.home__block,
-            )}
-          >
-            Who cares.
-          </p>
-        </div>
-        <div style={{display:'none'}} id="home-secondary">
-          <p
-            data-animated="one"
-            className={classNames(
-              styles['home__block--big'],
-            )}
-          >
-            How many laps
-          </p>
-          <p
-            data-animated="two"
-            className={classNames(
-              styles['home__block--big'],
-            )}
-            >
-            have you ridden?
-          </p>
-          <p
-            data-animated="three"
-            className={classNames(
-              'bigger',
-              styles.home__block,
-            )}
-          >
-            Good question.
-          </p>
-          <p
-            data-animated="four"
-            className={classNames(
-              styles.home__block,
-            )}
-          >
-            <Button
-              onClick={triggerModalOpen}
-              style={{
-                fontSize: '2rem',
-                padding: '1.4rem',
-                letterSpacing: '1px',
-              }}
-            >
-              Find Out Now
-            </Button>
-          </p>
-        </div>
+        <div
+          ref={(el) => this.animateContainer = el}
+        />
       </Layout>
     );
   }
