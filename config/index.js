@@ -35,5 +35,6 @@ module.exports = {
     success: '🎉 You\'re all set! 🎉',
     signup: '🚴 Let\'s get started ! 🚴',
   },
+  locale: 'en-US',
 };
 

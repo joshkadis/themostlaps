@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import { locale } from '../config';
 import * as styles from './Layout.css';
 
 const RankingRow = ({
@@ -21,7 +22,7 @@ const RankingRow = ({
       <img className={styles['ranking-row__avatar']} src={img} />
       <span className={styles['ranking-row__name']}>{firstname}&nbsp;{lastname}</span>
     </td>
-    <td>{value} lap{value === 1 ? '' : 's'}</td>
+    <td>{value.toLocaleString(locale)} lap{value === 1 ? '' : 's'}</td>
   </tr>
 );
 
