@@ -1,5 +1,22 @@
 @import '../styles/vars';
 
+.home__background {
+  position: absolute;
+  top: 5%;
+  right: 5%;
+  bottom: 5%;
+  left: 5%;
+}
+
+.home__background--svg {
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
 .home__block {
   display: none;
   opacity: 0;

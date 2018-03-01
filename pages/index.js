@@ -70,7 +70,11 @@ class Index extends Component {
         query={query}
         style={{ textAlign: 'center' }}
       >
-        <div id="home-primary">
+        <div className={styles['home__background']}>
+          <LapPath className={styles['home__background--svg']} />
+        </div>
+
+        <div style={{display:'none'}} id="home-primary">
           <p
             data-animated="one"
             className={classNames(
@@ -99,7 +103,7 @@ class Index extends Component {
             Who cares.
           </p>
         </div>
-        <div id="home-secondary">
+        <div style={{display:'none'}} id="home-secondary">
           <p
             data-animated="one"
             className={classNames(
