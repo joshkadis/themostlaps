@@ -3,6 +3,7 @@
 @import '../styles/vars';
 @import './RankingSelector.css';
 @import './RankingRow.css';
+@import '../pages/index.css';
 
 @media (--largeViewport) {
   :global(html),

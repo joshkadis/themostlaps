@@ -1,0 +1,21 @@
+@import '../styles/vars';
+
+.home__block,
+.home__block--big {
+  display: block;
+  margin-bottom: 2rem;
+  opacity: 1;
+  transition: opacity ease-in-out 1s;
+}
+
+.home__block--big {
+  font-size: 3rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 2px;
+}
+
+:global(.home__hide) {
+  opacity: 0;
+}
+
