@@ -139,6 +139,7 @@ class Layout extends Component {
             open: this.handleOpenModal,
             close: this.handleCloseModal,
           }}
+          modalIsOpen={this.state.modalIsOpen}
         />
         <div className={styles.main}>
           <div className={styles.mainContainer}>

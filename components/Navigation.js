@@ -50,7 +50,10 @@ class Navigation extends Component {
         onClickHandler={this.toggleNavLinksContainer}
       />
       <nav
-        className={classNames(styles.linksContainer, { [styles.hidden]: shouldShowNav() })}
+        className={classNames(
+          styles.linksContainer,
+          { [styles.hidden]: shouldShowNav() || this.props.modalIsOpen }
+        )}
         ref={(el) => { this.linksContainer = el; }}
         onClick={this.toggleNavLinksContainer}
       >
