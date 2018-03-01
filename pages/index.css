@@ -1,9 +1,16 @@
 @import '../styles/vars';
 
+:global(.home__hide) {
+  opacity: 0 !important;
+}
+
+:global(.home__display-none) {
+  display: none;
+}
+
 .home__block,
 .home__block--big {
   display: block;
-  margin-bottom: 2rem;
   opacity: 1;
   transition: opacity ease-in-out 1s;
 }
@@ -15,7 +22,16 @@
   letter-spacing: 2px;
 }
 
-:global(.home__hide) {
-  opacity: 0;
+.home__one {
+  transition-delay: 0s;
+  margin-bottom: .75rem;
 }
 
+.home__two {
+  transition-delay: 1s;
+  margin-bottom: 2.5rem;
+}
+
+.home__three {
+  transition-delay: 3.5s;
+}
