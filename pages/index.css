@@ -1,37 +1,50 @@
 @import '../styles/vars';
 
-:global(.home__hide) {
-  opacity: 0 !important;
-}
-
-:global(.home__display-none) {
+.home__block {
   display: none;
-}
-
-.home__block,
-.home__block--big {
-  display: block;
-  opacity: 1;
-  transition: opacity ease-in-out 1s;
+  opacity: 0;
 }
 
 .home__block--big {
+  display: none;
+  opacity: 0;
   font-size: 3rem;
   font-weight: 700;
   line-height: 1;
   letter-spacing: 2px;
+  margin-bottom: .75rem;
+
+  &:nth-of-type(2) {
+    margin-bottom: 2.5rem;
+  }
 }
 
-.home__one {
-  transition-delay: 0s;
+.home__block--one {
   margin-bottom: .75rem;
 }
 
-.home__two {
-  transition-delay: 1s;
+.home__block--two {
   margin-bottom: 2.5rem;
 }
 
-.home__three {
-  transition-delay: 3.5s;
+:global(.home__block--active) {
+  display: block;
+  opacity: 1;
+  animation: fadeIn 1s linear;
+  animation-iteration-count: 1;
+}
+
+@keyframes fadeIn {
+  0% {
+    display: none;
+    opacity: 0;
+  }
+  1% {
+    display: block;
+    opacity: 0;
+  }
+  100% {
+    display: block;
+    opacity: 1;
+  }
 }

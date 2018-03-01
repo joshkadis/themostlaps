@@ -8,12 +8,13 @@ import { triggerModalOpen } from '../utils/modal';
 import * as styles from '../components/Layout.css';
 
 const delay = {
-  startup: 500,
-  transition: 1000,
+  startup: 1000,
+  transition: 1000, // must match animation-duration in index.css
   one: 0,
   two: 1000,
-  three: 3500,
-  interstitial: 3000,
+  three: 3000,
+  four: 4500,
+  interstitial: 2200,
 };
 
 function unhideChildElements(id) {
@@ -21,8 +22,12 @@ function unhideChildElements(id) {
     return;
   }
   document
-    .querySelectorAll(`#${id} .home__hide`)
-    .forEach((el) => el.classList.remove('home__hide'));
+    .querySelectorAll(`#${id} [data-animated]`)
+    .forEach((el) => {
+      setTimeout(() => {
+        el.classList.add('home__block--active');
+      }, delay[el.getAttribute('data-animated') || 0])
+    });
 }
 
 function playAnimation() {
@@ -38,15 +43,9 @@ function playAnimation() {
   // Unhide second set of elements
   const secondaryDelay = delay.startup + delay.three + delay.transition + delay.interstitial;
   setTimeout(() => {
-    document.getElementById('home-primary')
-      .classList.add('home__display-none');
-
-    document.getElementById('home-secondary')
-      .classList.remove('home__display-none');
-
-    setTimeout(() => unhideChildElements('home-secondary'), 0);
+    document.getElementById('home-primary').style.display = 'none';
+    unhideChildElements('home-secondary');
   }, secondaryDelay)
-
 }
 
 class Index extends Component {
@@ -59,6 +58,7 @@ class Index extends Component {
     console.log('UPDATED');
     playAnimation();
   }
+
   render() {
     const { pathname, query, siteTotals } = this.props;
     return (
@@ -68,53 +68,64 @@ class Index extends Component {
         style={{ textAlign: 'center' }}
       >
         <div id="home-primary">
-          <span className={classNames(
-            'home__hide',
-            styles['home__block--big'],
-            styles.home__one
-          )}>
-            Who has the KOM
-          </span>
-          <span className={classNames(
-            'home__hide',
-            styles['home__block--big'],
-            styles.home__two
-          )}>
-            for Prospect Park?
-          </span>
-          <span className={classNames(
-            'home__hide',
-            'bigger',
-            styles.home__block,
-            styles.home__three
-          )}>
-            Who cares.
-          </span>
-        </div>
-
-        <div
-          id="home-secondary"
-          className="home__display-none"
-        >
-          <span className={classNames(
-            'home__hide',
-            styles['home__block--big'],
-            styles.home__one
-          )}>
-            How many laps
-          </span>
-          <span className={classNames(
-            'home__hide',
-            styles['home__block--big'],
-            styles.home__two
-          )}>
-            have you ridden?
-          </span>
-          <span
+          <p
+            data-animated="one"
             className={classNames(
-              'home__hide',
+              styles['home__block--big'],
+              styles['home__block--one'],
+            )}
+          >
+            Who has the KOM
+          </p>
+          <p
+            data-animated="two"
+            className={classNames(
+              styles['home__block--big'],
+              styles['home__block--two'],
+            )}
+            >
+            for Prospect Park?
+          </p>
+          <p
+            data-animated="three"
+            className={classNames(
+              'bigger',
               styles.home__block,
-              styles.home__three
+            )}
+          >
+            Who cares.
+          </p>
+        </div>
+        <div id="home-secondary">
+          <p
+            data-animated="one"
+            className={classNames(
+              styles['home__block--big'],
+            )}
+          >
+            How many laps
+          </p>
+          <p
+            data-animated="two"
+            className={classNames(
+              styles['home__block--big'],
+            )}
+            >
+            have you ridden?
+          </p>
+          <p
+            data-animated="three"
+            className={classNames(
+              'bigger',
+              styles.home__block,
+            )}
+          >
+            Good question.
+          </p>
+          <p
+            data-animated="four"
+            className={classNames(
+              styles.home__block,
             )}
           >
             <Button
@@ -127,7 +138,7 @@ class Index extends Component {
             >
               Find Out Now
             </Button>
-          </span>
+          </p>
         </div>
       </Layout>
     );
