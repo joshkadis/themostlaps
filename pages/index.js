@@ -6,7 +6,7 @@ import Layout from '../components/Layout';
 import { LapPath } from '../components/lib/svg';
 import { getPathnameFromContext, APIRequest } from '../utils';
 import * as styles from '../components/Layout.css';
-import HomePrimary from '../components/home/HomePrimary';
+import HomeContent from '../components/HomeContent';
 
 const delays = {
   startup: 1000,
@@ -74,7 +74,7 @@ class Index extends Component {
         <div
           ref={(el) => this.contentContainer = el}
         >
-          <HomePrimary
+          <HomeContent
             delays={delays}
             contentMode={this.state.contentMode}
             isVisible={this.state.shouldShowContent}

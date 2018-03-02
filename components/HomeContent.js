@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import * as styles from '../Layout.css';
-import homeContent from '../../config/homeContent';
-import { triggerModalOpen } from '../../utils/modal';
-import Button from '../lib/Button';
+import * as styles from './Layout.css';
+import homeContent from '../config/homeContent';
+import { triggerModalOpen } from '../utils/modal';
+import Button from './lib/Button';
 
 class HomePrimary extends Component {
   constructor(props) {
