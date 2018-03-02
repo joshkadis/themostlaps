@@ -4,9 +4,9 @@
   "description": "Who rides the most laps of Prospect Park?",
   "main": "index.js",
   "scripts": {
-    "start": "node cssLoaderOptionsHack.js && NODE_ENV=production node server.js",
+    "start": "NODE_ENV=production node server.js",
     "dev": "node cssLoaderOptionsHack.js && NODE_ENV=development node --inspect server.js",
-    "build": "next build",
+    "build": "node cssLoaderOptionsHack.js && next build",
     "heroku-postbuild": "npm run build",
     "test": "jest"
   },
