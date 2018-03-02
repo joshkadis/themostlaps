@@ -96,12 +96,8 @@ class HomePrimary extends Component {
             )}
           >
             <Button
+              className={styles.home__button}
               onClick={triggerModalOpen}
-              style={{
-                fontSize: '2rem',
-                padding: '1.4rem',
-                letterSpacing: '1px',
-              }}
             >
               Get Your Stats
             </Button>
