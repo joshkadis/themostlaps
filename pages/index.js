@@ -67,9 +67,8 @@ class Index extends Component {
           className={classNames(
             styles['home__background']
           )}
-        >
-          <LapPath className={styles['home__background--svg']} />
-        </div>
+          dangerouslySetInnerHTML={{ __html: LapPath('home__background--svg') }}
+        />
 
         <div
           ref={(el) => this.contentContainer = el}

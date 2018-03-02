@@ -10,7 +10,7 @@
   opacity: .25;
 }
 
-.home__background--svg {
+:global(.home__background--svg) {
   height: 100%;
   width: auto;
   max-width: 100%;
@@ -18,9 +18,9 @@
   left: 50%;
   transform: translateX(-50%);
 }
+
 /**
  * @todo Use keyframe animate to avoid setTimeout
- * @todo Vertically center content in page
  */
 .home__block {
   opacity: 1;
