@@ -142,7 +142,7 @@ class Layout extends Component {
           modalIsOpen={this.state.modalIsOpen}
         />
         <div className={styles.main}>
-          <div className={styles.mainContainer}>
+          <div className={ '/' !== this.props.pathname ? styles.mainContainer : null}>
             {this.props.children}
           </div>
         </div>

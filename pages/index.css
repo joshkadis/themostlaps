@@ -23,12 +23,15 @@
  * @todo Vertically center content in page
  */
 .home__block {
-  margin-bottom: .75rem;
   opacity: 1;
   transition: opacity ease-in 1s;
 
-  &:nth-of-type(2) {
-    margin-bottom: 2.5rem;
+  @media (--largeViewport) {
+    margin-bottom: .75rem;
+
+    &:nth-of-type(2) {
+      margin-bottom: 2.5rem;
+    }
   }
 }
 
@@ -44,8 +47,24 @@
 }
 
 .home__mobilespacer {
+  &::before {
+    content: '\00A0';
+  }
+
   @media (--largeViewport) {
     display: none;
+  }
+}
+
+.home__inner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+
+  & > :global(p:first-of-type) {
+    margin-bottom: 2.5rem;
   }
 }
 

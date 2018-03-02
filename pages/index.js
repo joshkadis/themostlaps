@@ -8,29 +8,28 @@ import { getPathnameFromContext, APIRequest } from '../utils';
 import * as styles from '../components/Layout.css';
 import HomePrimary from '../components/home/HomePrimary';
 
-const delay = {
+const delays = {
   startup: 1000,
+  initTransition: 50,
   transition: 1000, // must match animation-duration in index.css
   one: 0,
-  two: 1000,
-  three: 3000,
+  two: 1500,
+  three: 3500,
   four: 4500,
-  interstitial: 2200,
+  interstitial: 2500,
 };
 
-function unhideChildElements(id, useDelay = true) {
-  if (typeof document === 'undefined') {
-    return;
-  }
-  document
-    .querySelectorAll(`#${id} [data-animated]`)
-    .forEach((el) => {
-      const attr = el.getAttribute('data-animated');
-      const elDelay = (useDelay && attr && delay[attr]) ? delay[attr] : 0;
-      setTimeout(() => {
-        el.classList.add('home__block--active');
-      }, elDelay)
-    });
+/**
+ * Get total time in ms between rendering first set of content
+ * and start of rendering second set of content
+ */
+function getSecondaryDelay({
+  initTransition,
+  three,
+  transition,
+  interstitial,
+}) {
+  return initTransition + three + transition + interstitial;
 }
 
 /**
@@ -47,8 +46,11 @@ function playAnimation(container = null) {
 
   // Unhide first set of elements
   setTimeout(() => {
-    ReactDOM.render(<HomePrimary />, container);
-  }, delay.startup);
+    ReactDOM.render(<HomePrimary delays={delays} />, container);
+    setTimeout(() => {
+      ReactDOM.render(null, container);
+    }, getSecondaryDelay(delays));
+  }, delays.startup);
 
 }
 
@@ -80,6 +82,7 @@ class Index extends Component {
         >
           <LapPath className={styles['home__background--svg']} />
         </div>
+
         <div
           ref={(el) => this.animateContainer = el}
         />

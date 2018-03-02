@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import * as styles from '../Layout.css';
 
@@ -9,19 +10,22 @@ class HomePrimary extends Component {
         this.container
           .querySelectorAll(`.${styles.home__transparent}`)
           .forEach((el) => el.classList.remove(styles.home__transparent));
-        }, 100);
+        }, this.props.delays.initTransition);
     }
   }
 
   render() {
+    const { one, two, three } = this.props.delays;
     return (
       <div
+        className={styles.home__inner}
         id="home-primary"
         ref={(el) => this.container = el}
       >
         <p>
           <span
             data-step="one"
+            style={{ transitionDelay: `${one}ms` }}
             className={classNames(
               styles.home__block,
               styles.home__big,
@@ -36,9 +40,10 @@ class HomePrimary extends Component {
               styles.home__mobilespacer,
               styles.home__transparent,
             )}
-          >&nbsp;</span>
+          ></span>
           <span
             data-step="two"
+            style={{ transitionDelay: `${two}ms` }}
             className={classNames(
               styles.home__block,
               styles.home__big,
@@ -50,7 +55,7 @@ class HomePrimary extends Component {
         </p>
         <p
           data-step="three"
-          style={{ transitionDelay: '2s' }} /* @todo Use delay from config here */
+          style={{ transitionDelay: `${three}ms` }}
           className={classNames(
             'bigger',
             styles.home__block,
@@ -63,5 +68,9 @@ class HomePrimary extends Component {
     );
   }
 }
+
+HomePrimary.propTypes = {
+  delays: PropTypes.object.isRequired,
+};
 
 export default HomePrimary;
