@@ -6,7 +6,7 @@ module.exports = {
   },
   secondary: {
     one: 'How many laps',
-    two: 'do you ride?',
-    three: 'Now we\'re talking.',
+    two: 'have you ridden?',
+    three: 'The Most Laps tracks your laps automatically. For Brooklyn\'s real bragging rights.',
   },
 };

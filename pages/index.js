@@ -20,35 +20,39 @@ const delays = {
 };
 
 /**
- * Get total time in ms between rendering first set of content
- * and start of rendering second set of content
+ * Get total delay time as sum of list of keys from delays object
  */
-function getSecondaryDelay({
-  initTransition,
-  three,
-  transition,
-  interstitial,
-}) {
-  return initTransition + three + transition + interstitial;
+function getDelay(...args) {
+  return args.reduce((acc, key) => (acc + (delays[key] || 0)), 0);
 }
 
 class Index extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      content: 'primary',
+      contentMode: 'primary',
+      shouldShowContent: false,
     };
   }
 
   componentDidMount() {
+    // Fade in primary content
     setTimeout(() => {
-      if (this.contentContainer) {
-        this.contentContainer.innerHtml = '';
-      }
+      this.setState({ shouldShowContent: true });
+    }, delays.startup)
+
+    // Fade out primary content
+    setTimeout(() => {
+      this.setState({ shouldShowContent: false });
+
+      // Fade in second content
       setTimeout(() => {
-        this.setState({ content: 'secondary' });
-      }, 0);
-    }, getSecondaryDelay(delays));
+        this.setState({
+          contentMode: 'secondary',
+          shouldShowContent: true,
+        });
+      }, getDelay('transition', 'startup', 'initTransition'))
+    }, getDelay('initTransition', 'three', 'transition', 'interstitial'))
   }
 
   render() {
@@ -70,7 +74,11 @@ class Index extends Component {
         <div
           ref={(el) => this.contentContainer = el}
         >
-          <HomePrimary delays={delays} content={this.state.content} />
+          <HomePrimary
+            delays={delays}
+            contentMode={this.state.contentMode}
+            isVisible={this.state.shouldShowContent}
+          />
         </div>
       </Layout>
     );

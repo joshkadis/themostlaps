@@ -3,33 +3,41 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import * as styles from '../Layout.css';
 import homeContent from '../../config/homeContent';
+import { triggerModalOpen } from '../../utils/modal';
+import Button from '../lib/Button';
 
 class HomePrimary extends Component {
   constructor(props) {
     super(props);
-    this.reveal = this.reveal.bind(this);
+    this.fade = this.fade.bind(this);
   }
 
   componentDidMount() {
-    this.reveal();
+    this.fade();
   }
 
   componentDidUpdate() {
-    this.reveal();
+    this.fade();
   }
 
-  reveal() {
+  fade() {
     if ('undefined' !== typeof document && this.container) {
       setTimeout(() => {
         this.container
-          .querySelectorAll(`.${styles.home__transparent}`)
-          .forEach((el) => el.classList.remove(styles.home__transparent));
+          .querySelectorAll('[data-toggleopacity]')
+          .forEach((el) => {
+            if (this.props.isVisible) {
+              el.classList.remove(styles.home__transparent);
+            } else {
+              el.classList.add(styles.home__transparent);
+            }
+          });
         }, this.props.delays.initTransition);
     }
   }
 
   render() {
-    const { one, two, three } = this.props.delays;
+    const { one, two, three, four } = this.props.delays;
     return (
       <div
         className={styles.home__inner}
@@ -38,15 +46,15 @@ class HomePrimary extends Component {
       >
         <p>
           <span
-            data-step="one"
-            style={{ transitionDelay: `${one}ms` }}
+            data-toggleopacity
+            style={this.props.isVisible ? { transitionDelay: `${one}ms` } : null}
             className={classNames(
               styles.home__block,
               styles.home__big,
               styles.home__transparent,
             )}
           >
-            {homeContent[this.props.content].one}
+            {homeContent[this.props.contentMode].one}
           </span>
           <span
             className={classNames(
@@ -56,28 +64,49 @@ class HomePrimary extends Component {
             )}
           ></span>
           <span
-            data-step="two"
-            style={{ transitionDelay: `${two}ms` }}
+            data-toggleopacity
+            style={this.props.isVisible ? { transitionDelay: `${two}ms` } : null}
             className={classNames(
               styles.home__block,
               styles.home__big,
               styles.home__transparent,
             )}
             >
-            {homeContent[this.props.content].two}
+            {homeContent[this.props.contentMode].two}
           </span>
         </p>
         <p
-          data-step="three"
-          style={{ transitionDelay: `${three}ms` }}
+          data-toggleopacity
+          style={this.props.isVisible ? { transitionDelay: `${three}ms` } : null}
           className={classNames(
             'bigger',
             styles.home__block,
             styles.home__transparent,
           )}
         >
-          {homeContent[this.props.content].three}
+          {homeContent[this.props.contentMode].three}
         </p>
+        {this.props.contentMode === 'secondary' &&
+          <div
+            data-toggleopacity
+            style={this.props.isVisible ? { transitionDelay: `${four}ms` } : null}
+            className={classNames(
+              styles.home__block,
+              styles.home__transparent,
+            )}
+          >
+            <Button
+              onClick={triggerModalOpen}
+              style={{
+                fontSize: '2rem',
+                padding: '1.4rem',
+                letterSpacing: '1px',
+              }}
+            >
+              Get Your Stats
+            </Button>
+          </div>
+        }
       </div>
     );
   }
@@ -85,7 +114,8 @@ class HomePrimary extends Component {
 
 HomePrimary.propTypes = {
   delays: PropTypes.object.isRequired,
-  content: PropTypes.string.isRequired,
+  contentMode: PropTypes.string.isRequired,
+  isVisible: PropTypes.bool.isRequired,
 };
 
 export default HomePrimary;
