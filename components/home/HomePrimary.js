@@ -2,9 +2,23 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import * as styles from '../Layout.css';
+import homeContent from '../../config/homeContent';
 
 class HomePrimary extends Component {
+  constructor(props) {
+    super(props);
+    this.reveal = this.reveal.bind(this);
+  }
+
   componentDidMount() {
+    this.reveal();
+  }
+
+  componentDidUpdate() {
+    this.reveal();
+  }
+
+  reveal() {
     if ('undefined' !== typeof document && this.container) {
       setTimeout(() => {
         this.container
@@ -32,7 +46,7 @@ class HomePrimary extends Component {
               styles.home__transparent,
             )}
           >
-            Who has the KOM
+            {homeContent[this.props.content].one}
           </span>
           <span
             className={classNames(
@@ -50,7 +64,7 @@ class HomePrimary extends Component {
               styles.home__transparent,
             )}
             >
-            for Prospect Park?
+            {homeContent[this.props.content].two}
           </span>
         </p>
         <p
@@ -62,7 +76,7 @@ class HomePrimary extends Component {
             styles.home__transparent,
           )}
         >
-          Who cares.
+          {homeContent[this.props.content].three}
         </p>
       </div>
     );
@@ -71,6 +85,7 @@ class HomePrimary extends Component {
 
 HomePrimary.propTypes = {
   delays: PropTypes.object.isRequired,
+  content: PropTypes.string.isRequired,
 };
 
 export default HomePrimary;

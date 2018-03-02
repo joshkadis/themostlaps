@@ -32,39 +32,23 @@ function getSecondaryDelay({
   return initTransition + three + transition + interstitial;
 }
 
-/**
- * Insert animated text into DOM after page load
- *
- * @param {DOMElement} container
- */
-function playAnimation(container = null) {
-  if (typeof window === 'undefined' || !container) {
-    return;
-  }
-
-  container.innerHtml = '';
-
-  // Unhide first set of elements
-  setTimeout(() => {
-    ReactDOM.render(<HomePrimary delays={delays} />, container);
-    setTimeout(() => {
-      ReactDOM.render(null, container);
-    }, getSecondaryDelay(delays));
-  }, delays.startup);
-
-}
-
 class Index extends Component {
-  componentDidMount() {
-    if (this.animateContainer) {
-      playAnimation(this.animateContainer);
-    }
+  constructor(props) {
+    super(props);
+    this.state = {
+      content: 'primary',
+    };
   }
 
-  componentDidUpdate() {
-    if (this.animateContainer) {
-      playAnimation(this.animateContainer);
-    }
+  componentDidMount() {
+    setTimeout(() => {
+      if (this.contentContainer) {
+        this.contentContainer.innerHtml = '';
+      }
+      setTimeout(() => {
+        this.setState({ content: 'secondary' });
+      }, 0);
+    }, getSecondaryDelay(delays));
   }
 
   render() {
@@ -84,8 +68,10 @@ class Index extends Component {
         </div>
 
         <div
-          ref={(el) => this.animateContainer = el}
-        />
+          ref={(el) => this.contentContainer = el}
+        >
+          <HomePrimary delays={delays} content={this.state.content} />
+        </div>
       </Layout>
     );
   }
