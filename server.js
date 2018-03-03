@@ -10,6 +10,7 @@ const subscribeToMailingList = require('./utils/subscribeToMailingList');
 const onAuthCallback = require('./server/onAuthCallback');
 const initAPIRoutes = require('./api/initAPIRoutes');
 const getRankingParams = require('./utils/getRankingParams');
+const { slackError } = require('./utils/slackNotification');
 
 // Next.js setup
 const app = next({ dev: process.env.NODE_ENV !== 'production' });
@@ -31,7 +32,12 @@ app.prepare()
         redirectQuery = {
           autherror: authResult.error || 99
         };
-        console.log(`Auth error ${authResult.error}: ${authResult.errorMsg || 'unknown error'}`);
+        console.log(authResult);
+        const errorInfo = authResult.athlete && authResult.athlete.id ?
+          `Athlete id ${authResult.athlete.id}, ${authResult.athlete.email || 'email unknown'}` :
+          false;
+
+        slackError(authResult.error, errorInfo);
       } else {
         redirectQuery = {
           authsuccess: 'true',

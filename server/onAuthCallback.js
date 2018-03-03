@@ -52,11 +52,12 @@ function getErrorResponseObject(code, errData = null, athlete = false) {
  */
 async function onAuthCallback(req, res) {
   if (req.query.error) {
+    console.log(req.query);
     return getErrorResponseObject(10, req.query.error);
   }
 
   // Authenticate
-  let athlete;
+  let athlete = null;
   try {
     const response = await fetch('https://www.strava.com/oauth/token', {
       method: 'POST',
@@ -85,9 +86,8 @@ async function onAuthCallback(req, res) {
     athleteDoc = await createAthlete(athlete);
     console.log(`Saved ${athleteDoc.get('_id')} to database`);
   } catch (err) {
-    console.log(err);
     const errCode = -1 !== err.message.indexOf('duplicate key') ? 50 : 80;
-    return getErrorResponseObject(errCode);
+    return getErrorResponseObject(errCode, null, athlete.athlete || false);
   }
 
   // Fetch athlete history
