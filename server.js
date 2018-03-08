@@ -41,9 +41,7 @@ app.prepare()
       } else {
         redirectQuery = {
           authsuccess: 'true',
-          id: authResult.athlete.id,
           firstname: authResult.athlete.firstname,
-          email: authResult.athlete.email,
           allTime: authResult.athlete.allTime,
         };
       }

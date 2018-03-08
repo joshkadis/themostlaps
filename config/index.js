@@ -33,15 +33,14 @@ module.exports = {
   modalTitles: {
     error: '😞 We\'re sorry. 😞',
     success: '🎉 You\'re all set! 🎉',
+    successWithLaps: '🎉 ${allTime} laps! 🎉',
     signup: '🚴 Let\'s get started ! 🚴',
   },
   locale: 'en-US',
   modalQueryParams: [
     'autherror',
     'authsuccess',
-    'id',
     'firstname',
-    'email',
     'allTime',
   ],
 };

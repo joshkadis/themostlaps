@@ -14,7 +14,7 @@ import ModalContents from './ModalContents';
 import Signup from './modal/Signup';
 import AuthSuccess from './modal/AuthSuccess';
 import AuthError from './modal/AuthError';
-import { modalTitles } from '../config';
+import { modalTitles, locale } from '../config';
 
 /**
  * Page layout
@@ -93,12 +93,18 @@ class Layout extends Component {
   }
 
   getModalTitle(props) {
+    const allTime = props.query && props.query.allTime && !isNaN(props.query.allTime) ?
+      parseInt(props.query.allTime, 10).toLocaleString(locale) :
+      null;
+
     switch(this.getModalStateFromProps(props)) {
       case 'error':
         return modalTitles.error;
 
       case 'success':
-        return modalTitles.success;
+        return allTime ?
+          modalTitles.successWithLaps.replace('${allTime}', allTime) :
+          modalTitles.success;
 
       case 'signup':
       default:
@@ -114,7 +120,6 @@ class Layout extends Component {
 
       case 'success':
         return <AuthSuccess
-          id={parseInt(props.query.id, 10)}
           firstname={props.query.firstname}
           allTime={parseInt(props.query.allTime, 10)}
         />
