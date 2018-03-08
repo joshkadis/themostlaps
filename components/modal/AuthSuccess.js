@@ -6,7 +6,7 @@ import * as styles from './AuthSuccess.css';
 
 const AuthSuccess = ({ firstname, allTime }) => (
   <div style={{ textAlign: 'left' }}>
-    <p>Keep adding your rides to Strava and we'll update your stats automatically.</p>
+    <p><em>Keep adding your rides to Strava and we'll update your stats automatically.</em></p>
     <p>If you're looking for something to do next (other than riding laps),
       &nbsp;<Link href="/ranking"><a>check out the all-time rankings</a></Link>&nbsp;
       or tell your friends about The Most Laps:
