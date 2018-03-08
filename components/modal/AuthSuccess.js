@@ -1,6 +1,8 @@
 import PropTypes from 'prop-types';
 import Link from 'next/link';
 import TweetButton from '../lib/TweetButton';
+import FBShareButton from '../lib/FBShareButton';
+import * as styles from './AuthSuccess.css';
 
 const AuthSuccess = ({ firstname, allTime }) => (
   <div style={{ textAlign: 'left' }}>
@@ -9,8 +11,9 @@ const AuthSuccess = ({ firstname, allTime }) => (
       &nbsp;<Link href="/ranking"><a>check out the all-time rankings</a></Link>&nbsp;
       or tell your friends about The Most Laps:
     </p>
-    <p>
+    <p className={styles.shareLinks}>
       <TweetButton laps={allTime} />
+      <FBShareButton />
     </p>
     <p>PS - Thanks for signing up, {firstname}. We really appreciate it!</p>
   </div>
