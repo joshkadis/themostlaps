@@ -36,5 +36,13 @@ module.exports = {
     signup: '🚴 Let\'s get started ! 🚴',
   },
   locale: 'en-US',
+  modalQueryParams: [
+    'autherror',
+    'authsuccess',
+    'id',
+    'firstname',
+    'email',
+    'allTime',
+  ],
 };
 

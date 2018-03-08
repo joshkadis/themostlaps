@@ -1,6 +1,8 @@
 const fetch = require('isomorphic-unfetch');
 const { stringify } = require('query-string');
 const { getEnvOrigin } = require('./envUtils');
+const { modalQueryParams } = require('../config');
+
 /**
  * Get pathname without query string from Next.js context object
  * https://github.com/zeit/next.js/#fetching-data-and-component-lifecycle
@@ -50,8 +52,28 @@ function APIRequest(path = false, query = {}, defaultResult = {}) {
     });
 }
 
+/**
+ * Get "under the hood" Next path with query string from router object
+ * without modal-related query params
+ *
+ * @param {String} pathname
+ * @param {Object} query
+ * @return {String}
+ */
+function getPathWithQueryString({ pathname, query }) {
+  const pathQuery = Object.keys(query).reduce((acc, key) => {
+    if (modalQueryParams.indexOf(key) === -1) {
+      acc[key] = query[key];
+    }
+    return acc;
+  }, {});
+
+  return `${pathname}?${stringify(pathQuery)}`;
+}
+
 module.exports = {
   getPathnameFromContext,
   getTimestampFromISO,
   APIRequest,
+  getPathWithQueryString,
 };
