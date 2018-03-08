@@ -15,6 +15,7 @@ import Signup from './modal/Signup';
 import AuthSuccess from './modal/AuthSuccess';
 import AuthError from './modal/AuthError';
 import { modalTitles, locale } from '../config';
+import { getDocumentTitle, getOgData } from '../utils/metaTags';
 
 /**
  * Page layout
@@ -145,6 +146,14 @@ class Layout extends Component {
           <meta charset="utf-8" />
           <meta http-equiv="x-ua-compatible" content="ie=edge" />
           <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no, maximum-scale=1" />
+          <title>{getDocumentTitle(this.props.pathname)}</title>
+          {getOgData().map((tag) =>
+            <meta
+              key={tag[0]}
+              property={`og:${tag[0]}`}
+              content={tag[1]}
+            />
+          )}
           <link href="https://fonts.googleapis.com/css?family=Arvo:400,700" rel="stylesheet" />
           <link rel="stylesheet" href="/static/css/react-select.css" />
           <link rel="stylesheet" href="/_next/static/style.css" />
