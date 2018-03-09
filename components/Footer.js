@@ -1,4 +1,5 @@
 import * as styles from './Footer.css';
+import GA from './GA';
 
 export default () => (
   <footer className={styles.footer}>
@@ -7,5 +8,6 @@ export default () => (
       className={styles.stravaCredit}
       src="/static/img/api_logo_pwrdBy_strava_horiz_white.png"
     />
+    <GA />
   </footer>
 );
