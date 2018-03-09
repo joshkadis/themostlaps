@@ -4,7 +4,7 @@ import classNames from 'classnames';
 import * as styles from './Layout.css';
 import { homeContent } from '../config/content';
 import { triggerModalOpen } from '../utils/modal';
-import { trackModalOpen } from '../utils/analytics';
+import { trackModalOpen, setDimensions } from '../utils/analytics';
 import Button from './lib/Button';
 
 class HomePrimary extends Component {
@@ -23,7 +23,8 @@ class HomePrimary extends Component {
 
   triggerModalOpen() {
     triggerModalOpen();
-    trackModalOpen('homepage');
+    setDimensions({ 'Signup Starting Point': 'homepage' });
+    trackModalOpen();
   }
 
   fade() {

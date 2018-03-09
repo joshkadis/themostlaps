@@ -7,6 +7,7 @@ import { lapSegmentId, breakpointPx, socialLinks } from '../config';
 import * as styles from './Navigation.css';
 import { MenuSvg, InstagramSvg, TwitterSvg } from './lib/svg';
 import { modalControlsShape } from '../utils/propTypes';
+import { trackModalOpen, setDimensions } from '../utils/analytics';
 
 /**
  * Determine if nav should be shown, isomorphically
@@ -25,6 +26,7 @@ class Navigation extends Component {
   constructor(props) {
     super(props);
     this.toggleNavLinksContainer = this.toggleNavLinksContainer.bind(this);
+    this.onClickButton = this.onClickButton.bind(this);
   }
 
   toggleNavLinksContainer(evt) {
@@ -33,6 +35,12 @@ class Navigation extends Component {
     }
 
     this.linksContainer.classList.toggle(styles.hidden);
+  }
+
+  onClickButton() {
+    this.props.modalControls.open();
+    setDimensions({ 'Signup Starting Point': 'nav' });
+    trackModalOpen();
   }
 
   componentDidMount() {
@@ -70,7 +78,7 @@ class Navigation extends Component {
           <InstagramSvg />
         </a>
         <Button
-          onClick={this.props.modalControls.open}
+          onClick={this.onClickButton}
         >
           Sign Up
         </Button>

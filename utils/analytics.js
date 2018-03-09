@@ -1,4 +1,5 @@
 const { getDocumentTitle } = require('./metaTags');
+const { customDimensions } = require('../config/analytics');
 
 /**
  * Check for window.ga to avoid server-side errors by accident
@@ -47,24 +48,40 @@ function trackEvent(...args) {
  *
  * @param {String} label
  */
-function trackModalOpen(label = '') {
-  trackEvent('signup', 'openModal', label);
+function trackModalOpen() {
+  trackEvent('signup', 'openModal');
 }
 
 /**
- * Set persistent custom dimensions from key-value strings or object
+ * Set persistent custom dimensions from key-value object with
+ * names like 'User Has Connected' instead of 'dimension1'
  *
- * @param {String|Object} key String of key or object of key-value pairs
- * @param {String} value Used as value only if key is a string
+ * @param {Object} namedDimensions
  */
-function setDimensions(key = false, value) {
-  if ('object' === typeof key) {
-    _ga('set', key);
-  } else if ('string' === typeof key && 'string' === typeof value) {
-    _ga('set', key, value);
-  }
+function setDimensions(namedDimensions) {
+  const dimensions = Object.keys(namedDimensions).reduce((acc, inputKey) => {
+    // Handle input already in 'dimension1' format
+    if (/dimension\d+/.test(inputKey)) {
+      acc[inputKey] = namedDimensions[inputKey].toString();
+    } else {
+      const dimensionKey = getDimensionKey(inputKey);
+      if (dimensionKey) {
+        acc[dimensionKey] = namedDimensions[inputKey].toString();
+      }
+    }
+    return acc;
+  }, {});
+  _ga('set', dimensions);
+  return dimensions; // for unit test
 }
 
+/**
+ * Get custom dimension key from name, e.g. 'User Has Connected' -> 'dimension1'
+ *
+ * @param {String} name
+ * @return {String|Bool}
+ */
+const getDimensionKey = (name) => (customDimensions[name] || false);
 
 module.exports = {
   trackPageview,
