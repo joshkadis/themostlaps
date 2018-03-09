@@ -9,6 +9,42 @@ const {
 } = require('../athleteStats');
 
 /**
+ * Get timestamp of athlete's most recently created activity (highest activity ID)
+ * or fall back to athlete document's last_updated
+ *
+ * @param {Document} athleteDoc
+ * @param {Boolean} verbose Defaults to false
+ * @return {Number} UTC *seconds*
+ */
+async function getFetchTimestampFromAthlete(athleteDoc, verbose = false) {
+  const logPrepend = 'Searching for activities since';
+  let ISOString = athleteDoc.get('last_updated');
+  try {
+    const lastActivity = await Activity.findOne(
+      { athlete_id: athleteDoc.get('_id') },
+      'start_date_local',
+      {
+        limit: 1,
+        sort: { '_id': -1 },
+      }
+    );
+
+    if (lastActivity) {
+      ISOString = lastActivity.get('start_date_local');
+      if (verbose) {
+        console.log(`${logPrepend} ${lastActivity.get('_id')} at ${ISOString}`);
+      }
+    } else if (verbose) {
+      console.log(`${logPrepend} athlete last_updated at ${ISOString}`);
+    }
+  } catch(err) {
+    console.log('Error fetching lastActivity');
+  }
+
+  return getTimestampFromISO(ISOString);
+}
+
+/**
  * Get athlete's laps since last_update and update their stats
  *
  * @param {Number|Document} athlete ID or Document
@@ -22,10 +58,12 @@ module.exports = async (athlete, after = false, verbose = false) => {
 
   console.log(`Fetching new activities for ${athleteDoc.get('athlete.firstname')} ${athleteDoc.get('athlete.lastname')} (${athleteDoc.get('_id')})`);
 
-  // Fetch activities since user document's last_updated
+  // Fetch activities
+  const fetchTimestamp = after || await getFetchTimestampFromAthlete(athleteDoc, verbose);
+
   const eligibleActivities = await fetchAthleteActivities(
     athleteDoc.get('access_token'),
-    after || getTimestampFromISO(athleteDoc.get('last_updated')),
+    fetchTimestamp,
     verbose
   );
 
