@@ -43,5 +43,9 @@ module.exports = {
     'firstname',
     'allTime',
   ],
+  socialLinks: {
+    twitter: 'https://twitter.com/themostlaps',
+    instagram: 'https://instagram.com/themostlaps',
+  },
 };
 

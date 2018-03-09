@@ -3,9 +3,9 @@ import PropTypes from 'prop-types';
 import Link from 'next/link';
 import classNames from 'classnames';
 import Button from './lib/Button';
-import { lapSegmentId, breakpointPx } from '../config';
+import { lapSegmentId, breakpointPx, socialLinks } from '../config';
 import * as styles from './Navigation.css';
-import { MenuSvg } from './lib/svg';
+import { MenuSvg, InstagramSvg, TwitterSvg } from './lib/svg';
 import { modalControlsShape } from '../utils/propTypes';
 
 /**
@@ -63,6 +63,12 @@ class Navigation extends Component {
         <Link href="/page?pageName=about" as="/about">
           <a className={styles.link}>About</a>
         </Link>
+        <a className={styles.link} href={socialLinks.twitter} target="_blank">
+          <TwitterSvg />
+        </a>
+        <a className={styles.link} href={socialLinks.instagram} target="_blank">
+          <InstagramSvg />
+        </a>
         <Button
           onClick={this.props.modalControls.open}
         >

@@ -8,8 +8,15 @@
   --fadeLink: {
     color: white;
     transition: color ease-in-out .3s;
+    & svg {
+      fill: white;
+      transition: fill ease-in-out .3s;
+    }
     &:hover {
       color: var(--purpleLight);
+      & svg {
+        fill: var(--purpleLight);
+      }
     }
   };
   --button: {
