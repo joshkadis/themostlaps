@@ -4,6 +4,7 @@ import classNames from 'classnames';
 import * as styles from './Layout.css';
 import { homeContent } from '../config/content';
 import { triggerModalOpen } from '../utils/modal';
+import { trackModalOpen } from '../utils/analytics';
 import Button from './lib/Button';
 
 class HomePrimary extends Component {
@@ -18,6 +19,11 @@ class HomePrimary extends Component {
 
   componentDidUpdate() {
     this.fade();
+  }
+
+  triggerModalOpen() {
+    triggerModalOpen();
+    trackModalOpen('homepage');
   }
 
   fade() {
@@ -97,7 +103,7 @@ class HomePrimary extends Component {
           >
             <Button
               className={styles.home__button}
-              onClick={triggerModalOpen}
+              onClick={this.triggerModalOpen}
             >
               Get Your Stats
             </Button>
