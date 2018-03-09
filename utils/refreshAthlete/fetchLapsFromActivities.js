@@ -6,9 +6,10 @@ const calculateLapsFromSegmentEfforts =
  * Get laps data object from an activity
  *
  * @param {Object} activity
+ * @param {Boolean} verbose Defaults to false
  * @return {Object|false}
  */
-function getActivityData(activity) {
+function getActivityData(activity, verbose = false) {
   const {
     id,
     start_date_local,
@@ -20,6 +21,9 @@ function getActivityData(activity) {
   } = activity;
 
   const laps = calculateLapsFromSegmentEfforts(segment_efforts);
+  if (verbose) {
+    console.log(`Activity ${id} has ${laps} laps`);
+  }
 
   if (!laps) {
     return false;
@@ -62,7 +66,7 @@ async function fetchActivityDetails(activityIds, token, idx = 0, allLaps, verbos
   });
   const activity = await response.json();
 
-  const activityLaps = getActivityData(activity);
+  const activityLaps = getActivityData(activity, verbose);
   if(activityLaps) {
     allLaps.push(activityLaps);
   }

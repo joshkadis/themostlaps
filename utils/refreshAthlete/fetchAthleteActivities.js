@@ -77,6 +77,7 @@ async function fetchAllAthleteActivities(
  * @param {Array} start_latlng
  * @param {Array} end_latlng
  * @param {Float} distance
+ * @param {Bool} verbose Defaults to false
  * @return {Bool}
  */
 async function activityIsEligible({
@@ -86,18 +87,52 @@ async function activityIsEligible({
   start_latlng = null,
   end_latlng = null,
   distance = 0,
-}) {
+}, verbose = false) {
+  if (verbose) {
+    console.log(`Checking activity ${id}`);
+  }
+
   const exists = await Activity.findById(id);
   if (exists) {
+    if (verbose) {
+      console.log(`Activity ${id} is already in the database.`);
+    }
     return false;
   }
 
   if (manual || trainer || distance < config.minDistance) {
+    if (verbose) {
+      let reason;
+      switch (true) {
+        case !!manual:
+          reason = 'a manual activity';
+          break;
+
+        case !!trainer:
+          reason = 'a trainer activity';
+          break;
+
+        case !!(distance < config.minDistance):
+          reason = 'less than the min distance';
+          break;
+
+        default:
+          reason = 'invalid';
+      }
+      console.log(`Activity ${id} is ${reason}.`);
+    }
     return false;
   }
 
-  return (start_latlng && distFromParkCenter(start_latlng) < config.allowedRadius) ||
+  const nearParkCenter =
+    (start_latlng && distFromParkCenter(start_latlng) < config.allowedRadius) ||
     (end_latlng && distFromParkCenter(end_latlng) < config.allowedRadius);
+
+  if (verbose && !nearParkCenter) {
+      console.log(`Activity ${id} is not near the park center.`);
+  }
+
+  return nearParkCenter;
 }
 
 /**
@@ -113,7 +148,7 @@ module.exports = async (token, afterTimestamp, verbose = false) => {
 
   const eligibleActivities = [];
   for (let i = 0; i < activities.length; i++) {
-    const isEligible = await activityIsEligible(activities[i]);
+    const isEligible = await activityIsEligible(activities[i], verbose);
     if (isEligible) {
       eligibleActivities.push(activities[i]);
     }

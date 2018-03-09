@@ -81,7 +81,7 @@ const argv = require('yargs')
    * Refresh a user for the last n days
    */
   .command(
-    'refresh user daysago',
+    'refresh user [daysago]',
     false,
     (yargs) => {
       yargs.positional('user', {
@@ -92,7 +92,6 @@ const argv = require('yargs')
       });
     },
     async ({ user, daysago }) => {
-      const after = daysAgoTimestamp(daysago);
       await doCommand(
         `Enter admin code to refresh user ${user}.`,
         async () => {
@@ -101,7 +100,11 @@ const argv = require('yargs')
             console.log(`User ${user} not found`)
             process.exit(0);
           }
-          await refreshAthlete(athleteDoc, after, true);
+          await refreshAthlete(
+            athleteDoc,
+            'undefined' !== typeof daysago ? daysAgoTimestamp(daysago) : false,
+            true
+          );
           process.exit(0);
         }
       );
