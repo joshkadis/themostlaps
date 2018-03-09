@@ -13,30 +13,36 @@ const {
  *
  * @param {Number|Document} athlete ID or Document
  * @param {Number} after Optional UTC *seconds* to override last_updated
+ * @param {Boolean} verbose Defaults to false
  */
-module.exports = async (athlete, after = false) => {
+module.exports = async (athlete, after = false, verbose = false) => {
   // Get user document
   const athleteDoc = 'number' === typeof athlete ?
     await Athlete.findById(athlete) : athlete;
 
+  console.log(`Fetching new activities for ${athleteDoc.get('athlete.firstname')} ${athleteDoc.get('athlete.lastname')} (${athleteDoc.get('_id')})`);
+
   // Fetch activities since user document's last_updated
   const eligibleActivities = await fetchAthleteActivities(
     athleteDoc.get('access_token'),
-    after || getTimestampFromISO(athleteDoc.get('last_updated'))
+    after || getTimestampFromISO(athleteDoc.get('last_updated')),
+    verbose
   );
 
   if (!eligibleActivities.length) {
+    console.log(`No new activities for user ${athleteDoc.get('_id')}`);
     return;
   }
 
   // Add new activities to database
   const activitiesWithLaps = await fetchLapsFromActivities(
     eligibleActivities,
-    athleteDoc.get('access_token')
+    athleteDoc.get('access_token'),
+    verbose
   );
 
   if (!activitiesWithLaps.length) {
-    console.log(`No new activities for user ${id}`)
+    console.log(`No new activities *with laps* for user ${athleteDoc.get('_id')}`);
     return;
   }
 
@@ -45,7 +51,7 @@ module.exports = async (athlete, after = false) => {
     const activityDoc = new Activity(activity);
     const err = activityDoc.validateSync();
     if (err) {
-      console.warn(`Failed to validate activity ${activity._id}`);
+      console.warn(`Failed to validate activity ${activity.get('_id')}`);
     } else {
       acc.push(activityDoc);
     }

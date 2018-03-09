@@ -45,12 +45,16 @@ function getActivityData(activity) {
  * @param {String} token
  * @param {Int} idx
  * @param {Object} allLaps
+ * @param {Boolean} verbose Defaults to false
  * @return {Object}
  */
-async function fetchActivityDetails(activityIds, token, idx = 0, allLaps) {
+async function fetchActivityDetails(activityIds, token, idx = 0, allLaps, verbose = false) {
   const fetchNum = 'development' === process.env.NODE_ENV ? config.devFetchActivities : activityIds.length;
 
-  console.log(`Fetching ${(idx + 1)} of ${fetchNum}: ${activityIds[idx]}`)
+  if (verbose) {
+    console.log(`Fetching ${(idx + 1)} of ${fetchNum}: ${activityIds[idx]}`)
+  }
+
   const response = await fetch(`${config.apiUrl}/activities/${activityIds[idx]}`, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -66,7 +70,7 @@ async function fetchActivityDetails(activityIds, token, idx = 0, allLaps) {
   if ((idx + 1) === fetchNum) {
     return allLaps;
   }
-  return await fetchActivityDetails(activityIds, token, (idx + 1), allLaps);
+  return await fetchActivityDetails(activityIds, token, (idx + 1), allLaps, verbose);
 }
 
 /**
@@ -74,8 +78,9 @@ async function fetchActivityDetails(activityIds, token, idx = 0, allLaps) {
  *
  * @param {Array} activityIds List of eligible activities
  * @param {String} token User token
+ * @param {Boolean} verbose Defaults to false
  * @return {Array}
  */
-module.exports = async (activityIds, token) => {
-  return await fetchActivityDetails(activityIds, token, 0, []);
+module.exports = async (activityIds, token, verbose = false) => {
+  return await fetchActivityDetails(activityIds, token, 0, [], verbose);
 };

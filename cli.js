@@ -101,7 +101,7 @@ const argv = require('yargs')
             console.log(`User ${user} not found`)
             process.exit(0);
           }
-          await refreshAthlete(athleteDoc, after);
+          await refreshAthlete(athleteDoc, after, true);
           process.exit(0);
         }
       );

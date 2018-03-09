@@ -31,16 +31,22 @@ function distFromParkCenter(latlng = null) {
  * @param {String} token
  * @param {Int} afterTimestamp
  * @param {Array} allActivities
+ * @param {Boolean} verbose Defaults to false
  * @return {Promise}
  */
 async function fetchAllAthleteActivities(
   token,
   afterTimestamp,
   page = 1,
-  allActivities = []
+  allActivities = [],
+  verbose = false
 ) {
   const url = `${config.apiUrl}/athlete/activities?after=${afterTimestamp}&page=${page}`;
-  console.log(`Fetching ${url}`)
+
+  if (verbose) {
+    console.log(`Fetching ${url}`);
+  }
+
   const response = await fetch(url, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -56,7 +62,8 @@ async function fetchAllAthleteActivities(
     token,
     afterTimestamp,
     (page + 1),
-    allActivities.concat(activities)
+    allActivities.concat(activities),
+    verbose
   );
 }
 
@@ -98,10 +105,11 @@ async function activityIsEligible({
  *
  * @param {String} token
  * @param {Int} afterTimestamp
+ * @param {Boolean} verbose Defaults to false
  * @return {Array}
  */
-module.exports = async (token, afterTimestamp) => {
-  const activities = await fetchAllAthleteActivities(token, afterTimestamp);
+module.exports = async (token, afterTimestamp, verbose = false) => {
+  const activities = await fetchAllAthleteActivities(token, afterTimestamp, 1, [], verbose);
 
   const eligibleActivities = [];
   for (let i = 0; i < activities.length; i++) {
@@ -110,6 +118,10 @@ module.exports = async (token, afterTimestamp) => {
       eligibleActivities.push(activities[i]);
     }
   }
-  console.log(`Activities: ${activities.length} total; ${eligibleActivities.length} eligible`);
+
+  if (verbose) {
+    console.log(`Activities: ${activities.length} total; ${eligibleActivities.length} eligible`);
+  }
+
   return eligibleActivities.map(({ id }) => id);
 }
