@@ -154,6 +154,7 @@ class Layout extends Component {
               content={tag[1]}
             />
           )}
+          <link rel="shortcut icon" type="image/x-icon" href="/static/img/themostlaps.ico" />
           <link href="https://fonts.googleapis.com/css?family=Arvo:400,700" rel="stylesheet" />
           <link rel="stylesheet" href="/static/css/react-select.css" />
           <link rel="stylesheet" href="/_next/static/style.css" />
