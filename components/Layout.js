@@ -16,6 +16,11 @@ import AuthSuccess from './modal/AuthSuccess';
 import AuthError from './modal/AuthError';
 import { modalTitles, locale } from '../config';
 import { getDocumentTitle, getOgData } from '../utils/metaTags';
+import { trackPageview } from '../utils/analytics';
+
+Router.onRouteChangeComplete = (pathname) => {
+  trackPageview(pathname);
+};
 
 /**
  * Page layout
