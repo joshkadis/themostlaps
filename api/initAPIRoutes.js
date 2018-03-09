@@ -13,7 +13,7 @@ const getTotals = require('./getTotals');
 async function handleAPIRequest(req, res, fetchData) {
   const validation = validateApiRequest(req.hostname, req.query.key || null);
   if (validation.error) {
-    res.status(403).json(error);
+    res.status(403).json(validation.error);
     return;
   }
 
