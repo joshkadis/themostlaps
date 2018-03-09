@@ -37,7 +37,7 @@
     }
   }
 
-  /* fake transparent center on top of header gradient */
+  /* fake transparent center instead of white svg fill */
   & :global #fill-white {
     fill: rgb(171, 110, 210);
   }
@@ -52,7 +52,6 @@
   }
 
   &:hover {
-    & :global #fill-white,
     & :global #Horizontal-Text {
       fill: white;
     }
