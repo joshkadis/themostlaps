@@ -7,6 +7,7 @@ const deleteUserActivities = require('./cli/deleteUserActivities');
 const { daysAgoTimestamp } = require('./cli/utils');
 const refreshAthlete = require('./utils/refreshAthlete');
 const subscribeToMailingList = require('./utils/subscribeToMailingList');
+const Athlete = require('./schema/Athlete');
 
 function userPositional(yargs) {
   yargs.positional('user', {
@@ -35,6 +36,9 @@ async function doCommand(prompt, callback) {
 
 const argv = require('yargs')
   .usage('$0 <cmd> [args]')
+  /**
+   * Delete a user
+   */
   .command(
     'delete user',
     false,
@@ -46,6 +50,9 @@ const argv = require('yargs')
       );
     }
   )
+  /**
+   * Delete a user's activities from the last n days
+   */
   .command(
     'deleteactivities user daysago',
     false,
@@ -70,21 +77,39 @@ const argv = require('yargs')
       );
     }
   )
+  /**
+   * Refresh a user for the last n days
+   */
   .command(
-    'refresh user [--daysago <DAYS>]',
+    'refresh user daysago',
     false,
-    userPositional,
+    (yargs) => {
+      yargs.positional('user', {
+        type: 'number',
+      });
+      yargs.positional('daysago', {
+        type: 'number',
+      });
+    },
     async ({ user, daysago }) => {
       const after = daysAgoTimestamp(daysago);
       await doCommand(
         `Enter admin code to refresh user ${user}.`,
         async () => {
-          await refreshAthlete(user, after);
+          const athleteDoc = await Athlete.findById(user);
+          if (!athleteDoc) {
+            console.log(`User ${user} not found`)
+            process.exit(0);
+          }
+          await refreshAthlete(athleteDoc, after);
           process.exit(0);
         }
       );
     }
   )
+  /**
+   * Subscribe someone to the email list
+   */
   .command(
     'subscribe email [--newsletter]',
     false,
