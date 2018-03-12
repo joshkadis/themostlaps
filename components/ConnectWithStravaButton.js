@@ -4,6 +4,7 @@ import { stringify } from 'query-string';
 import * as styles from './ConnectWithStravaButton.css';
 import { stravaClientId } from '../config';
 import { getEnvOrigin } from '../utils/envUtils';
+import { trackConnectWithStrava } from '../utils/analytics';
 
 function getStravaAuthUrl(pathname = '/', shouldSubscribe = false) {
   const params = {
@@ -21,6 +22,7 @@ const ConnectWithStravaButton = ({ className, pathname, shouldSubscribe }) => (
   <a
     className={className}
     href={getStravaAuthUrl(pathname, shouldSubscribe)}
+    onClick={() => trackConnectWithStrava(shouldSubscribe)}
   >
     <img
       className={styles.connectButton}

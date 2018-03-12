@@ -53,6 +53,15 @@ function trackModalOpen() {
 }
 
 /**
+ * Track click on the Connect With Strava Button
+ *
+ * @param {Bool} withSubscribe
+ */
+function trackConnectWithStrava(withSubscribe = false) {
+  trackEvent('signup', 'connectWithStrava', (withSubscribe ? 'withSubscribe' : 'noSubscribe'));
+}
+
+/**
  * Set persistent custom dimensions from key-value object with
  * names like 'User Has Connected' instead of 'dimension1'
  *
@@ -88,4 +97,5 @@ module.exports = {
   trackEvent,
   setDimensions,
   trackModalOpen,
+  trackConnectWithStrava,
 };
