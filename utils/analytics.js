@@ -62,6 +62,26 @@ function trackConnectWithStrava(withSubscribe = false) {
 }
 
 /**
+ * Track authorization result
+ *
+ * @param {Bool} success
+ * @param {Number} errorCode Optional code if error
+ */
+function trackAuthResult(success, errorCode = null) {
+  // Set persistent dimensions
+  const dimensions = {
+    'Signup Result': success ? 'success' : 'error',
+  };
+  if (!success && errorCode !== null) {
+    dimensions['Signup Error Code'] = errorCode.toString();
+  }
+  setDimensions(dimensions);
+
+  // Track event with outcome as event label
+  trackEvent('signup', 'result', success ? 'success' : 'error');
+}
+
+/**
  * Set persistent custom dimensions from key-value object with
  * names like 'User Has Connected' instead of 'dimension1'
  *
@@ -98,4 +118,5 @@ module.exports = {
   setDimensions,
   trackModalOpen,
   trackConnectWithStrava,
+  trackAuthResult,
 };

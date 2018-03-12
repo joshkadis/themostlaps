@@ -16,7 +16,7 @@ import AuthSuccess from './modal/AuthSuccess';
 import AuthError from './modal/AuthError';
 import { modalTitles, locale } from '../config';
 import { getDocumentTitle, getOgData } from '../utils/metaTags';
-import { trackPageview } from '../utils/analytics';
+import { trackPageview, trackAuthResult } from '../utils/analytics';
 
 Router.onRouteChangeComplete = (pathname) => {
   trackPageview(pathname);
@@ -66,12 +66,20 @@ class Layout extends Component {
         this.handleOpenModal();
       }
     });
+
+    if (this.state.modalIsOpen && this.state.modalState !== 'signup') {
+      trackAuthResult(
+        this.state.modalState === 'success',
+        this.props.query.autherror || null,
+      );
+    }
   }
 
   handleOpenModal() {
     if ('#signup' !== window.location.hash) {
       window.location.hash = '#signup';
     }
+
     this.setState({ modalIsOpen: true });
   }
 

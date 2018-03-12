@@ -3,5 +3,7 @@ module.exports = {
   customDimensions: {
     'User Has Connected': 'dimension1',
     'Signup Starting Point': 'dimension2',
+    'Signup Result': 'dimension3',
+    'Signup Error Code': 'dimension4',
   },
 };
