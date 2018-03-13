@@ -52,7 +52,7 @@ async function getLapEffortsHistory(token, athleteId, page = 1, allEfforts = [])
  */
 function formatSegmentEffort({ id, elapsed_time, moving_time, start_date_local }) {
   return {
-    id,
+    _id: id,
     elapsed_time,
     moving_time,
     start_date_local,

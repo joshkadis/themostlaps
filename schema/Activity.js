@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const SegmentEffort = new Schema({
-  id: Number,
+  _id: Number,
   elapsed_time: Number,
   moving_time: Number,
   start_date_local: String,
