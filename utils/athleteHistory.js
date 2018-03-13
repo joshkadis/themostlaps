@@ -45,7 +45,22 @@ async function getLapEffortsHistory(token, athleteId, page = 1, allEfforts = [])
 }
 
 /**
- * Convert big array of segment efforts into array of pseudo-activities
+ * Format segment effort into our database model shape
+ *
+ * @param {Object} effort Segment effort from Strava API
+ * @return {Object}
+ */
+function formatSegmentEffort({ id, elapsed_time, moving_time, start_date_local }) {
+  return {
+    id,
+    elapsed_time,
+    moving_time,
+    start_date_local,
+  };
+}
+
+/**
+ * Convert big array of segment efforts into array of inferred activities
  *
  * @param {Array} efforts
  * @param {String} source Optional. Defaults to 'signup'
@@ -60,8 +75,8 @@ function getActivitiesFromEfforts(efforts, source = 'signup') {
     } = effort;
 
     // Add activity to map if not found
-    const added = new Date();
     if (!map[activity.id]) {
+      const added = new Date();
       map[activity.id] = {
         _id: activity.id,
         added_date: added.toISOString(),
@@ -77,7 +92,7 @@ function getActivitiesFromEfforts(efforts, source = 'signup') {
     map[activity.id].laps = map[activity.id].laps + 1;
 
     // save segment effort for v2+ features
-    map[activity.id].segment_efforts.push(effort);
+    map[activity.id].segment_efforts.push(formatSegmentEffort(effort));
 
     return map;
   }, {});
@@ -150,5 +165,6 @@ async function saveAthleteHistory(activities) {
 module.exports = {
   fetchAthleteHistory,
   saveAthleteHistory,
+  formatSegmentEffort,
 };
 

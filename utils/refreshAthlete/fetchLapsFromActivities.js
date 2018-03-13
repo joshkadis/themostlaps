@@ -2,6 +2,20 @@ require('isomorphic-fetch');
 const config = require('../../config');
 const calculateLapsFromSegmentEfforts =
   require('./calculateLapsFromSegmentEfforts');
+const { formatSegmentEffort } = require('../athleteHistory');
+
+/**
+ * Filter segment efforts for activity
+ *
+ * @param {Array} efforts
+ * @return {Array}
+ */
+function filterSegmentEfforts(efforts) {
+  return efforts
+    .filter(({ segment }) => config.lapSegmentId === segment.id)
+    .map((effort) => formatSegmentEffort(effort));
+}
+
 /**
  * Get laps data object from an activity
  *
@@ -9,15 +23,12 @@ const calculateLapsFromSegmentEfforts =
  * @param {Boolean} verbose Defaults to false
  * @return {Object|false}
  */
-function getActivityData(activity, verbose = false) {
+function formatActivityData(activity, verbose = false) {
   const {
     id,
-    start_date_local,
-    total_elevation_gain,
     athlete,
-    start_latlng,
-    end_latlng,
     segment_efforts,
+    start_date_local,
   } = activity;
 
   const laps = calculateLapsFromSegmentEfforts(segment_efforts);
@@ -29,15 +40,15 @@ function getActivityData(activity, verbose = false) {
     return false;
   }
 
+  const added = new Date();
   return {
     _id: id,
-    start_date_local,
-    total_elevation_gain,
+    added_date: added.toISOString(),
     athlete_id: athlete.id,
-    start_latlng,
-    end_latlng,
-    segment_efforts,
     laps,
+    segment_efforts: filterSegmentEfforts(segment_efforts),
+    source: 'refresh',
+    start_date_local,
   };
 }
 
@@ -48,11 +59,11 @@ function getActivityData(activity, verbose = false) {
  * @param {Array} activityIds
  * @param {String} token
  * @param {Int} idx
- * @param {Object} allLaps
+ * @param {Object} allActivities
  * @param {Boolean} verbose Defaults to false
  * @return {Object}
  */
-async function fetchActivityDetails(activityIds, token, idx = 0, allLaps, verbose = false) {
+async function fetchActivityDetails(activityIds, token, idx = 0, allActivities, verbose = false) {
   const fetchNum = 'development' === process.env.NODE_ENV ? config.devFetchActivities : activityIds.length;
 
   if (verbose) {
@@ -66,15 +77,15 @@ async function fetchActivityDetails(activityIds, token, idx = 0, allLaps, verbos
   });
   const activity = await response.json();
 
-  const activityLaps = getActivityData(activity, verbose);
-  if(activityLaps) {
-    allLaps.push(activityLaps);
+  const activityData = formatActivityData(activity, verbose);
+  if(activityData) {
+    allActivities.push(activityData);
   }
 
   if ((idx + 1) === fetchNum) {
-    return allLaps;
+    return allActivities;
   }
-  return await fetchActivityDetails(activityIds, token, (idx + 1), allLaps, verbose);
+  return await fetchActivityDetails(activityIds, token, (idx + 1), allActivities, verbose);
 }
 
 /**

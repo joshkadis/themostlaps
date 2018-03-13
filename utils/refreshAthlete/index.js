@@ -87,6 +87,7 @@ module.exports = async (athlete, after = false, verbose = false) => {
   // Filter for valid activities
   const filtered = activitiesWithLaps.reduce((acc, activity) => {
     const activityDoc = new Activity(activity);
+    // Mongoose returns error here instead of throwing
     const err = activityDoc.validateSync();
     if (err) {
       console.warn(`Failed to validate activity ${activity.get('_id')}`);
