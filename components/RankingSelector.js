@@ -7,6 +7,7 @@ import Button from './lib/Button';
 import { primaryOptions, secondaryOptions } from '../config/rankingsOpts';
 import { timePartString } from '../utils/dateTimeUtils';
 import * as styles from './Layout.css';
+import { trackRankingSelector } from '../utils/analytics';
 
 /**
  * If selected year is current year, remove future months from secondaryOptions
@@ -47,6 +48,22 @@ class RankingSelector extends Component {
     this.setState(current);
   }
 
+  // Track when ranking selection changes
+  componentDidUpdate(prevProps, prevState) {
+    const stateLabel = this.getStateLabel(this.state);
+    if (stateLabel !== this.getStateLabel(prevState)) {
+      trackRankingSelector('changeSelection', stateLabel);
+    }
+  }
+
+  getStateLabel(state) {
+    return [
+      state.type || null,
+      state.year || null,
+      state.month ? timePartString(state.month) : null,
+    ].filter((item) => !!item).join('|');
+  }
+
   onChangePrimary({ value }) {
     const parts = value.split('.');
     const newState = {
@@ -82,7 +99,7 @@ class RankingSelector extends Component {
     if ('timePeriod' === type && month) {
       pathname = `${pathname}/${timePartString(month)}`;
     }
-
+    trackRankingSelector('goButton', this.getStateLabel(this.state));
     Router.push(`/ranking?${stringify(this.state)}`, pathname);
   }
 

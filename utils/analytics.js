@@ -105,6 +105,16 @@ function trackSocial(network, action, target) {
 }
 
 /**
+ * Track ranking selector interaction
+ *
+ * @param {String} action
+ * @param {String} label
+ */
+function trackRankingSelector(action, label = '') {
+  trackEvent('rankingSelector', action, label);
+}
+
+/**
  * Set persistent custom dimensions from key-value object with
  * names like 'User Has Connected' instead of 'dimension1'
  *
@@ -143,4 +153,5 @@ module.exports = {
   trackConnectWithStrava,
   trackAuthResult,
   trackSocial,
+  trackRankingSelector,
 };
