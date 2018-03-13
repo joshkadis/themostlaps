@@ -34,13 +34,15 @@ class Signup extends Component {
             checked={this.state.subscribeChecked}
             onChange={this.onChangeSubscribe}
           />
-          <label htmlFor="subscribe">Send me occasional laps-related emails.</label>
+          <label htmlFor="subscribe">Subscribe me to the newsletter.</label>
         </p>
-        <Markdown
-          source={pageContent}
-          escapeHtml={false}
-          renderers={{ link: convertMarkdownLink }}
-        />
+        <div style={{ textAlign: 'left' }}>
+          <Markdown
+            source={pageContent}
+            escapeHtml={false}
+            renderers={{ link: convertMarkdownLink }}
+          />
+        </div>
       </div>
     );
   }

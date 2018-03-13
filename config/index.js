@@ -34,7 +34,7 @@ module.exports = {
     error: '😞 We\'re sorry. 😞',
     success: '🎉 You\'re all set! 🎉',
     successWithLaps: '🎉 ${allTime} laps! 🎉',
-    signup: '🚴 Let\'s get started ! 🚴',
+    signup: '🚴 Here we go! 🚴',
   },
   locale: 'en-US',
   modalQueryParams: [
