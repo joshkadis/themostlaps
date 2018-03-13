@@ -34,7 +34,7 @@
   }
 }
 
-.hidden {
+.hideMobile {
   @media (--smallViewport) {
     display: none;
   }
