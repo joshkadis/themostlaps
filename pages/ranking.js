@@ -2,7 +2,6 @@ import PropTypes from 'prop-types';
 import Layout from '../components/Layout';
 import RankingRow from '../components/RankingRow';
 import RankingSelector from '../components/RankingSelector';
-import { getEnvOrigin } from '../utils/envUtils';
 import { getPathnameFromContext, APIRequest } from '../utils';
 import { timePartString, getMonthName } from '../utils/dateTimeUtils';
 import * as styles from '../components/Layout.css';
