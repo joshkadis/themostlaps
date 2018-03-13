@@ -17,6 +17,13 @@ function _ga(...args) {
  * @param {Bool} setPageDimensions Defaults to true, updates page-level dimensions
  */
 function trackPageview(pathname, fields = {}, setPageDimensions = true) {
+  let currentIsAuthResult = false;
+  let currentPathname;
+  ga((tracker) => {
+    currentPathname = tracker.get('page');
+    currentIsAuthResult = /\?auth(success|error)=/.test(tracker.get('location'));
+  });
+
   if (setPageDimensions) {
     _ga('set', {
       location: window.location.href,
@@ -24,7 +31,12 @@ function trackPageview(pathname, fields = {}, setPageDimensions = true) {
       page: window.location.pathname,
     });
   }
-  _ga('send', 'pageview', fields);
+
+  // If we're staying on the same page and just closing the modal after OAuth
+  // don't track a pageview
+  if (!currentIsAuthResult || currentPathname !== window.location.pathname) {
+    _ga('send', 'pageview', fields);
+  }
 }
 
 /**
