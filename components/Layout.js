@@ -38,6 +38,8 @@ class Layout extends Component {
 
   componentWillMount() {
     const modalState = this.getModalStateFromProps(this.props);
+    // Automatically open modal on render
+    // if authsuccess or autherror query params are found
     this.setState({
       modalIsOpen: (modalState !== 'signup'),
       modalState,
@@ -45,10 +47,11 @@ class Layout extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    // @todo Refactor above into single method
+    // Open modal on update if authsuccess or autherror
+    // query params are found OR if it is already open
     const modalState = this.getModalStateFromProps(nextProps);
     this.setState({
-      modalIsOpen: (modalState !== 'signup'),
+      modalIsOpen: (this.state.modalIsOpen || modalState !== 'signup'),
       modalState,
     });
   }
