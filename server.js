@@ -6,6 +6,8 @@ const next = require('next');
 
 const scheduleNightlyRefresh = require('./utils/scheduleNightlyRefresh');
 const subscribeToMailingList = require('./utils/subscribeToMailingList');
+const Athlete = require('./schema/Athlete');
+
 // Route handlers
 const onAuthCallback = require('./server/onAuthCallback');
 const initAPIRoutes = require('./api/initAPIRoutes');
@@ -70,6 +72,24 @@ app.prepare()
         app.render(req, res, '/_error', {});
       } else {
         app.render(req, res, '/ranking', Object.assign(req.query, params));
+      }
+    });
+
+    server.get(/^\/rider\/(\d+)$/, async (req, res) => {
+      const athleteId = parseInt(req.params[0], 10);
+      let athleteExists = true;
+      if (!isNaN(athleteId)) {
+        athleteExists = await Athlete.findById(athleteId);
+        athleteExists = !!athleteExists;
+      } else {
+        athleteExists = false;
+      }
+
+      if (!athleteExists) {
+        res.statusCode = 404;
+        app.render(req, res, '/_error', {});
+      } else {
+        app.render(req, res, '/rider', Object.assign(req.query, { athleteId }));
       }
     });
 
