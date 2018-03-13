@@ -1,7 +1,9 @@
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import Link from 'next/link';
 import { locale } from '../config';
 import * as styles from './Layout.css';
+import AthleteHeader from './lib/AthleteHeader';
 
 const RankingRow = ({
   athleteId,
@@ -18,9 +20,16 @@ const RankingRow = ({
     )}>
       {rank}
     </td>
-    <td className={styles['ranking-row__athlete']}>
-      <img className={styles['ranking-row__avatar']} src={img} />
-      <span className={styles['ranking-row__name']}>{firstname}&nbsp;{lastname}</span>
+    <td>
+      <Link href={`/rider?athleteId=${athleteId}`} as={`/rider/${athleteId}`}>
+        <a>
+          <AthleteHeader
+            img={img}
+            firstname={firstname}
+            lastname={lastname}
+          />
+        </a>
+      </Link>
     </td>
     <td>{value.toLocaleString(locale)} lap{value === 1 ? '' : 's'}</td>
   </tr>

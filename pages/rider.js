@@ -1,14 +1,23 @@
 import PropTypes from 'prop-types';
 import Layout from '../components/Layout';
 import { getPathnameFromContext, APIRequest } from '../utils';
+import AthleteHeader from '../components/lib/AthleteHeader';
 import * as styles from '../components/Layout.css';
 
-const Rider = ({ pathname, query, stats }) => (
+const Rider = ({ pathname, query, stats, athlete }) => (
   <Layout
     pathname={pathname}
     query={query}
   >
-
+    <AthleteHeader
+      img={athlete.profile}
+      firstname={athlete.firstname}
+      lastname={athlete.lastname}
+      style={{
+        justifyContent: 'center',
+        fontSize: '1.5rem',
+      }}
+    />
   </Layout>
 );
 

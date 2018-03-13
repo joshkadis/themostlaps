@@ -1,0 +1,17 @@
+.athlete-header {
+  display: flex;
+  align-items: center;
+}
+
+.athlete-header__avatar {
+  max-width: 48px;
+  border-radius: 50%;
+
+  @media (--smallViewport) {
+    max-width: 36px;
+  }
+}
+
+.athlete-header__name {
+  margin-left: .7rem;
+}

@@ -31,25 +31,7 @@
   }
 }
 
-.ranking-row__avatar {
-  max-width: 48px;
-  border-radius: 50%;
-
-  @media (--smallViewport) {
-    max-width: 36px;
-  }
-}
-
-.ranking-row__athlete {
-  display: flex;
-  align-items: center;
-}
-
 .ranking-row__first {
   font-weight: bold;
   color: var(--purple);
-}
-
-.ranking-row__name {
-  margin-left: .7rem;
 }
