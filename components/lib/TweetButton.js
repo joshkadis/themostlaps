@@ -23,6 +23,15 @@ class TweetButton extends Component {
 
       return t;
     }(document, "script", "twitter-wjs"));
+
+    // Track social share
+    twttr.ready(function(twttr) {
+      twttr.events.bind('tweet', function(evt) {
+        if (window.ga && evt.target.getAttribute('data-url')) {
+          ga('send', 'social', 'twitter', 'share', evt.target.getAttribute('data-url'));
+        }
+      });
+    });
   }
 
   render() {

@@ -82,6 +82,17 @@ function trackAuthResult(success, errorCode = null) {
 }
 
 /**
+ * Track social interaction
+ *
+ * @param {String} network
+ * @param {String} action
+ * @param {String} target
+ */
+function trackSocial(network, action, target) {
+  _ga('send', 'social', network, action, target);
+}
+
+/**
  * Set persistent custom dimensions from key-value object with
  * names like 'User Has Connected' instead of 'dimension1'
  *
@@ -119,4 +130,5 @@ module.exports = {
   trackModalOpen,
   trackConnectWithStrava,
   trackAuthResult,
+  trackSocial,
 };

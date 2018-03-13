@@ -3,9 +3,10 @@ import PropTypes from 'prop-types';
 import Link from 'next/link';
 import classNames from 'classnames';
 import Button from './lib/Button';
-import { lapSegmentId, breakpointPx, socialLinks } from '../config';
+import { lapSegmentId, breakpointPx } from '../config';
 import * as styles from './Navigation.css';
 import { MenuSvg, InstagramSvg, TwitterSvg } from './lib/svg';
+import SocialLink from './lib/SocialLink';
 import { modalControlsShape } from '../utils/propTypes';
 import { trackModalOpen, setDimensions } from '../utils/analytics';
 
@@ -68,15 +69,19 @@ class Navigation extends Component {
         <Link href="/ranking">
           <a className={styles.link}>Rankings</a>
         </Link>
+
         <Link href="/page?pageName=about" as="/about">
           <a className={styles.link}>About</a>
         </Link>
-        <a className={styles.link} href={socialLinks.twitter} target="_blank">
+
+        <SocialLink network="twitter">
           <TwitterSvg />
-        </a>
-        <a className={styles.link} href={socialLinks.instagram} target="_blank">
+        </SocialLink>
+
+        <SocialLink network="instagram">
           <InstagramSvg />
-        </a>
+        </SocialLink>
+
         <Button
           onClick={this.onClickButton}
         >
