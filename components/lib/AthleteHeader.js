@@ -1,22 +1,26 @@
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import * as styles from '../Layout.css';
 
-const AthleteHeader = ({ img, firstname, lastname, style }) => (
-  <span className={styles['athlete-header']} style={style}>
+const AthleteHeader = ({ img, firstname, lastname, className }) => (
+  <div className={classNames(
+    styles['athlete-header'],
+    className || false
+  )}>
     <img className={styles['athlete-header__avatar']} src={img} />
     <span className={styles['athlete-header__name']}>{firstname} {lastname}</span>
-  </span>
+  </div>
 );
 
 AthleteHeader.defaultProps = {
-  style: {},
+  className: '',
 };
 
 AthleteHeader.propTypes = {
   img: PropTypes.string.isRequired,
   firstname: PropTypes.string.isRequired,
   lastname: PropTypes.string.isRequired,
-  style: PropTypes.object,
+  className: PropTypes.string,
 };
 
 export default AthleteHeader;
