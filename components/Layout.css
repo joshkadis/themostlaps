@@ -4,6 +4,7 @@
 @import './RankingSelector.css';
 @import './RankingRow.css';
 @import './lib/AthleteHeader.css';
+@import './charts/Chart.css';
 @import '../pages/index.css';
 
 :global(html),

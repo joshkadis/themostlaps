@@ -9,7 +9,6 @@ import * as styles from './Layout.css';
 import Modal from 'react-modal';
 import { CloseSvg } from './lib/svg';
 import { getPathWithQueryString } from '../utils';
-import numberOrNullProp from '../utils/numberOrNullProp';
 import ModalContents from './ModalContents';
 import Signup from './modal/Signup';
 import AuthSuccess from './modal/AuthSuccess';

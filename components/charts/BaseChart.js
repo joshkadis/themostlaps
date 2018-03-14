@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import * as styles from '../Layout.css';
 
 class BaseChart extends Component {
   constructor(props) {
@@ -20,7 +21,12 @@ class BaseChart extends Component {
       <div
         ref={(el) => this.container = el}
       >
-        <h2>{this.renderTitle(this.props)}</h2>
+        <h2
+          className={styles.chart__title}
+        >
+          {this.renderTitle(this.props)}
+        </h2>
+
         {this.renderChart(this.props)}
       </div>
     );

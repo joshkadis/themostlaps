@@ -17,6 +17,8 @@ class Rider extends Component {
   constructor(props) {
     super(props);
     this.onClickTick = this.onClickTick.bind(this);
+    this.canNavigateToYear = this.canNavigateToYear.bind(this);
+    this.changeYear = this.changeYear.bind(this);
     this.state = {
       displayYear: 'all',
       compare: [],
@@ -28,6 +30,30 @@ class Rider extends Component {
       return;
     }
     this.setState({ displayYear: value.toString() });
+  }
+
+  canNavigateToYear(direction) {
+    const compareToYear = direction === 'next' ?
+      [...this.props.stats.years].pop() :
+      [...this.props.stats.years].shift();
+    return this.state.displayYear !== compareToYear;
+  }
+
+  changeYear(evt, incr) {
+    if ('all' === incr) {
+      this.setState({ displayYear: incr });
+      return;
+    }
+
+    evt.preventDefault();
+    if (isNaN(this.state.displayYear)) {
+      return;
+    }
+
+    const targetYear = (parseInt(this.state.displayYear, 10) + incr).toString();
+    if (-1 !== this.props.stats.years.indexOf(targetYear)) {
+      this.setState({ displayYear: targetYear });
+    }
   }
 
   render() {
@@ -55,6 +81,9 @@ class Rider extends Component {
           <SingleAthleteYearChart
             data={statsForSingleAthleteYearChart(this.state.displayYear, stats.data)}
             year={this.state.displayYear}
+            onClickPrevYear={this.canNavigateToYear('prev') ? (e) => this.changeYear(e, -1) : false}
+            onClickNextYear={this.canNavigateToYear('next') ? (e) => this.changeYear(e, 1) : false}
+            onClickBack={(e) => this.changeYear(e, 'all')}
           />
         }
       </Layout>
