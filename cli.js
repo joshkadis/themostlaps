@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const promptly = require('promptly');
 const deleteUser = require('./cli/deleteUser');
 const deleteUserActivities = require('./cli/deleteUserActivities');
+const getActivityInfo = require('./cli/getActivityInfo');
 const { daysAgoTimestamp } = require('./cli/utils');
 const refreshAthlete = require('./utils/refreshAthlete');
 const subscribeToMailingList = require('./utils/subscribeToMailingList');
@@ -129,6 +130,27 @@ const argv = require('yargs')
           await subscribeToMailingList(argv.email, newsletter);
           process.exit(0);
         }
+      );
+    }
+  )
+  /**
+   * Get info for a specific activity
+   */
+  .command(
+    'activity userId activityId',
+    false,
+    (yargs) => {
+      yargs.positional('userId', {
+        type: 'number',
+      });
+      yargs.positional('activityId', {
+        type: 'number',
+      });
+    },
+    async ({ userId, activityId }) => {
+      await doCommand(
+        `Enter admin code to fetch details for user ${userId} activity ${activityId}.`,
+        () => getActivityInfo(userId, activityId)
       );
     }
   )

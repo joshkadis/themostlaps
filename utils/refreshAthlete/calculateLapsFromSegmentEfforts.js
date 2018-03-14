@@ -27,8 +27,10 @@ module.exports = (segmentEfforts) => {
   const sectionsRidden = [];
   segmentEfforts.forEach(({ segment }) => {
     if (lapSegmentId === segment.id) {
+      // Count canonical full lap segments
       laps++;
     } else if (-1 !== sectionSegmentIds.indexOf(segment.id)) {
+      // Array of canonical lap section segments
       sectionsRidden.push(segment.id);
     }
   });
