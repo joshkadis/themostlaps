@@ -1,3 +1,5 @@
+const { timePartString } = require('./dateTimeUtils');
+
 /**
  * Format athlete stats for rider page
  *
@@ -57,7 +59,7 @@ function statsForAthletePage(stats) {
  * @param {Array} years
  * @return {Array}
  */
-function statsForSingleAthleteYearsChart({ data, years }) {
+function statsForSingleAthleteChart({ data, years }) {
   const output = [];
   const yearsInts = years.map((year) => parseInt(year, 10));
   const min = yearsInts.shift();
@@ -73,7 +75,26 @@ function statsForSingleAthleteYearsChart({ data, years }) {
   return output;
 }
 
+/**
+ * Format stats for a specific year chart for a single athlete
+ *
+ * @param {String} year
+ * @param {Object} data
+ * @return {Array}
+ */
+function statsForSingleAthleteYearChart(year, data) {
+  if (!data[year]) {
+    return [];
+  }
+
+  return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((month, idx) => ({
+    month,
+    value: data[year][timePartString(1 + idx)] || 0,
+  }));
+}
+
 module.exports = {
   statsForAthletePage,
-  statsForSingleAthleteYearsChart,
+  statsForSingleAthleteChart,
+  statsForSingleAthleteYearChart,
 };
