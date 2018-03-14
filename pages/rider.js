@@ -2,7 +2,9 @@ import PropTypes from 'prop-types';
 import Layout from '../components/Layout';
 import { getPathnameFromContext, APIRequest } from '../utils';
 import AthleteHeader from '../components/lib/AthleteHeader';
+import { locale } from '../config';
 import * as styles from '../components/Layout.css';
+import { statsForAthletePage } from '../utils/athleteStats';
 
 const Rider = ({ pathname, query, stats, athlete }) => (
   <Layout
@@ -13,11 +15,12 @@ const Rider = ({ pathname, query, stats, athlete }) => (
       img={athlete.profile}
       firstname={athlete.firstname}
       lastname={athlete.lastname}
-      style={{
-        justifyContent: 'center',
-        fontSize: '1.5rem',
-      }}
+      className="biggest"
     />
+    <div className="big">
+      <p>Total laps: <strong>{stats.allTime.toLocaleString(locale)}</strong></p>
+      <p>Biggest ride: <strong>{stats.single} laps</strong></p>
+    </div>
   </Layout>
 );
 
@@ -38,7 +41,7 @@ Rider.getInitialProps = async function(context) {
       if (apiResponse.length) {
         return Object.assign(defaultInitialProps, {
           athlete: apiResponse[0].athlete,
-          stats: apiResponse[0].stats,
+          stats: statsForAthletePage(apiResponse[0].stats),
          });
       }
       return defaultInitialProps;
