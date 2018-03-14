@@ -1,3 +1,22 @@
+@import '../../styles/vars';
+
 .chart__title {
   text-align: center;
+}
+
+.chart__singleAthlete {
+  & :global(.recharts-xAxis .recharts-cartesian-axis-tick text) {
+    fill: var(--purpleLight);
+    cursor: pointer;
+    text-decoration: underline;
+    font-weight: bold;
+    transition: fill ease-in-out .3s;
+    &:hover{
+      fill: var(--purpleDark);
+    }
+  }
+
+  & :global(.recharts-bar-rectangle) {
+    cursor: pointer;
+  }
 }

@@ -7,6 +7,7 @@ import {
   Tooltip,
 } from 'recharts';
 import BaseChart from './BaseChart';
+import * as styles from '../Layout.css';
 
 const TooltipContent = ({ label, payload }) => {
   const value = ('undefined' !== typeof payload && payload.length) ? payload[0].value : 0;
@@ -14,6 +15,17 @@ const TooltipContent = ({ label, payload }) => {
 };
 
 class SingleAthleteYearChart extends BaseChart {
+  constructor(props) {
+    super(props);
+    this.onClickBar = this.onClickBar.bind(this);
+  }
+
+  onClickBar(evt) {
+    if (evt.year) {
+      this.props.onClickTick({ value: evt.year });
+    }
+  }
+
   renderTitle() {
     return 'Yearly Totals';
   }
@@ -24,6 +36,7 @@ class SingleAthleteYearChart extends BaseChart {
         width={this.state.width}
         height={this.state.height}
         data={data}
+        className={styles['chart__singleAthlete']}
       >
         <XAxis
           dataKey="year"
@@ -41,7 +54,11 @@ class SingleAthleteYearChart extends BaseChart {
             border: '1px solid #914dff',
           }}
         />
-        <Bar dataKey="value" fill="#6100FF" />
+        <Bar
+          dataKey="value"
+          fill="#6100FF"
+          onClick={this.onClickBar}
+        />
       </BarChart>
     );
   }
