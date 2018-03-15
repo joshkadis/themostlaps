@@ -12,6 +12,7 @@ import {
 } from '../utils/athleteStatsClient';
 import SingleAthleteChart from '../components/charts/SingleAthlete';
 import SingleAthleteYearChart from '../components/charts/SingleAthleteYear';
+import SearchUsers from '../components/lib/SearchUsers';
 
 class Rider extends Component {
   constructor(props) {
@@ -90,6 +91,12 @@ class Rider extends Component {
             onClickBack={(e) => this.changeYear(e, 'all')}
           />
         }
+        <div>
+          <h3 style={{ textAlign: 'center' }}>Compare to...</h3>
+          <SearchUsers
+            onChange={(evt) => { debugger; }}
+          />
+        </div>
       </Layout>
     );
   }

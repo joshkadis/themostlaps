@@ -2,6 +2,7 @@ const validateApiRequest = require('./validateApiRequest');
 const getRanking = require('./getRanking');
 const getAthletes = require('./getAthletes');
 const getTotals = require('./getTotals');
+const getSearchUsers = require('./getSearchUsers');
 
 /**
  * Validate and fetch data for API request
@@ -44,6 +45,12 @@ async function initAPIRoutes(server) {
   server.get('/api/athletes/:ids', async (req, res) => {
     await handleAPIRequest(req, res, async ({ params }) => {
       return await getAthletes(params.ids);
+    });
+  });
+
+  server.get('/api/searchUsers', async (req, res) => {
+    await handleAPIRequest(req, res, async ({ query }) => {
+      return await getSearchUsers(!!query.complete);
     });
   });
 }
