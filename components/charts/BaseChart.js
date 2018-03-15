@@ -4,6 +4,8 @@ import * as styles from '../Layout.css';
 class BaseChart extends Component {
   constructor(props) {
     super(props);
+    this.renderTitle = this.renderTitle.bind(this);
+    this.renderChart = this.renderChart.bind(this);
     this.state = {
       width: 500,
       height: 400,

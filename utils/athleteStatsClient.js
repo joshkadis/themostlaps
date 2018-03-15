@@ -56,14 +56,11 @@ function statsForAthletePage(stats) {
  * including any missing years
  *
  * @param {Object} data
- * @param {Array} years
  * @return {Array}
  */
-function statsForSingleAthleteChart({ data, years }) {
+function statsForSingleAthleteChart(data) {
   const output = [];
-  const yearsInts = years.map((year) => parseInt(year, 10));
-  const min = yearsInts.shift();
-  const max = yearsInts.length > 0 ? yearsInts.pop() : min;
+  const { min, max } = getMinMaxYears(Object.keys(data));
 
   for (let year = min; year <= max; year++) {
     output.push({
@@ -73,6 +70,23 @@ function statsForSingleAthleteChart({ data, years }) {
   }
 
   return output;
+}
+
+/**
+ * Get min and max years from array of years
+ *
+ * @param {Array} years Can be strings or numbers
+ * @return {Object} Returns min and max as numbers
+ */
+function getMinMaxYears(years) {
+  // Sort years
+  const sorted = [...years]
+    .map((year) => year.toString())
+    .sort();
+  const yearsInts = sorted.map((year) => parseInt(year, 10));
+  const min = yearsInts.shift();
+  const max = yearsInts.length > 0 ? yearsInts.pop() : min;
+  return { min, max };
 }
 
 /**
@@ -93,7 +107,49 @@ function statsForSingleAthleteYearChart(year, data) {
   }));
 }
 
+/**
+ * Find year value in chart data
+ *
+ * @param {Array} data
+ * @param {Number} year
+ * @return {Number} Return 0 if year not found
+ */
+function findValue(data, year) {
+  for (let idx = 0; idx < data.length; idx++ ) {
+    if (year === data[idx].year) {
+      return data[idx].value;
+    }
+  }
+  return 0;
+}
+
+/**
+ * Merge stats for chart
+ *
+ * @param {Array} athlete1
+ * @param {Array} athlete2
+ * @return {Array}
+ */
+function mergeStats(primary, secondary) {
+  const { min, max } = getMinMaxYears([].concat(
+    primary.map(({ year }) => year),
+    secondary.map(({ year }) => year),
+  ));
+
+  let output = [];
+  for (let year = min; year <= max; year++) {
+    output = output.concat({
+      year,
+      primary: findValue(primary, year),
+      secondary: findValue(secondary, year),
+    });
+  }
+  return output;
+}
+
 module.exports = {
+  mergeStats,
+  getMinMaxYears,
   statsForAthletePage,
   statsForSingleAthleteChart,
   statsForSingleAthleteYearChart,

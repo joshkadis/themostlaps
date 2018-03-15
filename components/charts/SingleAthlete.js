@@ -14,10 +14,22 @@ const TooltipContent = ({ label, payload }) => {
   return <span>{label}: {value} laps</span>;
 };
 
-class SingleAthleteYearChart extends BaseChart {
+class SingleAthleteChart extends BaseChart {
   constructor(props) {
     super(props);
     this.onClickBar = this.onClickBar.bind(this);
+  }
+
+  componentWillMount() {
+    this.setState({
+      hasCompare: this.props.compare > 0,
+    });
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.setState({
+      hasCompare: nextProps.compare > 0,
+    });
   }
 
   onClickBar(evt) {
@@ -27,7 +39,13 @@ class SingleAthleteYearChart extends BaseChart {
   }
 
   renderTitle() {
-    return 'Yearly Totals';
+    if (this.state.hasCompare && this.props.compareName) {
+      return <span>
+        <span className={styles.chart__baseTitle}>Yearly Totals vs. </span>
+        <span className={styles.chart__compareName}>{this.props.compareName}</span>
+      </span>;
+    }
+    return <span className={styles.chart__baseTitle}>Yearly Totals</span>;
   }
 
   renderChart({ data, onClickTick }) {
@@ -55,18 +73,27 @@ class SingleAthleteYearChart extends BaseChart {
           }}
         />
         <Bar
-          dataKey="value"
-          fill="#6100FF"
+          dataKey={this.state.hasCompare ? 'primary' : 'value'}
+          fill="#450082"
           onClick={this.onClickBar}
         />
+        {this.state.hasCompare &&
+          <Bar
+            dataKey="secondary"
+            fill="#914dff"
+            onClick={this.onClickBar}
+          />
+        }
       </BarChart>
     );
   }
 }
 
-SingleAthleteYearChart.propTypes = {
+SingleAthleteChart.propTypes = {
   data: PropTypes.array.isRequired,
   year: PropTypes.string.isRequired,
+  compare: PropTypes.number.isRequired,
+  compareName: PropTypes.string.isRequired,
 };
 
-export default SingleAthleteYearChart;
+export default SingleAthleteChart;

@@ -6,6 +6,7 @@ import AthleteHeader from '../components/lib/AthleteHeader';
 import { locale } from '../config';
 import * as styles from '../components/Layout.css';
 import {
+  mergeStats,
   statsForAthletePage,
   statsForSingleAthleteChart,
   statsForSingleAthleteYearChart,
@@ -22,8 +23,10 @@ class Rider extends Component {
     this.changeYear = this.changeYear.bind(this);
     this.onChangeSearchUsers = this.onChangeSearchUsers.bind(this);
     this.state = {
-      displayYear: 'all',
       compare: 0,
+      compareName: '',
+      chartData: statsForSingleAthleteChart(props.stats.data),
+      displayYear: 'all',
     };
   }
 
@@ -59,8 +62,38 @@ class Rider extends Component {
   }
 
   onChangeSearchUsers(selection) {
-    const compare = selection && selection.value ? selection.value : 0;
-    this.setState({ compare });
+    if (!selection) {
+      const chartData = 'all' === this.state.displayYear ?
+        statsForSingleAthleteChart(this.props.stats.data) :
+        statsForSingleAthleteYearChart(this.state.displayYear, this.props.stats.data);
+
+      // Revert to default state if selection is unset
+      this.setState({
+        compare: 0,
+        compareName: '',
+        chartData,
+      });
+    } else {
+      // Fetch compared athlete data, format, merge with primary athlete
+      // then update state to trigger chart re-render
+      APIRequest(`/athletes/${selection.value}`)
+        .then((response) => statsForAthletePage(response[0].stats))
+        .then(({ data }) => ('all' === this.state.displayYear ?
+          statsForSingleAthleteChart(data) :
+          statsForSingleAthleteYearChart(data)
+        ))
+        .then((compareStats) => ('all' === this.state.displayYear ?
+          mergeStats(statsForSingleAthleteChart(this.props.stats.data), compareStats) :
+          mergeStatsYear(this.state.chartData, compareStats)
+        ))
+        .then((mergedStats) => {
+          this.setState({
+            compare: selection.value,
+            compareName: selection.label,
+            chartData:mergedStats,
+          });
+        });
+    }
   }
 
   render() {
@@ -86,11 +119,13 @@ class Rider extends Component {
         </div>
         {'all' === this.state.displayYear ?
           <SingleAthleteChart
-            data={statsForSingleAthleteChart(stats)}
+            data={this.state.chartData}
             onClickTick={this.onClickTick}
+            compare={this.state.compare}
+            compareName={this.state.compareName}
           /> :
           <SingleAthleteYearChart
-            data={statsForSingleAthleteYearChart(this.state.displayYear, stats.data)}
+            data={statsForSingleAthleteYearChart(this.state.displayYear, this.state.chartData)}
             year={this.state.displayYear}
             onClickPrevYear={this.canNavigateToYear('prev') ? (e) => this.changeYear(e, -1) : false}
             onClickNextYear={this.canNavigateToYear('next') ? (e) => this.changeYear(e, 1) : false}
