@@ -20,9 +20,10 @@ class Rider extends Component {
     this.onClickTick = this.onClickTick.bind(this);
     this.canNavigateToYear = this.canNavigateToYear.bind(this);
     this.changeYear = this.changeYear.bind(this);
+    this.onChangeSearchUsers = this.onChangeSearchUsers.bind(this);
     this.state = {
       displayYear: 'all',
-      compare: [],
+      compare: 0,
     };
   }
 
@@ -55,6 +56,11 @@ class Rider extends Component {
     if (-1 !== this.props.stats.years.indexOf(targetYear)) {
       this.setState({ displayYear: targetYear });
     }
+  }
+
+  onChangeSearchUsers(selection) {
+    const compare = selection && selection.value ? selection.value : 0;
+    this.setState({ compare });
   }
 
   render() {
@@ -94,7 +100,8 @@ class Rider extends Component {
         <div>
           <h3 style={{ textAlign: 'center' }}>Compare to...</h3>
           <SearchUsers
-            onChange={(evt) => { debugger; }}
+            onChange={this.onChangeSearchUsers}
+            value={this.state.compare}
           />
         </div>
       </Layout>
