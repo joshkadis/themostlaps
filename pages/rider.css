@@ -1,0 +1,32 @@
+@import '../styles/vars';
+
+.rider__header {
+  align-items: baseline;
+  line-height: 1;
+
+  @media (--largeViewport) {
+    display: flex;
+  }
+}
+
+.rider__header--info {
+  &::before {
+    content: '/ ';
+    font-weight: 700;
+    color: var(--purple);
+  }
+
+  @media (--largeViewport) {
+    transform: translateY(-14px);
+    margin-left: 1.5rem;
+  }
+
+  @media (--smallViewport) {
+    display: block;
+    margin-bottom: 1rem;
+
+    &:first-of-type {
+      margin-top: 1rem;
+    }
+  }
+}

@@ -6,6 +6,7 @@
 @import './lib/AthleteHeader.css';
 @import './charts/Chart.css';
 @import '../pages/index.css';
+@import '../pages/rider.css';
 
 :global(html),
 :global(body),

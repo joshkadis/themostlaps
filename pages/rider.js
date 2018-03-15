@@ -63,15 +63,19 @@ class Rider extends Component {
         pathname={pathname}
         query={query}
       >
-        <AthleteHeader
-          img={athlete.profile}
-          firstname={athlete.firstname}
-          lastname={athlete.lastname}
-          className="biggest"
-        />
-        <div className="big">
-          <p>All-time laps: <strong>{stats.allTime.toLocaleString(locale)}</strong></p>
-          <p>Biggest ride: <strong>{stats.single} laps</strong></p>
+        <div className={styles.rider__header}>
+          <AthleteHeader
+            img={athlete.profile}
+            firstname={athlete.firstname}
+            lastname={athlete.lastname}
+            className="biggest"
+          />
+          <span className={`big ${styles['rider__header--info']}`}>
+            All-time laps: <strong>{stats.allTime.toLocaleString(locale)}</strong>
+          </span>
+          <span className={`big ${styles['rider__header--info']}`}>
+            Biggest ride: <strong>{stats.single} laps</strong>
+          </span>
         </div>
         {'all' === this.state.displayYear ?
           <SingleAthleteChart
