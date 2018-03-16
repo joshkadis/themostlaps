@@ -27,6 +27,8 @@ class Rider extends Component {
     super(props);
     this.onChangeSearchUsers = this.onChangeSearchUsers.bind(this);
     this.onSelectYear = this.onSelectYear.bind(this);
+    this.canGoToYear = this.canGoToYear.bind(this);
+    this.goToYear = this.goToYear.bind(this);
 
     this.defaultCompareTo = {
       compareAthlete: {},
@@ -38,6 +40,39 @@ class Rider extends Component {
       primaryData: statsForSingleAthleteChart(props.stats.data),
       year: 'all',
     });
+  }
+
+/**
+  * Determine if next or prev year is inside data range for main user
+  *
+   * @param {Bool} shouldIncrement `true` to increment, `false` to decrement
+  * @{return} Bool
+  */
+  canGoToYear(shouldIncrement) {
+    const compareToYear = shouldIncrement ?
+      [...this.props.stats.years].pop() :
+      [...this.props.stats.years].shift();
+    return this.state.displayYear !== compareToYear;
+  }
+
+  /**
+   * Increment or decrement current state year
+   *
+   * @param {Bool} shouldIncrement `true` to increment, `false` to decrement
+   */
+  goToYear(shouldIncrement) {
+    const currentYear = parseInt(this.state.year, 10);
+    let toYear = null;
+
+    if (shouldIncrement && this.canGoToYear(true)) {
+      toYear = (currentYear + 1);
+    } else if (!shouldIncrement && this.canGoToYear(false)) {
+      toYear = (currentYear - 1);
+    }
+
+    if(toYear) {
+      this.onSelectYear(toYear.toString());
+    }
   }
 
   /**
@@ -67,6 +102,9 @@ class Rider extends Component {
     this.setState(newState);
   }
 
+  /**
+   * Handle change in search/select field for user to compare to
+   */
   onChangeSearchUsers(evt) {
     if (!evt || !evt.value) {
       this.setState(this.defaultCompareTo);
@@ -153,8 +191,8 @@ class Rider extends Component {
             hasCompare={(0 !== this.state.compareToId)}
             primaryData={this.state.primaryData}
             year={this.state.year}
-            onClickPrevYear={false}
-            onClickNextYear={false}
+            onClickPrevYear={this.canGoToYear(false) ? () => this.goToYear(false) : false}
+            onClickNextYear={this.canGoToYear(true) ? () => this.goToYear(true) : false}
             onClickBack={() => this.onSelectYear('all')}
           />
         }
