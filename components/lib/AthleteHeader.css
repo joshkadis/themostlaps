@@ -3,6 +3,15 @@
   align-items: center;
 }
 
+.athlete-header__reverse {
+  flex-direction: row-reverse;
+
+  & .athlete-header__name {
+    margin-left: 0;
+    margin-right: .7rem;
+  }
+}
+
 .athlete-header__avatar {
   max-width: 48px;
   border-radius: 50%;
