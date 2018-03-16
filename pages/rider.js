@@ -2,10 +2,8 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Layout from '../components/Layout';
 import { getPathnameFromContext, APIRequest } from '../utils';
-import AthleteHeader from '../components/lib/AthleteHeader';
-import { locale } from '../config';
+import RiderPageHeader from '../components/RiderPageHeader';
 import * as styles from '../components/Layout.css';
-import SearchUsers from '../components/lib/SearchUsers';
 import {
   statsForAthletePage,
   statsForSingleAthleteChart,
@@ -19,7 +17,11 @@ function getCompareTo({ compareToId, compareAthlete }) {
     return { id: compareToId };
   }
 
-  return Object.assign(compareAthlete.athlete, { id: compareToId });
+  return Object.assign(compareAthlete.athlete, {
+    id: compareToId,
+    allTime: compareAthlete.stats.allTime,
+    single: compareAthlete.stats.single
+  });
 }
 
 class Rider extends Component {
@@ -148,35 +150,14 @@ class Rider extends Component {
         pathname={pathname}
         query={query}
       >
-        <div className={styles.rider__header}>
-          <AthleteHeader
-            img={athlete.profile}
-            firstname={athlete.firstname}
-            lastname={athlete.lastname}
-            className="biggest"
-          />
-          <span className={`big ${styles['rider__header--info']}`}>
-            All-time laps: <strong>{stats.allTime.toLocaleString(locale)}</strong>
-          </span>
-          <span className={`big ${styles['rider__header--info']}`}>
-            Biggest ride: <strong>{stats.single} laps</strong>
-          </span>
-        </div>
+        <RiderPageHeader
+          firstname={athlete.firstname}
+          lastname={athlete.lastname}
+          img={athlete.profile}
+          allTime={stats.allTime}
+          single={stats.single}
+        />
 
-        <div>
-          <h3 style={{ textAlign: 'center' }}>Compare to...</h3>
-          <SearchUsers
-            onChange={this.onChangeSearchUsers}
-            value={this.state.compareToId}
-          />
-        </div>
-        <div>
-          {['all', 2013, 2014, 2015, 2016, 2017, 2018].map((year) => (
-            <button key={year} onClick={() => this.onSelectYear(year.toString())}>
-              {year}
-            </button>
-          ))}
-        </div>
         {'all' === this.state.year ?
           <AllYears
             compareTo={getCompareTo(this.state)}
@@ -184,6 +165,7 @@ class Rider extends Component {
             hasCompare={(0 !== this.state.compareToId)}
             primaryData={this.state.primaryData}
             onClickTick={this.onSelectYear}
+            onChange={this.onChangeSearchUsers}
           /> :
           <SingleYear
             compareTo={getCompareTo(this.state)}
@@ -194,12 +176,9 @@ class Rider extends Component {
             onClickPrevYear={this.canGoToYear(false) ? () => this.goToYear(false) : false}
             onClickNextYear={this.canGoToYear(true) ? () => this.goToYear(true) : false}
             onClickBack={() => this.onSelectYear('all')}
+            onChange={this.onChangeSearchUsers}
           />
         }
-        <div>
-          <h3>State</h3>
-          <pre>{JSON.stringify(this.state, null, 4)}</pre>
-        </div>
       </Layout>
     );
   }

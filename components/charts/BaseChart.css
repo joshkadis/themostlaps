@@ -29,3 +29,19 @@
 .chart__compareName {
   color: var(--purpleLight);
 }
+
+.compare_container {
+  margin: 1.5rem 0;
+}
+.compare_searchUsers {
+  width: 300px;
+  margin-right: 1rem;
+}
+
+.compare_searchContainer {
+  display: flex;
+}
+
+.compare_closeSearchUsersButton {
+  background: color(red lightness(60%));
+}

@@ -20,6 +20,7 @@ const TooltipContent = ({ label, payload }) => {
 // compareData: PropTypes.array, // Compare athlete's data
 // hasCompare: PropTypes.bool.isRequired, // Compare athlete ID !== 0
 // primaryData: PropTypes.array.isRequired, // Athlete whose page we're looking at
+// onChange: PropTypes.func.isRequired,
 //
 // Custom props:
 // year: PropTypes.string.isRequired,
@@ -48,7 +49,10 @@ class SingleYear extends BaseChart {
             >prev</a>
           }
 
-          {`${props.year} Laps`}
+          {this.props.hasCompare ?
+            this.renderBaseTitleCompare(`${props.year} Laps`, 'Change') :
+            this.renderBaseTitle(`${props.year} Laps`, 'Compare')
+          }
 
           {'function' === typeof props.onClickNextYear &&
             <a

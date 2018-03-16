@@ -1,6 +1,6 @@
 @import '../styles/vars';
 
-.rider__header {
+.riderPageHeader {
   align-items: baseline;
   line-height: 1;
 
@@ -9,7 +9,7 @@
   }
 }
 
-.rider__header--info {
+.riderPageHeader_info {
   &::before {
     content: '/ ';
     font-weight: 700;

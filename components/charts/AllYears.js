@@ -10,7 +10,6 @@ import BaseChart from './BaseChart';
 import * as styles from '../Layout.css';
 import { mergeStats } from '../../utils/athleteStatsClient';
 
-
 const TooltipContent = ({ label, payload }) => {
   const value = ('undefined' !== typeof payload && payload.length) ? payload[0].value : 0;
   return <span>{label}: {value} laps</span>;
@@ -21,6 +20,7 @@ const TooltipContent = ({ label, payload }) => {
 // compareData: PropTypes.array, // Compare athlete's data
 // hasCompare: PropTypes.bool.isRequired, // Compare athlete ID !== 0
 // primaryData: PropTypes.array.isRequired, // Athlete whose page we're looking at
+// onChange: PropTypes.func.isRequired,
 //
 // Custom props:
 // onClickTick: PropTypes.func.isRequired,
@@ -36,12 +36,9 @@ class AllYears extends BaseChart {
 
   renderTitle({ hasCompare, compareTo }) {
     if (hasCompare) {
-      return <span>
-        <span className={styles.chart__baseTitle}>Yearly Totals vs. </span>
-        <span className={styles.chart__compareName}>{`${compareTo.firstname} ${compareTo.lastname}`}</span>
-      </span>;
+      return this.renderBaseTitleCompare('Yearly Totals', 'Change');
     }
-    return <span className={styles.chart__baseTitle}>Yearly Totals</span>;
+    return this.renderBaseTitle('Yearly Totals', 'Compare');
   }
 
   renderChart(props, state) {
