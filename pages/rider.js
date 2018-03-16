@@ -20,8 +20,7 @@ class Rider extends Component {
 
     this.defaultCompareTo = {
       compareAthlete: {},
-      compareYearData: [],
-      compareData: {},
+      compareData: [],
       compareToId: 0,
     }
 
@@ -41,9 +40,9 @@ class Rider extends Component {
     const newState = { year, primaryData };
 
     if (this.state.compareToId > 0) {
-      newState.compareYearData = 'all' === year ?
-        statsForSingleAthleteChart(this.state.compareData) :
-        statsForSingleAthleteYearChart(year, this.state.compareData);
+      newState.compareData = 'all' === year ?
+        statsForSingleAthleteChart(this.state.compareAthlete.stats.data) :
+        statsForSingleAthleteYearChart(year, this.state.compareAthlete.stats.data);
     }
 
     this.setState(newState);
@@ -73,15 +72,14 @@ class Rider extends Component {
         if (!athleteData) {
           return;
         }
-        const compareYearData = 'all' === this.state.year ?
+        const compareData = 'all' === this.state.year ?
           statsForSingleAthleteChart(athleteData.stats.data) :
           statsForSingleAthleteYearChart(this.state.year, athleteData.stats.data);
 
         this.setState({
-          compareAthlete: athleteData.athlete,
+          compareAthlete: athleteData,
+          compareData,
           compareToId: evt.value,
-          compareData: athleteData.stats.data,
-          compareYearData,
         });
       })
   }
