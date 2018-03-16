@@ -33,6 +33,12 @@
       text-decoration: none;
     }
   };
+  --appendSpace: {
+    white-space: pre;
+    &::after {
+      content: ' ';
+    }
+  }
 }
 
 @custom-media --smallViewport (max-width: 799px);

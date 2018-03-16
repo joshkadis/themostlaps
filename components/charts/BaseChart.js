@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import * as styles from '../Layout.css';
 import Button from '../lib/Button';
 import SearchUsers from '../lib/SearchUsers';
@@ -22,7 +23,7 @@ class BaseChart extends Component {
     this.renderBaseTitleCompare = this.renderBaseTitleCompare.bind(this);
     this.state = {
       width: 500,
-      height: 400,
+      height: 350,
       chartData: this.transformData(props),
       showSelectField: false,
     }
@@ -55,22 +56,26 @@ class BaseChart extends Component {
   renderCompareButton(buttonText = 'Compare') {
     return (<Button
       onClick={this.onClickCompareButton}
-      style={{ fontSize: '1rem' }}
+      className={styles.compare__compareButton}
     >
       {buttonText}
     </Button>);
   }
 
   renderBaseTitle(baseTitleText, buttonText) {
-    return <span className={styles.chart__baseTitle}>
-      {baseTitleText}
+    return <span className={styles.chart__baseTitle__container}>
+      <span className={styles.chart__baseTitle}>
+        {baseTitleText}
+      </span>
       {this.renderCompareButton(buttonText)}
     </span>
   }
 
   renderBaseTitleCompare(baseTitleText, buttonText) {
-    return <span>
-      <span className={styles.chart__baseTitle}>{`${baseTitleText} vs. `}</span>
+    return <span className={styles.chart__baseTitle__container}>
+      <span className={styles.chart__baseTitle}>
+        {`${baseTitleText} vs.`}
+      </span>
       <span className={styles.chart__compareName}>
         <AthleteHeader
           firstname={this.props.compareTo.firstname}
@@ -78,8 +83,8 @@ class BaseChart extends Component {
           img={this.props.compareTo.profile}
           reverse
         />
-        {this.renderCompareButton(buttonText)}
       </span>
+      {this.renderCompareButton(buttonText)}
     </span>
   }
 
@@ -87,9 +92,13 @@ class BaseChart extends Component {
     return (
       <div
         ref={(el) => this.container = el}
+        className={classNames(
+          styles.chart__container,
+          { [styles.chart__container__selectFieldHidden]: !this.state.showSelectField },
+        )}
       >
         {this.state.showSelectField &&
-          <div className={styles.compare_searchContainer}>
+          <div className={styles.compare__searchContainer}>
             <SearchUsers
               onChange={this.props.onChange}
               value={this.props.compareTo.id || 0}

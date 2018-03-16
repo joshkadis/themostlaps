@@ -23,7 +23,7 @@ const RiderPageHeader = ({
       img={img}
       firstname={firstname}
       lastname={lastname}
-      className="biggest"
+      className={`biggest ${styles.riderPageHeader_athleteHeader}`}
     />
     <span className={getRiderInfoClassName()}>
       All-time laps: <strong>{allTime.toLocaleString(locale)}</strong>

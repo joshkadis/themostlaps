@@ -6,7 +6,12 @@
 
   @media (--largeViewport) {
     display: flex;
+    justify-content: center;
   }
+}
+
+.riderPageHeader_athleteHeader {
+  font-weight: bold;
 }
 
 .riderPageHeader_info {
