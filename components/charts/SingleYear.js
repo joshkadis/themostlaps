@@ -46,13 +46,13 @@ class SingleYear extends BaseChart {
             this.renderBaseTitle(`${props.year} Laps`, 'Compare')
           }
         </h2>
-        <div>
+        <div className={styles.chart__singleYear__nav}>
           {'function' === typeof props.onClickPrevYear &&
             <a
               className={styles['chart__header--nav']}
               href="#0"
               onClick={props.onClickPrevYear}
-            >{`<${(parseInt(props.year, 10) - 1)}`}</a>
+            >{`< ${(parseInt(props.year, 10) - 1)}`}</a>
           }
 
           {'function' === typeof props.onClickBack &&
@@ -60,7 +60,7 @@ class SingleYear extends BaseChart {
               className={styles['chart__header--nav']}
               href="#0"
               onClick={props.onClickBack}
-            >back</a>
+            >All Years</a>
           }
 
           {'function' === typeof props.onClickNextYear &&
@@ -68,7 +68,7 @@ class SingleYear extends BaseChart {
               className={styles['chart__header--nav']}
               href="#0"
               onClick={props.onClickNextYear}
-            >{`${(parseInt(props.year, 10) + 1)}>`}</a>
+            >{`${(parseInt(props.year, 10) + 1)} >`}</a>
           }
         </div>
       </div>

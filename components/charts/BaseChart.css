@@ -8,6 +8,7 @@
 
 .chart__title {
   text-align: center;
+  margin-bottom: .5rem;
 }
 
 .chart__singleAthlete {
@@ -42,10 +43,24 @@
   margin: 1.5rem 0;
 }
 
-.chart__baseTitle__container {
+.chart__baseTitle__container,
+.chart__singleYear__nav {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.chart__singleYear__nav {
+  margin-bottom: .5rem;
+
+  & :global(a) {
+    font-weight: bold;
+    margin-left: 1rem;
+
+    &:first-of-type {
+      margin-left: 0;
+    }
+  }
 }
 
 .compare__compareButton {
