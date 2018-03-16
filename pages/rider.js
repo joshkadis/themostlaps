@@ -11,12 +11,22 @@ import {
   statsForSingleAthleteChart,
   statsForSingleAthleteYearChart,
 } from '../utils/athleteStatsClient';
+import AllYears from '../components/charts/AllYears';
+import SingleYear from '../components/charts/SingleYear';
+
+function getCompareTo({ compareToId, compareAthlete }) {
+  if (!compareToId || !compareAthlete.athlete) {
+    return { id: compareToId };
+  }
+
+  return Object.assign(compareAthlete.athlete, { id: compareToId });
+}
 
 class Rider extends Component {
   constructor(props) {
     super(props);
     this.onChangeSearchUsers = this.onChangeSearchUsers.bind(this);
-    this.onChangeYear = this.onChangeYear.bind(this);
+    this.onSelectYear = this.onSelectYear.bind(this);
 
     this.defaultCompareTo = {
       compareAthlete: {},
@@ -30,8 +40,17 @@ class Rider extends Component {
     });
   }
 
-  onChangeYear(year) {
-    year = year.toString();
+  /**
+   * Pass year directly or in recharts handler like { value: year }
+   *
+   * @param {String|Number|Object} year
+   */
+  onSelectYear(year) {
+    if ('undefined' === typeof year || !year) {
+      return;
+    }
+
+    year = !!year.value ? year.value.toString() : year.toString();
 
     const primaryData = 'all' === year ?
       statsForSingleAthleteChart(this.props.stats.data) :
@@ -115,11 +134,30 @@ class Rider extends Component {
         </div>
         <div>
           {['all', 2013, 2014, 2015, 2016, 2017, 2018].map((year) => (
-            <button key={year} onClick={() => this.onChangeYear(year.toString())}>
+            <button key={year} onClick={() => this.onSelectYear(year.toString())}>
               {year}
             </button>
           ))}
         </div>
+        {'all' === this.state.year ?
+          <AllYears
+            compareTo={getCompareTo(this.state)}
+            compareData={this.state.compareData || []}
+            hasCompare={(0 !== this.state.compareToId)}
+            primaryData={this.state.primaryData}
+            onClickTick={this.onSelectYear}
+          /> :
+          <SingleYear
+            compareTo={getCompareTo(this.state)}
+            compareData={this.state.compareData || []}
+            hasCompare={(0 !== this.state.compareToId)}
+            primaryData={this.state.primaryData}
+            year={this.state.year}
+            onClickPrevYear={false}
+            onClickNextYear={false}
+            onClickBack={() => this.onSelectYear('all')}
+          />
+        }
         <div>
           <h3>State</h3>
           <pre>{JSON.stringify(this.state, null, 4)}</pre>
