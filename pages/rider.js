@@ -5,95 +5,85 @@ import { getPathnameFromContext, APIRequest } from '../utils';
 import AthleteHeader from '../components/lib/AthleteHeader';
 import { locale } from '../config';
 import * as styles from '../components/Layout.css';
+import SearchUsers from '../components/lib/SearchUsers';
 import {
-  mergeStats,
   statsForAthletePage,
   statsForSingleAthleteChart,
   statsForSingleAthleteYearChart,
 } from '../utils/athleteStatsClient';
-import SingleAthleteChart from '../components/charts/SingleAthlete';
-import SingleAthleteYearChart from '../components/charts/SingleAthleteYear';
-import SearchUsers from '../components/lib/SearchUsers';
 
 class Rider extends Component {
   constructor(props) {
     super(props);
-    this.onClickTick = this.onClickTick.bind(this);
-    this.canNavigateToYear = this.canNavigateToYear.bind(this);
-    this.changeYear = this.changeYear.bind(this);
     this.onChangeSearchUsers = this.onChangeSearchUsers.bind(this);
-    this.state = {
-      compare: 0,
-      compareName: '',
-      chartData: statsForSingleAthleteChart(props.stats.data),
-      displayYear: 'all',
-    };
+    this.onChangeYear = this.onChangeYear.bind(this);
+
+    this.defaultCompareTo = {
+      compareAthlete: {},
+      compareYearData: [],
+      compareData: {},
+      compareToId: 0,
+    }
+
+    this.state = Object.assign(this.defaultCompareTo, {
+      primaryData: statsForSingleAthleteChart(props.stats.data),
+      year: 'all',
+    });
   }
 
-  onClickTick({ value }) {
-    if ('undefined' === typeof value) {
+  onChangeYear(year) {
+    year = year.toString();
+
+    const primaryData = 'all' === year ?
+      statsForSingleAthleteChart(this.props.stats.data) :
+      statsForSingleAthleteYearChart(year, this.props.stats.data);
+
+    const newState = { year, primaryData };
+
+    if (this.state.compareToId > 0) {
+      newState.compareYearData = 'all' === year ?
+        statsForSingleAthleteChart(this.state.compareData) :
+        statsForSingleAthleteYearChart(year, this.state.compareData);
+    }
+
+    this.setState(newState);
+  }
+
+  onChangeSearchUsers(evt) {
+    if (!evt || !evt.value) {
+      this.setState(this.defaultCompareTo);
       return;
     }
-    this.setState({ displayYear: value.toString() });
-  }
 
-  canNavigateToYear(direction) {
-    const compareToYear = direction === 'next' ?
-      [...this.props.stats.years].pop() :
-      [...this.props.stats.years].shift();
-    return this.state.displayYear !== compareToYear;
-  }
-
-  changeYear(evt, incr) {
-    if ('all' === incr) {
-      this.setState({ displayYear: incr });
+    if (evt.value === this.state.compareToId) {
       return;
     }
 
-    evt.preventDefault();
-    if (isNaN(this.state.displayYear)) {
-      return;
-    }
+    APIRequest(`/athletes/${evt.value}`)
+      .then((apiResponse) => {
+        if (apiResponse.length) {
+          return {
+            athlete: apiResponse[0].athlete,
+            stats: statsForAthletePage(apiResponse[0].stats),
+          };
+        }
+        return false
+      })
+      .then((athleteData) => {
+        if (!athleteData) {
+          return;
+        }
+        const compareYearData = 'all' === this.state.year ?
+          statsForSingleAthleteChart(athleteData.stats.data) :
+          statsForSingleAthleteYearChart(this.state.year, athleteData.stats.data);
 
-    const targetYear = (parseInt(this.state.displayYear, 10) + incr).toString();
-    if (-1 !== this.props.stats.years.indexOf(targetYear)) {
-      this.setState({ displayYear: targetYear });
-    }
-  }
-
-  onChangeSearchUsers(selection) {
-    if (!selection) {
-      const chartData = 'all' === this.state.displayYear ?
-        statsForSingleAthleteChart(this.props.stats.data) :
-        statsForSingleAthleteYearChart(this.state.displayYear, this.props.stats.data);
-
-      // Revert to default state if selection is unset
-      this.setState({
-        compare: 0,
-        compareName: '',
-        chartData,
-      });
-    } else {
-      // Fetch compared athlete data, format, merge with primary athlete
-      // then update state to trigger chart re-render
-      APIRequest(`/athletes/${selection.value}`)
-        .then((response) => statsForAthletePage(response[0].stats))
-        .then(({ data }) => ('all' === this.state.displayYear ?
-          statsForSingleAthleteChart(data) :
-          statsForSingleAthleteYearChart(data)
-        ))
-        .then((compareStats) => ('all' === this.state.displayYear ?
-          mergeStats(statsForSingleAthleteChart(this.props.stats.data), compareStats) :
-          mergeStatsYear(this.state.chartData, compareStats)
-        ))
-        .then((mergedStats) => {
-          this.setState({
-            compare: selection.value,
-            compareName: selection.label,
-            chartData:mergedStats,
-          });
+        this.setState({
+          compareAthlete: athleteData.athlete,
+          compareToId: evt.value,
+          compareData: athleteData.stats.data,
+          compareYearData,
         });
-    }
+      })
   }
 
   render() {
@@ -117,27 +107,24 @@ class Rider extends Component {
             Biggest ride: <strong>{stats.single} laps</strong>
           </span>
         </div>
-        {'all' === this.state.displayYear ?
-          <SingleAthleteChart
-            data={this.state.chartData}
-            onClickTick={this.onClickTick}
-            compare={this.state.compare}
-            compareName={this.state.compareName}
-          /> :
-          <SingleAthleteYearChart
-            data={statsForSingleAthleteYearChart(this.state.displayYear, this.state.chartData)}
-            year={this.state.displayYear}
-            onClickPrevYear={this.canNavigateToYear('prev') ? (e) => this.changeYear(e, -1) : false}
-            onClickNextYear={this.canNavigateToYear('next') ? (e) => this.changeYear(e, 1) : false}
-            onClickBack={(e) => this.changeYear(e, 'all')}
-          />
-        }
+
         <div>
           <h3 style={{ textAlign: 'center' }}>Compare to...</h3>
           <SearchUsers
             onChange={this.onChangeSearchUsers}
-            value={this.state.compare}
+            value={this.state.compareToId}
           />
+        </div>
+        <div>
+          {['all', 2013, 2014, 2015, 2016, 2017, 2018].map((year) => (
+            <button key={year} onClick={() => this.onChangeYear(year.toString())}>
+              {year}
+            </button>
+          ))}
+        </div>
+        <div>
+          <h3>State</h3>
+          <pre>{JSON.stringify(this.state, null, 4)}</pre>
         </div>
       </Layout>
     );
