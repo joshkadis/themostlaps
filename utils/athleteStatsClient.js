@@ -1,4 +1,5 @@
 const { timePartString } = require('./dateTimeUtils');
+const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 /**
  * Format athlete stats for rider page
@@ -101,22 +102,23 @@ function statsForSingleAthleteYearChart(year, data) {
     return [];
   }
 
-  return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((month, idx) => ({
+  return months.map((month, idx) => ({
     month,
     value: data[year][timePartString(1 + idx)] || 0,
   }));
 }
 
 /**
- * Find year value in chart data
+ * Find value in chart data from adjacent key
  *
  * @param {Array} data
- * @param {Number} year
+ * @param {String} key
+ * @param {Number|String} value
  * @return {Number} Return 0 if year not found
  */
-function findValue(data, year) {
+function findValue(data, key, value) {
   for (let idx = 0; idx < data.length; idx++ ) {
-    if (year === data[idx].year) {
+    if (value === data[idx][key]) {
       return data[idx].value;
     }
   }
@@ -124,10 +126,10 @@ function findValue(data, year) {
 }
 
 /**
- * Merge stats for chart
+ * Merge stats for AllYears chart
  *
- * @param {Array} athlete1
- * @param {Array} athlete2
+ * @param {Array} primary Main athlete
+ * @param {Array} secondary Athlete for comparison
  * @return {Array}
  */
 function mergeStats(primary, secondary) {
@@ -140,15 +142,31 @@ function mergeStats(primary, secondary) {
   for (let year = min; year <= max; year++) {
     output = output.concat({
       year,
-      primary: findValue(primary, year),
-      secondary: findValue(secondary, year),
+      primary: findValue(primary, 'year', year),
+      secondary: findValue(secondary, 'year', year),
     });
   }
   return output;
 }
 
+/**
+ * Merge stats for SingleYear chart
+ *
+ * @param {Array} primary Main athlete
+ * @param {Array} secondary Athlete for comparison
+ * @return {Array}
+ */
+function mergeStatsSingleYear(primary, secondary) {
+  return months.map((month) => ({
+    month,
+    primary: findValue(primary, 'month', month),
+    secondary: findValue(secondary, 'month', month),
+  }));
+}
+
 module.exports = {
   mergeStats,
+  mergeStatsSingleYear,
   getMinMaxYears,
   statsForAthletePage,
   statsForSingleAthleteChart,
