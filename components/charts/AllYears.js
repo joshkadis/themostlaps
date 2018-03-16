@@ -35,10 +35,12 @@ class AllYears extends BaseChart {
   }
 
   renderTitle({ hasCompare, compareTo }) {
-    if (hasCompare) {
-      return this.renderBaseTitleCompare('Yearly Totals', 'Change');
-    }
-    return this.renderBaseTitle('Yearly Totals', 'Compare');
+    return <h2 className={styles.chart__title}>
+      {hasCompare ?
+        this.renderBaseTitleCompare('Yearly Totals', 'Change') :
+        this.renderBaseTitle('Yearly Totals', 'Compare')
+      }
+    </h2>;
   }
 
   renderChart(props, state) {

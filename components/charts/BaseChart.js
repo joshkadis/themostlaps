@@ -113,11 +113,9 @@ class BaseChart extends Component {
           </div>
         }
 
-        <h2
-          className={styles.chart__title}
-        >
+        <div>
           {this.renderTitle(this.props, this.state)}
-        </h2>
+        </div>
 
         {this.renderChart(this.props, this.state)}
       </div>
