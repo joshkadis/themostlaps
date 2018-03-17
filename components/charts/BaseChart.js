@@ -25,6 +25,7 @@ class BaseChart extends Component {
       height: 350,
       chartData: this.transformData(props),
       showSelectField: false,
+      shouldHideChart: true,
     }
   }
 
@@ -37,7 +38,10 @@ class BaseChart extends Component {
 
   componentDidMount() {
     if (this.container) {
-      this.setState({ width: this.container.clientWidth });
+      this.setState({
+        width: this.container.clientWidth,
+        shouldHideChart: false,
+      });
     }
   }
 
@@ -136,7 +140,7 @@ class BaseChart extends Component {
           {this.renderTitle(this.props, this.state)}
         </div>
 
-        {this.renderChart(this.props, this.state)}
+        {!this.state.shouldHideChart && this.renderChart(this.props, this.state)}
       </div>
     );
   }
