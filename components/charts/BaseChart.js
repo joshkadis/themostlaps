@@ -126,6 +126,7 @@ class BaseChart extends Component {
               onChange={this.props.onChange}
               value={this.props.compareTo.id || 0}
               wrapperClassName={styles.compare_searchUsers}
+              skipUsers={[this.props.primaryId]}
             />
             <Button
               onClick={this.onClickCloseSearchUsers}

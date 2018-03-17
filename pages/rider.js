@@ -145,6 +145,7 @@ class Rider extends Component {
 
   render() {
     const { pathname, query, stats, athlete } = this.props;
+
     return (
       <Layout
         pathname={pathname}
@@ -166,6 +167,7 @@ class Rider extends Component {
             primaryData={this.state.primaryData}
             onClickTick={this.onSelectYear}
             onChange={this.onChangeSearchUsers}
+            primaryId={parseInt(query.athleteId, 10)}
           /> :
           <SingleYear
             compareTo={getCompareTo(this.state)}

@@ -6,6 +6,7 @@ module.exports = {
     compareData: PropTypes.array, // Compare athlete's data
     hasCompare: PropTypes.bool.isRequired, // Compare athlete ID !== 0
     primaryData: PropTypes.array.isRequired, // Athlete whose page we're looking at
+    primaryId: PropTypes.number.isRequired,
     onChange: PropTypes.func.isRequired,
   },
   baseChartDefaultProps: {
