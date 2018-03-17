@@ -115,10 +115,6 @@ class BaseChart extends Component {
     return (
       <div
         ref={(el) => this.container = el}
-        className={classNames(
-          styles.chart__container,
-          { [styles.chart__container__selectFieldHidden]: !this.state.showSelectField },
-        )}
       >
         {this.state.showSelectField &&
           <div className={styles.compare__searchContainer}>
@@ -137,9 +133,11 @@ class BaseChart extends Component {
           </div>
         }
 
-        <div>
-          {this.renderTitle(this.props, this.state)}
-        </div>
+        {!this.state.showSelectField &&
+          <div className={styles.chart__titleContainer}>
+            {this.renderTitle(this.props, this.state)}
+          </div>
+        }
 
         {!this.state.shouldHideChart && this.renderChart(this.props, this.state)}
       </div>

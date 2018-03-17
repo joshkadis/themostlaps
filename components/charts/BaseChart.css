@@ -1,11 +1,5 @@
 @import '../../styles/vars';
 
-.chart__container {
-  &.chart__container__selectFieldHidden {
-    padding-top: 68px; /* field height + 2rem */
-  }
-}
-
 .chart__title {
   text-align: center;
   margin-bottom: .5rem;
@@ -70,15 +64,34 @@
 }
 
 .compare_searchUsers {
-  width: 300px;
+  width: 320px;
   margin-right: 1rem;
+
+  @media (--smallViewport) {
+    margin-bottom: .5rem;
+    margin-right: 0;
+    max-width: 100%;
+  }
 }
 
 .compare__searchContainer {
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  margin: 1rem 0;
+
+  @media (--largeViewport) {
+    height: 42px;
+  }
+
+  @media (--smallViewport) {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+.compare__searchContainer,
+.chart__titleContainer {
+  margin: 1.5rem 0;
 }
 
 .compare_closeSearchUsersButton {
