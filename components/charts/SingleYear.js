@@ -7,6 +7,10 @@ import {
   Tooltip,
 } from 'recharts';
 import BaseChart from './BaseChart';
+import {
+  baseChartPropTypes,
+  baseChartDefaultProps,
+} from './baseChartProps';
 import * as styles from '../Layout.css';
 import { mergeStatsSingleYear } from '../../utils/athleteStatsClient';
 
@@ -110,11 +114,12 @@ class SingleYear extends BaseChart {
   }
 }
 
-SingleYear.propTypes = {
+SingleYear.defaultProps = baseChartDefaultProps;
+SingleYear.propTypes = Object.assign(baseChartPropTypes, {
   year: PropTypes.string.isRequired,
   onClickPrevYear: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]).isRequired,
   onClickNextYear: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]).isRequired,
   onClickBack: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]).isRequired,
-};
+});
 
 export default SingleYear;

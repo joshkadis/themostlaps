@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import {
+  baseChartPropTypes,
+  baseChartDefaultProps,
+} from './baseChartProps';
 import classNames from 'classnames';
 import * as styles from '../Layout.css';
 import Button from '../lib/Button';
@@ -123,17 +126,7 @@ class BaseChart extends Component {
   }
 }
 
-BaseChart.defaultProps = {
-  compareTo: {},
-  compareData: [],
-};
-
-BaseChart.propTypes = {
-  compareTo: PropTypes.object, // Athlete metadata object
-  compareData: PropTypes.array, // Compare athlete's data
-  hasCompare: PropTypes.bool.isRequired, // Compare athlete ID !== 0
-  primaryData: PropTypes.array.isRequired, // Athlete whose page we're looking at
-  onChange: PropTypes.func.isRequired,
-};
+BaseChart.defaultProps = baseChartDefaultProps;
+BaseChart.propTypes = baseChartPropTypes;
 
 export default BaseChart;

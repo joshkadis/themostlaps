@@ -7,6 +7,10 @@ import {
   Tooltip,
 } from 'recharts';
 import BaseChart from './BaseChart';
+import {
+  baseChartPropTypes,
+  baseChartDefaultProps,
+} from './baseChartProps';
 import * as styles from '../Layout.css';
 import { mergeStats } from '../../utils/athleteStatsClient';
 
@@ -84,7 +88,8 @@ class AllYears extends BaseChart {
   }
 }
 
-AllYears.propTypes = Object.assign(BaseChart.propTypes, {
+AllYears.defaultProps = baseChartDefaultProps;
+AllYears.propTypes = Object.assign(baseChartPropTypes, {
   onClickTick: PropTypes.func.isRequired,
 });
 
