@@ -83,11 +83,13 @@ class SingleYear extends BaseChart {
         <XAxis dataKey="month" interval={0} />
         <YAxis />
         <Bar
+          label={this.renderBarLabel}
           dataKey={props.hasCompare ? 'primary' : 'value'}
           fill="#450082"
         />
         {props.hasCompare &&
           <Bar
+            label={this.renderBarLabel}
             dataKey="secondary"
             fill="#914dff"
           />

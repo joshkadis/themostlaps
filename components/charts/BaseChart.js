@@ -91,6 +91,26 @@ class BaseChart extends Component {
     </span>
   }
 
+  renderBarLabel({ value, x, y, width, height }) {
+    if (0 === value) {
+      return null;
+    }
+
+    return (
+      <text
+        x={x + width / 2}
+        y={y - 10}
+        width={width}
+        height={height}
+        className="recharts-text recharts-label"
+        text-anchor="middle"
+        fill="black"
+      >
+        <tspan x={x + width / 2} dy="0.355em">{value}</tspan>
+      </text>
+    );
+  }
+
   render() {
     return (
       <div

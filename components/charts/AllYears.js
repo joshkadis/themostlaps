@@ -55,12 +55,14 @@ class AllYears extends BaseChart {
         />
         <YAxis />
         <Bar
+          label={this.renderBarLabel}
           dataKey={props.hasCompare ? 'primary' : 'value'}
           fill="#450082"
           onClick={(evt) => props.onClickTick(evt.year || false)}
         />
         {props.hasCompare &&
           <Bar
+            label={this.renderBarLabel}
             dataKey="secondary"
             fill="#914dff"
             onClick={(evt) => props.onClickTick(evt.year || false)}
