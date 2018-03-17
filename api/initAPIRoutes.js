@@ -38,7 +38,7 @@ async function initAPIRoutes(server) {
 
   server.get('/api/ranking/:type', async (req, res) => {
     await handleAPIRequest(req, res, async ({ params, query }) => {
-      return await getRanking(params.type, (query.filter || false));
+      return await getRanking(params.type, query);
     });
   });
 

@@ -30,22 +30,39 @@ function validateInput(rankingType, filter = '') {
  * Get ranking for API request
  *
  * @param {String} rankingType
- * @param {String} filter
+ * @param {Object} query
  */
-async function getRanking(rankingType = null, filter = false) {
+async function getRanking(rankingType = null, query) {
+  const filter = query.filter || false;
   const validation = validateInput(rankingType, filter);
   if (validation.error) {
     return validation;
   }
 
+  // If request is for specific time period, use that as the stats key
+  // otherwise use the ranking type (allTime, single, etc)
   const statsKey = 'timePeriod' === rankingType ? filter : rankingType;
+
+  // Default to first page, 0-based
+  const page = query.page && !isNaN(query.page) ?
+    parseInt(query.page, 10) - 1 :
+    0;
+
+  // Allow limit query param
+  const limit = query.per_page && !isNaN(query.per_page) ?
+    parseInt(query.per_page, 10) :
+    apiConfig.rankingPerPage;
+
+  // Calculat offset
+  const skip = limit * page;
 
   const ranking = await Athlete.find(
     { [`stats.${statsKey}`]: { $gt: 0 } },
     defaultAthleteFields.join(' ').replace('stats', `stats.${statsKey}`),
     {
-      limit: 20,
-      sort: { [`stats.${statsKey}`]: -1 }
+      limit,
+      skip,
+      sort: { [`stats.${statsKey}`]: -1 },
     }
   );
 
