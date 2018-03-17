@@ -100,7 +100,7 @@ class SingleYear extends BaseChart {
 }
 
 SingleYear.defaultProps = baseChartDefaultProps;
-SingleYear.propTypes = Object.assign(baseChartPropTypes, {
+SingleYear.propTypes = Object.assign({...baseChartPropTypes}, {
   year: PropTypes.string.isRequired,
   onClickPrevYear: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]).isRequired,
   onClickNextYear: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]).isRequired,

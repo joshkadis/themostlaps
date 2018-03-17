@@ -74,7 +74,7 @@ class AllYears extends BaseChart {
 }
 
 AllYears.defaultProps = baseChartDefaultProps;
-AllYears.propTypes = Object.assign(baseChartPropTypes, {
+AllYears.propTypes = Object.assign({...baseChartPropTypes}, {
   onClickTick: PropTypes.func.isRequired,
 });
 

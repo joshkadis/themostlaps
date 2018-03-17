@@ -1,8 +1,4 @@
 import React, { Component } from 'react';
-import {
-  baseChartPropTypes,
-  baseChartDefaultProps,
-} from './baseChartProps';
 import classNames from 'classnames';
 import * as styles from '../Layout.css';
 import Button from '../lib/Button';
@@ -145,8 +141,5 @@ class BaseChart extends Component {
     );
   }
 }
-
-BaseChart.defaultProps = baseChartDefaultProps;
-BaseChart.propTypes = baseChartPropTypes;
 
 export default BaseChart;
