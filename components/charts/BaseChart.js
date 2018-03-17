@@ -4,6 +4,7 @@ import * as styles from '../Layout.css';
 import Button from '../lib/Button';
 import SearchUsers from '../lib/SearchUsers';
 import AthleteHeader from '../lib/AthleteHeader';
+import { breakpointPx } from '../../config';
 
 /**
  * Extendable Chart class requires methods:
@@ -25,7 +26,8 @@ class BaseChart extends Component {
       height: 350,
       chartData: this.transformData(props),
       showSelectField: false,
-      shouldHideChart: true,
+      shouldRenderChart: false,
+      shouldRenderHorizontal: false,
     }
   }
 
@@ -38,9 +40,13 @@ class BaseChart extends Component {
 
   componentDidMount() {
     if (this.container) {
+      const shouldRenderHorizontal =
+        'undefined' !== typeof window && window.innerWidth < breakpointPx;
+
       this.setState({
         width: this.container.clientWidth,
-        shouldHideChart: false,
+        shouldRenderHorizontal,
+        shouldRenderChart: true,
       });
     }
   }
@@ -140,7 +146,7 @@ class BaseChart extends Component {
           </div>
         }
 
-        {!this.state.shouldHideChart && this.renderChart(this.props, this.state)}
+        {this.state.shouldRenderChart && this.renderChart(this.props, this.state)}
       </div>
     );
   }
