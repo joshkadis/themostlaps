@@ -44,6 +44,16 @@
   align-items: center;
 }
 
+.chart__baseTitle__container {
+  @media (--smallViewport) {
+    flex-direction: column;
+
+    & > * {
+      margin-bottom: .25rem;
+    }
+  }
+}
+
 .chart__singleYear__nav {
   margin-bottom: .5rem;
 

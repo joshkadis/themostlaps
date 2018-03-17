@@ -1,12 +1,17 @@
 @import '../styles/vars';
 
 .riderPageHeader {
-  align-items: baseline;
+  display: flex;
   line-height: 1;
 
   @media (--largeViewport) {
-    display: flex;
+    align-items: baseline;
     justify-content: center;
+  }
+
+  @media (--smallViewport) {
+    flex-direction: column;
+    align-items: center;
   }
 }
 
