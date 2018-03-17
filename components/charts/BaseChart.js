@@ -118,6 +118,12 @@ class BaseChart extends Component {
     );
   }
 
+  getChartHeight({ height, shouldRenderHorizontal }, hasCompare) {
+    return hasCompare && shouldRenderHorizontal ?
+      height * 1.5 :
+      height;
+  }
+
   render() {
     return (
       <div

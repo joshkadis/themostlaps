@@ -74,14 +74,24 @@ class SingleYear extends BaseChart {
   }
 
   renderChart(props, state) {
+    let xAxis, yAxis;
+    if (state.shouldRenderHorizontal) {
+      xAxis = <XAxis type="number" />
+      yAxis = <YAxis dataKey="month" type="category" interval={0} />
+    } else {
+      xAxis = <XAxis dataKey="month" interval={0} />
+      yAxis = <YAxis />
+    }
+
     return (
       <BarChart
         width={state.width}
-        height={state.height}
+        height={this.getChartHeight(state, props.hasCompare)}
         data={state.chartData}
+        layout={state.shouldRenderHorizontal ? 'vertical' : 'horizontal'}
       >
-        <XAxis dataKey="month" interval={0} />
-        <YAxis />
+        {xAxis}
+        {yAxis}
         <Bar
           label={this.renderBarLabel}
           dataKey={props.hasCompare ? 'primary' : 'value'}

@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import {
   BarChart,
   Bar,
@@ -42,18 +43,28 @@ class AllYears extends BaseChart {
   }
 
   renderChart(props, state) {
+    let xAxis, yAxis;
+    if (state.shouldRenderHorizontal) {
+      xAxis = <XAxis type="number" />
+      yAxis = <YAxis dataKey="year" type="category" onClick={props.onClickTick} />
+    } else {
+      xAxis = <XAxis dataKey="year" onClick={props.onClickTick} />
+      yAxis = <YAxis />
+    }
+
     return (
       <BarChart
         width={state.width}
-        height={state.height}
+        height={this.getChartHeight(state, props.hasCompare)}
         data={state.chartData}
-        className={styles['chart__singleAthlete']}
+        className={classNames(
+          styles.chart__singleAthlete,
+          { [styles.chart__singleAthlete__horizontal]: state.shouldRenderHorizontal },
+        )}
+        layout={state.shouldRenderHorizontal ? 'vertical' : 'horizontal'}
       >
-        <XAxis
-          dataKey="year"
-          onClick={props.onClickTick}
-        />
-        <YAxis />
+        {xAxis}
+        {yAxis}
         <Bar
           label={this.renderBarLabel}
           dataKey={props.hasCompare ? 'primary' : 'value'}
