@@ -6,9 +6,14 @@ const Button = ({
   onClick = null,
   style = {},
   children = '',
+  disabled,
 }) => (
   <button
-    className={classNames(styles.button, className)}
+    className={classNames(
+      styles.button,
+      { [styles.button__disabled]: disabled },
+      className,
+    )}
     onClick={onClick}
     style={style}
   >

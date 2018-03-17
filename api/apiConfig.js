@@ -4,5 +4,5 @@ module.exports = {
     'timePeriod',
     'single',
   ],
-  rankingPerPage: 2,
+  rankingPerPage: 15,
 };
