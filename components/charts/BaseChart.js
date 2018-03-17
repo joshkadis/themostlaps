@@ -85,6 +85,7 @@ class BaseChart extends Component {
           lastname={this.props.compareTo.lastname}
           img={this.props.compareTo.profile}
           reverse
+          linkId={this.props.compareTo.id}
         />
       </span>
       {this.renderCompareButton(buttonText)}

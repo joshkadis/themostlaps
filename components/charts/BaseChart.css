@@ -31,6 +31,9 @@
 
 .chart__compareName {
   color: var(--purpleLight);
+  & a {
+    color: var(--purpleLight);
+  }
 }
 
 .compare_container {
