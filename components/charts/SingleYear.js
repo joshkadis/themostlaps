@@ -4,7 +4,6 @@ import {
   Bar,
   XAxis,
   YAxis,
-  Tooltip,
 } from 'recharts';
 import BaseChart from './BaseChart';
 import {
@@ -13,11 +12,6 @@ import {
 } from './baseChartProps';
 import * as styles from '../Layout.css';
 import { mergeStatsSingleYear } from '../../utils/athleteStatsClient';
-
-const TooltipContent = ({ label, payload }) => {
-  const value = ('undefined' !== typeof payload && payload.length) ? payload[0].value : 0;
-  return <span>{label}: {value} laps</span>;
-};
 
 // Inherited props
 // compareTo: PropTypes.object, // Athlete metadata object
@@ -88,17 +82,6 @@ class SingleYear extends BaseChart {
       >
         <XAxis dataKey="month" interval={0} />
         <YAxis />
-        <Tooltip
-          isAnimationActive={false}
-          content={<TooltipContent />}
-          cursor={false}
-          wrapperStyle={{
-            backgroundColor: 'white',
-            lineHeight: '1',
-            padding: '1rem',
-            border: '1px solid #914dff',
-          }}
-        />
         <Bar
           dataKey={props.hasCompare ? 'primary' : 'value'}
           fill="#450082"
