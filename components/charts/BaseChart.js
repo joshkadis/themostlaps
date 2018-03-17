@@ -98,22 +98,49 @@ class BaseChart extends Component {
     </span>
   }
 
-  renderBarLabel({ value, x, y, width, height }) {
+  renderBarLabel({ value, x, y, width, height }, shouldTranspose = false) {
     if (0 === value) {
       return null;
     }
 
+    let renderAttrs;
+    if (!shouldTranspose) {
+      renderAttrs = {
+        x: x + width / 2,
+        y: y - 10,
+        width: width,
+        height: height,
+        dx: null,
+        dy: '0.355em',
+      }
+    } else {
+      renderAttrs = {
+        x: x + width + 10,
+        y: y + height / 2,
+        height: width,
+        width: height,
+        dy: null,
+        dx: '0.355em',
+      }
+    }
+
     return (
       <text
-        x={x + width / 2}
-        y={y - 10}
-        width={width}
-        height={height}
+        x={renderAttrs.x}
+        y={renderAttrs.y}
+        width={renderAttrs.width}
+        height={renderAttrs.height}
         className="recharts-text recharts-label"
         textAnchor="middle"
         fill="black"
       >
-        <tspan x={x + width / 2} dy="0.355em">{value}</tspan>
+        <tspan
+          x={renderAttrs.x}
+          dx={renderAttrs.dx}
+          dy={renderAttrs.dy}
+        >
+          {value}
+        </tspan>
       </text>
     );
   }

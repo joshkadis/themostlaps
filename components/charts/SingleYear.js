@@ -74,6 +74,7 @@ class SingleYear extends BaseChart {
   }
 
   renderChart(props, state) {
+    const horiz = state.shouldRenderHorizontal;
     let xAxis, yAxis;
     if (state.shouldRenderHorizontal) {
       xAxis = <XAxis type="number" />
@@ -93,13 +94,13 @@ class SingleYear extends BaseChart {
         {xAxis}
         {yAxis}
         <Bar
-          label={this.renderBarLabel}
+          label={(coords) => this.renderBarLabel(coords, horiz)}
           dataKey={props.hasCompare ? 'primary' : 'value'}
           fill="#450082"
         />
         {props.hasCompare &&
           <Bar
-            label={this.renderBarLabel}
+            label={(coords) => this.renderBarLabel(coords, horiz)}
             dataKey="secondary"
             fill="#914dff"
           />

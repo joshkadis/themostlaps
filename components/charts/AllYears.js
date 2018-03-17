@@ -43,8 +43,9 @@ class AllYears extends BaseChart {
   }
 
   renderChart(props, state) {
+    const horiz = state.shouldRenderHorizontal;
     let xAxis, yAxis;
-    if (state.shouldRenderHorizontal) {
+    if (horiz) {
       xAxis = <XAxis type="number" />
       yAxis = <YAxis dataKey="year" type="category" onClick={props.onClickTick} />
     } else {
@@ -59,21 +60,21 @@ class AllYears extends BaseChart {
         data={state.chartData}
         className={classNames(
           styles.chart__singleAthlete,
-          { [styles.chart__singleAthlete__horizontal]: state.shouldRenderHorizontal },
+          { [styles.chart__singleAthlete__horizontal]: horiz },
         )}
-        layout={state.shouldRenderHorizontal ? 'vertical' : 'horizontal'}
+        layout={horiz ? 'vertical' : 'horizontal'}
       >
         {xAxis}
         {yAxis}
         <Bar
-          label={this.renderBarLabel}
+          label={(coords) => this.renderBarLabel(coords, horiz)}
           dataKey={props.hasCompare ? 'primary' : 'value'}
           fill="#450082"
           onClick={(evt) => props.onClickTick(evt.year || false)}
         />
         {props.hasCompare &&
           <Bar
-            label={this.renderBarLabel}
+            label={(coords) => this.renderBarLabel(coords, horiz)}
             dataKey="secondary"
             fill="#914dff"
             onClick={(evt) => props.onClickTick(evt.year || false)}
