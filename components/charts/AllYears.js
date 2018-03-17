@@ -60,6 +60,7 @@ class AllYears extends BaseChart {
         data={state.chartData}
         className={classNames(
           styles.chart__singleAthlete,
+          { [styles.chart__singleAthlete__vertical]: !horiz },
           { [styles.chart__singleAthlete__horizontal]: horiz },
         )}
         layout={horiz ? 'vertical' : 'horizontal'}
