@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import AthleteHeader from './lib/AthleteHeader';
-import * as styles from './RiderPageHeader.css';
+import * as styles from './Layout.css';
 import { locale } from '../config';
 
 

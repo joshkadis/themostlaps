@@ -3,6 +3,7 @@
 @import '../styles/vars';
 @import './RankingSelector.css';
 @import './RankingRow.css';
+@import './RiderPageHeader.css';
 @import './lib/AthleteHeader.css';
 @import './charts/BaseChart.css';
 @import '../pages/index.css';
