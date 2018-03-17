@@ -103,7 +103,7 @@ class BaseChart extends Component {
         width={width}
         height={height}
         className="recharts-text recharts-label"
-        text-anchor="middle"
+        textAnchor="middle"
         fill="black"
       >
         <tspan x={x + width / 2} dy="0.355em">{value}</tspan>
