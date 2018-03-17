@@ -38,7 +38,7 @@ class Rider extends Component {
       compareToId: 0,
     }
 
-    this.state = Object.assign(this.defaultCompareTo, {
+    this.state = Object.assign({...this.defaultCompareTo}, {
       primaryData: statsForSingleAthleteChart(props.stats.data),
       year: 'all',
     });
