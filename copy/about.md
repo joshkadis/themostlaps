@@ -6,6 +6,10 @@ The Most Laps was conceived, designed, and built by [Josh Kadis][1], a cyclist, 
 
 In case you were wondering, it's an isomorphic React web application with a MongoDB database.
 
+#### How can I contact you?
+
+[Email][6], [Twitter][7], or [Instagram][8], take your pick.
+
 #### How does it work?
 
 The most important thing to know is that we **do not** collect or retain any of your data without your consent. Once you authorize The Most Laps to access your Strava account, we look back through your past [segment efforts][2] and calculate your all-time, yearly, and monthly totals, and the most laps in a single ride. Then we check automatically every night to see if you've ridden any new laps, and we add those to your stats.
@@ -41,3 +45,6 @@ Check out our [Privacy Statement](/privacy) and [Terms of Service](/terms)
 [3]: https://www.strava.com/segments/5313629
 [4]: https://eepurl.com/dl6VVT
 [5]: https://www.strava.com/settings/apps
+[6]: mailto:info@themostlaps.com
+[7]: https://twitter.com/themostlaps
+[8]: https://instagram.com/themostlaps
