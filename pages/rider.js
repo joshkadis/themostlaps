@@ -31,6 +31,7 @@ class Rider extends Component {
     this.onSelectYear = this.onSelectYear.bind(this);
     this.canGoToYear = this.canGoToYear.bind(this);
     this.goToYear = this.goToYear.bind(this);
+    this.onChartRendered = this.onChartRendered.bind(this);
 
     this.defaultCompareTo = {
       compareAthlete: {},
@@ -41,13 +42,18 @@ class Rider extends Component {
     this.state = Object.assign({...this.defaultCompareTo}, {
       primaryData: statsForSingleAthleteChart(props.stats.data),
       year: 'all',
+      chartRendered: false,
     });
   }
 
-/**
+  onChartRendered() {
+    this.setState({ chartRendered: true });
+  }
+
+ /**
   * Determine if next or prev year is inside data range for main user
   *
-   * @param {Bool} shouldIncrement `true` to increment, `false` to decrement
+  * @param {Bool} shouldIncrement `true` to increment, `false` to decrement
   * @{return} Bool
   */
   canGoToYear(shouldIncrement) {
@@ -168,6 +174,7 @@ class Rider extends Component {
             onClickTick={this.onSelectYear}
             onChange={this.onChangeSearchUsers}
             primaryId={parseInt(query.athleteId, 10)}
+            onChartRendered={this.onChartRendered}
           /> :
           <SingleYear
             compareTo={getCompareTo(this.state)}
@@ -179,7 +186,19 @@ class Rider extends Component {
             onClickNextYear={this.canGoToYear(true) ? () => this.goToYear(true) : false}
             onClickBack={() => this.onSelectYear('all')}
             onChange={this.onChangeSearchUsers}
+            onChartRendered={this.onChartRendered}
           />
+        }
+        {this.state.chartRendered &&
+          <div style={{ textAlign: 'right'}}>
+            <a
+              className="strava_link"
+              href={`https://www.strava.com/athletes/${query.athleteId}`}
+              target="_blank"
+            >
+              View on Strava
+            </a>
+          </div>
         }
       </Layout>
     );

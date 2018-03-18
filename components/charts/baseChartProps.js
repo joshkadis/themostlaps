@@ -8,6 +8,7 @@ module.exports = {
     primaryData: PropTypes.array.isRequired, // Athlete whose page we're looking at
     primaryId: PropTypes.number.isRequired,
     onChange: PropTypes.func.isRequired,
+    onChartRendered: PropTypes.func,
   },
   baseChartDefaultProps: {
     compareTo: {},

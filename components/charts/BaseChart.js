@@ -51,6 +51,18 @@ class BaseChart extends Component {
     }
   }
 
+  /**
+   * Call render callback when shouldRenderChart changes from false to true
+   */
+  componentDidUpdate(prevProps, prevState) {
+    if (!prevState.shouldRenderChart &&
+      this.state.shouldRenderChart &&
+      'function' === typeof this.props.onChartRendered
+    ) {
+      this.props.onChartRendered();
+    }
+  }
+
   onClickCompareButton(evt) {
     evt.preventDefault();
     this.setState({ showSelectField: true });

@@ -83,3 +83,13 @@ a {
     text-decoration: none;
   }
 }
+
+:global(.strava_link) {
+  color: #FC4C02;
+  font-size: .85em;
+  text-decoration: none;
+  &:hover {
+    color: color(#FC4C02 lightness(65%));
+    text-decoration: underline;
+  }
+}
