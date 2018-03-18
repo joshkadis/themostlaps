@@ -125,4 +125,4 @@ We reserve the right, at our sole discretion, to update, change or replace any p
 
 SECTION 16 - CONTACT INFORMATION
 
-Questions about the Terms of Service should be sent to us at josh@kadisco.com.
+Questions about the Terms of Service should be sent to us at info@themostlaps.com.

@@ -2,7 +2,7 @@
 
 #### Who made this?
 
-The Most Laps was conceived, designed, and built by [Josh Kadis][1], a cyclist, developer, and product manager from Brooklyn. Josh is currently looking for a job...
+The Most Laps was conceived, designed, and built by [Josh Kadis][1], a cyclist, developer, and product manager from Brooklyn. Josh is currently looking for a job, by the way.
 
 In case you were wondering, it's an isomorphic React web application with a MongoDB database.
 
@@ -28,7 +28,7 @@ Private rides (or "activities" in Strava's technical terminology) _are_ included
 
 #### Can you remove me from the site?
 
-Yes, no problem. [Email us](mailto:josh+themostlaps@kadisco.com) and we'll take care of it right away.
+Yes, no problem. [Email us](mailto:info@themostlaps.com) and we'll take care of it right away.
 
 Note that if you revoke access in [your Strava settings][5], your data will still be on the site until you let us know to remove you.
 

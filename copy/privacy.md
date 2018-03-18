@@ -16,7 +16,7 @@ If we ask for your personal information for a secondary reason, like marketing, 
 
 How do I withdraw my consent?
 
-If after you opt-in, you change your mind, you may withdraw your consent for us to contact you, for the continued collection, use or disclosure of your information, at anytime, by contacting us at josh+themostlaps@kadisco.com or mailing us at: Josh Kadis 444 13th St Apt 3, Brooklyn, NY, 11215, United States
+If after you opt-in, you change your mind, you may withdraw your consent for us to contact you, for the continued collection, use or disclosure of your information, at anytime, by contacting us at info@themostlaps.com or mailing us at: Josh Kadis 444 13th St Apt 3, Brooklyn, NY, 11215, United States
 
 SECTION 3 - DISCLOSURE
 
@@ -48,4 +48,4 @@ We reserve the right to modify this privacy policy at any time, so please review
 
 QUESTIONS AND CONTACT INFORMATION
 
-If you would like to: access, correct, amend or delete any personal information we have about you, register a complaint, or simply want more information contact josh+themostlaps@kadisco.com or by mail at Josh Kadis, 444 13th St Apt 3, Brooklyn, NY, 11215, United States
+If you would like to: access, correct, amend or delete any personal information we have about you, register a complaint, or simply want more information contact info@themostlaps.com or by mail at Josh Kadis, 444 13th St Apt 3, Brooklyn, NY, 11215, United States
