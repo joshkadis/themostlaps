@@ -39,11 +39,23 @@ class Rider extends Component {
       compareToId: 0,
     }
 
-    this.state = Object.assign({...this.defaultCompareTo}, {
+    this.defaultState = Object.assign({...this.defaultCompareTo}, {
       primaryData: statsForSingleAthleteChart(props.stats.data),
       year: 'all',
       chartRendered: false,
     });
+
+    this.state = this.defaultState;
+  }
+
+  componentWillReceiveProps(nextProps) {
+    // Reset state to defaults when athlete changes
+    if (this.props.query.athleteId !== nextProps.query.athleteId) {
+      this.setState(Object.assign({...this.defaultState}, {
+        primaryData: statsForSingleAthleteChart(nextProps.stats.data),
+        chartRendered: true,
+      }));
+    }
   }
 
   onChartRendered() {

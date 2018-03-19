@@ -11,10 +11,11 @@ const AthleteHeader = ({ img, firstname, lastname, className, reverse, linkId })
   )}>
     <img className={styles['athlete-header__avatar']} src={img} />
     {!!linkId ?
-        <a
-          href={`/rider/${linkId}`}
-          className={styles['athlete-header__name']}
-        >{firstname} {lastname}</a> :
+        <Link href={`/rider?athleteId=${linkId}`} as={`/rider/${linkId}`}>
+          <a className={styles['athlete-header__name']}>
+            {firstname} {lastname}
+          </a>
+        </Link> :
       <span className={styles['athlete-header__name']}>{firstname} {lastname}</span>
     }
   </div>
