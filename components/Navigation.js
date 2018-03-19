@@ -21,11 +21,14 @@ class Navigation extends Component {
     this.onClickButton = this.onClickButton.bind(this);
     this.onClickRidersButton = this.onClickRidersButton.bind(this);
     this.renderSearchUsersContainer = this.renderSearchUsersContainer.bind(this);
+    this.navigateToRiderPage = this.navigateToRiderPage.bind(this);
 
-    this.state = {
+    this.defaultState = {
       shouldShowMobileNav: false,
       shouldShowSearchUsers: false,
     };
+
+    this.state = this.defaultState;
   }
 
   onClickButton() {
@@ -41,8 +44,9 @@ class Navigation extends Component {
     });
   }
 
-  navigateToRiderPage(selection) {
+  navigateToRiderPage(selection, nextState) {
     if (selection && selection.value) {
+      this.setState(this.defaultState)
       Router.push(
         `/rider?athleteId=${selection.value}`,
         `/rider/${selection.value}`,
