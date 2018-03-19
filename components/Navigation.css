@@ -54,3 +54,16 @@
     display: inherit;
   }
 }
+
+.textButton {
+  @apply (--fadeLink);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: var(--baseFont);
+  padding: 0;
+}
+
+.searchUsersContainer {
+  width: var(--searchUsersWidth);
+}

@@ -93,7 +93,7 @@
 }
 
 .compare_searchUsers {
-  width: 320px;
+  width: var(--searchUsersWidth);
   margin-right: 1rem;
 
   @media (--smallViewport) {

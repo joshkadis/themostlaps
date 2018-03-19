@@ -2,7 +2,7 @@
 
 body {
   color: #000;
-  font: var(--baseSize)/1.5 'Arvo', serif;
+  font: var(--baseFont);
   font-weight: 400;
 }
 

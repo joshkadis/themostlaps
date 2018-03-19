@@ -21,12 +21,24 @@ function loadOptions(skipUsers) {
     }));
 }
 
-const SearchUsers = ({ value, allowMultiSelect, onChange, wrapperClassName, skipUsers }) => (
+const SearchUsers = ({
+  autoBlur,
+  autoFocus,
+  value,
+  allowMultiSelect,
+  onChange,
+  onBlur,
+  wrapperClassName,
+  skipUsers
+}) => (
   <div className={wrapperClassName || ''}>
     <Async
+      autoBlur={autoBlur}
+      autoFocus={autoFocus}
       multi={allowMultiSelect}
       value={value}
       onChange={onChange}
+      onBlur={onBlur || null}
       loadOptions={() => loadOptions(skipUsers)}
       placeholder="Search by name or Strava user ID"
     />
@@ -34,16 +46,25 @@ const SearchUsers = ({ value, allowMultiSelect, onChange, wrapperClassName, skip
 );
 
 SearchUsers.defaultProps = {
+  autoBlur: true,
+  autoFocus: false,
   value: 0,
   allowMultiSelect: false,
   wrapperClassName: '',
-  skipUsers: []
+  skipUsers: [],
+  onBlur: false,
 };
 
 SearchUsers.propTypes = {
+  autoBlur: PropTypes.bool,
+  autoFocus: PropTypes.bool,
   value: PropTypes.number,
   allowMultiSelect: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
+  onBlur: PropTypes.oneOfType([
+    PropTypes.func,
+    PropTypes.bool,
+  ]),
   wrapperClassName: PropTypes.string,
   skipUsers: PropTypes.array,
 };

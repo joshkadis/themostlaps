@@ -1,10 +1,12 @@
 :root {
   --baseSize: 16px;
+  --baseFont: var(--baseSize)/1.5 'Arvo', serif;
   --purple: #6100FF;
   --purpleLight: color(var(--purple) lightness(65%));
   --purpleDark: #450082;
   --yellow: #FFD323;
   --headerGradient: linear-gradient(to right, var(--purpleLight), var(--yellow));
+  --searchUsersWidth: 320px;
   --fadeLink: {
     color: white;
     transition: color ease-in-out .3s;
