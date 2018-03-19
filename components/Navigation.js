@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Link from 'next/link';
+import Router from 'next/router';
 import classNames from 'classnames';
 import Button from './lib/Button';
 import { lapSegmentId, breakpointPx } from '../config';
 import * as styles from './Navigation.css';
+import * as layoutStyles from './Layout.css';
 import { MenuSvg, InstagramSvg, TwitterSvg } from './lib/svg';
 import SocialLink from './lib/SocialLink';
 import { modalControlsShape } from '../utils/propTypes';
@@ -38,7 +40,12 @@ class Navigation extends Component {
   }
 
   navigateToRiderPage(selection) {
-    console.log(selection);
+    if (selection && selection.value) {
+      Router.push(
+        `/rider?athleteId=${selection.value}`,
+        `/rider/${selection.value}`,
+      );
+    }
   }
 
   onClickRidersButton() {
@@ -75,9 +82,6 @@ class Navigation extends Component {
             onClick={this.onClickRidersButton}
           >
             Riders
-            <span style={{ fontSize: '.75em' }}>
-              {this.state.shouldShowSearchUsers ? ' ▲' : ' ▼'}
-            </span>
           </button>
 
           <SocialLink network="twitter">
@@ -97,11 +101,20 @@ class Navigation extends Component {
       )}
       {this.state.shouldShowSearchUsers && (
         <div className={styles.searchUsersContainer}>
-          <SearchUsers
-            autoFocus
-            onChange={this.navigateToRiderPage}
-            onBlur={() => this.setState({ shouldShowSearchUsers: false })}
-          />
+          <div className={styles.searchUsersField}>
+            <SearchUsers
+              autoFocus
+              onChange={this.navigateToRiderPage}
+              onBlur={() => this.setState({ shouldShowSearchUsers: false })}
+            />
+          </div>
+
+          <Button
+            onClick={() => this.setState({ shouldShowSearchUsers: false })}
+            className={layoutStyles.compare_closeSearchUsersButton}
+          >
+            Clear
+          </Button>
         </div>
       )}
     </div>);

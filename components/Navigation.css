@@ -65,5 +65,13 @@
 }
 
 .searchUsersContainer {
+  display: flex;
+  & > *:first-child {
+    margin-right: 1rem;
+  }
+}
+
+.searchUsersField {
+  text-align: left;
   width: var(--searchUsersWidth);
 }
