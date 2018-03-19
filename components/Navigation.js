@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Router from 'next/router';
 import classNames from 'classnames';
 import Button from './lib/Button';
-import { lapSegmentId, breakpointPx } from '../config';
+import { lapSegmentId } from '../config';
 import * as styles from './Navigation.css';
 import * as layoutStyles from './Layout.css';
 import { MenuSvg, InstagramSvg, TwitterSvg } from './lib/svg';
@@ -12,6 +12,7 @@ import SocialLink from './lib/SocialLink';
 import { modalControlsShape } from '../utils/propTypes';
 import { trackModalOpen, setDimensions } from '../utils/analytics';
 import SearchUsers from './lib/SearchUsers';
+import { isSmallViewport } from '../utils/window';
 
 class Navigation extends Component {
   constructor(props) {
@@ -19,6 +20,7 @@ class Navigation extends Component {
     this.mobileToggleNav = this.mobileToggleNav.bind(this);
     this.onClickButton = this.onClickButton.bind(this);
     this.onClickRidersButton = this.onClickRidersButton.bind(this);
+    this.renderSearchUsersContainer = this.renderSearchUsersContainer.bind(this);
 
     this.state = {
       shouldShowMobileNav: false,
@@ -54,18 +56,50 @@ class Navigation extends Component {
     });
   }
 
+  /**
+   * Render SearchUsers container when it's supposed to be rendered, depending on viewport
+   *
+   * @param {Bool} shouldShowForSmallViewport
+   * @return {JSX}
+   */
+  renderSearchUsersContainer(shouldShowForSmallViewport = true) {
+    if (!this.state.shouldShowSearchUsers ||
+      isSmallViewport() !== shouldShowForSmallViewport
+    ) {
+      return null;
+    }
+
+    return (
+      <div className={styles.searchUsersContainer}>
+        <div className={styles.searchUsersField}>
+          <SearchUsers
+            autoFocus
+            onChange={this.navigateToRiderPage}
+            onBlur={() => this.setState({ shouldShowSearchUsers: false })}
+          />
+        </div>
+
+        <Button
+          onClick={() => this.setState({ shouldShowSearchUsers: false })}
+          className={layoutStyles.compare_closeSearchUsersButton}
+        >
+          Clear
+        </Button>
+      </div>
+    );
+  }
+
   render() {
-    return (<div style={{ position: 'relative' }}>
+    return (<div>
       <MenuSvg
         className={styles.menu}
         onClickHandler={this.mobileToggleNav}
       />
-      {!this.state.shouldShowSearchUsers && (
+      {(!this.state.shouldShowSearchUsers || isSmallViewport()) && (
         <nav
           className={classNames(
             styles.linksContainer,
             { [styles.hideMobile]: !this.state.shouldShowMobileNav },
-            { [styles.showingSearchUsers]: this.state.shouldShowSearchUsers }
           )}
           ref={(el) => { this.linksContainer = el; }}
         >
@@ -84,6 +118,8 @@ class Navigation extends Component {
             Riders
           </button>
 
+          {this.renderSearchUsersContainer()}
+
           <SocialLink network="twitter">
             <TwitterSvg />
           </SocialLink>
@@ -99,24 +135,7 @@ class Navigation extends Component {
           </Button>
         </nav>
       )}
-      {this.state.shouldShowSearchUsers && (
-        <div className={styles.searchUsersContainer}>
-          <div className={styles.searchUsersField}>
-            <SearchUsers
-              autoFocus
-              onChange={this.navigateToRiderPage}
-              onBlur={() => this.setState({ shouldShowSearchUsers: false })}
-            />
-          </div>
-
-          <Button
-            onClick={() => this.setState({ shouldShowSearchUsers: false })}
-            className={layoutStyles.compare_closeSearchUsersButton}
-          >
-            Clear
-          </Button>
-        </div>
-      )}
+      {this.renderSearchUsersContainer(false)}
     </div>);
   }
 };

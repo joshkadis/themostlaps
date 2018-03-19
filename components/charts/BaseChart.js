@@ -4,8 +4,7 @@ import * as styles from '../Layout.css';
 import Button from '../lib/Button';
 import SearchUsers from '../lib/SearchUsers';
 import AthleteHeader from '../lib/AthleteHeader';
-import { breakpointPx } from '../../config';
-
+import { isSmallViewport } from '../../utils/window';
 /**
  * Extendable Chart class requires methods:
  * renderTitle(this.props, this.state)
@@ -40,12 +39,9 @@ class BaseChart extends Component {
 
   componentDidMount() {
     if (this.container) {
-      const shouldRenderHorizontal =
-        'undefined' !== typeof window && window.innerWidth < breakpointPx;
-
       this.setState({
         width: this.container.clientWidth,
-        shouldRenderHorizontal,
+        shouldRenderHorizontal: isSmallViewport(),
         shouldRenderChart: true,
       });
     }

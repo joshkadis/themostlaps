@@ -69,9 +69,24 @@
   & > *:first-child {
     margin-right: 1rem;
   }
+
+  @media (--smallViewport) {
+    margin: .5rem 0;
+    justify-content: flex-end;
+    width: 100%;
+    max-width: 400px;
+  }
 }
 
 .searchUsersField {
   text-align: left;
-  width: var(--searchUsersWidth);
+
+  @media (--largeViewport) {
+    width: var(--searchUsersWidth);
+  }
+
+  @media (--smallViewport) {
+    width: auto;
+    flex-grow: 99;
+  }
 }
