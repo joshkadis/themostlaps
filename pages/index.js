@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
+import Router from 'next/router';
 import classNames from 'classnames';
 import Layout from '../components/Layout';
 import { LapPath } from '../components/lib/svg';
@@ -36,6 +37,17 @@ class Index extends Component {
   }
 
   componentDidMount() {
+    if (window.localStorage) {
+      const TMLAthleteId = localStorage.getItem('TMLAthleteId');
+      if (TMLAthleteId && !isNaN(TMLAthleteId)) {
+        Router.push(
+          `/rider?athleteId=${TMLAthleteId}`,
+          `/rider/${TMLAthleteId}`,
+        );
+        return;
+      }
+    }
+
     // Fade in primary content
     setTimeout(() => {
       this.setState({ shouldShowContent: true });

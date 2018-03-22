@@ -70,10 +70,16 @@ class Layout extends Component {
     });
 
     if (this.state.modalIsOpen && this.state.modalState !== 'signup') {
+      // GA event tracking
       trackAuthResult(
         this.state.modalState === 'success',
         this.props.query.autherror || null,
       );
+
+      // Set user value in local storage
+      if (this.state.modalState === 'success' && window.localStorage) {
+        localStorage.setItem('TMLAthleteId', parseInt(this.props.query.id, 10))
+      }
     }
   }
 

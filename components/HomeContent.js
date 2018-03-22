@@ -30,6 +30,10 @@ class HomePrimary extends Component {
   fade() {
     if ('undefined' !== typeof document && this.container) {
       setTimeout(() => {
+        if (!this.container) {
+          return;
+        }
+
         this.container
           .querySelectorAll('[data-toggleopacity]')
           .forEach((el) => {
