@@ -45,6 +45,7 @@ app.prepare()
           authsuccess: 'true',
           firstname: authResult.athlete.firstname,
           allTime: authResult.athlete.allTime,
+          id: authResult.athlete.id,
         };
       }
 

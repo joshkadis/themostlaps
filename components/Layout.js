@@ -138,6 +138,7 @@ class Layout extends Component {
         return <AuthSuccess
           firstname={props.query.firstname}
           allTime={parseInt(props.query.allTime, 10)}
+          id={parseInt(props.query.id, 10)}
         />
 
       case 'signup':
