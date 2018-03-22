@@ -74,6 +74,21 @@ class SingleYear extends BaseChart {
   }
 
   renderChart(props, state) {
+    const chartHeight = this.getChartHeight(state, props.hasCompare);
+
+    if (!state.chartData.length) {
+      return <div style={{
+        height: `${chartHeight}px`,
+      }}>
+        <h3 style={{
+          marginTop: '1.5rem',
+          textAlign: 'center',
+        }}>
+          {`No laps in ${props.year} 😢`}
+        </h3>
+      </div>;
+    }
+
     const horiz = state.shouldRenderHorizontal;
     let xAxis, yAxis;
     if (state.shouldRenderHorizontal) {
@@ -87,7 +102,7 @@ class SingleYear extends BaseChart {
     return (
       <BarChart
         width={state.width}
-        height={this.getChartHeight(state, props.hasCompare)}
+        height={chartHeight}
         data={state.chartData}
         layout={state.shouldRenderHorizontal ? 'vertical' : 'horizontal'}
       >

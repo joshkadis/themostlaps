@@ -8,12 +8,12 @@ module.exports = {
     secondary: {
       one: 'How many laps',
       two: 'have you ridden?',
-      three: 'The Most Laps tracks your laps automatically. For Brooklyn\'s real bragging rights.',
+      three: 'Track and compare the laps you ride in Prospect Park.',
     },
   },
   openGraph: [
     ['title', 'The Most Laps'],
     ['type', 'website'],
-    ['description', 'Track your Prospect Park laps for Brooklyn cycling\'s real bragging rights.'],
+    ['description', 'Track and compare the laps you ride in Prospect Park.'],
   ],
 };
