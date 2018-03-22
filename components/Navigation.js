@@ -44,7 +44,7 @@ class Navigation extends Component {
     });
   }
 
-  navigateToRiderPage(selection, nextState) {
+  navigateToRiderPage(selection) {
     if (selection && selection.value) {
       this.setState(this.defaultState)
       Router.push(

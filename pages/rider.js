@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import Router from 'next/router';
 import Layout from '../components/Layout';
 import { getPathnameFromContext, APIRequest } from '../utils';
 import RiderPageHeader from '../components/RiderPageHeader';
+import SearchUsers from '../components/lib/SearchUsers';
 import * as styles from '../components/Layout.css';
 import {
   statsForAthletePage,
@@ -40,7 +42,7 @@ class Rider extends Component {
     }
 
     this.defaultState = Object.assign({...this.defaultCompareTo}, {
-      primaryData: statsForSingleAthleteChart(props.stats.data),
+      primaryData: props.stats.data ? statsForSingleAthleteChart(props.stats.data) : [],
       year: 'all',
       chartRendered: false,
     });
@@ -163,8 +165,28 @@ class Rider extends Component {
       })
   }
 
+  navigateToRiderPage(selection) {
+    if (selection && selection.value) {
+      Router.push(
+        `/rider?athleteId=${selection.value}`,
+        `/rider/${selection.value}`,
+      );
+    }
+  }
+
   render() {
     const { pathname, query, stats, athlete } = this.props;
+
+    // Athlete not found, would have returned a 404 if server-rendered
+    if (!Object.keys(athlete).length) {
+      return <Layout
+        pathname={pathname}
+        query={query}
+      >
+        <h2 style={{ textAlign: 'center' }}>Rider not found 😧</h2>
+        <SearchUsers onChange={this.navigateToRiderPage} />
+      </Layout>;
+    }
 
     return (
       <Layout
