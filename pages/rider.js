@@ -72,7 +72,9 @@ class Rider extends Component {
     const compareToYear = shouldIncrement ?
       [...this.props.stats.years].pop() :
       [...this.props.stats.years].shift();
-    return this.state.displayYear !== compareToYear;
+
+    // Loose check because we have numeric strings
+    return this.state.year != compareToYear;
   }
 
   /**
