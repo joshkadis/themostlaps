@@ -112,7 +112,9 @@ module.exports = async (athlete, after = false, verbose = false) => {
   const updatedAthleteDoc = await updateAthleteStats(athleteDoc, stats);
 
   // @todo Email notification depending on current date and user preference
-  // sendEmailNotification(updatedAthleteDoc)
+  // if (process.env.MAILGUN_API_KEY) {}
+  //   sendEmailNotification(updatedAthleteDoc)
+  // }
 
   return true;
 };

@@ -9,7 +9,20 @@ async function sendEmailNotification(userId, type) {
     process.exit(0);
   }
 
-  await sendMonthlyEmail(athleteDoc);
+  if (!process.env.MAILGUN_API_KEY) {
+    console.log('Missing Mailgun API key')
+    process.exit(0);
+  }
+
+  const result = await sendMonthlyEmail(athleteDoc);
+
+  if (result) {
+    console.log('Email sent successfully!');
+  } else {
+    console.log('Email failed to send');
+  }
+
+  process.exit(0);
 }
 
 module.exports = sendEmailNotification;

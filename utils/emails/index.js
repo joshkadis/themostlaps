@@ -1,4 +1,5 @@
 const { timePartString, getMonthName } = require('../dateTimeUtils');
+const sendMailgun = require('./sendMailgun');
 
 /**
  * Get _YYYY_MM key for *last month* relative to today's date
@@ -16,9 +17,15 @@ function getLastMonth(current) {
   return [lastMonthYear.toString(), timePartString(lastMonth)];
 }
 
-function sendMonthlyEmail(athleteDoc) {
-  const email = athleteDoc.get('athlete.email');
-  const firstname = athleteDoc.get('athlete.email');
+/**
+ * Send monthly email update
+ *
+ * @param {Document} athleteDoc
+ * @return {Bool} Success or fail
+ */
+async function sendMonthlyEmail(athleteDoc) {
+  const to = athleteDoc.get('athlete.email');
+  const firstname = athleteDoc.get('athlete.firstname');
   const current = new Date();
   const lastMonth = getLastMonth(current);
   const lastMonthLaps = athleteDoc.get(`stats._${lastMonth[0]}_${lastMonth[1]}`);
@@ -27,7 +34,7 @@ function sendMonthlyEmail(athleteDoc) {
 
 
 
-  const emailText = `Hello ${firstname}!
+  const text = `Hello ${firstname}!
 
 This is your monthly update for ${monthYearName}. You rode ${lastMonthLaps} laps!
 
@@ -37,9 +44,12 @@ Come see the rankings at https://themostlaps.com/ranking/${lastMonth[0]}/${lastM
 
 PS - Click here to stop these updates: https://themostlaps.com/notifications/${unsubHash}`;
 
-console.log(emailText);
+  const sendResult = await sendMailgun({
+    to,
+    text,
+  });
 
-  process.exit(0);
+  return sendResult;
 }
 
 module.exports = {
