@@ -10,6 +10,7 @@ const Athlete = require('./schema/Athlete');
 
 // Route handlers
 const onAuthCallback = require('./server/onAuthCallback');
+const handleNotification = require('./server/handleNotification');
 const initAPIRoutes = require('./api/initAPIRoutes');
 const getRankingParams = require('./utils/getRankingParams');
 const { slackError } = require('./utils/slackNotification');
@@ -97,6 +98,10 @@ app.prepare()
     server.get(/^\/(terms|privacy|about)$/, (req, res) => {
       app.render(req, res, '/page', Object.assign(req.query, { pageName: req.params[0] }));
     })
+
+    server.get('/notifications/:cipher', async ({ params }, res) => {
+      await handleNotification(params.cipher, res);
+    });
 
     /**
      * API routing

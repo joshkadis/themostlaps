@@ -1,5 +1,5 @@
 const crypto = require('crypto');
-const algorithm = 'rc4';
+const algorithm = 'aes-256-ctr';
 
 function encrypt(input) {
   const cipher = crypto.createCipher(algorithm, input);
@@ -10,8 +10,9 @@ function encrypt(input) {
 
 function decrypt(input) {
   const decipher = crypto.createDecipher(algorithm, input);
-  const dec = decipher.update(input ,'hex', 'utf8');
-  return dec + decipher.final('utf8');
+  let dec = decipher.update(input ,'hex', 'utf8');
+  dec = dec + decipher.final('utf8');
+  return dec;
 }
 
 module.exports = {
