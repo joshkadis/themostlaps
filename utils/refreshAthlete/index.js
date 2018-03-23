@@ -109,6 +109,10 @@ module.exports = async (athlete, after = false, verbose = false) => {
   console.log(`Found ${stats.allTime - athleteDoc.get('stats.allTime')} new laps`);
 
   // Update user stats and last_updated
-  await updateAthleteStats(athleteDoc, stats);
+  const updatedAthleteDoc = await updateAthleteStats(athleteDoc, stats);
+
+  // @todo Email notification depending on current date and user preference
+  // sendEmailNotification(updatedAthleteDoc)
+
   return true;
 };

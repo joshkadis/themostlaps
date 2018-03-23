@@ -1,0 +1,47 @@
+const { timePartString, getMonthName } = require('../dateTimeUtils');
+
+/**
+ * Get _YYYY_MM key for *last month* relative to today's date
+ *
+ * @param {Date} current
+ * @return {Array} [YYYY, MM]
+ */
+function getLastMonth(current) {
+  // getMonth() is 0-based index and our app uses 1-based
+  const lastMonth = current.getMonth() !== 0 ? current.getMonth() : 12;
+  let lastMonthYear = current.getFullYear();
+  if (lastMonth === 12) {
+    lastMonthYear = lastMonthYear - 1;
+  }
+  return [lastMonthYear.toString(), timePartString(lastMonth)];
+}
+
+function sendMonthlyEmail(athleteDoc) {
+  const email = athleteDoc.get('athlete.email');
+  const firstname = athleteDoc.get('athlete.email');
+  const current = new Date();
+  const lastMonth = getLastMonth(current);
+  const lastMonthLaps = athleteDoc.get(`stats._${lastMonth[0]}_${lastMonth[1]}`);
+  const monthYearName = `${getMonthName(parseInt(lastMonth[1], 10))} ${lastMonth[0]}`;
+  const unsubHash = 'todo' // Hash id, timestamp
+
+
+
+  const emailText = `Hello ${firstname}!
+
+This is your monthly update for ${monthYearName}. You rode ${lastMonthLaps} laps!
+
+Come see the rankings at https://themostlaps.com/ranking/${lastMonth[0]}/${lastMonth[1]}
+
+- The Most Laps
+
+PS - Click here to stop these updates: https://themostlaps.com/notifications/${unsubHash}`;
+
+console.log(emailText);
+
+  process.exit(0);
+}
+
+module.exports = {
+  sendMonthlyEmail,
+};

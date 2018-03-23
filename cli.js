@@ -5,6 +5,7 @@ const promptly = require('promptly');
 const deleteUser = require('./cli/deleteUser');
 const deleteUserActivities = require('./cli/deleteUserActivities');
 const getActivityInfo = require('./cli/getActivityInfo');
+const sendEmailNotification = require('./cli/sendEmailNotification')
 const { daysAgoTimestamp } = require('./cli/utils');
 const refreshAthlete = require('./utils/refreshAthlete');
 const subscribeToMailingList = require('./utils/subscribeToMailingList');
@@ -151,6 +152,28 @@ const argv = require('yargs')
       await doCommand(
         `Enter admin code to fetch details for user ${userId} activity ${activityId}.`,
         () => getActivityInfo(userId, activityId)
+      );
+    }
+  )
+  /**
+   * Get info for a specific activity
+   */
+  .command(
+    'mailgun userId [type]',
+    false,
+    (yargs) => {
+      yargs.positional('userId', {
+        type: 'number',
+      });
+      yargs.positional('type', {
+        type: 'string',
+        default: 'monthly',
+      });
+    },
+    async ({ userId, type }) => {
+      await doCommand(
+        `Enter admin code to send ${type} email notification to user ${userId}`,
+        () => sendEmailNotification(userId, type)
       );
     }
   )
