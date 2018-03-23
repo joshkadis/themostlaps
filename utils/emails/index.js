@@ -1,5 +1,6 @@
 const { timePartString, getMonthName } = require('../dateTimeUtils');
 const sendMailgun = require('./sendMailgun');
+const getTextEmail = require('./getTextEmail');
 
 /**
  * Get _YYYY_MM key for *last month* relative to today's date
@@ -29,24 +30,19 @@ async function sendMonthlyEmail(athleteDoc) {
   const current = new Date();
   const lastMonth = getLastMonth(current);
   const lastMonthLaps = athleteDoc.get(`stats._${lastMonth[0]}_${lastMonth[1]}`);
-  const monthYearName = `${getMonthName(parseInt(lastMonth[1], 10))} ${lastMonth[0]}`;
+  const monthYearLong = `${getMonthName(parseInt(lastMonth[1], 10))} ${lastMonth[0]}`;
   const unsubHash = 'todo' // Hash id, timestamp
-
-
-
-  const text = `Hello ${firstname}!
-
-This is your monthly update for ${monthYearName}. You rode ${lastMonthLaps} laps!
-
-Come see the rankings at https://themostlaps.com/ranking/${lastMonth[0]}/${lastMonth[1]}
-
-- The Most Laps
-
-PS - Click here to stop these updates: https://themostlaps.com/notifications/${unsubHash}`;
 
   const sendResult = await sendMailgun({
     to,
-    text,
+    text: getTextEmail(
+      firstname,
+      monthYearLong,
+      lastMonthLaps,
+      lastMonth[0],
+      lastMonth[1],
+      unsubHash,
+    ),
   });
 
   return sendResult;
