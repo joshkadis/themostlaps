@@ -40,8 +40,8 @@ function compileStatsForActivities(
  * Update an athletes stats with new rides
  *
  * @param {Document} athleteDoc
- * @param {String} status Defaults to 'ready'
  * @param {Object} stats
+ * @param {String} status Defaults to 'ready'
  */
 async function updateAthleteStats(athleteDoc, stats, status = 'ready') {
   const currentDate = new Date();
