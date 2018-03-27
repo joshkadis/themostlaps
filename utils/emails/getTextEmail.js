@@ -1,3 +1,5 @@
+const { getEnvOrigin } = require('../envUtils');
+
 /**
  * Get plain-text email
  *
@@ -20,10 +22,10 @@ const getTextEmail = (
 
 This is your monthly update for ${monthYearLong}...${laps} laps!
 
-Come see the rankings at https://themostlaps.com/ranking/${year}/${month}
+Come see the rankings at ${getEnvOrigin()}/ranking/${year}/${month}
 
 - The Most Laps
 
-PS - Click here to stop these updates: https://themostlaps.com/notifications/${unsubHash}`;
+PS - Click here to stop monthly updates: ${getEnvOrigin()}/notifications/${unsubHash}`;
 
 module.exports = getTextEmail;
