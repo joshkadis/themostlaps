@@ -1,18 +1,13 @@
-const crypto = require('crypto');
-const algorithm = 'aes-256-ctr';
+const Cryptr = require('cryptr');
 
-function encrypt(input) {
-  const cipher = crypto.createCipher(algorithm, input);
-  let crypted = cipher.update(input,'utf8', 'hex');
-  crypted = crypted + cipher.final('hex');
-  return crypted;
+function encrypt(input, secret = process.env.NOTIFICATIONS_KEY) {
+  const cryptr = new Cryptr(secret);
+  return cryptr.encrypt(input);
 }
 
-function decrypt(input) {
-  const decipher = crypto.createDecipher(algorithm, input);
-  let dec = decipher.update(input ,'hex', 'utf8');
-  dec = dec + decipher.final('utf8');
-  return dec;
+function decrypt(input, secret = process.env.NOTIFICATIONS_KEY) {
+  const cryptr = new Cryptr(secret);
+  return cryptr.decrypt(input);
 }
 
 module.exports = {

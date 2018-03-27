@@ -23,6 +23,7 @@
   "dependencies": {
     "@zeit/next-css": "0.1.2",
     "classnames": "^2.2.5",
+    "cryptr": "^3.0.0",
     "dotenv": "^5.0.1",
     "express": "^4.16.2",
     "geolib": "^2.0.24",
