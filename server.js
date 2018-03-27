@@ -99,8 +99,8 @@ app.prepare()
       app.render(req, res, '/page', Object.assign(req.query, { pageName: req.params[0] }));
     })
 
-    server.get('/notifications/:cipher', async ({ params }, res) => {
-      await handleNotification(params.cipher, res);
+    server.get('/notifications/:encrypted', async ({ params }, res) => {
+      await handleNotification(params.encrypted, res);
     });
 
     /**

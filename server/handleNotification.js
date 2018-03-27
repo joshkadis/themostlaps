@@ -1,4 +1,5 @@
 const { decrypt } = require('../utils/encryption');
+const { slackError } = require('../utils/slackNotification');
 
 /**
  * Handle notification route
@@ -6,10 +7,20 @@ const { decrypt } = require('../utils/encryption');
  * @param {String} cipher
  * @param {Response} res
  */
-function handleNotification(cipher, res) {
-  const input = decrypt(cipher);
-  console.log(cipher, input);
-  res.send(input);
+async function handleNotification(encrypted, res) {
+  const decrypted = JSON.parse(decrypt(encrypted));
+  if ('undefined' === typeof decrypted || !decrypted) {
+    slackError(100, encrypted);
+    return;
+  }
+
+  const { id, action, type } = decrypted;
+
+  // Get Athlete doc from ID
+
+  // Update notification pref
+
+  // Show confirmation screen
 }
 
 module.exports = handleNotification;

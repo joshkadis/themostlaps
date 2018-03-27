@@ -30,6 +30,9 @@ module.exports = (code = 0, data = '') => {
     case 90:
       return 'We couldn\'t update your stats, sorry 😞';
 
+    case 100:
+      return 'Notifications decryption error';
+
     default:
       return 'An error occurred';
   }

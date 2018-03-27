@@ -32,7 +32,11 @@ async function sendMonthlyEmail(athleteDoc) {
   const lastMonth = getLastMonth(current);
   const lastMonthLaps = athleteDoc.get(`stats._${lastMonth[0]}_${lastMonth[1]}`);
   const monthYearLong = `${getMonthName(parseInt(lastMonth[1], 10))} ${lastMonth[0]}`;
-  const unsubHash = encrypt(`${athleteDoc.get('_id').toString()}|unsub|monthly`);
+  const unsubHash = encrypt(JSON.stringify({
+    id: athleteDoc.get('_id'),
+    action: 'unsub',
+    type: 'monthly'
+  }));
 
   const sendResult = await sendMailgun({
     to,
