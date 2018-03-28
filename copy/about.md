@@ -2,23 +2,31 @@
 
 #### Who made this?
 
-The Most Laps was conceived, designed, and built by [Josh Kadis][1], a cyclist, developer, and product manager from Brooklyn. Josh is currently looking for a job, by the way.
+The Most Laps was conceived, designed, and built by [Josh Kadis][1], a cyclist, web developer, and product manager from Brooklyn.
 
-In case you were wondering, it's an isomorphic React web application with a MongoDB database.
+At first, Josh just wanted to use the Strava API to count all the Prospect Park laps he'd ridden. Then he quit his job and had some time on his hands, and things went from there...
 
 #### How can I contact you?
 
-[Email][6], [Twitter][7], or [Instagram][8], take your pick.
+[Email][6], [Twitter][7], or [Instagram][8], take your pick. We are particularly interested in sponsorships, freelance projects, and job offers. 😀
 
 #### How does it work?
 
-The most important thing to know is that we **do not** collect or retain any of your data without your consent. Once you authorize The Most Laps to access your Strava account, we look back through your past [segment efforts][2] and calculate your all-time, yearly, and monthly totals, and the most laps in a single ride. Then we check automatically every night to see if you've ridden any new laps, and we add those to your stats.
+The most important thing is that we **do not** collect or retain any of your data without your consent. Once you authorize The Most Laps to access your Strava account, we look back through your past [segment efforts][2] and calculate your all-time, yearly, and monthly totals, and the most laps in a single ride. Then we check automatically every night to see if you've ridden any new laps, and we add those to your stats.
+
+#### How does it really work?
+
+It's an isomorphic React web application built with Next.js and MongoDB, if that's what you mean.
 
 #### How are laps calculated?
 
 It's more complicated than you might think! The [segment][3] we use to calculate laps starts and finishes on the Flatbush side of the park. But let's say you enter at 15th Street and Prospect Park West. If you do 5 laps, your Strava activity will only include that segment 4 times. To make up for the half-laps at the beginning and end of your ride, we look at shorter Strava segments along the route to piece together the extra lap.
 
 Because of performance constraints during your initial setup, we give you the benefit of the doubt and add an extra lap to any ride that contains more than one lap.
+
+#### Where is my profile page?
+
+There's no page on The Most Laps that "knows" if you're logged in. If you want to change your notification settings or unsubscribe from the newsletter, use the links in the emails. To be removed from The Most Laps, [email us](mailto:info@themostlaps.com).
 
 #### What personal data is stored?
 
