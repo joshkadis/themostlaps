@@ -52,6 +52,11 @@ async function fetchAllAthleteActivities(
       Authorization: `Bearer ${token}`,
     },
   });
+
+  if (200 !== response.status) {
+    return allActivities;
+  }
+
   const activities = await response.json();
 
   if (!activities.length) {
