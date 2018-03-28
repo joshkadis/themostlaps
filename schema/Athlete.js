@@ -5,18 +5,23 @@ const Schema = mongoose.Schema;
 const athleteSchema = new Schema({
   _id: Number,
   access_token: { type: String, required: true, unique: true },
-  token_type: String,
+  token_type: { type: String, required: true },
   athlete: {
     firstname: String,
     lastname: String,
     profile: String,
-    email: String,
-    id: Number,
+    email: { type: String, required: true },
+    id: { type: Number, required: true },
   },
-  status: String,
-  last_updated: String,
-  created: String,
-  stats: Mixed,
+  status: { type: String, required: true, default: 'ingesting' },
+  last_updated: { type: String, required: true },
+  created: { type: String, required: true },
+  stats: { type: Mixed, required: true, default: {} },
+  preferences: {
+    notifications: {
+      monthly: { type: Boolean, default: true },
+    },
+  },
 });
 
 const Athlete = mongoose.model('Athlete', athleteSchema);

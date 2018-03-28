@@ -14,10 +14,8 @@ function getAthleteModelFormat({ athlete, access_token, token_type }) {
   const currentDate = new Date();
   return {
     _id: id,
-    status: 'ingesting',
     last_updated: currentDate.toISOString(),
     created: currentDate.toISOString(),
-    stats: {},
     access_token,
     token_type,
     athlete: {
