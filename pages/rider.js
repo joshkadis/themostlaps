@@ -67,6 +67,8 @@ class Rider extends Component {
       // Loose comparison for numeric strings
       if (this.props.query.athleteId == localStorage.getItem('TMLAthleteId')) {
         localStorage.removeItem('TMLAthleteId');
+        // Assume we were pushed from index.js so go back there
+        Router.push('/');
       }
     }
   }

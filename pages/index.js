@@ -27,6 +27,20 @@ function getDelay(...args) {
   return args.reduce((acc, key) => (acc + (delays[key] || 0)), 0);
 }
 
+/**
+ * Hacky way to determine if modal is open based on current location
+ *
+ * @return {Bool}
+ */
+function modalIsOpen() {
+  if ('undefined' === typeof window) {
+    return false;
+  }
+
+  return /auth(?:success|error)/.test(window.location.search) ||
+    '#signup' === window.location.hash;
+}
+
 class Index extends Component {
   constructor(props) {
     super(props);
@@ -37,7 +51,7 @@ class Index extends Component {
   }
 
   componentDidMount() {
-    if (window.localStorage) {
+    if (window.localStorage && !modalIsOpen()) {
       const TMLAthleteId = localStorage.getItem('TMLAthleteId');
       if (TMLAthleteId && !isNaN(TMLAthleteId)) {
         Router.push(
