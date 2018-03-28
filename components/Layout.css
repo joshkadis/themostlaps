@@ -69,6 +69,15 @@
   top: 5%;
   transform: translateX(-50%);
   width: 400px;
+
+  @media (--xsViewport) {
+    max-width: none;
+    max-height: 95%;
+    width: 90%;
+    top: 2.5%;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
 }
 
 .closeModal {
