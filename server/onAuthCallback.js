@@ -86,7 +86,7 @@ async function onAuthCallback(req, res) {
     athleteDoc = await createAthlete(athlete);
     console.log(`Saved ${athleteDoc.get('_id')} to database`);
   } catch (err) {
-    const errCode = -1 !== err.message.indexOf('duplicate key') ? 50 : 80;
+    const errCode = -1 !== err.message.indexOf('duplicate key') ? 50 : 55;
     return getErrorResponseObject(errCode, null, athlete.athlete || false);
   }
 

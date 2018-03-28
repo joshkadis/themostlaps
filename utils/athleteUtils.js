@@ -23,6 +23,7 @@ function getAthleteModelFormat({ athlete, access_token, token_type }) {
       lastname,
       profile,
       email,
+      id,
     },
   };
 }
