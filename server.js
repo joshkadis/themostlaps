@@ -104,6 +104,13 @@ app.prepare()
       app.render(req, res, '/notifications', Object.assign({...req.query}, { success } ));
     });
 
+    // Email template page with hot-reloading for local development
+    if ('development' === process.env.NODE_ENV) {
+      server.get('/emailtemplate', (req, res) => {
+        app.render(req, res, '/emailtemplate');
+      });
+    }
+
     /**
      * API routing
      */
