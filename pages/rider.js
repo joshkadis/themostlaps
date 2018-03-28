@@ -60,6 +60,17 @@ class Rider extends Component {
     }
   }
 
+  componentDidMount() {
+    // If athlete not found but their ID is saved in localStorage, delete it
+    // Handles edge case after athlete deleted from database
+    if (!Object.keys(this.props.athlete).length && window.localStorage) {
+      // Loose comparison for numeric strings
+      if (this.props.query.athleteId == localStorage.getItem('TMLAthleteId')) {
+        localStorage.removeItem('TMLAthleteId');
+      }
+    }
+  }
+
   onChartRendered() {
     this.setState({ chartRendered: true });
   }
