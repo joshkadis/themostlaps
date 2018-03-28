@@ -17,8 +17,7 @@ const AuthSuccess = ({ firstname, allTime, id }) => (
       <TweetButton laps={allTime} />
       <FBShareButton />
     </p>
-    <p>If you're looking for something else to do (besides riding more laps),
-      check out <Link href="/ranking"><a>the overall rankings.</a></Link>
+    <p>If you're not busy riding laps, check out <Link href="/ranking"><a>the overall rankings.</a></Link>
     </p>
   </div>
 );
