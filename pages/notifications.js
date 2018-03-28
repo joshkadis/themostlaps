@@ -9,7 +9,7 @@ function getText(success) {
 
 const Notifications = ({ query, success }) => (
   <Layout
-    pathname={`/${query.pageName}`}
+    pathname="/notifications"
     query={query}
   >
     <p style={{ textAlign: 'center' }}>{getText(success)}</p>
