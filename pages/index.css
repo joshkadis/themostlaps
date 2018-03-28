@@ -45,8 +45,13 @@
 
   @media (--smallViewport) {
     font-size: 2.5rem;
-    letter-spacing: 1.5px;
+    letter-spacing: 1.25px;
     line-height: 1.1;
+  }
+
+  @media (--xsViewport) {
+    font-size: 2.1rem;
+    letter-spacing: 1px;
   }
 }
 
@@ -83,6 +88,11 @@
   @media (--smallViewport) {
     font-size: 1.4rem;
     padding: 1.2rem;
+  }
+
+  @media (--xsViewport) {
+    font-size: 1.1rem;
+    padding: .9rem;
   }
 }
 

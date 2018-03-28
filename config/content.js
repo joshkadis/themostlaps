@@ -6,14 +6,14 @@ module.exports = {
       three: 'Who cares.',
     },
     secondary: {
-      one: 'How many laps',
-      two: 'have you ridden?',
-      three: 'Track and compare the laps you ride in Prospect Park.',
+      one: 'How many Prospect Park laps',
+      two: 'do you ride?',
+      three: 'Track and compare the only cycling stat that matters.',
     },
   },
   openGraph: [
     ['title', 'The Most Laps'],
     ['type', 'website'],
-    ['description', 'Track and compare the laps you ride in Prospect Park.'],
+    ['description', 'Track and compare your Prospect Park laps, the only cycling stat that matters.'],
   ],
 };
