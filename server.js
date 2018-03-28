@@ -99,8 +99,9 @@ app.prepare()
       app.render(req, res, '/page', Object.assign(req.query, { pageName: req.params[0] }));
     })
 
-    server.get('/notifications/:encrypted', async ({ params }, res) => {
-      await handleNotification(params.encrypted, res);
+    server.get('/notifications/:encrypted', async (req, res) => {
+      const success = await handleNotification(req.params.encrypted, res);
+      app.render(req, res, '/notifications', Object.assign({...req.query}, { success } ));
     });
 
     /**

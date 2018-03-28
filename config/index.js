@@ -47,5 +47,8 @@ module.exports = {
     twitter: 'https://twitter.com/themostlaps',
     instagram: 'https://instagram.com/themostlaps',
   },
+  notificationTypes: ['monthly'],
+  notificationActions: ['sub', 'unsub'],
+  notificationSubscribeAction: 'sub',
 };
 

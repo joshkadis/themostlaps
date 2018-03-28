@@ -16,4 +16,8 @@ module.exports = {
     ['type', 'website'],
     ['description', 'Track and compare your Prospect Park laps, the only cycling stat that matters.'],
   ],
+  notificationsText:  {
+    success: 'Your preferences have been updated. 👍',
+    error: 'Sorry, we had some trouble updating your preferences. Please try again later.'
+  },
 };
