@@ -7,6 +7,8 @@ const {
   compileStatsForActivities,
   updateAthleteStats,
 } = require('../athleteStats');
+const sendMonthlyEmail = require('../emails');
+const { shouldSendMonthlyEmail } = require('../emails/utils');
 
 /**
  * Get timestamp of athlete's most recently created activity (highest activity ID)
@@ -111,10 +113,9 @@ module.exports = async (athlete, after = false, verbose = false) => {
   // Update user stats and last_updated
   const updatedAthleteDoc = await updateAthleteStats(athleteDoc, stats);
 
-  // @todo Email notification depending on current date and user preference
-  // if (process.env.MAILGUN_API_KEY) {}
-  //   sendEmailNotification(updatedAthleteDoc)
-  // }
+  if (shouldSendMonthlyEmail(updatedAthleteDoc)) {
+    sendMonthlyEmail(updatedAthleteDoc);
+  }
 
   return true;
 };

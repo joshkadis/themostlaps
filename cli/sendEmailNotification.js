@@ -1,5 +1,6 @@
 const Athlete = require('../schema/Athlete');
 const { sendMonthlyEmail } = require('../utils/emails');
+const { shouldSendMonthlyEmail } = require('../utils/emails');
 
 async function sendEmailNotification(userId, type) {
   const athleteDoc = await Athlete.findById(userId);
@@ -14,7 +15,14 @@ async function sendEmailNotification(userId, type) {
     process.exit(0);
   }
 
-  const result = await sendMonthlyEmail(athleteDoc);
+  const { notifications } = athleteDoc.get('preferences');
+  if (!notifications[type]) {
+    console.log(`User has opted out of ${type} emails`);
+    process.exit(0);
+  }
+
+  const current = new Date();
+  const result = await sendMonthlyEmail(athleteDoc, current.getDate());
 
   if (result) {
     console.log('Email sent successfully!');
