@@ -22,10 +22,12 @@ class Signup extends Component {
   render() {
     return (
       <div>
-        <ConnectWithStravaButton
-          pathname={this.props.pathname}
-          shouldSubscribe={this.state.subscribeChecked}
-        />
+        <div>
+          <ConnectWithStravaButton
+            pathname={this.props.pathname}
+            shouldSubscribe={this.state.subscribeChecked}
+          />
+        </div>
         <p className={styles.subscribeContainer}>
           <input
             id="subscribe"

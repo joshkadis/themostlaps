@@ -75,7 +75,11 @@
     max-height: 95%;
     width: 90%;
     top: 2.5%;
-    padding: 2.75rem 1.15rem 1.15rem;
+    padding: 2.5rem 1.15rem 1.15rem;
+
+    & :global(h2) {
+      margin-bottom: 1rem;
+    }
   }
 }
 
