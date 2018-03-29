@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import Select from 'react-select';
 import Router from 'next/router';
 import { stringify } from 'query-string';
-import Button from './lib/Button';
 import { primaryOptions, secondaryOptions } from '../config/rankingsOpts';
 import { timePartString } from '../utils/dateTimeUtils';
 import * as styles from './Layout.css';
@@ -32,7 +31,7 @@ class RankingSelector extends Component {
     super(props);
     this.onChangePrimary = this.onChangePrimary.bind(this);
     this.onChangeSecondary = this.onChangeSecondary.bind(this);
-    this.onClickButton = this.onClickButton.bind(this);
+    this.handleStateChange = this.handleStateChange.bind(this);
     this.state = {
       type: false,
       year: null,
@@ -84,22 +83,22 @@ class RankingSelector extends Component {
       }
     }
 
-    this.setState(newState);
+    this.setState(newState, this.handleStateChange);
   }
 
   onChangeSecondary(evt) {
     this.setState({
       month: (evt && evt.value) ? evt.value : null,
-    });
+    }, this.handleStateChange);
   }
 
-  onClickButton() {
+  handleStateChange() {
     const { type, year, month } = this.state;
     let pathname = `/ranking/${'timePeriod' === type ? year : type}`;
     if ('timePeriod' === type && month) {
       pathname = `${pathname}/${timePartString(month)}`;
     }
-    trackRankingSelector('goButton', this.getStateLabel(this.state));
+    trackRankingSelector('handleStateChange', this.getStateLabel(this.state));
     Router.push(`/ranking?${stringify(this.state)}`, pathname);
   }
 
@@ -132,12 +131,6 @@ class RankingSelector extends Component {
             />
           )}
         </div>
-        <Button
-          className={styles['ranking-selector__button']}
-          onClick={this.onClickButton}
-        >
-          Go
-        </Button>
       </div>
     );
   };
