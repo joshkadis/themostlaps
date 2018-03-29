@@ -17,14 +17,6 @@ import { modalTitles, locale } from '../config';
 import { getDocumentTitle, getOgData } from '../utils/metaTags';
 import { trackPageview, trackAuthResult } from '../utils/analytics';
 
-Router.onRouteChangeStart = (pathname) => {
-  // Route any client-side attempts to hit the email template
-  // to the homepage instead
-  if ('emailtemplate' === pathname) {
-    Router.push('/');
-  }
-};
-
 Router.onRouteChangeComplete = (pathname) => {
   trackPageview(pathname);
 };
