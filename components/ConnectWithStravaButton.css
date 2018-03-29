@@ -3,9 +3,8 @@
 .connectButton {
   max-width: 200px;
   height: auto;
-}
 
-.connectButtonContainer {
-  margin-top: 2em;
-  text-align: center;
+  @media (--xsViewport) {
+    max-width: 150px;
+  }
 }
