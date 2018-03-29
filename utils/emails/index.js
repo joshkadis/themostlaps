@@ -1,6 +1,12 @@
 const { timePartString, getMonthName } = require('../dateTimeUtils');
 const sendMailgun = require('./sendMailgun');
 const getTextEmail = require('./getTextEmail');
+const getHTMLEmail = require('./getHTMLEmail');
+const {
+  getHTMLEmailTitle,
+  getMonthlyHTMLBody,
+  getHTMLFooter,
+} = require('./utils');
 const { encrypt } = require('../encryption');
 
 /**
@@ -47,6 +53,17 @@ async function sendMonthlyEmail(athleteDoc) {
       lastMonth[0],
       lastMonth[1],
       unsubHash,
+    ),
+    html: await getHTMLEmail(
+      getHTMLEmailTitle('monthly'),
+      getMonthlyHTMLBody(
+        firstname,
+        monthYearLong,
+        lastMonthLaps,
+        lastMonth[0],
+        lastMonth[1],
+      ),
+      getHTMLFooter('monthly', unsubHash),
     ),
   });
 

@@ -20,7 +20,7 @@ const getTextEmail = (
   unsubHash,
 ) => `Hello ${firstname}!
 
-This is your monthly update for ${monthYearLong}...${laps} laps!
+This is your monthly update for ${monthYearLong}...You rode ${laps} laps!
 
 Come see the rankings at ${getEnvOrigin()}/ranking/${year}/${month}
 
