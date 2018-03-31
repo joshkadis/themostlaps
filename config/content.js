@@ -1,8 +1,8 @@
 module.exports = {
   homeContent: {
     primary: {
-      one: 'Who has the KOM',
-      two: 'for Prospect Park?',
+      one: 'Who has the fastest lap',
+      two: 'of Prospect Park?',
       three: 'Who cares.',
     },
     secondary: {
