@@ -16,7 +16,7 @@ module.exports = (code = 0, data = '') => {
       return 'Authentication failed, please try again later 🙅';
 
     case 50:
-      return 'It looks like you\'ve already signed up. You only need to do that once!';
+      return 'You only need to sign up once!';
 
     case 60:
       return 'It looks like you have never ridden laps! 😱';
