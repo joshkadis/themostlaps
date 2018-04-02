@@ -70,7 +70,7 @@ module.exports = async (athlete, after = false, verbose = false) => {
   );
 
   if (!eligibleActivities.length) {
-    console.log(`No new activities for user ${athleteDoc.get('_id')}`);
+    console.log(`No eligible activities for user ${athleteDoc.get('_id')}`);
     if (shouldSendMonthlyEmail(athleteDoc)) {
       sendMonthlyEmail(athleteDoc);
     }
