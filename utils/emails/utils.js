@@ -1,4 +1,5 @@
 const { getEnvOrigin } = require('../envUtils');
+const { htmlSubjects } = require('../../config/email');
 
 /**
  * Check user preference and date before sending monthly email on 1st of the month
@@ -27,14 +28,8 @@ function shouldSendMonthlyEmail(athleteDoc = false, sendOnDate = 1) {
  *
  * @param {String} type
  */
-function getHTMLEmailTitle(type = false) {
-  switch (type) {
-    case 'monthly':
-      return 'Your Monthly Update';
-
-    default:
-      return 'A message from The Most Laps';
-  }
+function getHTMLEmailTitle(type = 'default') {
+  return htmlSubjects[type] || htmlSubjects.default;
 }
 
 /**
