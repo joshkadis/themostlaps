@@ -8,6 +8,7 @@ const getHTMLEmail = require('./getHTMLEmail');
 const {
   getHTMLEmailTitle,
   getMonthlyHTMLBody,
+  getIngestHTMLBody,
   getHTMLFooter,
 } = require('./utils');
 const { encrypt } = require('../encryption');
@@ -88,15 +89,9 @@ async function sendIngestEmail(athleteDoc) {
     to,
     text: getTextIngestEmail(firstname, id),
     html: await getHTMLIngestEmail(
-      getHTMLEmailTitle('monthly'),
-      getMonthlyHTMLBody(
-        firstname,
-        monthYearLong,
-        lastMonthLaps,
-        lastMonth[0],
-        lastMonth[1],
-      ),
-      getHTMLFooter('monthly', unsubHash),
+      getHTMLEmailTitle('ingest'),
+      getIngestHTMLBody(firstname, id),
+      getHTMLFooter('ingest', unsubHash),
     ),
   });
 

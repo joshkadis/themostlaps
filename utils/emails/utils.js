@@ -51,6 +51,24 @@ function getMonthlyHTMLBody(firstname, monthYearLong, laps, year, month) {
 }
 
 /**
+ * Get body HTML for ingest email
+ *
+ * @param {String} firstname
+ * @param {Number} id
+ * @return {String} HTML for ingest body
+ */
+function getIngestHTMLBody(firstname, id) {
+  return `
+<p>Hello ${firstname}!</p>
+<p>Welcome to The Most Laps, where you can track and compare the only cycling stat that matters – Prospect Park laps.</p>
+<p>Now would be a good time to share your <a href="${getEnvOrigin()}/rider/${id}">rider page</a> or follow @themostlaps on <a href="https://twitter.com/themostlaps">Twitter</a> or <a href="https://instagram.com/themostlaps">Instagram</a>.
+<p>As a reminder, your stats are publicly visible on your page and in the rankings, and you will not need to log in through Strava again.</p>
+<p>If you have any questions, <a href="mailto:info@themostlaps.com">send us an email</a> or check out the <a href="${getEnvOrigin()}/about">about page</a>.
+<p>See you in the park!</p>`;
+}
+
+
+/**
  * Get HTML email footer content
  *
  * @param {String} type

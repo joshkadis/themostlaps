@@ -48,9 +48,7 @@ As a reminder, your stats are publicly visible on your page and in the rankings,
 
 If you have any questions, send an email to info@themostlaps.com or check out ${getEnvOrigin()}/about.
 
-See you in the park!
-
- - Josh Kadis`;
+See you in the park!`;
 
 module.exports = {
   getTextMonthlyEmail,
