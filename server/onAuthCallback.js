@@ -10,6 +10,7 @@ const {
   updateAthleteStats,
 } = require('../utils/athleteStats');
 const getInternalErrorMessage = require('../utils/internalErrors');
+const { sendIngestEmail } = require('../utils/emails');
 
 /**
  * Get query string for token request with oAuth code
@@ -115,6 +116,7 @@ async function onAuthCallback(req, res) {
   try {
     const stats = compileStatsForActivities(savedActivities);
     const updated = await updateAthleteStats(athleteDoc, stats);
+    sendIngestEmail(updated);
     return {
       error: false,
       errorMsg: '',

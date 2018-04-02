@@ -1,6 +1,9 @@
 const { timePartString, getMonthName } = require('../dateTimeUtils');
 const sendMailgun = require('./sendMailgun');
-const getTextEmail = require('./getTextEmail');
+const {
+  getTextMonthlyEmail,
+  getTextIngestEmail,
+} = require('./getTextEmail');
 const getHTMLEmail = require('./getHTMLEmail');
 const {
   getHTMLEmailTitle,
@@ -46,7 +49,7 @@ async function sendMonthlyEmail(athleteDoc) {
 
   const sendResult = await sendMailgun({
     to,
-    text: getTextEmail(
+    text: getTextMonthlyEmail(
       firstname,
       monthYearLong,
       lastMonthLaps,
@@ -70,6 +73,37 @@ async function sendMonthlyEmail(athleteDoc) {
   return sendResult;
 }
 
+/**
+ * Send ingest email
+ *
+ * @param {Document} athleteDoc
+ * @return {Bool} Success or fail
+ */
+async function sendIngestEmail(athleteDoc) {
+  const to = athleteDoc.get('athlete.email');
+  const id = athleteDoc.get('_id');
+  const firstname = athleteDoc.get('athlete.firstname');
+
+  const sendResult = await sendMailgun({
+    to,
+    text: getTextIngestEmail(firstname, id),
+    html: await getHTMLIngestEmail(
+      getHTMLEmailTitle('monthly'),
+      getMonthlyHTMLBody(
+        firstname,
+        monthYearLong,
+        lastMonthLaps,
+        lastMonth[0],
+        lastMonth[1],
+      ),
+      getHTMLFooter('monthly', unsubHash),
+    ),
+  });
+
+  return sendResult;
+}
+
 module.exports = {
   sendMonthlyEmail,
+  sendIngestEmail,
 };
