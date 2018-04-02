@@ -71,6 +71,9 @@ module.exports = async (athlete, after = false, verbose = false) => {
 
   if (!eligibleActivities.length) {
     console.log(`No new activities for user ${athleteDoc.get('_id')}`);
+    if (shouldSendMonthlyEmail(athleteDoc)) {
+      sendMonthlyEmail(athleteDoc);
+    }
     return;
   }
 
@@ -83,6 +86,9 @@ module.exports = async (athlete, after = false, verbose = false) => {
 
   if (!activitiesWithLaps.length) {
     console.log(`No new activities *with laps* for user ${athleteDoc.get('_id')}`);
+    if (shouldSendMonthlyEmail(athleteDoc)) {
+      sendMonthlyEmail(athleteDoc);
+    }
     return;
   }
 
