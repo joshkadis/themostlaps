@@ -51,16 +51,11 @@ class Index extends Component {
   }
 
   componentDidMount() {
-    if (window.localStorage && !modalIsOpen()) {
-      const TMLAthleteId = localStorage.getItem('TMLAthleteId');
-      if (TMLAthleteId && !isNaN(TMLAthleteId)) {
-        Router.push(
-          `/rider?athleteId=${TMLAthleteId}`,
-          `/rider/${TMLAthleteId}`,
-        );
-        return;
-      }
-    }
+    // Disable for now, confusing UX
+    // const navigated = this.maybeNavigateToRiderPage();
+    // if (navigated) {
+    //   return;
+    // }
 
     // Fade in primary content
     setTimeout(() => {
@@ -79,6 +74,25 @@ class Index extends Component {
         });
       }, getDelay('transition', 'startup', 'initTransition'))
     }, getDelay('initTransition', 'three', 'transition', 'interstitial'))
+  }
+
+  /**
+   * Maybe navigate automatically to rider page based on local storage
+   *
+   * @return {Bool} True if navigated, false if not
+   */
+  maybeNavigateToRiderPage() {
+    if (window.localStorage && !modalIsOpen()) {
+      const TMLAthleteId = localStorage.getItem('TMLAthleteId');
+      if (TMLAthleteId && !isNaN(TMLAthleteId)) {
+        Router.push(
+          `/rider?athleteId=${TMLAthleteId}`,
+          `/rider/${TMLAthleteId}`,
+        );
+        return true;
+      }
+    }
+    return false;
   }
 
   render() {
