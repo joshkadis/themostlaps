@@ -32,8 +32,15 @@ app.prepare()
 
       let redirectQuery;
       if (authResult.error || !authResult.athlete) {
+
+        // Pass athlete ID if available
+        const id = authResult.athlete && authResult.athlete.id ?
+          authResult.athlete.id :
+          0;
+
         redirectQuery = {
-          autherror: authResult.error || 99
+          autherror: authResult.error || 99,
+          id,
         };
         console.log(authResult);
         const errorInfo = authResult.athlete && authResult.athlete.id ?

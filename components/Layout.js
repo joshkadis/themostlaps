@@ -138,7 +138,10 @@ class Layout extends Component {
     const { query, pathname } = props;
     switch(this.getModalStateFromProps(props)) {
       case 'error':
-        return <AuthError code={parseInt(query.autherror, 10)} />
+        return <AuthError
+          code={parseInt(query.autherror, 10)}
+          id={query.id ? parseInt(query.id, 10) : 0}
+        />
 
       case 'success':
         return <AuthSuccess
