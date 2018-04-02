@@ -16,10 +16,10 @@ module.exports = (code = 0, data = '') => {
       return 'Authentication failed, please try again later 🙅';
 
     case 50:
-      return 'Looks like you\'ve already signed up. You only need to do that once! 🕵';
+      return 'It looks like you\'ve already signed up. You only need to do that once!';
 
     case 60:
-      return 'Looks like you have never ridden laps! 😱';
+      return 'It looks like you have never ridden laps! 😱';
 
     case 70:
       return 'Sorry, we couldn\'t find your laps history. 🕵';
