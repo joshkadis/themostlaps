@@ -61,7 +61,7 @@ function getIngestHTMLBody(firstname, id) {
   return `
 <p>Hello ${firstname}!</p>
 <p>Welcome to The Most Laps, where you can track and compare the only cycling stat that matters – Prospect Park laps.</p>
-<p>Now would be a good time to share your <a href="${getEnvOrigin()}/rider/${id}">rider page</a> or follow @themostlaps on <a href="https://twitter.com/themostlaps">Twitter</a> or <a href="https://instagram.com/themostlaps">Instagram</a>.
+<p>Now would be a good time to share your <a href="${getEnvOrigin()}/rider/${id}">rider page</a> or follow <strong>@themostlaps</strong> on <a href="https://twitter.com/themostlaps">Twitter</a> or <a href="https://instagram.com/themostlaps">Instagram</a>.
 <p>As a reminder, your stats are publicly visible on your page and in the rankings, and you will not need to log in through Strava again.</p>
 <p>If you have any questions, <a href="mailto:info@themostlaps.com">send us an email</a> or check out the <a href="${getEnvOrigin()}/about">about page</a>.
 <p>See you in the park!</p>`;
@@ -75,17 +75,21 @@ function getIngestHTMLBody(firstname, id) {
  * @param {String} hash
  * @return {String} HTML for email footer
  */
-function getHTMLFooter(type, hash) {
+function getHTMLFooter(type, hash = false) {
+  const base = `<p>Email sent by <a href="${getEnvOrigin()}">The Most Laps</a>.</p>`;
+  if (!hash) {
+    return base;
+  }
+
   const unsubUrl = `${getEnvOrigin()}/notifications/${hash}`;
-  return `
-<p>Email sent by <a href="${getEnvOrigin()}">The Most Laps</a>.</p>
-<p>To unsubscribe from these ${type} updates, <a href="${unsubUrl}">click here</a>.</p>
-`;
+  return `${base}
+<p>To unsubscribe from ${type} updates, <a href="${unsubUrl}">click here</a>.</p>`;
 }
 
 module.exports = {
   shouldSendMonthlyEmail,
   getHTMLEmailTitle,
   getMonthlyHTMLBody,
+  getIngestHTMLBody,
   getHTMLFooter,
 };

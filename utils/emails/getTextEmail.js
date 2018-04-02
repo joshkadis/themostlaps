@@ -29,13 +29,13 @@ Come see the rankings at ${getEnvOrigin()}/ranking/${year}/${month}
 PS - Click here to stop monthly updates: ${getEnvOrigin()}/notifications/${unsubHash}`;
 
 /**
- * Get plain-text email
+ * Get plain-text email for ingest
  *
  * @param {String} firstname
  * @param {Number} id
  * @return {String} Text of email
  */
-const getTextMonthlyEmail = (
+const getTextIngestEmail = (
   firstname,
   id,
 ) => `Hello ${firstname}!

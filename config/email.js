@@ -2,7 +2,7 @@ module.exports = {
   domain: 'themostlaps.com',
   defaultSendOpts: {
     from: 'The Most Laps <info@themostlaps.com>',
-    subject: 'Monthly update from The Most Laps',
+    subject: 'A message from The Most Laps',
   },
   htmlSubjects: {
     monthly: 'Your monthly update',

@@ -47,9 +47,11 @@ async function sendMonthlyEmail(athleteDoc) {
     action: 'unsub',
     type: 'monthly'
   }));
+  const subject = getHTMLEmailTitle('monthly');
 
   const sendResult = await sendMailgun({
     to,
+    subject,
     text: getTextMonthlyEmail(
       firstname,
       monthYearLong,
@@ -59,7 +61,7 @@ async function sendMonthlyEmail(athleteDoc) {
       unsubHash,
     ),
     html: await getHTMLEmail(
-      getHTMLEmailTitle('monthly'),
+      subject,
       getMonthlyHTMLBody(
         firstname,
         monthYearLong,
@@ -84,14 +86,16 @@ async function sendIngestEmail(athleteDoc) {
   const to = athleteDoc.get('athlete.email');
   const id = athleteDoc.get('_id');
   const firstname = athleteDoc.get('athlete.firstname');
+  const subject = getHTMLEmailTitle('ingest');
 
   const sendResult = await sendMailgun({
     to,
+    subject,
     text: getTextIngestEmail(firstname, id),
-    html: await getHTMLIngestEmail(
-      getHTMLEmailTitle('ingest'),
+    html: await getHTMLEmail(
+      subject,
       getIngestHTMLBody(firstname, id),
-      getHTMLFooter('ingest', unsubHash),
+      getHTMLFooter('ingest'),
     ),
   });
 
