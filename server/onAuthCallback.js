@@ -11,6 +11,7 @@ const {
 } = require('../utils/athleteStats');
 const getInternalErrorMessage = require('../utils/internalErrors');
 const { sendIngestEmail } = require('../utils/emails');
+const { slackSuccess } = require('../utils/slackNotification');
 
 /**
  * Get query string for token request with oAuth code
@@ -117,6 +118,16 @@ async function onAuthCallback(req, res) {
     const stats = compileStatsForActivities(savedActivities);
     const updated = await updateAthleteStats(athleteDoc, stats);
     sendIngestEmail(updated);
+    slackSuccess(
+      'New signup!',
+      [
+        updated.get('athlete.firstname'),
+        updated.get('athlete.lastname'),
+        `(${updated.get('_id')})`,
+        `${updated.get('stats.allTime')} laps`,
+      ].join(' '),
+    );
+
     return {
       error: false,
       errorMsg: '',
