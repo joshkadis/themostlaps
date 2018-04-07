@@ -132,7 +132,11 @@ app.prepare()
       console.log('Connected to database');
       server.listen(process.env.PORT, () => {
         console.log(`App listening on port ${process.env.PORT}`);
-        scheduleNightlyRefresh();
+        if (process.env.DISABLE_NIGHTLY_REFRESH) {
+          console.log('Nightly refresh is disabled');
+        } else {
+          scheduleNightlyRefresh();
+        }
       });
     });
   })
