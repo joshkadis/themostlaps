@@ -50,5 +50,6 @@ module.exports = {
   notificationTypes: ['monthly'],
   notificationActions: ['sub', 'unsub'],
   notificationSubscribeAction: 'sub',
+  timezoneOffset: 240, // NYC offset from UTC in mintues
 };
 

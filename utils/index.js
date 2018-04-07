@@ -1,7 +1,7 @@
 const fetch = require('isomorphic-unfetch');
 const { stringify } = require('query-string');
 const { getEnvOrigin } = require('./envUtils');
-const { modalQueryParams } = require('../config');
+const { modalQueryParams, timezoneOffset } = require('../config');
 
 /**
  * Get pathname without query string from Next.js context object
@@ -22,12 +22,12 @@ function getPathnameFromContext(context = {}) {
  * @param {String} dateString
  * @return {Int|Null} Integer or null if malformed input
  */
-function getTimestampFromISO(dateString) {
+function getTimestampFromLocalISO(dateString) {
   const dateObj = new Date(dateString);
   if (isNaN(dateObj.valueOf())) {
     return null;
   }
-  return Math.floor(dateObj.valueOf() / 1000);
+  return Math.floor(dateObj.valueOf() / 1000) + timezoneOffset * 60;
 }
 
 /**
@@ -73,7 +73,7 @@ function getPathWithQueryString({ pathname, query }) {
 
 module.exports = {
   getPathnameFromContext,
-  getTimestampFromISO,
+  getTimestampFromLocalISO,
   APIRequest,
   getPathWithQueryString,
 };

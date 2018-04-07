@@ -1,6 +1,6 @@
 const Athlete = require('../../schema/Athlete');
 const Activity = require('../../schema/Activity');
-const { getTimestampFromISO } = require('../../utils');
+const { getTimestampFromLocalISO } = require('../../utils');
 const fetchAthleteActivities = require('./fetchAthleteActivities');
 const fetchLapsFromActivities = require('./fetchLapsFromActivities');
 const {
@@ -20,8 +20,12 @@ const { shouldSendMonthlyEmail } = require('../emails/utils');
  */
 async function getFetchTimestampFromAthlete(athleteDoc, verbose = false) {
   const logPrepend = 'Searching for activities since';
+
+  // Start with athlete's last_updated
   let ISOString = athleteDoc.get('last_updated');
+
   try {
+    // Get athlete's activity w highest activity ID
     const lastActivity = await Activity.findOne(
       { athlete_id: athleteDoc.get('_id') },
       'start_date_local',
@@ -43,7 +47,7 @@ async function getFetchTimestampFromAthlete(athleteDoc, verbose = false) {
     console.log('Error fetching lastActivity');
   }
 
-  return getTimestampFromISO(ISOString);
+  return getTimestampFromLocalISO(ISOString);
 }
 
 /**
