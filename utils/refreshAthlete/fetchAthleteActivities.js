@@ -1,4 +1,5 @@
 require('isomorphic-fetch');
+const { stringify } = require('query-string');
 const getDistance = require('geolib').getDistance;
 const Activity = require('../../schema/Activity');
 const config = require('../../config');
@@ -41,7 +42,13 @@ async function fetchAllAthleteActivities(
   allActivities = [],
   verbose = false
 ) {
-  const url = `${config.apiUrl}/athlete/activities?after=${afterTimestamp}&page=${page}`;
+  const queryParams = {
+    after: afterTimestamp,
+    page,
+    per_page: config.apiPerPage,
+  };
+
+  const url = `${config.apiUrl}/athlete/activities?${stringify(queryParams)}`;
 
   if (verbose) {
     console.log(`Fetching ${url}`);
@@ -59,8 +66,8 @@ async function fetchAllAthleteActivities(
 
   const activities = await response.json();
 
-  if (!activities.length) {
-    return allActivities;
+  if (activities.length < config.apiPerPage) {
+    return allActivities.concat(activities);
   }
 
   return await fetchAllAthleteActivities(

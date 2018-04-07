@@ -1,5 +1,6 @@
 module.exports = {
   apiUrl: 'https://www.strava.com/api/v3',
+  apiPerPage: 30,
   parkCenter: {
     latitude: 40.661990,
     longitude: -73.969681,
