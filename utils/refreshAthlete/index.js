@@ -1,6 +1,6 @@
 const Athlete = require('../../schema/Athlete');
 const Activity = require('../../schema/Activity');
-const getTimestampFromISO = require('../../utils').getTimestampFromISO;
+const { getTimestampFromISO } = require('../../utils');
 const fetchAthleteActivities = require('./fetchAthleteActivities');
 const fetchLapsFromActivities = require('./fetchLapsFromActivities');
 const {
