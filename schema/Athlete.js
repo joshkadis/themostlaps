@@ -16,6 +16,7 @@ const athleteSchema = new Schema({
   status: { type: String, required: true, default: 'ingesting' },
   last_updated: { type: String, required: true },
   created: { type: String, required: true },
+  last_refreshed: { type: Number, required: true },
   stats: { type: Mixed, required: true, default: {} },
   preferences: {
     notifications: {
