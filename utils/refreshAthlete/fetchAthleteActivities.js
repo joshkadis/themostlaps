@@ -3,6 +3,7 @@ const { stringify } = require('query-string');
 const getDistance = require('geolib').getDistance;
 const Activity = require('../../schema/Activity');
 const config = require('../../config');
+const { getEpochSecondsFromDateObj } = require('../athleteUtils');
 
 /**
  * Get distance of [lat,lng] point from park center
@@ -148,21 +149,57 @@ async function activityIsEligible({
 }
 
 /**
+ * Compare timestamp to date string and return newer one as timestamp in *seconds*
+ *
+ * @param {Number} timestamp
+ * @param {String} dateString ISO-8601 string
+ * @return {Number}
+ */
+function compareTimestampToDateString(timestamp, dateString) {
+  const compareDate = new Date(dateString);
+  const compareTimestamp = getEpochSecondsFromDateObj(compareDate);
+  return compareTimestamp > timestamp ? compareTimestamp : timestamp;
+}
+
+/**
  * Get list of athlete's activity IDs that *might* contain laps
  *
- * @param {String} token
+ * @param {Document} athleteDoc
  * @param {Int} afterTimestamp
  * @param {Boolean} verbose Defaults to false
  * @return {Array}
  */
-module.exports = async (token, afterTimestamp, verbose = false) => {
+module.exports = async (athleteDoc, afterTimestamp, verbose = false) => {
+  const token = athleteDoc.get('access_token');
   const activities = await fetchAllAthleteActivities(token, afterTimestamp, 1, [], verbose);
 
+  // Use for loop instead of Array.filter because of async
   const eligibleActivities = [];
+  let newestActivityStartTimestamp = 0;
   for (let i = 0; i < activities.length; i++) {
+    // Compare timestamp
+    newestActivityStartTimestamp = compareTimestampToDateString(
+      newestActivityStartTimestamp,
+      activities[i].start_date
+    );
+
+    // Check if activity is eligible to maybe have laps
     const isEligible = await activityIsEligible(activities[i], verbose);
     if (isEligible) {
       eligibleActivities.push(activities[i]);
+    }
+  }
+
+  // Update athlete doc with time to start next search
+  if (0 < newestActivityStartTimestamp) {
+    athleteDoc.set('last_refreshed', newestActivityStartTimestamp);
+    try {
+      const updatedAthleteDoc = await athleteDoc.save();
+      if (verbose) {
+        console.log(`Set athlete last_refreshed to ${updatedAthleteDoc.get('last_refreshed')}`);
+      }
+    } catch (err) {
+      console.log(`Error updating last_refreshed for athlete ${updatedAthleteDoc.get('_id')}`);
     }
   }
 

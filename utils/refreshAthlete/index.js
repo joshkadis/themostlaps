@@ -67,8 +67,9 @@ module.exports = async (athlete, after = false, verbose = false) => {
   // Fetch activities
   const fetchTimestamp = after || await getFetchTimestampFromAthlete(athleteDoc, verbose);
 
+  // Get activities that *might* have laps
   const eligibleActivities = await fetchAthleteActivities(
-    athleteDoc.get('access_token'),
+    athleteDoc,
     fetchTimestamp,
     verbose
   );
