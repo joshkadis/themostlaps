@@ -1,6 +1,5 @@
 const Athlete = require('../../schema/Athlete');
 const Activity = require('../../schema/Activity');
-const { getTimestampFromLocalISO } = require('../../utils');
 const fetchAthleteActivities = require('./fetchAthleteActivities');
 const fetchLapsFromActivities = require('./fetchLapsFromActivities');
 const {
@@ -9,45 +8,40 @@ const {
 } = require('../athleteStats');
 const sendMonthlyEmail = require('../emails');
 const { shouldSendMonthlyEmail } = require('../emails/utils');
+const { getEpochSecondsFromDateObj } = require('../athleteUtils');
 
 /**
- * Get timestamp of athlete's most recently created activity (highest activity ID)
- * or fall back to athlete document's last_updated
+ * Get timestamp of athlete's most recently checked activity from last_refreshed
+ * or fall back to athlete document's created date
  *
  * @param {Document} athleteDoc
  * @param {Boolean} verbose Defaults to false
  * @return {Number} UTC *seconds*
  */
 async function getFetchTimestampFromAthlete(athleteDoc, verbose = false) {
-  const logPrepend = 'Searching for activities since';
+  let lastRefreshed = athleteDoc.get('last_refreshed');
 
-  // Start with athlete's last_updated
-  let ISOString = athleteDoc.get('last_updated');
+  // Set athlete's last_refreshed to created time if needed
+  if (!lastRefreshed) {
+    const createdTimeStringUTC = athleteDoc.get('created');
+    const createdDate = new Date(createdTimeStringUTC);
+    lastRefreshed = getEpochSecondsFromDateObj(createdDate);
 
-  try {
-    // Get athlete's activity w highest activity ID
-    const lastActivity = await Activity.findOne(
-      { athlete_id: athleteDoc.get('_id') },
-      'start_date_local',
-      {
-        limit: 1,
-        sort: { '_id': -1 },
-      }
-    );
-
-    if (lastActivity) {
-      ISOString = lastActivity.get('start_date_local');
-      if (verbose) {
-        console.log(`${logPrepend} ${lastActivity.get('_id')} at ${ISOString}`);
-      }
-    } else if (verbose) {
-      console.log(`${logPrepend} athlete last_updated at ${ISOString}`);
+    athleteDoc.set('last_refreshed', lastRefreshed);
+    try {
+      const updatedAthleteDoc = await athleteDoc.save();
+      console.log('Set last_refreshed timestamp from created');
+    } catch (err) {
+      console.log('Error setting last_refreshed timestamp from created');
     }
-  } catch(err) {
-    console.log('Error fetching lastActivity');
   }
 
-  return getTimestampFromLocalISO(ISOString);
+  if (verbose) {
+    const logDate = new Date(lastRefreshed * 1000); // convert s to ms
+    console.log(`Querying activities since ${logDate.toISOString()}`);
+  }
+
+  return lastRefreshed;
 }
 
 /**
