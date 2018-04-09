@@ -6,6 +6,7 @@ const {
   callbackSubscribe,
   callbackActivityInfo,
   callbackMailgun,
+  callbackRefreshBatch,
 } = require ('./cli/callbacks');
 
 function createPositionals(...args) {
@@ -77,7 +78,7 @@ const argv = require('yargs')
     async (argv) => await callbackActivityInfo(argv),
   )
   /**
-   * Get info for a specific activity
+   * Send an email notification via Mailgun
    */
   .command(
     'mailgun user [type]',
@@ -87,5 +88,17 @@ const argv = require('yargs')
       ['type', { type: 'string', default: 'monthly' }],
     ),
     async (argv) => await callbackMailgun(argv),
+  )
+  /**
+   * Process batch of athletes w/ simulated nightly refresh
+   */
+  .command(
+    'refreshbatch limit skip',
+    false,
+    createPositionals(
+      ['limit', { type: 'number' }],
+      ['skip', { type: 'number' }],
+    ),
+    async (argv) => await callbackRefreshBatch(argv),
   )
   .argv;

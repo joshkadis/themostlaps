@@ -37,11 +37,21 @@ async function getFetchTimestampFromAthlete(athleteDoc, verbose = false) {
   }
 
   if (verbose) {
-    const logDate = new Date(lastRefreshed * 1000); // convert s to ms
-    console.log(`Querying activities since ${logDate.toISOString()}`);
+    console.log(`Querying activities since ${timestampToISOString(lastRefreshed)}`);
   }
 
   return lastRefreshed;
+}
+
+/**
+ * Quick converter for UNIX timestamp in seconds to ISO string
+ *
+ * @param {Number} timestamp
+ * @return {String}
+ */
+function timestampToISOString(timestamp) {
+  const theDate = new Date(timestamp * 1000);
+  return theDate.toISOString();
 }
 
 /**
@@ -56,10 +66,10 @@ module.exports = async (athlete, after = false, verbose = false) => {
   const athleteDoc = 'number' === typeof athlete ?
     await Athlete.findById(athlete) : athlete;
 
-  console.log(`Fetching new activities for ${athleteDoc.get('athlete.firstname')} ${athleteDoc.get('athlete.lastname')} (${athleteDoc.get('_id')})`);
-
   // Fetch activities
   const fetchTimestamp = after || await getFetchTimestampFromAthlete(athleteDoc, verbose);
+
+  console.log(`\n----\nFetching new activities for ${athleteDoc.get('athlete.firstname')} ${athleteDoc.get('athlete.lastname')} (${athleteDoc.get('_id')}) since ${timestampToISOString(fetchTimestamp)}`);
 
   // Get activities that *might* have laps
   const eligibleActivities = await fetchAthleteActivities(

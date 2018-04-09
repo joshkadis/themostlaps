@@ -9,6 +9,8 @@ const refreshAthlete = require('../utils/refreshAthlete');
 const subscribeToMailingList = require('../utils/subscribeToMailingList');
 const getActivityInfo = require('./getActivityInfo');
 const sendEmailNotification = require('./sendEmailNotification')
+const { refreshAthletes } = require('../utils/scheduleNightlyRefresh')
+;
 /**
  * Prompt for admin code then connect and run command
  *
@@ -52,7 +54,7 @@ const callbackRefreshUser = async ({ user, daysago }) => {
   await doCommand(
     `Enter admin code to refresh user ${user}.`,
     async () => {
-      const athleteDoc = await Athlete.findBy(user);
+      const athleteDoc = await Athlete.findById(user);
       if (!athleteDoc) {
         console.log(`User ${user} not found`)
         process.exit(0);
@@ -94,6 +96,20 @@ const callbackMailgun = async ({ user, type }) => {
   );
 }
 
+const callbackRefreshBatch = async ({ limit, skip }) => {
+  await doCommand(
+    `Enter admin code to refresh batch of ${limit} athletes with offset ${skip}`,
+    async () => {
+      await refreshAthletes({}, null, {
+        limit,
+        skip,
+        sort: { _id: 1 },
+      });
+      process.exit(0);
+    }
+  );
+};
+
 module.exports = {
   callbackDeleteUser,
   callbackDeleteUserActivities,
@@ -101,4 +117,5 @@ module.exports = {
   callbackSubscribe,
   callbackActivityInfo,
   callbackMailgun,
+  callbackRefreshBatch,
 };

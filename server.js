@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const express = require('express');
 const next = require('next');
 
-const scheduleNightlyRefresh = require('./utils/scheduleNightlyRefresh');
+const { scheduleNightlyRefresh } = require('./utils/scheduleNightlyRefresh');
 const subscribeToMailingList = require('./utils/subscribeToMailingList');
 const Athlete = require('./schema/Athlete');
 
