@@ -95,6 +95,7 @@ async function fetchAllAthleteActivities(
  */
 async function activityIsEligible({
   id = 0,
+  type,
   trainer = false,
   manual = false,
   start_latlng = null,
@@ -109,6 +110,13 @@ async function activityIsEligible({
   if (exists) {
     if (verbose) {
       console.log(`Activity ${id} is already in the database.`);
+    }
+    return false;
+  }
+
+  if ('string' === typeof type && type.toLowerCase() !== 'ride') {
+    if (verbose) {
+      console.log(`Activity ${id} is not a Ride.`);
     }
     return false;
   }
