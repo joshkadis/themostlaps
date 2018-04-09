@@ -36,10 +36,6 @@ async function getFetchTimestampFromAthlete(athleteDoc, verbose = false) {
     }
   }
 
-  if (verbose) {
-    console.log(`Querying activities since ${timestampToISOString(lastRefreshed)}`);
-  }
-
   return lastRefreshed;
 }
 
