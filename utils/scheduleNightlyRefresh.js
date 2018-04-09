@@ -13,7 +13,7 @@ async function refreshAthletes(...args) {
   const athletes = await Athlete.find(...args);
   for (let i = 0; i < athletes.length; i++) {
     const athlete = athletes[i];
-    await refreshAthlete(athlete);
+    await refreshAthlete(athlete, false, process.env.SHOULD_REFRESH_VERBOSE);
   }
   console.log(`Updated ${athletes.length} athletes`);
 }
