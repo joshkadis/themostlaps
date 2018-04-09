@@ -1,39 +1,17 @@
 #!/usr/bin/env node
-require('dotenv').config();
-const mongoose = require('mongoose');
-const promptly = require('promptly');
-const deleteUser = require('./cli/deleteUser');
-const deleteUserActivities = require('./cli/deleteUserActivities');
-const getActivityInfo = require('./cli/getActivityInfo');
-const sendEmailNotification = require('./cli/sendEmailNotification')
-const { daysAgoTimestamp } = require('./cli/utils');
-const refreshAthlete = require('./utils/refreshAthlete');
-const subscribeToMailingList = require('./utils/subscribeToMailingList');
-const Athlete = require('./schema/Athlete');
+const {
+  callbackDeleteUser,
+  callbackDeleteUserActivities,
+  callbackRefreshUser,
+  callbackSubscribe,
+  callbackActivityInfo,
+  callbackMailgun,
+} = require ('./cli/callbacks');
 
-function userPositional(yargs) {
-  yargs.positional('user', {
-    type: 'number',
-  });
-}
-
-/**
- * Prompt for admin code then connect and run command
- *
- * @param {String} prompt
- * @param {Func} callback Callback function is responsible for exiting the process
- * @param {Bool} Return true or exit if invalid admin code
- */
-async function doCommand(prompt, callback) {
-  const code = await promptly.prompt(prompt, { silent: true });
-  if (code !== process.env.ADMIN_CODE) {
-    console.log('Invalid admin code.');
-    process.exit(0);
-  }
-
-  mongoose.connect(process.env.MONGODB_URI);
-  const db = mongoose.connection;
-  db.once('open', callback);
+function createPositionals(...args) {
+  return (yargs) => {
+    args.forEach((arg) => yargs.positional(arg[0], arg[1]));
+  };
 }
 
 const argv = require('yargs')
@@ -44,13 +22,10 @@ const argv = require('yargs')
   .command(
     'delete user',
     false,
-    userPositional,
-    async ({ user }) => {
-      await doCommand(
-        `Enter admin code to delete user ${user}.`,
-        () => deleteUser(user)
-      );
-    }
+    createPositionals(
+      ['user', { type: 'number' }],
+    ),
+    async (argv) => await callbackDeleteUser(argv),
   )
   /**
    * Delete a user's activities from the last n days
@@ -58,123 +33,58 @@ const argv = require('yargs')
   .command(
     'deleteactivities user daysago',
     false,
-    (yargs) => {
-      yargs.positional('user', {
-        type: 'number',
-      });
-      yargs.positional('daysago', {
-        type: 'number',
-      });
-    },
-    async ({ user, daysago }) => {
-      if (0 === daysago) {
-        console.log('daysago must be >=1')
-        process.exit(0);
-      }
-
-      const after = daysAgoTimestamp(daysago);
-      await doCommand(
-        `Enter admin code to delete activities for user ${user} from last ${daysago} days.`,
-        () => deleteUserActivities(user, after)
-      );
-    }
+    createPositionals(
+      ['user', { type: 'number' }],
+      ['daysago', { type: 'number', default: 0 }],
+    ),
+    async (argv) => await callbackDeleteUserActivities(argv),
   )
   /**
-   * Refresh a user for the last n days
+   * Refresh a user since last checked activity or for the last n days
    */
   .command(
     'refresh user [daysago]',
     false,
-    (yargs) => {
-      yargs.positional('user', {
-        type: 'number',
-      });
-      yargs.positional('daysago', {
-        type: 'number',
-      });
-    },
-    async ({ user, daysago }) => {
-      await doCommand(
-        `Enter admin code to refresh user ${user}.`,
-        async () => {
-          const athleteDoc = await Athlete.findById(user);
-          if (!athleteDoc) {
-            console.log(`User ${user} not found`)
-            process.exit(0);
-          }
-          await refreshAthlete(
-            athleteDoc,
-            'undefined' !== typeof daysago ? daysAgoTimestamp(daysago) : false,
-            true
-          );
-          process.exit(0);
-        }
-      );
-    }
+    createPositionals(
+      ['user', { type: 'number' }],
+      ['daysago', { type: 'number', default: 0 }],
+    ),
+    async (argv) => await callbackRefreshUser(argv),
   )
   /**
-   * Subscribe someone to the email list
+   * Subscribe someone to the MailChimp list, maybe in the newsletter group
    */
   .command(
     'subscribe email [--newsletter]',
     false,
-    (yargs) => {
-      yargs.positional('email', {
-        type: 'string',
-      });
-    },
-    async (argv) => {
-      const newsletter = !!argv.newsletter;
-      await doCommand(
-        `Enter admin code to subscribe ${argv.email} to the email list${newsletter ? ' AND the newsletter' : ''}.`,
-        async () => {
-          await subscribeToMailingList(argv.email, newsletter);
-          process.exit(0);
-        }
-      );
-    }
+    createPositionals(
+      ['email', { type: 'string' }],
+      ['newsletter', { type: 'boolean', default: false }],
+    ),
+    async (argv) => await callbackSubscribe(argv),
   )
   /**
    * Get info for a specific activity
    */
   .command(
-    'activity userId activityId',
+    'activityinfo user activity',
     false,
-    (yargs) => {
-      yargs.positional('userId', {
-        type: 'number',
-      });
-      yargs.positional('activityId', {
-        type: 'number',
-      });
-    },
-    async ({ userId, activityId }) => {
-      await doCommand(
-        `Enter admin code to fetch details for user ${userId} activity ${activityId}.`,
-        () => getActivityInfo(userId, activityId)
-      );
-    }
+    createPositionals(
+      ['user', { type: 'number' }],
+      ['activity', { type: 'number' }],
+    ),
+    async (argv) => await callbackActivityInfo(argv),
   )
   /**
    * Get info for a specific activity
    */
   .command(
-    'mailgun userId [type]',
+    'mailgun user [type]',
     false,
-    (yargs) => {
-      yargs.positional('userId', {
-        type: 'number',
-      });
-      yargs.positional('type', {
-        type: 'string',
-        default: 'monthly',
-      });
-    },
-    async ({ userId, type }) => {
-      await doCommand(
-        `Enter admin code to send ${type} email notification to user ${userId}`,
-        () => sendEmailNotification(userId, type)
-      );
-    }
+    createPositionals(
+      ['user', { type: 'number' }],
+      ['type', { type: 'string', default: 'monthly' }],
+    ),
+    async (argv) => await callbackMailgun(argv),
   )
   .argv;
