@@ -8,7 +8,7 @@ const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
  * @return {Object}
  */
 function statsForAthletePage(stats) {
-  const { allTime, single } = stats;
+
   let output = {}
   const defaultOutput = {
     allTime: 0,
@@ -17,12 +17,18 @@ function statsForAthletePage(stats) {
     data: {}
   };
 
+  if ('undefined' === typeof stats || !stats) {
+    return defaultOutput;
+  }
+
   try {
+    const { allTime, single } = stats;
     output = Object.assign(defaultOutput, { allTime, single });
   } catch (err) {
     // if either of those is undefined...
     output = defaultOutput;
   }
+
 
   // Add years and months to output
   const data = Object.keys(stats).reduce((acc, key) => {

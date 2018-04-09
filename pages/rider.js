@@ -213,8 +213,10 @@ class Rider extends Component {
           allTime={stats.allTime}
           single={stats.single}
         />
-
-        {'all' === this.state.year ?
+        {this.state.primaryData.length === 0 &&
+          <p style={{ textAlign: 'center', marginTop: '1.5rem'}}>Not even one lap, ever! 😱</p>
+        }
+        {this.state.primaryData.length > 0 && ('all' === this.state.year ?
           <AllYears
             compareTo={getCompareTo(this.state)}
             compareData={this.state.compareData || []}
@@ -236,7 +238,7 @@ class Rider extends Component {
             onClickBack={() => this.onSelectYear('all')}
             onChange={this.onChangeSearchUsers}
             onChartRendered={this.onChartRendered}
-          />
+          />)
         }
         {this.state.chartRendered &&
           <div style={{ textAlign: 'right'}}>
