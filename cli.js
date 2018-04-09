@@ -20,10 +20,11 @@ const argv = require('yargs')
    * Delete a user
    */
   .command(
-    'delete user',
+    'delete user [--deauthorize]',
     false,
     createPositionals(
       ['user', { type: 'number' }],
+      ['deauthorize', { type: 'boolean', default: false }]
     ),
     async (argv) => await callbackDeleteUser(argv),
   )

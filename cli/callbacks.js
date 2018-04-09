@@ -28,10 +28,10 @@ async function doCommand(prompt, callback) {
   db.once('open', callback);
 }
 
-const callbackDeleteUser = async ({ user }) => {
+const callbackDeleteUser = async ({ user, deauthorize }) => {
   await doCommand(
     `Enter admin code to delete user ${user}.`,
-    () => deleteUser(user)
+    () => deleteUser(user, deauthorize)
   );
 };
 

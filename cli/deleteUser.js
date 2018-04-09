@@ -9,7 +9,7 @@ const Activity = require('../schema/Activity');
  *
  * @param {Number} id
  */
-module.exports = async (id) => {
+module.exports = async (id, shouldDeauthorize = false) => {
   try {
     // Remove from athletes collection
     const athleteDoc = await Athlete.findByIdAndRemove(id);
@@ -24,17 +24,20 @@ module.exports = async (id) => {
     await Activity.deleteMany({ athlete_id: id });
     console.log(`Deleted user ${id}'s activities`);
 
-    // Deauthorize API access
-    const { status } = await fetch('https://www.strava.com/oauth/deauthorize', {
-      method: 'POST',
-      body: `access_token=${athleteDoc.get('access_token')}`,
-    });
+    // Maybe deauthorize Strava API access
+    if (shouldDeauthorize) {
+      const { status } = await fetch('https://www.strava.com/oauth/deauthorize', {
+        method: 'POST',
+        body: `access_token=${athleteDoc.get('access_token')}`,
+      });
 
-    if (200 === status) {
-      console.log('Deauthorized Strava API');
-    } else {
-      console.log('Error deauthorizing Strava API');
+      if (200 === status) {
+        console.log('Deauthorized Strava API');
+      } else {
+        console.log('Error deauthorizing Strava API');
+      }
     }
+
     process.exit(0);
   } catch (err) {
     throw err;
