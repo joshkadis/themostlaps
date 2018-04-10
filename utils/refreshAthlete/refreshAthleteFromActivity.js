@@ -9,21 +9,29 @@ const {
   compileStatsForActivities,
   updateAthleteStats,
 } = require('../athleteStats');
-const { getEpochSecondsFromDateObj } = require('../athleteUtils');
+const {
+  getEpochSecondsFromDateObj,
+  isTestUser,
+} = require('../athleteUtils');
 
 /**
  * Validate activity model and save to database
  *
  * @param {Object} activity
+ * @param {Bool} shouldUpdateDb If false, will validate without saving
  * @return {Document|false}
  */
-async function validateActivityAndSave(activity) {
+async function validateActivityAndSave(activity, shouldUpdateDb = true) {
   const activityDoc = new Activity(activity);
   // Mongoose returns error here instead of throwing
   const err = activityDoc.validateSync();
   if (err) {
     console.warn(`Failed to validate activity ${activity.get('_id')}`);
     return false;
+  }
+
+  if (!shouldUpdateDb) {
+    return activityDoc;
   }
 
   try {
@@ -64,6 +72,8 @@ async function updateAthleteLastRefreshed(athleteDoc, startDateString) {
  * @param {Number} activityId
  */
 async function refreshAthleteFromActivity(athleteId, activityId) {
+  const shouldUpdateDb = isTestUser(athleteId);
+
   // Check that athlete exists and activity is new
   let athleteDoc = await Athlete.findById(athleteId);
   if (!athleteDoc) {
@@ -81,7 +91,9 @@ async function refreshAthleteFromActivity(athleteId, activityId) {
   const activity = await fetchActivity(activityId, athleteDoc.get('access_token'));
 
   // Update athlete's last_refreshed timestamp
-  athleteDoc = await updateAthleteLastRefreshed(athleteDoc, activity.start_date);
+  if (shouldUpdateDb) {
+    athleteDoc = await updateAthleteLastRefreshed(athleteDoc, activity.start_date);
+  }
 
   // Check eligibility
   if (!activityCouldHaveLaps(activity, true)) {
@@ -95,7 +107,7 @@ async function refreshAthleteFromActivity(athleteId, activityId) {
   }
 
   // Validate and save
-  const savedDoc = await validateActivityAndSave(activityData);
+  const savedDoc = await validateActivityAndSave(activityData, shouldUpdateDb);
   if (!savedDoc) {
     return 0;
   }
@@ -105,7 +117,9 @@ async function refreshAthleteFromActivity(athleteId, activityId) {
   console.log(`Added ${stats.allTime - athleteDoc.get('stats.allTime')} to stats.allTime`);
 
   // Update user stats and last_updated
-  const updatedAthleteDoc = await updateAthleteStats(athleteDoc, stats);
+  if (shouldUpdateDb) {
+    const updatedAthleteDoc = await updateAthleteStats(athleteDoc, stats);
+  }
 
   // Return laps found
   // @todo Reconcile with ${stats.allTime - athleteDoc.get('stats.allTime')} above
