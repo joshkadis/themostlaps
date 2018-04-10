@@ -1,56 +1,5 @@
-require('isomorphic-fetch');
 const config = require('../../config');
-const calculateLapsFromSegmentEfforts =
-  require('./calculateLapsFromSegmentEfforts');
-const { formatSegmentEffort } = require('../athleteHistory');
-
-/**
- * Filter segment efforts for activity
- *
- * @param {Array} efforts
- * @return {Array}
- */
-function filterSegmentEfforts(efforts) {
-  return efforts
-    .filter(({ segment }) => config.lapSegmentId === segment.id)
-    .map((effort) => formatSegmentEffort(effort));
-}
-
-/**
- * Get laps data object from an activity
- *
- * @param {Object} activity
- * @param {Boolean} verbose Defaults to false
- * @return {Object|false}
- */
-function formatActivityData(activity, verbose = false) {
-  const {
-    id,
-    athlete,
-    segment_efforts,
-    start_date_local,
-  } = activity;
-
-  const laps = calculateLapsFromSegmentEfforts(segment_efforts);
-  if (verbose) {
-    console.log(`Activity ${id} has ${laps} laps`);
-  }
-
-  if (!laps) {
-    return false;
-  }
-
-  const added = new Date();
-  return {
-    _id: id,
-    added_date: added.toISOString(),
-    athlete_id: athlete.id,
-    laps,
-    segment_efforts: filterSegmentEfforts(segment_efforts),
-    source: 'refresh',
-    start_date_local,
-  };
-}
+const { fetchActivity , getActivityData } = require('./utils');
 
 /**
  * Iterate over activity ids list and get laps.
@@ -70,16 +19,15 @@ async function fetchActivityDetails(activityIds, token, idx = 0, allActivities, 
     console.log(`Fetching ${(idx + 1)} of ${fetchNum}: ${activityIds[idx]}`)
   }
 
-  const response = await fetch(`${config.apiUrl}/activities/${activityIds[idx]}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  const activity = await response.json();
-
-  const activityData = formatActivityData(activity, verbose);
-  if(activityData) {
-    allActivities.push(activityData);
+  try {
+    const activity = await fetchActivity(activityIds[idx], token);
+    const activityData = getActivityData(activity, verbose);
+    if(activityData) {
+      allActivities.push(activityData);
+    }
+  } catch (err) {
+    console.log(`Error processing activity ${activityIds[idx]}`);
+    console.log(err);
   }
 
   if ((idx + 1) === fetchNum) {

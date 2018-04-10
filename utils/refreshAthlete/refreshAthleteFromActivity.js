@@ -1,0 +1,90 @@
+const Athlete = require('../../schema/Athlete');
+const Activity = require('../../schema/Activity');
+const {
+  fetchActivity,
+  activityCouldHaveLaps,
+  getActivityData,
+} = require('./utils');
+const {
+  compileStatsForActivities,
+  updateAthleteStats,
+} = require('../athleteStats');
+
+/**
+ * Validate activity model and save to database
+ *
+ * @param {Object} activity
+ * @return {Document|false}
+ */
+async function validateActivityAndSave(activity) {
+  const activityDoc = new Activity(activity);
+  // Mongoose returns error here instead of throwing
+  const err = activityDoc.validateSync();
+  if (err) {
+    console.warn(`Failed to validate activity ${activity.get('_id')}`);
+    return false;
+  }
+
+  try {
+    await Activity.create(activityDoc);
+    console.log(`Saved activity ${activityDoc.get('_id')}`);
+    return activityDoc;
+  } catch (err) {
+    console.log(`Error saving activity ${activityDoc.get('_id')}`);
+    console.log(err);
+    return false;
+  }
+}
+
+/**
+ * Take a single activity ID which may or may not have laps and refresh the athlete
+ *
+ * @param {Number} athleteId
+ * @param {Number} activityId
+ */
+async function refreshAthleteFromActivity(athleteId, activityId) {
+  // Check that athlete exists and activity is new
+  const athleteDoc = await Athlete.findById(athleteId);
+  if (!athleteDoc) {
+    console.log(`Athlete id ${athleteId} not found`);
+    return 0;
+  }
+
+  const activityExists = await Activity.findById(activityId);
+  if (activityExists) {
+    console.log(`Activity id ${activityId} already exists in database`);
+    return 0;
+  }
+
+  // Fetch activity details
+  const activity = await fetchActivity(activityId, athleteDoc.get('access_token'));
+
+  // Check eligibility
+  if (!activityCouldHaveLaps(activity, true)) {
+    return;
+  }
+
+  // Check for laps
+  const activityData = getActivityData(activity, true);
+  if (!activityData) {
+    return 0;
+  }
+
+  // Validate and save
+  const savedDoc = await validateActivityAndSave(activityData);
+  if (!savedDoc) {
+    return 0;
+  }
+
+  // Update athlete stats
+  const stats = compileStatsForActivities([savedDoc], athleteDoc.toJSON().stats);
+  console.log(`Added ${stats.allTime - athleteDoc.get('stats.allTime')} to stats.allTime`);
+
+  // Update user stats and last_updated
+  const updatedAthleteDoc = await updateAthleteStats(athleteDoc, stats);
+
+  // Return laps found
+  return activityData.laps;
+}
+
+module.exports = refreshAthleteFromActivity;

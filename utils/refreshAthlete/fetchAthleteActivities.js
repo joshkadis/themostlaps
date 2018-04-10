@@ -1,31 +1,9 @@
 require('isomorphic-fetch');
 const { stringify } = require('query-string');
-const getDistance = require('geolib').getDistance;
 const Activity = require('../../schema/Activity');
 const config = require('../../config');
 const { getEpochSecondsFromDateObj } = require('../athleteUtils');
-
-/**
- * Get distance of [lat,lng] point from park center
- *
- * @param {Array} latlng
- * @return {Number}
- */
-function distFromParkCenter(latlng = null) {
-  if (!latlng || 2 !== latlng.length) {
-    return null;
-  }
-
-  return getDistance(
-    config.parkCenter,
-    {
-      latitude: latlng[0],
-      longitude: latlng[1],
-    },
-    100,
-    1
-  );
-}
+const { activityCouldHaveLaps } = require('./utils');
 
 /**
  * Get all of a user's activities by iterating recursively over paginated API results
@@ -93,15 +71,9 @@ async function fetchAllAthleteActivities(
  * @param {Bool} verbose Defaults to false
  * @return {Bool}
  */
-async function activityIsEligible({
-  id = 0,
-  type,
-  trainer = false,
-  manual = false,
-  start_latlng = null,
-  end_latlng = null,
-  distance = 0,
-}, verbose = false) {
+async function activityIsEligible(activity, verbose = false) {
+  const { id = 0 } = activity;
+
   if (verbose) {
     console.log(`Checking activity ${id}`);
   }
@@ -114,46 +86,7 @@ async function activityIsEligible({
     return false;
   }
 
-  if ('string' === typeof type && type.toLowerCase() !== 'ride') {
-    if (verbose) {
-      console.log(`Activity ${id} is not a Ride.`);
-    }
-    return false;
-  }
-
-  if (manual || trainer || distance < config.minDistance) {
-    if (verbose) {
-      let reason;
-      switch (true) {
-        case !!manual:
-          reason = 'a manual activity';
-          break;
-
-        case !!trainer:
-          reason = 'a trainer activity';
-          break;
-
-        case !!(distance < config.minDistance):
-          reason = 'less than the min distance';
-          break;
-
-        default:
-          reason = 'invalid';
-      }
-      console.log(`Activity ${id} is ${reason}.`);
-    }
-    return false;
-  }
-
-  const nearParkCenter =
-    (start_latlng && distFromParkCenter(start_latlng) < config.allowedRadius) ||
-    (end_latlng && distFromParkCenter(end_latlng) < config.allowedRadius);
-
-  if (verbose && !nearParkCenter) {
-      console.log(`Activity ${id} is not near the park center.`);
-  }
-
-  return nearParkCenter;
+  return activityCouldHaveLaps(activity, verbose);
 }
 
 /**
