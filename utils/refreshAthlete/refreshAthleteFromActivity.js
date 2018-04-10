@@ -9,6 +9,7 @@ const {
   compileStatsForActivities,
   updateAthleteStats,
 } = require('../athleteStats');
+const { getEpochSecondsFromDateObj } = require('../athleteUtils');
 
 /**
  * Validate activity model and save to database
@@ -37,6 +38,26 @@ async function validateActivityAndSave(activity) {
 }
 
 /**
+ * Update athlete's last refreshed to start time of this activity
+ *
+ * @param {Document} athleteDoc
+ * @param {String} startDateString ISO-8601 string, presumably UTC
+ * @return {Document} Updated document
+ */
+async function updateAthleteLastRefreshed(athleteDoc, startDateString) {
+  try {
+    const startDate = new Date(startDateString); // UTC
+    athleteDoc.set('last_refreshed', getEpochSecondsFromDateObj(startDate));
+    const updatedDoc = await athleteDoc.save();
+    console.log(`Updated last_refreshed to ${startDateString}`);
+    return updatedDoc;
+  } catch (err) {
+    console.log(`Error updating last_refreshed to ${startDateString}`);
+  }
+  return athleteDoc;
+}
+
+/**
  * Take a single activity ID which may or may not have laps and refresh the athlete
  *
  * @param {Number} athleteId
@@ -44,7 +65,7 @@ async function validateActivityAndSave(activity) {
  */
 async function refreshAthleteFromActivity(athleteId, activityId) {
   // Check that athlete exists and activity is new
-  const athleteDoc = await Athlete.findById(athleteId);
+  let athleteDoc = await Athlete.findById(athleteId);
   if (!athleteDoc) {
     console.log(`Athlete id ${athleteId} not found`);
     return 0;
@@ -58,6 +79,9 @@ async function refreshAthleteFromActivity(athleteId, activityId) {
 
   // Fetch activity details
   const activity = await fetchActivity(activityId, athleteDoc.get('access_token'));
+
+  // Update athlete's last_refreshed timestamp
+  athleteDoc = await updateAthleteLastRefreshed(athleteDoc, activity.start_date);
 
   // Check eligibility
   if (!activityCouldHaveLaps(activity, true)) {
