@@ -97,7 +97,7 @@ async function refreshAthleteFromActivity(athleteId, activityId) {
 
   // Check eligibility
   if (!activityCouldHaveLaps(activity, true)) {
-    return;
+    return 0;
   }
 
   // Check for laps
