@@ -2,6 +2,7 @@ require('dotenv').config();
 const querystring = require('querystring');
 const mongoose = require('mongoose');
 const express = require('express');
+const bodyParser = require('body-parser');
 const next = require('next');
 
 const { scheduleNightlyRefresh } = require('./utils/scheduleNightlyRefresh');
@@ -12,6 +13,7 @@ const Athlete = require('./schema/Athlete');
 const onAuthCallback = require('./server/onAuthCallback');
 const handleNotification = require('./server/handleNotification');
 const initAPIRoutes = require('./api/initAPIRoutes');
+const initWebhookRoutes = require('./utils/initWebhookRoutes');
 const getRankingParams = require('./utils/getRankingParams');
 const { slackError } = require('./utils/slackNotification');
 
@@ -23,6 +25,7 @@ app.prepare()
   .then(() => {
 
     const server = express();
+    server.use(bodyParser.json());
 
     /**
      * Auth callback, ingest and redirect
@@ -110,6 +113,11 @@ app.prepare()
       const success = await handleNotification(req.params.encrypted, res);
       app.render(req, res, '/notifications', Object.assign({...req.query}, { success } ));
     });
+
+    /**
+     * Webhook routes
+     */
+    initWebhookRoutes(server);
 
     /**
      * API routing
