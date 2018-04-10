@@ -1,4 +1,5 @@
 const Athlete = require('../schema/Athlete');
+const { testAthleteIds } = require('../config');
 
 /**
  * Convert API response for athlete to our model's format
@@ -47,7 +48,27 @@ async function createAthlete(athlete) {
   return await Athlete.create(getAthleteModelFormat(athlete));
 };
 
+
+/**
+ * Determine if athlete is a test user
+ *
+ * @param {Number|Document} athlete ID or Athlete document
+ * @return {Bool}
+ */
+function isTestUser(athlete) {
+  if (athlete instanceof Athlete) {
+    return -1 !== testAthleteIds.indexOf(athlete.get('_id'));
+  }
+
+  if ('number' === typeof athlete) {
+    return -1 !== testAthleteIds.indexOf(athlete);
+  }
+
+  return false;
+}
+
 module.exports = {
   createAthlete,
   getEpochSecondsFromDateObj,
+  isTestUser,
 };
