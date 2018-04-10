@@ -108,6 +108,7 @@ async function refreshAthleteFromActivity(athleteId, activityId) {
   const updatedAthleteDoc = await updateAthleteStats(athleteDoc, stats);
 
   // Return laps found
+  // @todo Reconcile with ${stats.allTime - athleteDoc.get('stats.allTime')} above
   return activityData.laps;
 }
 
