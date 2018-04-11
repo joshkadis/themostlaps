@@ -11,7 +11,6 @@ const {
 } = require('../athleteStats');
 const {
   getEpochSecondsFromDateObj,
-  isTestUser,
 } = require('../athleteUtils');
 
 /**
@@ -70,10 +69,9 @@ async function updateAthleteLastRefreshed(athleteDoc, startDateString) {
  *
  * @param {Number} athleteId
  * @param {Number} activityId
+ * @param {Bool} shouldUpdateDb If false, will validate without saving
  */
-async function refreshAthleteFromActivity(athleteId, activityId) {
-  const shouldUpdateDb = isTestUser(athleteId);
-
+async function refreshAthleteFromActivity(athleteId, activityId, shouldUpdateDb = true) {
   // Check that athlete exists and activity is new
   let athleteDoc = await Athlete.findById(athleteId);
   if (!athleteDoc) {

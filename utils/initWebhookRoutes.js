@@ -1,5 +1,6 @@
 const { slackError, slackSuccess } = require('./slackNotification');
 const refreshAthleteFromActivity = require('./refreshAthlete/refreshAthleteFromActivity');
+const { isTestUser } = require('./athleteUtils');
 
 /**
  * See https://developers.strava.com/docs/webhooks/
@@ -52,8 +53,11 @@ async function handleEvent(req, res) {
     } = req.body;
 
     if ('create' === aspect_type) {
-      const activityLaps = await refreshAthleteFromActivity(owner_id, object_id);
-      slackSuccess(`New activity ${object_id} by athlete ${owner_id} has ${activityLaps} laps`);
+      const shouldUpdateDb = !process.env.DISABLE_REFRESH_FROM_WEBHOOK;
+      const activityLaps = await refreshAthleteFromActivity(owner_id, object_id, shouldUpdateDb);
+      if (activityLaps > 0) {
+        slackSuccess(`New activity ${object_id} by athlete ${owner_id} has ${activityLaps} laps${shouldUpdateDb ? ', saved to database' : ''}`);
+      }
     }
   } catch (err) {
     slackError(110, JSON.stringify(req.body, null, 2));
