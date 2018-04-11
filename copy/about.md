@@ -12,7 +12,7 @@ At first, Josh just wanted to use the Strava API to count all the Prospect Park 
 
 #### How does it work?
 
-The most important thing is that we **do not** collect or retain any of your data without your consent. Once you authorize The Most Laps to access your Strava account, we look back through your past [segment efforts][2] and calculate your all-time, yearly, and monthly totals, and the most laps in a single ride. Then we check automatically every night to see if you've ridden any new laps, and we add those to your stats.
+The most important thing is that we **do not** collect or retain any of your data without your consent. Once you authorize The Most Laps to access your Strava account, we look back through your past [segment efforts][2] and calculate your all-time, yearly, and monthly totals, and the most laps in a single ride. Then we check automatically to see if you've ridden any new laps, and we add those to your stats.
 
 #### How does it really work?
 
