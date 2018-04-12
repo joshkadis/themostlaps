@@ -14,9 +14,15 @@ function timePartString(part) {
 /**
  * Get _YYYY key
  *
+ * @param {Number|String} year Optional 4-digit year
  * @return {String}
  */
-function getYearKey() {
+function getYearKey(year = null) {
+  // Must be 4 digit year in 21st century
+  if (year && /20\d{2,2}/.test(year.toString())) {
+    return `_${year}`;
+  }
+
   const current = new Date();
   return `_${current.getFullYear()}`;
 }

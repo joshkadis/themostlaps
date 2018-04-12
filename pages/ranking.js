@@ -5,7 +5,12 @@ import RankingRow from '../components/RankingRow';
 import RankingSelector from '../components/RankingSelector';
 import Button from '../components/lib/Button';
 import { getPathnameFromContext, APIRequest } from '../utils';
-import { timePartString, getMonthName } from '../utils/dateTimeUtils';
+import {
+  timePartString,
+  getMonthName,
+  getMonthKey,
+  getYearKey,
+} from '../utils/dateTimeUtils';
 import * as styles from '../components/Layout.css';
 import { rankingPerPage } from '../api/apiConfig';
 
@@ -104,25 +109,63 @@ class Ranking extends Component {
   }
 }
 
-Ranking.getInitialProps = async function(context) {
-  const { query } = context;
-  const queryType = query.type || 'allTime';
-
-  const apiQueryParams = {};
-  if ('timePeriod' === queryType) {
-    apiQueryParams.filter = query.month ? `_${query.year}_${timePartString(query.month)}` : `_${query.year}`;
+/**
+ * Get query info from Next.js page query for API request
+ *
+ * @param {Object} pageQuery
+ * @return {Object}
+ */
+function getAPIQuery(pageQuery = {}) {
+  // Default to current month ranking
+  if (!pageQuery.type) {
+    return {
+      type: 'timePeriod',
+      params: {
+        filter: getMonthKey(),
+      },
+    };
   }
 
-  return APIRequest(`/ranking/${queryType}`, apiQueryParams, [])
+  if ('timePeriod' === pageQuery.type) {
+    let filter = getYearKey(pageQuery.year);
+    if (pageQuery.month) {
+      filter = `${filter}_${timePartString(pageQuery.month)}`;
+    }
+
+    return {
+      type: 'timePeriod',
+      params: {
+        filter,
+      },
+    };
+  }
+
+  return {
+    type: pageQuery.type,
+    params: {},
+  };
+}
+
+Ranking.getInitialProps = async function(context) {
+  let { query } = context;
+  // @todo Clean up logic between query and APIQuery, these are basically the same thing
+  if (!query.type) {
+    const current = new Date();
+    query = Object.assign({...query}, {
+      type: 'timePeriod',
+      year: current.getFullYear().toString(),
+      month: (current.getMonth() + 1).toString(),
+    });
+  }
+  const APIQuery = getAPIQuery(query);
+
+  return APIRequest(`/ranking/${APIQuery.type}`, APIQuery.params, [])
     .then(({ ranking, statsKey }) => ({
       pathname: getPathnameFromContext(context),
       query,
       ranking,
       statsKey,
-      APIQuery: {
-        type: queryType,
-        params: apiQueryParams,
-      },
+      APIQuery,
     }));
 }
 
