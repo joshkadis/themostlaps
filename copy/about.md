@@ -1,5 +1,13 @@
 ## Infrequently Asked Questions
 
+#### Who can be on here?
+
+Technically, any Strava user can sign up but it probably helps if you ride laps in Prospect Park.
+
+This brings up an important point: Prospect Park is home to the most diverse community of cyclists in the world but they're not all on Strava. So take these rankings with a grain of salt because the true lap leaders have been out here since the days when chamois and sew-up were literal terms.
+
+Extra special shoutout to Postal Joe. Some estimate his lifetime total at **250,000 laps.** 🙌
+
 #### Who made this?
 
 The Most Laps was conceived, designed, and built by [Josh Kadis][1], a cyclist, web developer, and product manager from Brooklyn.
