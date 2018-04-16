@@ -37,6 +37,6 @@ module.exports = (code = 0, data = '') => {
       return 'Webhook payload error';
 
     default:
-      return 'An error occurred';
+      return 'An error occurred.';
   }
 };
