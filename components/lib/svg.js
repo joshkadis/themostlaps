@@ -47,10 +47,10 @@ export const CloseSvg = ({ className }) => (
 /**
  * Export as string because safari requires xlink: for the animateMotion elements
  */
-export const LapPath = (className) => (`
+export const LapPath = (className, width = false) => (`
   <svg
-    width="190px"
-    height="310px"
+    width="${ `${width}px` || '190px'}"
+    height="${width ? `${width * 310 / 190}px` : '310px'}"
     viewBox="0 0 190 310"
     class="${className || ''}"
   >
