@@ -47,4 +47,4 @@ async function exchangeCodeForAthleteInfo(code) {
   }
 }
 
-module.exports exchangeCodeForAthleteInfo;
+module.exports = exchangeCodeForAthleteInfo;
