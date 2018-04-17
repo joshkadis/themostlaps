@@ -1,4 +1,7 @@
+const { stringify } = require('querystring');
 const  exchangeCodeForAthleteInfo = require('../utils/ingest/exchangeCodeForAthleteInfo');
+const Athlete = require('../schema/Athlete');
+const { getAthleteModelFormat } = require('../utils/athleteUtils');
 
 /**
  * Handle OAuth callback from signup
@@ -7,7 +10,7 @@ const  exchangeCodeForAthleteInfo = require('../utils/ingest/exchangeCodeForAthl
  * @param {Request} req
  * @param {Response} res
  */
-async function handleSignupCallback(app, req, res) {
+async function handleSignupCallback(req, res) {
   // Handle request error, most likely error=access_denied
   if (req.query.error) {
     // Log and redirect to error page with error code
@@ -25,16 +28,20 @@ async function handleSignupCallback(app, req, res) {
   // Create athlete record in database
   let athleteDoc;
   try {
-    athleteDoc = await createAthlete(athleteInfo);
+    athleteDoc = await Athlete.create(getAthleteModelFormat(athleteInfo));
   } catch (err) {
     // Log and redirect to error page with error code
     return;
   }
 
   // Render the welcome page, athlete status will be 'ingesting'
-  app.render(req, res, '/welcome', Object.assign({...req.query}, athleteInfo));
+  res.redirect(303, `/welcome?${stringify({
+    id: athleteInfo.athlete.id,
+    firstname: athleteInfo.athlete.firstname,
+  })}`);
 
   // Fetch athlete history
+  console.log('here');
 
   // Validate and save history
 

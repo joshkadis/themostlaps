@@ -33,6 +33,8 @@ class Welcome extends Component {
   }
 }
 
+Welcome.getInitialProps = ({ query }) => ({ ...query });
+
 Welcome.defaultProps = {
   id: 541773,
   firstname: 'josh',
