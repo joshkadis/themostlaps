@@ -78,11 +78,11 @@ async function handleSignupCallback(req, res) {
   try {
     athleteHistory = await fetchAthleteHistory(athleteDoc);
     if (!athleteHistory || !athleteHistory.length) {
-      // Log and redirect to error page with error code
+      // Send ingest email, *no error*, set athlete status to ready
       return;
     }
   } catch (err) {
-    // Log and redirect to error page with error code
+    // Send ingest email, log error, set athlete status to ready
     return;
   }
 
@@ -91,7 +91,7 @@ async function handleSignupCallback(req, res) {
   try {
     savedActivities = await saveAthleteHistory(athleteHistory);
   } catch (err) {
-    // Log and redirect to error page with error code
+    // Send ingest email, log error, set athlete status to ready
     return;
   }
 
@@ -112,7 +112,7 @@ async function handleSignupCallback(req, res) {
     );
 
   } catch (err) {
-    // Log and redirect to error page with error code
+    // Send ingest email, log error, set athlete status to ready
     return;
   }
 }
