@@ -11,7 +11,26 @@ const {
   updateAthleteStats,
 } = require('../utils/athleteStats');
 const { sendIngestEmail } = require('../utils/emails');
-const { slackSuccess } = require('../utils/slackNotification');
+const { slackSuccess, slackError } = require('../utils/slackNotification');
+
+function createHandleSignupError(res) {
+  return (errorCode = 0, errorAddtlInfo = false) => {
+    slackError(errorCode, errorAddtlInfo);
+
+    // @todo Make this a util getter/setter
+    let errorQuery;
+    switch (errorCode) {
+      case 50:
+        errorQuery = { type: 2, id: errorAddtlInfo.id || 0 };
+        break;
+
+      default:
+        errorQuery = { type: 1 };
+    }
+
+    res.redirect(303, `/error?${stringify(errorQuery)}`);
+  }
+}
 
 /**
  * Handle OAuth callback from signup
@@ -21,17 +40,18 @@ const { slackSuccess } = require('../utils/slackNotification');
  * @param {Response} res
  */
 async function handleSignupCallback(req, res) {
+  const handleSignupError = createHandleSignupError(res);
+
   // Handle request error, most likely error=access_denied
   if (req.query.error) {
-    // Log and redirect to error page with error code
+    handleSignupError(10, req.query.error)
     return;
   }
 
   // Get athlete profile info
   const athleteInfo = await exchangeCodeForAthleteInfo(req.query.code);
-
   if (athleteInfo.errorCode) {
-    // Log and redirect to error page with error code
+    handleSignupError(athleteInfo.errorCode, athleteInfo);
     return;
   }
 
@@ -39,8 +59,11 @@ async function handleSignupCallback(req, res) {
   let athleteDoc;
   try {
     athleteDoc = await Athlete.create(getAthleteModelFormat(athleteInfo));
+    console.log(`Saved ${athleteDoc.get('_id')} to database`);
   } catch (err) {
-    // Log and redirect to error page with error code
+    // @todo Redirect to rider page if already signed up with notice
+    const errCode = -1 !== err.message.indexOf('duplicate key') ? 50 : 55;
+    handleSignupError(errCode, athleteInfo.athlete || false);
     return;
   }
 
@@ -50,7 +73,6 @@ async function handleSignupCallback(req, res) {
     firstname: athleteInfo.athlete.firstname,
   })}`);
 
-  // Fetch athlete history
   // Fetch athlete history
   let athleteHistory;
   try {
