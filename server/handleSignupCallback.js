@@ -13,7 +13,20 @@ const {
 const { sendIngestEmail } = require('../utils/emails');
 const { slackSuccess, slackError } = require('../utils/slackNotification');
 
+/**
+ * Factory for handling error while creating athlete in db
+ *
+ * @param {Response}
+ * @return {Function}
+ */
 function createHandleSignupError(res) {
+
+  /**
+   * Log error to Slack and redirect to error page
+   *
+   * @param {Number} errorCode
+   * @param {Any} errorAddtlInfo
+   */
   return (errorCode = 0, errorAddtlInfo = false) => {
     slackError(errorCode, errorAddtlInfo);
 
