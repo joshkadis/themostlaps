@@ -90,10 +90,6 @@ async function handleSignupCallback(req, res) {
   let athleteHistory;
   try {
     athleteHistory = await fetchAthleteHistory(athleteDoc);
-    if (!athleteHistory || !athleteHistory.length) {
-      // Send ingest email, *no error*, set athlete status to ready
-      return;
-    }
   } catch (err) {
     // Send ingest email, log error, set athlete status to ready
     return;
@@ -101,17 +97,19 @@ async function handleSignupCallback(req, res) {
 
   // Validate and save athlete history
   let savedActivities;
-  try {
-    savedActivities = await saveAthleteHistory(athleteHistory);
-  } catch (err) {
-    // Send ingest email, log error, set athlete status to ready
-    return;
+  if (athleteHistory && athleteHistory.length) {
+    try {
+      savedActivities = await saveAthleteHistory(athleteHistory);
+    } catch (err) {
+      // Send ingest email, log error, set athlete status to ready
+      return;
+    }
   }
 
   // Calculate stats and update athlete document
   // Compile and update stats
   try {
-    const stats = compileStatsForActivities(savedActivities);
+    const stats = compileStatsForActivities(savedActivities || []);
     const updated = await updateAthleteStats(athleteDoc, stats);
     sendIngestEmail(updated);
     slackSuccess(
