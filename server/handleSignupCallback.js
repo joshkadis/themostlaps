@@ -46,6 +46,32 @@ function createHandleSignupError(res) {
 }
 
 /**
+ * Handle error during activiities ingest after athlete has been created
+ *
+ * @param {Document} athleteDoc
+ * @param {Number} errorCode
+ * @param {Any} errAddtlInfo
+ */
+async function handleActivitiesIngestError(
+  athleteDoc,
+  errorCode = 0,
+  errorAddtlInfo = false
+) {
+  slackError(
+    errorCode,
+    Object.assign(
+      {},
+      athleteDoc.toJSON(),
+      errAddtlInfo ? { errAddtlInfo } : {},
+    ),
+  );
+
+  athleteDoc.set('status', 'error');
+  await athleteDoc.save();
+
+  sendIngestEmail(athleteDoc, { error: true });
+}
+/**
  * Handle OAuth callback from signup
  *
  * @param {Next} app Next.js application
@@ -57,7 +83,7 @@ async function handleSignupCallback(req, res) {
 
   // Handle request error, most likely error=access_denied
   if (req.query.error) {
-    handleSignupError(10, req.query.error)
+    handleSignupError(10, req.query)
     return;
   }
 
@@ -91,7 +117,7 @@ async function handleSignupCallback(req, res) {
   try {
     athleteHistory = await fetchAthleteHistory(athleteDoc);
   } catch (err) {
-    // Send ingest email, log error, set athlete status to ready
+    handleActivitiesIngestError(athleteDoc, 70);
     return;
   }
 
@@ -101,7 +127,7 @@ async function handleSignupCallback(req, res) {
     try {
       savedActivities = await saveAthleteHistory(athleteHistory);
     } catch (err) {
-      // Send ingest email, log error, set athlete status to ready
+      handleActivitiesIngestError(athleteDoc, 80);
       return;
     }
   }
@@ -123,7 +149,7 @@ async function handleSignupCallback(req, res) {
     );
 
   } catch (err) {
-    // Send ingest email, log error, set athlete status to ready
+    handleActivitiesIngestError(athleteDoc, 90);
     return;
   }
 }
