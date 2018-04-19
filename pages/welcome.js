@@ -14,6 +14,14 @@ class Welcome extends Component {
     };
   }
 
+  // Only need this client-side
+  componentDidMount() {
+    // Set user value in local storage
+    if ('undefined' !== typeof window && window.localStorage) {
+      localStorage.setItem('TMLAthleteId', this.props.id)
+    }
+  }
+
   render() {
     return (<Layout
       pathname="/welcome"
@@ -34,8 +42,8 @@ class Welcome extends Component {
 }
 
 Welcome.getInitialProps = ({ query }) => ({
-  firstname: query.firstname,
-  id: parseInt(query.id, 10),
+  firstname: query.firstname || 'rider',
+  id: parseInt(query.id || 0, 10),
 });
 
 Welcome.propTypes = {
