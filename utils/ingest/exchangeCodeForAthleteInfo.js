@@ -43,7 +43,7 @@ async function exchangeCodeForAthleteInfo(code) {
 
     return athlete;
   } catch (err) {
-    return getErrorResponseObject(10);
+    return getErrorResponseObject(40);
   }
 }
 
