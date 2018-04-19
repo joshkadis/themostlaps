@@ -33,12 +33,10 @@ class Welcome extends Component {
   }
 }
 
-Welcome.getInitialProps = ({ query }) => ({ ...query });
-
-Welcome.defaultProps = {
-  id: 541773,
-  firstname: 'josh',
-};
+Welcome.getInitialProps = ({ query }) => ({
+  firstname: query.firstname,
+  id: parseInt(query.id, 10),
+});
 
 Welcome.propTypes = {
   id: PropTypes.number.isRequired,
