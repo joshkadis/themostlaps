@@ -29,6 +29,8 @@ function createHandleSignupError(res) {
    * @param {Any} errorAddtlInfo
    */
   return (errorCode = 0, errorAddtlInfo = false) => {
+    console.log(`Error ${errorCode} during athlete creation`, errorAddtlInfo);
+
     slackError(errorCode, errorAddtlInfo);
 
     // @todo Make this a util getter/setter
@@ -63,6 +65,8 @@ async function handleActivitiesIngestError(
     'New signup!',
     getSlackSuccessMessage(athleteDoc),
   );
+
+  console.log(`Error ${errorCode} during ingest after athlete creation`, errorAddtlInfo);
 
   // Boo something broke...
   slackError(
@@ -179,10 +183,9 @@ async function handleSignupCallback(req, res) {
     const stats = compileStatsForActivities(savedActivities || []);
     const updated = await updateAthleteStats(athleteDoc, stats);
     sendIngestEmail(updated);
-    slackSuccess(
-      'New signup!',
-      getSlackSuccessMessage(updated),
-    );
+    const successMessage = getSlackSuccessMessage(updated);
+    console.log(`New signup: ${successMessage}`);
+    slackSuccess('New signup!', successMessage);
 
   } catch (err) {
     await handleActivitiesIngestError(athleteDoc, 90);
