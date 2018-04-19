@@ -69,7 +69,7 @@ async function handleActivitiesIngestError(
     Object.assign(
       {},
       athleteDoc.toJSON(),
-      errAddtlInfo ? { errAddtlInfo } : {},
+      errorAddtlInfo ? { errorAddtlInfo } : {},
     ),
   );
 
