@@ -57,6 +57,13 @@ async function handleActivitiesIngestError(
   errorCode = 0,
   errorAddtlInfo = false
 ) {
+  // Yay someone signed up!
+  slackSuccess(
+    'New signup!',
+    getSlackSuccessMessage(athleteDoc),
+  );
+
+  // Boo something broke...
   slackError(
     errorCode,
     Object.assign(
@@ -66,11 +73,29 @@ async function handleActivitiesIngestError(
     ),
   );
 
+  // Update status
   athleteDoc.set('status', 'error');
   await athleteDoc.save();
 
+  // Welcome...
   sendIngestEmail(athleteDoc, { error: true });
 }
+
+/**
+ * Get text for Slack success message from document
+ *
+ * @param {Document} athleteDoc
+ * @return {String}
+ */
+function getSlackSuccessMessage(athleteDoc) {
+  return [
+    athleteDoc.get('athlete.firstname'),
+    athleteDoc.get('athlete.lastname'),
+    `(${athleteDoc.get('_id')})`,
+    `${athleteDoc.get('stats.allTime') || 0} laps`,
+  ].join(' ');
+}
+
 /**
  * Handle OAuth callback from signup
  *
@@ -117,7 +142,7 @@ async function handleSignupCallback(req, res) {
   try {
     athleteHistory = await fetchAthleteHistory(athleteDoc);
   } catch (err) {
-    handleActivitiesIngestError(athleteDoc, 70);
+    await handleActivitiesIngestError(athleteDoc, 70);
     return;
   }
 
@@ -127,7 +152,7 @@ async function handleSignupCallback(req, res) {
     try {
       savedActivities = await saveAthleteHistory(athleteHistory);
     } catch (err) {
-      handleActivitiesIngestError(athleteDoc, 80);
+      await handleActivitiesIngestError(athleteDoc, 80);
       return;
     }
   }
@@ -140,16 +165,11 @@ async function handleSignupCallback(req, res) {
     sendIngestEmail(updated);
     slackSuccess(
       'New signup!',
-      [
-        updated.get('athlete.firstname'),
-        updated.get('athlete.lastname'),
-        `(${updated.get('_id')})`,
-        `${updated.get('stats.allTime')} laps`,
-      ].join(' '),
+      getSlackSuccessMessage(updated),
     );
 
   } catch (err) {
-    handleActivitiesIngestError(athleteDoc, 90);
+    await handleActivitiesIngestError(athleteDoc, 90);
     return;
   }
 }
