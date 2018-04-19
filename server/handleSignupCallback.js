@@ -68,7 +68,7 @@ async function handleActivitiesIngestError(
     errorCode,
     Object.assign(
       {},
-      athleteDoc.toJSON(),
+      athleteDoc.toJSON().athlete,
       errorAddtlInfo ? { errorAddtlInfo } : {},
     ),
   );
@@ -115,7 +115,7 @@ async function handleSignupCallback(req, res) {
   // Get athlete profile info
   const athleteInfo = await exchangeCodeForAthleteInfo(req.query.code);
   if (athleteInfo.errorCode) {
-    handleSignupError(athleteInfo.errorCode, athleteInfo);
+    handleSignupError(athleteInfo.errorCode, athleteInfo.athlete || false);
     return;
   }
 
