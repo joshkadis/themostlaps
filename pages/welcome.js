@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import Link from 'next/link';
 import Layout from '../components/Layout';
 import { welcomeContent } from '../config/content';
 import { LapPath } from '../components/lib/svg';
@@ -27,14 +28,22 @@ class Welcome extends Component {
       pathname="/welcome"
       query={{}}
     >
-      <h1>🎉🚴 Welcome {this.props.firstname} 🎉🚴</h1>
+      <h1>🎉🚴 Welcome 🎉🚴</h1>
       {this.state.status === 'ingesting' && (
         <div style={{ textAlign: 'center' }}>
-          <h3>This will take a moment...</h3>
+          <h3>We're building your profile!</h3>
           <div
             dangerouslySetInnerHTML={{ __html: LapPath('', 80) }}
           />
-          <p>{welcomeContent.ingesting}</p>
+          <p>
+            You can check out{' '}
+            <Link href={`/rider?athleteId=${this.props.id}`} as={`/rider/${this.props.id}`}>
+              <a>your rider page</a>
+            </Link>
+            {' '}after we've downloaded all your past laps from Strava.
+            Feel free to wait here or go for a ride. We'll email you when your
+            profile is ready.
+          </p>
         </div>
       )}
     </Layout>);

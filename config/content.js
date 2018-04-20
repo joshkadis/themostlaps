@@ -20,7 +20,4 @@ module.exports = {
     success: 'Your preferences have been updated. 👍',
     error: 'Sorry, we had some trouble updating your preferences. Please try again later.'
   },
-  welcomeContent: {
-    ingesting: 'You can wait here or go ride some laps. We\'ll send you an email when your profile is ready.',
-  },
 };
