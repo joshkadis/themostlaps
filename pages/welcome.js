@@ -86,7 +86,35 @@ class Welcome extends Component {
     );
   }
 
+  renderReady(id) {
+    return (
+      <div style={{ textAlign: 'center' }}>
+        <h3>Your profile is ready!</h3>
+        <p>
+          <Link href={`/rider?athleteId=${id}`} as={`/rider/${id}`}>
+            <a>Click here</a>
+          </Link>{' '}
+          if you are not automatically redirected to view your laps.
+        </p>
+      </div>
+    );
+  }
+
   render() {
+    const renderContent = () => {
+      switch (this.state.status) {
+        case 'error':
+          return this.renderError(this.props.id);
+
+        case 'ready':
+          return this.renderReady(this.props.id);
+
+        case 'ingesting':
+        default:
+          return this.renderIngesting(this.props.id);
+      }
+    }
+
     return (<Layout
       pathname="/welcome"
       query={{}}
@@ -97,8 +125,7 @@ class Welcome extends Component {
           '😞🚴 Welcome 🚴😞'
         }
       </h1>
-      {this.state.status === 'ingesting' && this.renderIngesting(this.props.id)}
-      {this.state.status === 'error' && this.renderError(this.props.id)}
+      {renderContent()}
       <div
         style={{ textAlign: 'center' }}
         dangerouslySetInnerHTML={{ __html: LapPath('', 80) }}
