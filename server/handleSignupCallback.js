@@ -154,7 +154,6 @@ async function handleSignupCallback(req, res) {
   // Render the welcome page, athlete status will be 'ingesting'
   res.redirect(303, `/welcome?${stringify({
     id: athleteInfo.athlete.id,
-    firstname: athleteInfo.athlete.firstname,
   })}`);
 
   // Fetch athlete history

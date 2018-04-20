@@ -36,13 +36,13 @@ class Welcome extends Component {
             dangerouslySetInnerHTML={{ __html: LapPath('', 80) }}
           />
           <p>
-            You can check out{' '}
             <Link href={`/rider?athleteId=${this.props.id}`} as={`/rider/${this.props.id}`}>
-              <a>your rider page</a>
-            </Link>
-            {' '}after we've downloaded all your past laps from Strava.
-            Feel free to wait here or go for a ride. We'll email you when your
-            profile is ready.
+              <a>Your rider page</a>
+            </Link>{' '}
+            will be complete after we've downloaded your laps history from Strava.
+          </p>
+          <p>
+            We'll send you an email when everything is ready. Go ride some laps!
           </p>
         </div>
       )}
@@ -51,13 +51,11 @@ class Welcome extends Component {
 }
 
 Welcome.getInitialProps = ({ query }) => ({
-  firstname: query.firstname || 'rider',
   id: parseInt(query.id || 0, 10),
 });
 
 Welcome.propTypes = {
   id: PropTypes.number.isRequired,
-  firstname: PropTypes.string.isRequired,
 };
 
 export default Welcome;
