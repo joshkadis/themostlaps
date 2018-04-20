@@ -14,6 +14,10 @@ function compileStatsForActivities(
     single: 0,
   },
 ) {
+  if (!activities || !activities.length) {
+    return initial;
+  }
+
   return activities.reduce((acc, activity) => {
     // Increment allTime total
     acc.allTime = acc.allTime + activity.get('laps');

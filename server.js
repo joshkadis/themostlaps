@@ -6,11 +6,10 @@ const bodyParser = require('body-parser');
 const next = require('next');
 
 const { scheduleNightlyRefresh } = require('./utils/scheduleNightlyRefresh');
-const subscribeToMailingList = require('./utils/subscribeToMailingList');
 const Athlete = require('./schema/Athlete');
 
 // Route handlers
-const onAuthCallback = require('./server/onAuthCallback');
+const handleSignupCallback = require('./server/handleSignupCallback');
 const handleNotification = require('./server/handleNotification');
 const initAPIRoutes = require('./api/initAPIRoutes');
 const initWebhookRoutes = require('./utils/initWebhookRoutes');
@@ -31,47 +30,7 @@ app.prepare()
      * Auth callback, ingest and redirect
      */
     server.get('/auth-callback', async (req, res) => {
-      const authResult = await onAuthCallback(req, res);
-
-      let redirectQuery;
-      if (authResult.error || !authResult.athlete) {
-
-        // Pass athlete ID if available
-        const id = authResult.athlete && authResult.athlete.id ?
-          authResult.athlete.id :
-          0;
-
-        redirectQuery = {
-          autherror: authResult.error || 99,
-          id,
-        };
-        console.log(authResult);
-        const errorInfo = authResult.athlete && authResult.athlete.id ?
-          `Athlete id ${authResult.athlete.id}, ${authResult.athlete.email || 'email unknown'}` :
-          false;
-
-        slackError(authResult.error, errorInfo);
-      } else {
-        redirectQuery = {
-          authsuccess: 'true',
-          firstname: authResult.athlete.firstname,
-          allTime: authResult.athlete.allTime,
-          id: authResult.athlete.id,
-        };
-      }
-
-      const stateParam = req.query.state ?
-        decodeURIComponent(req.query.state).split('|') :
-        ['/'];
-
-      if (redirectQuery.authsuccess) {
-        subscribeToMailingList(
-          authResult.athlete.email,
-          (stateParam.length > 1 && stateParam[1] === 'shouldSubscribe') // Add to newsletter segment?
-        );
-      }
-
-      res.redirect(303, `${stateParam[0]}?${querystring.stringify(redirectQuery)}`);
+      handleSignupCallback(req, res);
     });
 
     /**

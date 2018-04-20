@@ -33,9 +33,8 @@ function sendSlackNotification(fallback, pretext, color, fields) {
  * @param {Int} errorCode
  * @param {addtlInfo} any Optional extra info
  */
-function slackError(errorCode = 0, addtlInfo) {
-  const addtlInfoStr = 'undefined' !== typeof addtlInfo && false !== addtlInfo ?
-    ` (${JSON.stringify(addtlInfo)})` : '';
+function slackError(errorCode = 0, addtlInfo = false) {
+  const addtlInfoStr = false !== addtlInfo ? ` (${JSON.stringify(addtlInfo)})` : '';
 
   sendSlackNotification(
     `Error ${errorCode}: ${getErrorMessage(errorCode)}${addtlInfoStr}`,

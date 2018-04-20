@@ -188,7 +188,13 @@ class Rider extends Component {
   }
 
   render() {
-    const { pathname, query, stats, athlete } = this.props;
+    const {
+      pathname,
+      query,
+      stats,
+      athlete,
+      status,
+    } = this.props;
 
     // Athlete not found, would have returned a 404 if server-rendered
     if (!Object.keys(athlete).length) {
@@ -198,6 +204,28 @@ class Rider extends Component {
       >
         <h2 style={{ textAlign: 'center' }}>Rider not found 😧</h2>
         <SearchUsers onChange={this.navigateToRiderPage} />
+      </Layout>;
+    }
+
+    if ('ready' !== status) {
+      return <Layout
+        pathname={pathname}
+        query={query}
+      >
+        <RiderPageHeader
+          firstname={athlete.firstname}
+          lastname={athlete.lastname}
+          img={athlete.profile}
+          allTime={stats.allTime}
+          single={stats.single}
+        />
+        <h3 style={{ textAlign: 'center' }}>
+          {
+            'ingesting' === status ?
+              'Compiling your stats. Please check back in a minute.' :
+              'An error occurred. We\'re looking into it.'
+          }
+        </h3>
       </Layout>;
     }
 
@@ -274,6 +302,7 @@ Rider.getInitialProps = async function(context) {
         return Object.assign(defaultInitialProps, {
           athlete: apiResponse[0].athlete,
           stats: statsForAthletePage(apiResponse[0].stats),
+          status: apiResponse[0].status,
          });
       }
       return defaultInitialProps;
@@ -285,6 +314,7 @@ Rider.defaultProps = {
   athlete: {},
   query: {},
   pathname: '/',
+  status: 'ready',
 }
 
 Rider.propTypes = {
@@ -292,6 +322,7 @@ Rider.propTypes = {
   athlete: PropTypes.object.isRequired,
   query: PropTypes.object.isRequired,
   pathname: PropTypes.string.isRequired,
+  status: PropTypes.string.isRequired,
 };
 
 export default Rider;

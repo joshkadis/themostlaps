@@ -68,6 +68,7 @@ function isTestUser(athlete) {
 }
 
 module.exports = {
+  getAthleteModelFormat,
   createAthlete,
   getEpochSecondsFromDateObj,
   isTestUser,

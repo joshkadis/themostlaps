@@ -33,10 +33,13 @@ module.exports = (code = 0, data = '') => {
     case 100:
       return 'Notifications decryption error';
 
+    case 105:
+      return 'Mailchimp subscribe error';
+
     case 110:
       return 'Webhook payload error';
 
     default:
-      return 'An error occurred';
+      return 'An error occurred.';
   }
 };

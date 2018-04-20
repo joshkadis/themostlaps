@@ -30,6 +30,7 @@ module.exports = {
     'athlete.lastname',
     'athlete.profile',
     'stats',
+    'status',
   ],
   modalTitles: {
     error: '😞 We\'re sorry. 😞',
