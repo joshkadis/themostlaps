@@ -212,6 +212,7 @@ class Rider extends Component {
         pathname={pathname}
         query={query}
       >
+        {/* @todo Hide allTime and single stats unless status is 'ready' */}
         <RiderPageHeader
           firstname={athlete.firstname}
           lastname={athlete.lastname}
