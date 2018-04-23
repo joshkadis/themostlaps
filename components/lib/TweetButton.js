@@ -45,9 +45,7 @@ class TweetButton extends Component {
         className="twitter-share-button"
         href={'https://twitter.com/intent/tweet?' + stringify(params)}
         data-size="large"
-      >
-        Tweet
-      </a>
+      />
     );
   }
 }
