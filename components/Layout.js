@@ -11,8 +11,6 @@ import { CloseSvg } from './lib/svg';
 import { getPathWithQueryString } from '../utils';
 import ModalContents from './ModalContents';
 import Signup from './modal/Signup';
-import AuthSuccess from './modal/AuthSuccess';
-import AuthError from './modal/AuthError';
 import { modalTitles, locale } from '../config';
 import { getDocumentTitle, getOgData } from '../utils/metaTags';
 import { trackPageview, trackAuthResult } from '../utils/analytics';
@@ -35,26 +33,6 @@ class Layout extends Component {
     };
   }
 
-  componentWillMount() {
-    const modalState = this.getModalStateFromProps(this.props);
-    // Automatically open modal on render
-    // if authsuccess or autherror query params are found
-    this.setState({
-      modalIsOpen: (modalState !== 'signup'),
-      modalState,
-    });
-  }
-
-  componentWillReceiveProps(nextProps) {
-    // Open modal on update if authsuccess or autherror
-    // query params are found OR if it is already open
-    const modalState = this.getModalStateFromProps(nextProps);
-    this.setState({
-      modalIsOpen: (this.state.modalIsOpen || modalState !== 'signup'),
-      modalState,
-    });
-  }
-
   // Only need this client-side
   componentDidMount() {
     Modal.setAppElement('#__next');
@@ -68,19 +46,6 @@ class Layout extends Component {
         this.handleOpenModal();
       }
     });
-
-    if (this.state.modalIsOpen && this.state.modalState !== 'signup') {
-      // GA event tracking
-      trackAuthResult(
-        this.state.modalState === 'success',
-        this.props.query.autherror || null,
-      );
-
-      // Set user value in local storage
-      if (this.state.modalState === 'success' && window.localStorage) {
-        localStorage.setItem('TMLAthleteId', parseInt(this.props.query.id, 10))
-      }
-    }
   }
 
   handleOpenModal() {
@@ -103,57 +68,6 @@ class Layout extends Component {
       getPathWithQueryString(Router.router),
       window.location.pathname
     );
-  }
-
-  getModalStateFromProps({ query }) {
-    if (query.autherror && !isNaN(query.autherror)) {
-      return 'error';
-    } else if (query.authsuccess) {
-      return 'success';
-    }
-    return 'signup';
-  }
-
-  getModalTitle(props) {
-    const allTime = props.query && props.query.allTime && !isNaN(props.query.allTime) ?
-      parseInt(props.query.allTime, 10).toLocaleString(locale) :
-      null;
-
-    switch(this.getModalStateFromProps(props)) {
-      case 'error':
-        return modalTitles.error;
-
-      case 'success':
-        return allTime ?
-          modalTitles.successWithLaps.replace('${allTime}', allTime) :
-          modalTitles.success;
-
-      case 'signup':
-      default:
-        return modalTitles.signup;
-    }
-  }
-
-  getModalContents(props) {
-    const { query, pathname } = props;
-    switch(this.getModalStateFromProps(props)) {
-      case 'error':
-        return <AuthError
-          code={parseInt(query.autherror, 10)}
-          id={query.id ? parseInt(query.id, 10) : 0}
-        />
-
-      case 'success':
-        return <AuthSuccess
-          firstname={props.query.firstname}
-          allTime={parseInt(props.query.allTime, 10)}
-          id={parseInt(props.query.id, 10)}
-        />
-
-      case 'signup':
-      default:
-        return <Signup pathname={pathname} />;
-    }
   }
 
   render() {
@@ -211,8 +125,10 @@ class Layout extends Component {
           >
             <CloseSvg />
           </button>
-          <ModalContents title={this.getModalTitle(this.props)}>
-            {this.getModalContents(this.props)}
+          <ModalContents
+            title={modalTitles.signup}
+          >
+            <Signup pathname={this.props.pathname} />
           </ModalContents>
         </Modal>
       </div>

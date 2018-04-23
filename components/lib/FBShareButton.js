@@ -27,9 +27,7 @@ class FBShareButton extends Component {
           <a
             target="_blank"
             href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fthemostlaps.com%2F&amp;src=sdkpreparse" class="fb-xfbml-parse-ignore"
-          >
-            Share
-          </a>
+          />
         </span>
       </span>
     );

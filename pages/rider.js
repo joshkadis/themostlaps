@@ -4,6 +4,7 @@ import Router from 'next/router';
 import Layout from '../components/Layout';
 import { getPathnameFromContext, APIRequest } from '../utils';
 import RiderPageHeader from '../components/RiderPageHeader';
+import RiderPageWelcome from '../components/RiderPageWelcome';
 import SearchUsers from '../components/lib/SearchUsers';
 import * as styles from '../components/Layout.css';
 import {
@@ -194,6 +195,7 @@ class Rider extends Component {
       stats,
       athlete,
       status,
+      shouldShowWelcome,
     } = this.props;
 
     // Athlete not found, would have returned a 404 if server-rendered
@@ -235,6 +237,12 @@ class Rider extends Component {
         pathname={pathname}
         query={query}
       >
+        {shouldShowWelcome &&
+          <RiderPageWelcome
+            allTime={stats.allTime}
+            firstname={athlete.firstname}
+          />
+        }
         <RiderPageHeader
           firstname={athlete.firstname}
           lastname={athlete.lastname}
@@ -291,6 +299,7 @@ Rider.getInitialProps = async function(context) {
   const defaultInitialProps = {
     pathname: getPathnameFromContext(context),
     query,
+    shouldShowWelcome: !!('undefined' !== typeof query.welcome && query.welcome),
   };
 
   if (!query.athleteId) {
@@ -300,7 +309,7 @@ Rider.getInitialProps = async function(context) {
   return APIRequest(`/athletes/${query.athleteId}`, {}, {})
     .then((apiResponse) => {
       if (apiResponse.length) {
-        return Object.assign(defaultInitialProps, {
+        return Object.assign({}, defaultInitialProps, {
           athlete: apiResponse[0].athlete,
           stats: statsForAthletePage(apiResponse[0].stats),
           status: apiResponse[0].status,
@@ -316,6 +325,7 @@ Rider.defaultProps = {
   query: {},
   pathname: '/',
   status: 'ready',
+  shouldShowWelcome: false,
 }
 
 Rider.propTypes = {
@@ -324,6 +334,7 @@ Rider.propTypes = {
   query: PropTypes.object.isRequired,
   pathname: PropTypes.string.isRequired,
   status: PropTypes.string.isRequired,
+  shouldShowWelcome: PropTypes.bool,
 };
 
 export default Rider;

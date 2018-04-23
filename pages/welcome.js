@@ -38,7 +38,7 @@ class Welcome extends Component {
 
         if ('ready' === apiResponse[0].status) {
           Router.push(
-            `/rider?athleteId=${this.props.id}`,
+            `/rider?athleteId=${this.props.id}&welcome=1`,
             `/rider/${this.props.id}`,
           );
           return;

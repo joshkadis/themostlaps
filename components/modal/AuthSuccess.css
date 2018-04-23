@@ -1,7 +1,0 @@
-.shareLinks {
-  text-align: center;
-  line-height: 1;
-  & *:first-child {
-    margin-right: 1rem;
-  }
-}
