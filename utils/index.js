@@ -61,14 +61,7 @@ function APIRequest(path = false, query = {}, defaultResult = {}) {
  * @return {String}
  */
 function getPathWithQueryString({ pathname, query }) {
-  const pathQuery = Object.keys(query).reduce((acc, key) => {
-    if (modalQueryParams.indexOf(key) === -1) {
-      acc[key] = query[key];
-    }
-    return acc;
-  }, {});
-
-  return `${pathname}?${stringify(pathQuery)}`;
+  return `${pathname}?${stringify(query)}`;
 }
 
 module.exports = {

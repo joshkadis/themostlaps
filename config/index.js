@@ -39,12 +39,6 @@ module.exports = {
     signup: '🚴 Here we go! 🚴',
   },
   locale: 'en-US',
-  modalQueryParams: [
-    'autherror',
-    'authsuccess',
-    'firstname',
-    'allTime',
-  ],
   socialLinks: {
     twitter: 'https://twitter.com/themostlaps',
     instagram: 'https://instagram.com/themostlaps',
