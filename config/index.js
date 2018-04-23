@@ -33,9 +33,6 @@ module.exports = {
     'status',
   ],
   modalTitles: {
-    error: '😞 We\'re sorry. 😞',
-    success: '🎉 You\'re all set! 🎉',
-    successWithLaps: '🎉 ${allTime} laps! 🎉',
     signup: '🚴 Here we go! 🚴',
   },
   locale: 'en-US',
