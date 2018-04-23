@@ -1,0 +1,20 @@
+@import '../styles/vars';
+
+.riderPageWelcome__container {
+  background-color: var(--yellow);
+  padding: 0.5rem;
+  text-align: center;
+  max-width: 550px;
+  margin: 0 auto 1.5rem auto;
+}
+
+.riderPageWelcome__shareLinks {
+  & > * {
+    vertical-align: bottom;
+    margin-left: 0.5rem;
+  }
+}
+
+.riderPageWelcome__noThanks {
+  font-size: .7rem;
+}
