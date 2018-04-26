@@ -33,7 +33,7 @@ class RiderPageWelcome extends Component {
     return (
       <div className={styles.riderPageWelcome__container}>
         <p>
-          Hey {firstname}! Want to your friends about The Most Laps?
+          Hey {firstname}! Want to tell your friends about The Most Laps?
         </p>
         <div className={styles.riderPageWelcome__shareLinks}>
           <TweetButton laps={allTime} />
