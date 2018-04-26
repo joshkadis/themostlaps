@@ -2,6 +2,7 @@ require('isomorphic-fetch');
 const querystring = require('querystring');
 const { apiUrl, lapSegmentId, addMakeupLap } = require('../config');
 const Activity = require('../schema/Activity');
+const { slackError } = require('./slackNotification');
 
 /**
  * Iterate though paginated history of segment efforts and concatenate
@@ -27,6 +28,11 @@ async function getLapEffortsHistory(token, athleteId, page = 1, allEfforts = [])
 
   if (200 !== response.status) {
     console.log(`Error fetching ${url}`)
+    slackError(45, {
+      athleteId,
+      url,
+      status: response.status,
+    });
     return allEfforts;
   }
 
