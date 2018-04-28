@@ -133,10 +133,13 @@ async function handleSignupCallback(req, res) {
       athleteInfo.access_token !== existingAthleteDoc.get('access_token')
     ) {
       // Update access_token and refresh athlete activities + stats
+      console.log(`Updating access token for ${getSlackSuccessMessage(existingAthleteDoc)}`);
       existingAthleteDoc.set('access_token', athleteInfo.access_token)
-      const updatedAthlete = await existingAthleteDoc.save();
+      const updatedAthleteDoc = await existingAthleteDoc.save();
       res.redirect(303, `/rider/${athleteInfo.athlete.id}?updated=1`);
-      refreshAthlete(updatedAthlete);
+      await refreshAthlete(updatedAthleteDoc);
+      console.log(`Updated access token for ${getSlackSuccessMessage(updatedAthleteDoc)}`);
+      slackSuccess('Updated access token', getSlackSuccessMessage(updatedAthleteDoc));
       return;
     }
 
