@@ -9,6 +9,7 @@ const {
 } = require('../../config');
 const { formatSegmentEffort } = require('../athleteHistory');
 const calculateLapsFromSegmentEfforts = require('./calculateLapsFromSegmentEfforts');
+const { slackError } = require('../slackNotification');
 
 /**
  * Get distance of [lat,lng] point from park center
@@ -45,6 +46,16 @@ async function fetchActivity(activityId, token) {
       Authorization: `Bearer ${token}`,
     },
   });
+
+  if (200 !== response.status) {
+    console.log(`Error fetching activity ${activityId}`)
+    slackError(45, {
+      activityId,
+      status: response.status,
+    });
+    return allActivities;
+  }
+
   const activity = await response.json();
   return activity;
 }

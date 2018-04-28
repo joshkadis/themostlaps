@@ -1,13 +1,10 @@
 import React, { Component } from 'react';
-import TweetButton from './lib/TweetButton';
-import FBShareButton from './lib/FBShareButton';
 import Button from './lib/Button';
 import * as styles from './Layout.css';
 
 class RiderPageWelcome extends Component {
   state = {
     shouldDisplay: true,
-    shouldShowNoThanks: false,
   };
 
   onClickNoThanks = () => {
@@ -16,34 +13,24 @@ class RiderPageWelcome extends Component {
     });
   };
 
-  componentDidMount() {
-    // Hacky way to delay showing No Thanks button
-    // ~until Tweet and FB Share have loaded
-    setTimeout(() => {
-      this.setState({ shouldShowNoThanks: true });
-    }, 1500)
-  }
-
   render() {
     if (!this.state.shouldDisplay) {
       return null;
     }
 
-    const { allTime, firstname } = this.props;
     return (
       <div className={styles.riderPageWelcome__container}>
         <p>
-          Hey {firstname}! Want to tell your friends about The Most Laps?
+          Thanks for updating your account info.
+          Please give us a moment while we refresh your stats. Thanks!
         </p>
         <div className={styles.riderPageWelcome__shareLinks}>
-          <TweetButton laps={allTime} />
-          <FBShareButton />
-          {this.state.shouldShowNoThanks && <Button
+          <Button
             onClick={this.onClickNoThanks}
             className={styles.riderPageWelcome__noThanks}
           >
-            No thanks
-          </Button>}
+            Got it
+          </Button>
         </div>
       </div>
     );

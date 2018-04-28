@@ -5,7 +5,6 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const next = require('next');
 
-const { scheduleNightlyRefresh } = require('./utils/scheduleNightlyRefresh');
 const Athlete = require('./schema/Athlete');
 
 // Route handlers

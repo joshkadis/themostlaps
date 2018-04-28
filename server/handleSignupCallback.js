@@ -13,6 +13,7 @@ const {
 const { sendIngestEmail } = require('../utils/emails');
 const { slackSuccess, slackError } = require('../utils/slackNotification');
 const subscribeToMailingList = require('../utils/subscribeToMailingList');
+const refreshAthlete = require('../utils/refreshAthlete');
 
 /**
  * Factory for handling error while creating athlete in db
@@ -124,13 +125,24 @@ async function handleSignupCallback(req, res) {
     return;
   }
 
-  // Create athlete record in database
+  // Create athlete record in database or update access_token
   let athleteDoc;
   try {
+    const existingAthleteDoc = await Athlete.findById(athleteInfo.athlete.id);
+    if (existingAthleteDoc &&
+      athleteInfo.access_token !== existingAthleteDoc.get('access_token')
+    ) {
+      // Update access_token and refresh athlete activities + stats
+      existingAthleteDoc.set('access_token', athleteInfo.access_token)
+      const updatedAthlete = await existingAthleteDoc.save();
+      res.redirect(303, `/rider/${athleteInfo.athlete.id}?updated=1`);
+      refreshAthlete(updatedAthlete);
+      return;
+    }
+
     athleteDoc = await Athlete.create(getAthleteModelFormat(athleteInfo));
     console.log(`Saved ${athleteDoc.get('_id')} to database`);
   } catch (err) {
-    // @todo Redirect to rider page if already signed up with notice
     const errCode = -1 !== err.message.indexOf('duplicate key') ? 50 : 55;
     handleSignupError(errCode, athleteInfo.athlete || false);
     return;

@@ -4,18 +4,20 @@ const Activity = require('../../schema/Activity');
 const config = require('../../config');
 const { getEpochSecondsFromDateObj } = require('../athleteUtils');
 const { activityCouldHaveLaps } = require('./utils');
+const { slackError } = require('../slackNotification');
+
 
 /**
  * Get all of a user's activities by iterating recursively over paginated API results
  *
- * @param {String} token
+ * @param {Document} athleteDoc
  * @param {Int} afterTimestamp
  * @param {Array} allActivities
  * @param {Boolean} verbose Defaults to false
  * @return {Promise}
  */
 async function fetchAllAthleteActivities(
-  token,
+  athleteDoc,
   afterTimestamp,
   page = 1,
   allActivities = [],
@@ -35,11 +37,17 @@ async function fetchAllAthleteActivities(
 
   const response = await fetch(url, {
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${athleteDoc.get('access_token')}`,
     },
   });
 
   if (200 !== response.status) {
+    console.log(`Error fetching ${url} in fetchAllAthleteActivities`)
+    await slackError(45, {
+      athleteId: athleteDoc.get('_id'),
+      url,
+      status: response.status,
+    });
     return allActivities;
   }
 
@@ -50,7 +58,7 @@ async function fetchAllAthleteActivities(
   }
 
   return await fetchAllAthleteActivities(
-    token,
+    athleteDoc,
     afterTimestamp,
     (page + 1),
     allActivities.concat(activities),
@@ -111,8 +119,7 @@ function compareTimestampToDateString(timestamp, dateString) {
  * @return {Array}
  */
 module.exports = async (athleteDoc, afterTimestamp, verbose = false) => {
-  const token = athleteDoc.get('access_token');
-  const activities = await fetchAllAthleteActivities(token, afterTimestamp, 1, [], verbose);
+  const activities = await fetchAllAthleteActivities(athleteDoc, afterTimestamp, 1, [], verbose);
 
   // Use for loop instead of Array.filter because of async
   const eligibleActivities = [];
