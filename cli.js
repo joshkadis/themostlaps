@@ -3,7 +3,6 @@ const {
   callbackDeleteUser,
   callbackDeleteUserActivities,
   callbackRefreshUser,
-  callbackSubscribe,
   callbackActivityInfo,
   callbackMailgun,
   callbackRefreshBatch,
@@ -52,18 +51,6 @@ const argv = require('yargs')
       ['daysago', { type: 'number', default: 0 }],
     ),
     async (argv) => await callbackRefreshUser(argv),
-  )
-  /**
-   * Subscribe someone to the MailChimp list, maybe in the newsletter group
-   */
-  .command(
-    'subscribe email [--newsletter]',
-    false,
-    createPositionals(
-      ['email', { type: 'string' }],
-      ['newsletter', { type: 'boolean', default: false }],
-    ),
-    async (argv) => await callbackSubscribe(argv),
   )
   /**
    * Get info for a specific activity

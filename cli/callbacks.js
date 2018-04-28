@@ -6,7 +6,6 @@ const deleteUserActivities = require('./deleteUserActivities');
 const { daysAgoTimestamp } = require('./utils');
 const Athlete = require('../schema/Athlete');
 const refreshAthlete = require('../utils/refreshAthlete');
-const subscribeToMailingList = require('../utils/subscribeToMailingList');
 const getActivityInfo = require('./getActivityInfo');
 const sendEmailNotification = require('./sendEmailNotification')
 const { refreshAthletes } = require('../utils/scheduleNightlyRefresh')
@@ -66,17 +65,6 @@ const callbackRefreshUser = async ({ user, daysago }) => {
           false,
         true
       );
-      process.exit(0);
-    }
-  );
-}
-
-const callbackSubscribe = async (argv) => {
-  const newsletter = !!argv.newsletter;
-  await doCommand(
-    `Enter admin code to subscribe ${argv.email} to the email list${newsletter ? ' AND the newsletter' : ''}.`,
-    async () => {
-      await subscribeToMailingList(argv.email, newsletter);
       process.exit(0);
     }
   );
