@@ -36,7 +36,7 @@ class Signup extends Component {
             checked={this.state.subscribeChecked}
             onChange={this.onChangeSubscribe}
           />
-          <label htmlFor="subscribe">Subscribe me to the newsletter.</label>
+          <label htmlFor="subscribe">Subscribe me to monthly updates.</label>
         </p>
         <div style={{ textAlign: 'left' }}>
           <Markdown
