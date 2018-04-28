@@ -25,7 +25,7 @@ async function scheduleNightlyRefresh() {
   console.log(`Scheduling refresh for ${timePartString(refreshSchedule.hour)}h${timePartString(refreshSchedule.minute)} GMT`)
   const job = scheduleJob(refreshSchedule, async () => {
     console.log('Refreshing athletes and stats');
-    await refreshAthletes({});
+    await refreshAthletes();
   });
 }
 

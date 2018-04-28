@@ -96,15 +96,19 @@ const callbackMailgun = async ({ user, type }) => {
   );
 }
 
-const callbackRefreshBatch = async ({ limit, skip }) => {
+const callbackRefreshBatch = async ({ limit, skip, activities }) => {
   await doCommand(
     `Enter admin code to refresh batch of ${limit} athletes with offset ${skip}`,
     async () => {
-      await refreshAthletes({}, null, {
-        limit,
-        skip,
-        sort: { _id: 1 },
-      });
+      await refreshAthletes(activities, [
+        {},
+        null,
+        {
+          limit,
+          skip,
+          sort: { _id: 1 },
+        }
+      ]);
       process.exit(0);
     }
   );
