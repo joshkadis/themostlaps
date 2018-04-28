@@ -5,6 +5,7 @@ import Layout from '../components/Layout';
 import { getPathnameFromContext, APIRequest } from '../utils';
 import RiderPageHeader from '../components/RiderPageHeader';
 import RiderPageWelcome from '../components/RiderPageWelcome';
+import RiderPageUpdated from '../components/RiderPageUpdated';
 import SearchUsers from '../components/lib/SearchUsers';
 import * as styles from '../components/Layout.css';
 import {
@@ -196,6 +197,7 @@ class Rider extends Component {
       athlete,
       status,
       shouldShowWelcome,
+      shouldShowUpdated,
     } = this.props;
 
     // Athlete not found, would have returned a 404 if server-rendered
@@ -243,6 +245,9 @@ class Rider extends Component {
             firstname={athlete.firstname}
           />
         }
+
+        {shouldShowUpdated && <RiderPageUpdated />}
+
         <RiderPageHeader
           firstname={athlete.firstname}
           lastname={athlete.lastname}
@@ -300,6 +305,7 @@ Rider.getInitialProps = async function(context) {
     pathname: getPathnameFromContext(context),
     query,
     shouldShowWelcome: !!('undefined' !== typeof query.welcome && query.welcome),
+    shouldShowUpdated: !!('undefined' !== typeof query.updated && query.updated),
   };
 
   if (!query.athleteId) {
@@ -326,6 +332,7 @@ Rider.defaultProps = {
   pathname: '/',
   status: 'ready',
   shouldShowWelcome: false,
+  shouldShowUpdated: false,
 }
 
 Rider.propTypes = {
@@ -335,6 +342,7 @@ Rider.propTypes = {
   pathname: PropTypes.string.isRequired,
   status: PropTypes.string.isRequired,
   shouldShowWelcome: PropTypes.bool,
+  shouldShowUpdated: PropTypes.bool,
 };
 
 export default Rider;
