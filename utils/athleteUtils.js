@@ -8,9 +8,10 @@ const { testAthleteIds } = require('../config');
  * @param {String} athlete.access_token
  * @param {String} athlete.access_type
  * @param {Object} athlete.athlete
+ * @param {Bool} shouldSubscribe
  * @return {Object}
  */
-function getAthleteModelFormat({ athlete, access_token, token_type }) {
+function getAthleteModelFormat({ athlete, access_token, token_type }, shouldSubscribe = true) {
   const { firstname, lastname, profile, email, id } = athlete;
   const currentDate = new Date();
   return {
@@ -26,6 +27,11 @@ function getAthleteModelFormat({ athlete, access_token, token_type }) {
       profile,
       email,
       id,
+    },
+    preferences: {
+      notifications: {
+        monthly: shouldSubscribe,
+      },
     },
   };
 }

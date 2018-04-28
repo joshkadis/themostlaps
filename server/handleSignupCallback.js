@@ -12,7 +12,7 @@ const {
 } = require('../utils/athleteStats');
 const { sendIngestEmail } = require('../utils/emails');
 const { slackSuccess, slackError } = require('../utils/slackNotification');
-const subscribeToMailingList = require('../utils/subscribeToMailingList');
+const shouldSubscribe = require('../utils/emails/shouldSubscribe');
 const refreshAthlete = require('../utils/refreshAthlete');
 
 /**
@@ -143,27 +143,14 @@ async function handleSignupCallback(req, res) {
       return;
     }
 
-    athleteDoc = await Athlete.create(getAthleteModelFormat(athleteInfo));
+    athleteDoc = await Athlete.create(
+      getAthleteModelFormat(athleteInfo, shouldSubscribe(req.query))
+    );
     console.log(`Saved ${athleteDoc.get('_id')} to database`);
   } catch (err) {
     const errCode = -1 !== err.message.indexOf('duplicate key') ? 50 : 55;
     handleSignupError(errCode, athleteInfo.athlete || false);
     return;
-  }
-
-  // Maybe subscribe to newsletter
-  try {
-    // Expect something like '/about|shouldSubscribe'
-    const stateParam = req.query.state ?
-      decodeURIComponent(req.query.state).split('|') :
-      ['/'];
-
-    subscribeToMailingList(
-      athleteInfo.athlete.email || 'n/a',
-      (stateParam.length > 1 && stateParam[1] === 'shouldSubscribe') // Add to newsletter segment?
-    );
-  } catch (err) {
-    slackError(105, athleteInfo.athlete);
   }
 
   // Render the welcome page, athlete status will be 'ingesting'
