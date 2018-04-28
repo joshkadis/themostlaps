@@ -6,6 +6,7 @@ const {
   callbackActivityInfo,
   callbackMailgun,
   callbackRefreshBatch,
+  callbackUpdateSubscriptions,
 } = require ('./cli/callbacks');
 
 function createPositionals(...args) {
@@ -88,5 +89,16 @@ const argv = require('yargs')
       ['activities', { type: 'boolean', default: false }],
     ),
     async (argv) => await callbackRefreshBatch(argv),
+  )
+  /**
+   * Process batch of athletes w/ simulated nightly refresh
+   */
+  .command(
+    'updatesubscriptions [--dryrun]',
+    false,
+    createPositionals(
+      ['dryrun', { type: 'boolean', default: false }],
+    ),
+    async (argv) => await callbackUpdateSubscriptions(argv),
   )
   .argv;

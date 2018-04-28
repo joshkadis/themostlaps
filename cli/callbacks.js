@@ -8,8 +8,8 @@ const Athlete = require('../schema/Athlete');
 const refreshAthlete = require('../utils/refreshAthlete');
 const getActivityInfo = require('./getActivityInfo');
 const sendEmailNotification = require('./sendEmailNotification')
-const { refreshAthletes } = require('../utils/scheduleNightlyRefresh')
-;
+const { refreshAthletes } = require('../utils/scheduleNightlyRefresh');
+
 /**
  * Prompt for admin code then connect and run command
  *
@@ -102,12 +102,48 @@ const callbackRefreshBatch = async ({ limit, skip, activities }) => {
   );
 };
 
+const callbackUpdateSubscriptions = async ({ dryrun }) => {
+  await doCommand(
+    `Enter admin code to update user subscription statuses`,
+    async () => {
+      const newsletterSubscribers = require('../utils/emails/MCNewsletterSegment');
+      const athletes = await Athlete.find();
+      let result = {
+        subscribed: 0,
+        notSubscribed: 0,
+      };
+      for (let i = 0; i < athletes.length; i++) {
+        const athleteDoc = athletes[i];
+        const shouldBeSubscribed =
+          newsletterSubscribers.indexOf(athleteDoc.get('athlete.email')) !== -1;
+
+        athleteDoc.set({
+          preferences: {
+            notifications: {
+              monthly: shouldBeSubscribed,
+            },
+          },
+        });
+
+        result[`${shouldBeSubscribed ? 's' : 'notS'}ubscribed`]++;
+
+        if (!dryrun) {
+          await athleteDoc.save();
+        }
+      }
+
+      console.log(result);
+      process.exit(0);
+    }
+  );
+};
+
 module.exports = {
   callbackDeleteUser,
   callbackDeleteUserActivities,
   callbackRefreshUser,
-  callbackSubscribe,
   callbackActivityInfo,
   callbackMailgun,
   callbackRefreshBatch,
+  callbackUpdateSubscriptions,
 };
