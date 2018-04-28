@@ -1,19 +1,28 @@
 const { scheduleJob } = require('node-schedule');
 const { refreshSchedule } = require('../config');
 const Athlete = require('../schema/Athlete');
-const refreshAthlete = require('../utils/refreshAthlete');
+const refreshAthleteActivities = require('./refreshAthlete');
 const { timePartString } = require('./dateTimeUtils');
+const refreshAthleteProfile = require('./refreshAthlete/refreshAthleteProfile');
 
 /**
  * Query athletes collection then refresh since last_updated
  *
- * @param {Multiple} args to pass to http://mongoosejs.com/docs/api.html#find_find
+ * @param {Bool} shouldRefreshActivities Default to false, i.e. update profile
+ * @param {Multiple} findArgs Args to pass to http://mongoosejs.com/docs/api.html#find_find
  */
-async function refreshAthletes(...args) {
-  const athletes = await Athlete.find(...args);
+async function refreshAthletes(shouldRefreshActivities = false, findArgs = [{}]) {
+  const athletes = await Athlete.find(...findArgs);
   for (let i = 0; i < athletes.length; i++) {
     const athlete = athletes[i];
-    await refreshAthlete(athlete, false, process.env.SHOULD_REFRESH_VERBOSE);
+    const updatedAthlete = await refreshAthleteProfile(athlete);
+    if (shouldRefreshActivities) {
+      await refreshAthleteActivities(
+        updatedAthlete,
+        false,
+        process.env.SHOULD_REFRESH_VERBOSE
+      );
+    }
   }
   console.log(`Updated ${athletes.length} athletes`);
 }
@@ -25,7 +34,7 @@ async function scheduleNightlyRefresh() {
   console.log(`Scheduling refresh for ${timePartString(refreshSchedule.hour)}h${timePartString(refreshSchedule.minute)} GMT`)
   const job = scheduleJob(refreshSchedule, async () => {
     console.log('Refreshing athletes and stats');
-    await refreshAthletes({});
+    await refreshAthletes();
   });
 }
 

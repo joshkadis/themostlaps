@@ -93,11 +93,12 @@ const argv = require('yargs')
    * Process batch of athletes w/ simulated nightly refresh
    */
   .command(
-    'refreshbatch limit skip',
+    'refreshbatch limit skip [--activities]',
     false,
     createPositionals(
       ['limit', { type: 'number' }],
       ['skip', { type: 'number' }],
+      ['activities', { type: 'boolean', default: false }],
     ),
     async (argv) => await callbackRefreshBatch(argv),
   )
