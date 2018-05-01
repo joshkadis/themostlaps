@@ -1,4 +1,9 @@
-const { timePartString, getMonthName } = require('../dateTimeUtils');
+const fs = require('fs');
+const path = require('path');
+const remark = require('remark');
+const remarkHtml = require('remark-html');
+
+const { timePartString, getMonthName, getMonthKey } = require('../dateTimeUtils');
 const sendMailgun = require('./sendMailgun');
 const {
   getTextMonthlyEmail,
@@ -30,6 +35,34 @@ function getLastMonth(current) {
 }
 
 /**
+ * Get Markdown content for monthly update
+ *
+ * @param {Date} dateObj Optional, defaults to current date
+ * @return {Object} content
+ * @return {String} content.raw Raw Markdown
+ * @return {String} content.html HTML from Markdown
+ * @return {String} content.filename Filename
+ */
+async function getMonthlyUpdateContent(dateObj = false) {
+  dateObj = dateObj || new Date();
+  const filename = `update_${getMonthKey(dateObj, '')}.md`;
+
+  let raw = '';
+  let markdown = '';
+  try {
+    raw = fs.readFileSync(path.resolve(__dirname, `../../copy/emails/${filename}`), 'utf8');
+    markdown = await remark()
+      .use(remarkHtml)
+      .process(raw)
+      .then((file) => String(file));
+  } catch (err) {
+    // all good
+  }
+
+  return { filename, raw, markdown };
+}
+
+/**
  * Send monthly email update
  *
  * @param {Document} athleteDoc
@@ -48,7 +81,7 @@ async function sendMonthlyEmail(athleteDoc) {
     type: 'monthly'
   }));
   const subject = getHTMLEmailTitle('monthly');
-
+  const updateContent = await getMonthlyUpdateContent(current);
   const sendResult = await sendMailgun({
     to,
     subject,
@@ -105,4 +138,5 @@ async function sendIngestEmail(athleteDoc) {
 module.exports = {
   sendMonthlyEmail,
   sendIngestEmail,
+  getMonthlyUpdateContent,
 };
