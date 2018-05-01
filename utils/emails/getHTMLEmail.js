@@ -4,11 +4,10 @@ const { getEnvOrigin } = require('../envUtils');
 /**
  * Manually created from /pages/emailtemplate.js rendering
  *
- * @param {String} title
  * @param {String} bodyContent
  * @param {String} footerContent
  */
-const getHTMLEmail = async (title, bodyContent, footerContent) => await inlineCSS(
+const getHTMLEmail = async (bodyContent, footerContent) => await inlineCSS(
 `<!DOCTYPE html>
 <html>
 <head>
@@ -16,7 +15,7 @@ const getHTMLEmail = async (title, bodyContent, footerContent) => await inlineCS
   <style>
     body {
       font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
-      font-size: 19px;
+      font-size: 17px;
       line-height: 1.5;
       color: #000;
       margin: 0;
@@ -60,9 +59,16 @@ const getHTMLEmail = async (title, bodyContent, footerContent) => await inlineCS
       margin: 0 auto;
     }
 
+    .body__content h1,
+    .body__content h2,
+    .body__content h3,
+    .body__content h4,
+    .body__content p {
+      text-align: left;
+    }
+
     .body__content p {
       margin: 0 0 1.5em 0;
-      text-align: left;
     }
 
     .body__content a {
