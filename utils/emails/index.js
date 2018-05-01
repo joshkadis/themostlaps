@@ -89,8 +89,7 @@ async function sendMonthlyEmail(athleteDoc) {
       firstname,
       monthName,
       lastMonthLaps,
-      lastMonth[0],
-      lastMonth[1],
+      updateContent.raw,
       unsubHash,
     ),
     html: await getHTMLEmail(

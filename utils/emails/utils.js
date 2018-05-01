@@ -33,6 +33,35 @@ function getHTMLEmailTitle(type = 'default') {
 }
 
 /**
+ * Get some sort of Nice work! type of phrase based on number of laps
+ *
+ * @param {Number} laps
+ * @return {String}
+ */
+function getNiceWork(laps) {
+  if (laps < 10) {
+    return 'Time to get on the bike!';
+  } else if (laps < 25) {
+    return `It's a start!`;
+  } else if (laps < 50) {
+    return 'Pretty solid!';
+  }
+
+  return 'Nice work!';
+}
+
+/**
+ * Get personal note for number of laps during month
+ *
+ * @param {Number} laps
+ * @param {String} monthName
+ * @return {String}
+ */
+function getPersonalUpdate(laps, monthName) {
+  return `You rode ${laps} lap${laps > 1 ? 's' : ''} in ${monthName}. ${getNiceWork(laps)}`
+}
+
+/**
  * Get body HTML for monthly email
  *
  * @param {String} firstname
@@ -42,19 +71,10 @@ function getHTMLEmailTitle(type = 'default') {
  * @return {String} HTML for email body
  */
 function getMonthlyHTMLBody(firstname, monthName, laps, updateContent = '') {
-  let niceWork = 'Nice work!';
-  if (laps < 10) {
-    niceWork = 'Time to get on the bike!';
-  } else if (laps < 25) {
-    niceWork = `It's a start!`;
-  } else if (laps < 50) {
-    niceWork = 'Pretty solid!';
-  }
-
   return [
     `<p>Hello ${firstname}!</p>`,
     (laps > 0 ?
-     `<p>You rode ${laps} lap${laps > 1 ? 's' : ''} in ${monthName}. ${niceWork}</p>` :
+     `<p>${getPersonalUpdate(laps, monthName)}</p>` :
      ''
     ),
     updateContent,
@@ -103,4 +123,5 @@ module.exports = {
   getMonthlyHTMLBody,
   getIngestHTMLBody,
   getHTMLFooter,
+  getPersonalUpdate,
 };
