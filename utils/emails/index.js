@@ -74,7 +74,7 @@ async function sendMonthlyEmail(athleteDoc) {
   const current = new Date();
   const lastMonth = getLastMonth(current);
   const lastMonthLaps = athleteDoc.get(`stats._${lastMonth[0]}_${lastMonth[1]}`);
-  const monthYearLong = `${getMonthName(parseInt(lastMonth[1], 10))} ${lastMonth[0]}`;
+  const monthName = getMonthName(parseInt(lastMonth[1], 10));
   const unsubHash = encrypt(JSON.stringify({
     id: athleteDoc.get('_id'),
     action: 'unsub',
@@ -87,7 +87,7 @@ async function sendMonthlyEmail(athleteDoc) {
     subject,
     text: getTextMonthlyEmail(
       firstname,
-      monthYearLong,
+      monthName,
       lastMonthLaps,
       lastMonth[0],
       lastMonth[1],
@@ -96,10 +96,9 @@ async function sendMonthlyEmail(athleteDoc) {
     html: await getHTMLEmail(
       getMonthlyHTMLBody(
         firstname,
-        monthYearLong,
+        monthName,
         lastMonthLaps,
-        lastMonth[0],
-        lastMonth[1],
+        updateContent.markdown,
       ),
       getHTMLFooter('monthly', unsubHash),
     ),

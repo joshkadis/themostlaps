@@ -36,18 +36,29 @@ function getHTMLEmailTitle(type = 'default') {
  * Get body HTML for monthly email
  *
  * @param {String} firstname
- * @param {String} monthYearLong E.g. "December 2017"
- * @param {Number} laps
- * @param {String} year YYYY
- * @param {String} month MM
+ * @param {String} monthName E.g. "December"
+ * @param {Number} laps Number of laps ridden in month
+ * @param {String} updateContent HTML content
  * @return {String} HTML for email body
  */
-function getMonthlyHTMLBody(firstname, monthYearLong, laps, year, month) {
-  return `
-<p>Hello ${firstname}!</p>
-<p>This is your monthly update for ${monthYearLong}...you rode <strong>${laps} laps!</strong></p>
-<p>Come see the rankings at ${getEnvOrigin()}/ranking/${year}/${month}</p>
-<p>- <em>The Most Laps</em></p>`;
+function getMonthlyHTMLBody(firstname, monthName, laps, updateContent = '') {
+  let niceWork = 'Nice work!';
+  if (laps < 10) {
+    niceWork = 'Time to get on the bike!';
+  } else if (laps < 25) {
+    niceWork = `It's a start!`;
+  } else if (laps < 50) {
+    niceWork = 'Pretty solid!';
+  }
+
+  return [
+    `<p>Hello ${firstname}!</p>`,
+    (laps > 0 ?
+     `<p>You rode ${laps} lap${laps > 1 ? 's' : ''} in ${monthName}. ${niceWork}</p>` :
+     ''
+    ),
+    updateContent,
+  ].join("\n");
 }
 
 /**
