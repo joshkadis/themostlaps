@@ -1,6 +1,6 @@
 const Athlete = require('../schema/Athlete');
 const { decrypt } = require('../utils/encryption');
-const { slackError } = require('../utils/slackNotification');
+const { slackError, slackSuccess } = require('../utils/slackNotification');
 const {
   notificationTypes,
   notificationActions,
@@ -54,6 +54,12 @@ async function handleNotification(encrypted) {
   } catch (err) {
     slackError(103, encrypted);
     success = false;
+  }
+
+  if (success) {
+    slackSuccess('Notification preference updated', decrypted);
+  } else {
+    slackError(103, decrypted);
   }
 
   return success;
