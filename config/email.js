@@ -5,7 +5,7 @@ module.exports = {
     subject: 'A message from The Most Laps',
   },
   htmlSubjects: {
-    monthly: 'Your monthly update',
+    monthly: 'Laps-related news for spring!',
     ingest: 'Ready to ride laps?',
     default: 'A message from The Most Laps',
   },
