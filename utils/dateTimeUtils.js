@@ -30,11 +30,18 @@ function getYearKey(year = null) {
 /**
  * Get _YYYY_MM key
  *
+ * @param {Date} dateObj Optional Date, defaults to current
+ * @param {Boolean} delimiter Optional, defaults to '_'
  * @return {String}
  */
-function getMonthKey() {
-  const current = new Date();
-  return `_${current.getFullYear()}_${timePartString(current.getMonth() + 1)}`;
+function getMonthKey(dateObj = false, delimiter = '_') {
+  dateObj = dateObj || new Date();
+  return [
+    delimiter,
+    dateObj.getFullYear(),
+    delimiter,
+    timePartString(dateObj.getMonth() + 1),
+  ].join('');
 }
 
 /**
