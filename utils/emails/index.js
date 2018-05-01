@@ -94,7 +94,6 @@ async function sendMonthlyEmail(athleteDoc) {
       unsubHash,
     ),
     html: await getHTMLEmail(
-      subject,
       getMonthlyHTMLBody(
         firstname,
         monthYearLong,

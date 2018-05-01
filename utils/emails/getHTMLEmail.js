@@ -45,7 +45,7 @@ const getHTMLEmail = async (title, bodyContent, footerContent) => await inlineCS
     .body {
       background: url('https://themostlaps.com/static/img/email_bg_light.png') repeat-y;
       background-size: 100% 1px;
-      padding: 12px 36px;
+      padding: 24px 36px;
       text-align: center;
     }
 
@@ -102,9 +102,6 @@ const getHTMLEmail = async (title, bodyContent, footerContent) => await inlineCS
             src="https://themostlaps.com/static/img/tml_horizontal_email.png"
           />
         </a>
-      </div>
-      <div class="title">
-        <h2 class="title__text">${title}</h2>
       </div>
       <div class="body">
         <div class="body__content">${bodyContent}</div>
