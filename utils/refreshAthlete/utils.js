@@ -40,8 +40,9 @@ function distFromParkCenter(latlng = null) {
  * @param {String} token
  * @return {Object}
  */
-async function fetchActivity(activityId, token) {
-  const response = await fetch(`${apiUrl}/activities/${activityId}`, {
+async function fetchActivity(activityId, token, includeAllEfforts = true) {
+  const url = `${apiUrl}/activities/${activityId}${includeAllEfforts ? '?include_all_efforts=true' : ''}`;
+  const response = await fetch(url, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

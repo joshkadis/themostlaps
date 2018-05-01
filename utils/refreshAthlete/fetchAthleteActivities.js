@@ -42,7 +42,7 @@ async function fetchAllAthleteActivities(
   });
 
   if (200 !== response.status) {
-    console.log(`Error fetching ${url} in fetchAllAthleteActivities`)
+    console.log(`Error ${response.status} fetching ${url} in fetchAthleteActivities`)
     await slackError(45, {
       athleteId: athleteDoc.get('_id'),
       url,
