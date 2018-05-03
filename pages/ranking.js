@@ -14,17 +14,20 @@ import {
 import * as styles from '../components/Layout.css';
 import { rankingPerPage } from '../api/apiConfig';
 
-function getRankingName({ type, year, month }) {
+function getRankingName({ type, year, month, filter = false }) {
   switch (type) {
+    case 'special':
+      return filter === 'giro2018' ? 'Giro Laps' : 'Special Ranking';
+
     case 'single':
-      return 'Single Ride';
+      return 'Single Ride Ranking';
 
     case 'timePeriod':
-      return month ? `${getMonthName(parseInt(month, 10))} ${year}` : year;
+      return month ? `${getMonthName(parseInt(month, 10))} ${year} Ranking` : `${year} Ranking`;
 
     case 'allTime':
     default:
-      return 'All Time';
+      return 'All Time Ranking';
   }
 }
 
@@ -64,6 +67,21 @@ class Ranking extends Component {
       });
   }
 
+  getValue(stats, statsKey) {
+    if ('number' === typeof stats[statsKey]) {
+      return stats[statsKey];
+    }
+
+    if (statsKey.indexOf('.') !== -1) {
+      const parts = statsKey.split('.');
+      if ('number' === typeof stats[parts[0]][parts[1]]) {
+        return stats[parts[0]][parts[1]];
+      }
+    }
+
+    return 0;
+  }
+
   render() {
     const { statsKey, query, pathname } = this.props;
     return (
@@ -71,7 +89,7 @@ class Ranking extends Component {
         pathname={pathname}
         query={query}
       >
-        <h1>{getRankingName(query)} Ranking</h1>
+        <h1>{getRankingName(query)}</h1>
         <RankingSelector current={query} />
         {!!this.state.ranking.length ? (
           <div>
@@ -85,7 +103,7 @@ class Ranking extends Component {
                     firstname={athlete.firstname}
                     lastname={athlete.lastname}
                     img={athlete.profile}
-                    value={stats[statsKey] || 0}
+                    value={this.getValue(stats, statsKey)}
                   />
                 ))}
               </tbody>
@@ -116,6 +134,16 @@ class Ranking extends Component {
  * @return {Object}
  */
 function getAPIQuery(pageQuery = {}) {
+  // Temp Giro 2018 ranking
+  if (pageQuery.type === 'special') {
+    return {
+      type: pageQuery.type,
+      params: {
+        filter: 'giro2018',
+      },
+    };
+  }
+
   // Default to current month ranking
   if (!pageQuery.type) {
     return {
@@ -150,12 +178,17 @@ Ranking.getInitialProps = async function(context) {
   let { query } = context;
   // @todo Clean up logic between query and APIQuery, these are basically the same thing
   if (!query.type) {
-    const current = new Date();
+    // Temp Giro 2018
     query = Object.assign({...query}, {
-      type: 'timePeriod',
-      year: current.getFullYear().toString(),
-      month: (current.getMonth() + 1).toString(),
+      type: 'special',
+      filter: 'giro2018',
     });
+    // const current = new Date();
+    // query = Object.assign({...query}, {
+    //   type: 'timePeriod',
+    //   year: current.getFullYear().toString(),
+    //   month: (current.getMonth() + 1).toString(),
+    // });
   }
   const APIQuery = getAPIQuery(query);
 

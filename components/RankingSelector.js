@@ -99,6 +99,13 @@ class RankingSelector extends Component {
       pathname = `${pathname}/${timePartString(month)}`;
     }
     trackRankingSelector('handleStateChange', this.getStateLabel(this.state));
+
+    // Temp Giro 2018
+    if ('giro2018' === type) {
+      Router.push(`/ranking?${stringify({ type: 'special', filter: 'giro2018' })}`, pathname);
+      return;
+    }
+
     Router.push(`/ranking?${stringify(this.state)}`, pathname);
   }
 
