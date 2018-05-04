@@ -3,7 +3,6 @@ const { getMonthName } = require('../utils/dateTimeUtils');
 const startYear = 2010;
 
 const primaryOptions = [
-  { value: 'giro2018', label: 'Giro Laps' },
   { value: 'allTime', label: 'All Time' },
   { value: 'single', label: 'Single Ride' },
 ];
