@@ -36,6 +36,13 @@ app.prepare()
     /**
      * Next.js routing
      */
+    server.get(/^\/ranking\/giro2018$/, (req, res) => {
+      app.render(req, res, '/ranking', Object.assign({...req.query}, {
+        type: 'special',
+        filter: 'giro2018',
+      }));
+    });
+
     server.get(/^\/ranking\/(allTime|single|[\d]{4,4})?\/?(\d{2,2})?$/, (req, res) => {
       const params = getRankingParams(req.params);
       if (!params.type) {
