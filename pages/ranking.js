@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import Layout from '../components/Layout';
 import RankingRow from '../components/RankingRow';
 import RankingSelector from '../components/RankingSelector';
+import SpecialRankingPromo from '../components/SpecialRankingPromo';
+import SpecialRankingInfo from '../components/SpecialRankingInfo';
 import Button from '../components/lib/Button';
 import { getPathnameFromContext, APIRequest } from '../utils';
 import {
@@ -17,7 +19,7 @@ import { rankingPerPage } from '../api/apiConfig';
 function getRankingName({ type, year, month, filter = false }) {
   switch (type) {
     case 'special':
-      return filter === 'giro2018' ? 'Giro Laps' : 'Special Ranking';
+      return filter === 'giro2018' ? 'Giro di Laps' : 'Special Ranking';
 
     case 'single':
       return 'Single Ride Ranking';
@@ -90,6 +92,12 @@ class Ranking extends Component {
         query={query}
       >
         <h1>{getRankingName(query)}</h1>
+
+        {'special' !== query.type ?
+          <SpecialRankingPromo /> :
+          <SpecialRankingInfo />
+        }
+
         <RankingSelector current={query} />
         {!!this.state.ranking.length ? (
           <div>
