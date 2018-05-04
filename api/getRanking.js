@@ -85,7 +85,7 @@ async function getRanking(rankingType = null, query) {
     parseInt(query.per_page, 10) :
     rankingPerPage;
 
-  // Calculat offset
+  // Calculate offset
   const skip = limit * page;
 
   const ranking = await Athlete.find(
