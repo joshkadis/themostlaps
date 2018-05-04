@@ -178,17 +178,12 @@ Ranking.getInitialProps = async function(context) {
   let { query } = context;
   // @todo Clean up logic between query and APIQuery, these are basically the same thing
   if (!query.type) {
-    // Temp Giro 2018
+    const current = new Date();
     query = Object.assign({...query}, {
-      type: 'special',
-      filter: 'giro2018',
+      type: 'timePeriod',
+      year: current.getFullYear().toString(),
+      month: (current.getMonth() + 1).toString(),
     });
-    // const current = new Date();
-    // query = Object.assign({...query}, {
-    //   type: 'timePeriod',
-    //   year: current.getFullYear().toString(),
-    //   month: (current.getMonth() + 1).toString(),
-    // });
   }
   const APIQuery = getAPIQuery(query);
 
