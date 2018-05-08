@@ -7,13 +7,23 @@ const {
 const { shouldSendMonthlyEmail } = require('../utils/emails');
 const { listAliases } = require('../config/email');
 
+async function sendToList(userId) {
+  const result = await sendMonthlyListEmail(listAliases[userId]);
+  if (result) {
+    console.log(`Email sent successfully to ${listAliases[userId]}`);
+  } else {
+    console.log(`Email failed to send to ${listAliases[userId]}`);
+  }
+  process.exit(0);
+}
+
 async function sendEmailNotification(userId, type) {
   // List alias w/ general sanity check
   if (userId < listAliases.length &&
     userId < 30 &&
     'monthly' === type
   ) {
-    await sendMonthlyListEmail(listAliases[userId]);
+    await sendToList(userId);
     return;
   }
 
