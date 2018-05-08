@@ -1,30 +1,42 @@
 const { getEnvOrigin } = require('../envUtils');
+const { getPersonalUpdate } = require('./utils');
+const { unsubTemplateTag } = require('../../config/email');
+
+/**
+ * Get plain-text email
+ *
+ * @param {String} updateContent
+ * @return {String} Text of email
+ */
+const getTextMonthlyListEmail = (
+  updateContent,
+) => `Hello!
+
+${updateContent}
+
+PS - Click here to stop monthly updates: ${unsubTemplateTag}`;
 
 /**
  * Get plain-text email
  *
  * @param {String} firstname
- * @param {String} monthYearLong E.g. "December 2017"
+ * @param {String} monthName E.g. "December"
  * @param {Number} laps
- * @param {String} year YYYY
- * @param {String} month MM
+ * @param {String} updateContent
  * @param {String} unsub
  * @return {String} Text of email
  */
 const getTextMonthlyEmail = (
   firstname,
-  monthYearLong,
+  monthName,
   laps,
-  year,
-  month,
+  updateContent,
   unsubHash,
 ) => `Hello ${firstname}!
 
-This is your monthly update for ${monthYearLong}...You rode ${laps} laps!
+${getPersonalUpdate(laps, monthName)}
 
-Come see the rankings at ${getEnvOrigin()}/ranking/${year}/${month}
-
-- The Most Laps
+${updateContent}
 
 PS - Click here to stop monthly updates: ${getEnvOrigin()}/notifications/${unsubHash}`;
 
@@ -52,5 +64,6 @@ See you in the park!`;
 
 module.exports = {
   getTextMonthlyEmail,
+  getTextMonthlyListEmail,
   getTextIngestEmail,
 };

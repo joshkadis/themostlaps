@@ -33,21 +33,52 @@ function getHTMLEmailTitle(type = 'default') {
 }
 
 /**
+ * Get some sort of Nice work! type of phrase based on number of laps
+ *
+ * @param {Number} laps
+ * @return {String}
+ */
+function getNiceWork(laps) {
+  if (laps < 10) {
+    return 'Time to get on the bike!';
+  } else if (laps < 25) {
+    return `It's a start!`;
+  } else if (laps < 50) {
+    return 'Pretty solid!';
+  }
+
+  return 'Nice work!';
+}
+
+/**
+ * Get personal note for number of laps during month
+ *
+ * @param {Number} laps
+ * @param {String} monthName
+ * @return {String}
+ */
+function getPersonalUpdate(laps, monthName) {
+  return `You rode ${laps} lap${laps > 1 ? 's' : ''} in ${monthName}. ${getNiceWork(laps)}`
+}
+
+/**
  * Get body HTML for monthly email
  *
- * @param {String} firstname
- * @param {String} monthYearLong E.g. "December 2017"
- * @param {Number} laps
- * @param {String} year YYYY
- * @param {String} month MM
+ * @param {String|null} firstname Name or null for list
+ * @param {String} monthName E.g. "December"
+ * @param {Number} laps Number of laps ridden in month
+ * @param {String} updateContent HTML content
  * @return {String} HTML for email body
  */
-function getMonthlyHTMLBody(firstname, monthYearLong, laps, year, month) {
-  return `
-<p>Hello ${firstname}!</p>
-<p>This is your monthly update for ${monthYearLong}...you rode <strong>${laps} laps!</strong></p>
-<p>Come see the rankings at ${getEnvOrigin()}/ranking/${year}/${month}</p>
-<p>- <em>The Most Laps</em></p>`;
+function getMonthlyHTMLBody(firstname, monthName, laps, updateContent = '') {
+  return [
+    `<p>Hello${firstname ? ` ${firstname}` : ''}!</p>`,
+    (laps > 0 ?
+     `<p>${getPersonalUpdate(laps, monthName)}</p>` :
+     ''
+    ),
+    updateContent,
+  ].join("\n");
 }
 
 /**
@@ -75,15 +106,14 @@ function getIngestHTMLBody(firstname, id) {
  * @param {String} hash
  * @return {String} HTML for email footer
  */
-function getHTMLFooter(type, hash = false) {
+function getHTMLFooter(type, unsubLink = false) {
   const base = `<p>Email sent by <a href="${getEnvOrigin()}">The Most Laps</a>.</p>`;
-  if (!hash) {
+  if (!unsubLink) {
     return base;
   }
 
-  const unsubUrl = `${getEnvOrigin()}/notifications/${hash}`;
   return `${base}
-<p>To unsubscribe from ${type} updates, <a href="${unsubUrl}">click here</a>.</p>`;
+<p>To unsubscribe from ${type} updates, <a href="${unsubLink}">click here</a>.</p>`;
 }
 
 module.exports = {
@@ -92,4 +122,5 @@ module.exports = {
   getMonthlyHTMLBody,
   getIngestHTMLBody,
   getHTMLFooter,
+  getPersonalUpdate,
 };

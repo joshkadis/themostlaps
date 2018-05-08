@@ -1,7 +1,13 @@
-const { timePartString, getMonthName } = require('../dateTimeUtils');
+const fs = require('fs');
+const path = require('path');
+const remark = require('remark');
+const remarkHtml = require('remark-html');
+
+const { timePartString, getMonthName, getMonthKey } = require('../dateTimeUtils');
 const sendMailgun = require('./sendMailgun');
 const {
   getTextMonthlyEmail,
+  getTextMonthlyListEmail,
   getTextIngestEmail,
 } = require('./getTextEmail');
 const getHTMLEmail = require('./getHTMLEmail');
@@ -11,7 +17,19 @@ const {
   getIngestHTMLBody,
   getHTMLFooter,
 } = require('./utils');
+const { getEnvOrigin } = require('../envUtils');
 const { encrypt } = require('../encryption');
+const { unsubTemplateTag } = require('../../config/email');
+
+/**
+ * Get local unsubscribe URL from a user's hash
+ *
+ * @param {String} unsubHash
+ * @return {String}
+ */
+function getUnsubUrlFromHash(unsubHash) {
+  return `${getEnvOrigin()}/notifications/${unsubHash}`;
+}
 
 /**
  * Get _YYYY_MM key for *last month* relative to today's date
@@ -30,6 +48,34 @@ function getLastMonth(current) {
 }
 
 /**
+ * Get Markdown content for monthly update
+ *
+ * @param {Date} dateObj Optional, defaults to current date
+ * @return {Object} content
+ * @return {String} content.raw Raw Markdown
+ * @return {String} content.html HTML from Markdown
+ * @return {String} content.filename Filename
+ */
+async function getMonthlyUpdateContent(dateObj = false) {
+  dateObj = dateObj || new Date();
+  const filename = `update_${getMonthKey(dateObj, '')}.md`;
+
+  let raw = '';
+  let markdown = '';
+  try {
+    raw = fs.readFileSync(path.resolve(__dirname, `../../copy/emails/${filename}`), 'utf8');
+    markdown = await remark()
+      .use(remarkHtml)
+      .process(raw)
+      .then((file) => String(file));
+  } catch (err) {
+    // all good
+  }
+
+  return { filename, raw, markdown };
+}
+
+/**
  * Send monthly email update
  *
  * @param {Document} athleteDoc
@@ -41,35 +87,63 @@ async function sendMonthlyEmail(athleteDoc) {
   const current = new Date();
   const lastMonth = getLastMonth(current);
   const lastMonthLaps = athleteDoc.get(`stats._${lastMonth[0]}_${lastMonth[1]}`);
-  const monthYearLong = `${getMonthName(parseInt(lastMonth[1], 10))} ${lastMonth[0]}`;
+  const monthName = getMonthName(parseInt(lastMonth[1], 10));
   const unsubHash = encrypt(JSON.stringify({
     id: athleteDoc.get('_id'),
     action: 'unsub',
     type: 'monthly'
   }));
   const subject = getHTMLEmailTitle('monthly');
-
+  const updateContent = await getMonthlyUpdateContent(current);
   const sendResult = await sendMailgun({
     to,
     subject,
     text: getTextMonthlyEmail(
       firstname,
-      monthYearLong,
+      monthName,
       lastMonthLaps,
-      lastMonth[0],
-      lastMonth[1],
+      updateContent.raw,
       unsubHash,
     ),
     html: await getHTMLEmail(
-      subject,
       getMonthlyHTMLBody(
         firstname,
-        monthYearLong,
+        monthName,
         lastMonthLaps,
-        lastMonth[0],
-        lastMonth[1],
+        updateContent.markdown,
       ),
-      getHTMLFooter('monthly', unsubHash),
+      getHTMLFooter('monthly', getUnsubUrlFromHash(unsubHash)),
+    ),
+  });
+
+  return sendResult;
+}
+
+/**
+ * Send monthly email update to mailing list
+ *
+ * @param {String} listAddress
+ * @return {Bool} Success or fail
+ */
+async function sendMonthlyListEmail(listAddress) {
+  const current = new Date();
+  const subject = getHTMLEmailTitle('monthly');
+  const updateContent = await getMonthlyUpdateContent(current);
+
+  const sendResult = await sendMailgun({
+    to: listAddress,
+    subject,
+    text: getTextMonthlyListEmail(
+      updateContent.raw,
+    ),
+    html: await getHTMLEmail(
+      getMonthlyHTMLBody(
+        null,
+        '',
+        0,
+        updateContent.markdown,
+      ),
+      getHTMLFooter('monthly', unsubTemplateTag),
     ),
   });
 
@@ -104,5 +178,7 @@ async function sendIngestEmail(athleteDoc) {
 
 module.exports = {
   sendMonthlyEmail,
+  sendMonthlyListEmail,
   sendIngestEmail,
+  getMonthlyUpdateContent,
 };

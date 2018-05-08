@@ -4,11 +4,10 @@ const { getEnvOrigin } = require('../envUtils');
 /**
  * Manually created from /pages/emailtemplate.js rendering
  *
- * @param {String} title
  * @param {String} bodyContent
  * @param {String} footerContent
  */
-const getHTMLEmail = async (title, bodyContent, footerContent) => await inlineCSS(
+const getHTMLEmail = async (bodyContent, footerContent) => await inlineCSS(
 `<!DOCTYPE html>
 <html>
 <head>
@@ -16,7 +15,7 @@ const getHTMLEmail = async (title, bodyContent, footerContent) => await inlineCS
   <style>
     body {
       font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
-      font-size: 19px;
+      font-size: 16px;
       line-height: 1.5;
       color: #000;
       margin: 0;
@@ -45,7 +44,7 @@ const getHTMLEmail = async (title, bodyContent, footerContent) => await inlineCS
     .body {
       background: url('https://themostlaps.com/static/img/email_bg_light.png') repeat-y;
       background-size: 100% 1px;
-      padding: 12px 36px;
+      padding: 24px 36px;
       text-align: center;
     }
 
@@ -60,9 +59,16 @@ const getHTMLEmail = async (title, bodyContent, footerContent) => await inlineCS
       margin: 0 auto;
     }
 
+    .body__content h1,
+    .body__content h2,
+    .body__content h3,
+    .body__content h4,
+    .body__content p {
+      text-align: left;
+    }
+
     .body__content p {
       margin: 0 0 1.5em 0;
-      text-align: left;
     }
 
     .body__content a {
@@ -102,9 +108,6 @@ const getHTMLEmail = async (title, bodyContent, footerContent) => await inlineCS
             src="https://themostlaps.com/static/img/tml_horizontal_email.png"
           />
         </a>
-      </div>
-      <div class="title">
-        <h2 class="title__text">${title}</h2>
       </div>
       <div class="body">
         <div class="body__content">${bodyContent}</div>
