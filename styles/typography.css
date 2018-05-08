@@ -72,6 +72,10 @@ p {
   }
 }
 
+:global(.small) {
+  font-size: .9rem;
+}
+
 strong {
   font-weight: 700;
 }

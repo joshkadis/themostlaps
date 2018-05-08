@@ -1,7 +1,8 @@
 const Athlete = require('../schema/Athlete');
+const { compileSpecialStats } = require('./stats/compileSpecialStats');
 
 /**
- * Compile stats for an array of activity documents
+ * Update athlete stats from array of new activity documents
  *
  * @param {Array} activities Array of Activity documents
  * @param {Object} initial Optional initial stats value
@@ -19,22 +20,27 @@ function compileStatsForActivities(
   }
 
   return activities.reduce((acc, activity) => {
+    const activityLaps = activity.get('laps');
+    const startDate = activity.get('start_date_local');
+
     // Increment allTime total
-    acc.allTime = acc.allTime + activity.get('laps');
+    acc.allTime = acc.allTime + activityLaps;
 
     // Increment year and month allTimes
-    const matches = /^(\d{4,4})-(\d{2,2})-/.exec(activity.get('start_date_local'));
+    const matches = /^(\d{4,4})-(\d{2,2})-/.exec(startDate);
     if (matches) {
       const yearKey = `_${matches[1]}`;
       const monthKey = `${yearKey}_${matches[2]}`;
-      acc[yearKey] = (acc[yearKey] || 0) + activity.get('laps');
-      acc[monthKey] = (acc[monthKey] || 0) + activity.get('laps');
+      acc[yearKey] = (acc[yearKey] || 0) + activityLaps;
+      acc[monthKey] = (acc[monthKey] || 0) + activityLaps;
     }
 
     // Most laps in a single ride?
-    if (activity.get('laps') > acc.single) {
-      acc.single = activity.get('laps');
+    if (activityLaps > acc.single) {
+      acc.single = activityLaps;
     }
+
+    acc.special = compileSpecialStats(activityLaps, startDate, acc.special || {});
 
     return acc;
   }, initial);

@@ -1,8 +1,12 @@
 module.exports = {
-  rankingTypes: [
+  allowedRankingTypes: [
     'allTime',
-    'timePeriod',
     'single',
+    'special',
+    'timePeriod',
+  ],
+  allowedSpecialFilters: [
+    'giro2018',
   ],
   rankingPerPage: 15,
 };

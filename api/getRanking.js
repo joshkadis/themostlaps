@@ -1,5 +1,9 @@
 const Athlete = require('../schema/Athlete');
-const apiConfig = require('./apiConfig');
+const {
+  allowedRankingTypes,
+  allowedSpecialFilters,
+  rankingPerPage,
+} = require('./apiConfig');
 const { defaultAthleteFields } = require('../config');
 
 /**
@@ -9,7 +13,7 @@ const { defaultAthleteFields } = require('../config');
  * @return {Object}
  */
 function validateInput(rankingType, filter = '') {
-  if (apiConfig.rankingTypes.indexOf(rankingType) === -1) {
+  if (allowedRankingTypes.indexOf(rankingType) === -1) {
     return { error: `Invalid ranking type: ${rankingType}` };
   }
 
@@ -23,7 +27,37 @@ function validateInput(rankingType, filter = '') {
     return { error: `Invalid timePeriod filter: ${filter}` };
   }
 
+  if (rankingType === 'special' && allowedSpecialFilters.indexOf(filter) === -1) {
+    return { error: `Invalid special filter: ${filter}` };
+  }
+
   return { error: false };
+}
+
+/**
+ * Get key for athletes collection query
+ * Note that rankingType and filter have already been validated at this point
+ *
+ * @param {String} rankingType
+ * @param {String} filter
+ * @return {String}
+ */
+function getStatsKey(rankingType = 'allTime', filter = '') {
+  let key;
+  switch (rankingType) {
+    case 'timePeriod':
+      key = filter;
+      break;
+
+    case 'special':
+      key = `special.${filter}`;
+      break;
+
+    default:
+      key = rankingType;
+  }
+
+  return `stats.${key}`;
 }
 
 /**
@@ -39,9 +73,7 @@ async function getRanking(rankingType = null, query) {
     return validation;
   }
 
-  // If request is for specific time period, use that as the stats key
-  // otherwise use the ranking type (allTime, single, etc)
-  const statsKey = 'timePeriod' === rankingType ? filter : rankingType;
+  const statsKey = getStatsKey(rankingType, filter);
 
   // Default to first page, 0-based
   const page = query.page && !isNaN(query.page) ?
@@ -51,23 +83,23 @@ async function getRanking(rankingType = null, query) {
   // Allow limit query param
   const limit = query.per_page && !isNaN(query.per_page) ?
     parseInt(query.per_page, 10) :
-    apiConfig.rankingPerPage;
+    rankingPerPage;
 
-  // Calculat offset
+  // Calculate offset
   const skip = limit * page;
 
   const ranking = await Athlete.find(
-    { [`stats.${statsKey}`]: { $gt: 0 } },
-    defaultAthleteFields.join(' ').replace('stats', `stats.${statsKey}`),
+    { [statsKey]: { $gt: 0 } },
+    defaultAthleteFields.join(' ').replace('stats', statsKey),
     {
       limit,
       skip,
-      sort: { [`stats.${statsKey}`]: -1 },
+      sort: { [statsKey]: -1 },
     }
   );
 
   return { error: false, data: {
-    statsKey,
+    statsKey: statsKey.replace(/^stats\./, ''), // remove leading `stats.`
     ranking,
   } };
 }
