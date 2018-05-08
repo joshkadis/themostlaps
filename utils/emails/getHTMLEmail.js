@@ -15,7 +15,7 @@ const getHTMLEmail = async (bodyContent, footerContent) => await inlineCSS(
   <style>
     body {
       font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
-      font-size: 17px;
+      font-size: 16px;
       line-height: 1.5;
       color: #000;
       margin: 0;
