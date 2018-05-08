@@ -71,15 +71,15 @@ async function sendEmailNotification(userId, type, shouldExitProcess = true) {
   let result;
   if ('monthly' === type) {
     // Check if user wants monthly emails
-    const { notifications } = athleteDoc.get('preferences');
-    if (!notifications[type]) {
-      console.log(`User has opted out of ${type} emails`);
-      if (shouldExitProcess) {
-        process.exit(0);
-      } else {
-        return false;
-      }
-    }
+    // const { notifications } = athleteDoc.get('preferences');
+    // if (!notifications[type]) {
+    //   console.log(`User has opted out of ${type} emails`);
+    //   if (shouldExitProcess) {
+    //     process.exit(0);
+    //   } else {
+    //     return false;
+    //   }
+    // }
 
     result = await sendMonthlyEmail(athleteDoc);
   } else if ('ingest' === type) {
