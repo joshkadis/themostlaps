@@ -10,6 +10,7 @@ const getActivityInfo = require('./getActivityInfo');
 const sendEmailNotification = require('./sendEmailNotification')
 const { refreshAthletes } = require('../utils/scheduleNightlyRefresh');
 const { listAliases } = require('../config/email');
+const { testAthleteIds } = require('../config');
 
 /**
  * Prompt for admin code then connect and run command
@@ -99,7 +100,7 @@ const callbackMailgun = async ({ user, type }) => {
   );
 }
 
-const callbackMailgunAll = async ({ override }) => {
+const callbackMailgunAll = async ({ override, testonly }) => {
   await doCommand(
     `Enter admin code to send monthly email notification to all subscribed users`,
     async () => {
@@ -113,8 +114,13 @@ const callbackMailgunAll = async ({ override }) => {
       console.log(`Sending to ${athletes.length} users`);
 
       for (let i = 0; i < athletes.length; i++) {
-        console.log(`Sending to ${athletes[i].get('athlete.email')}`);
-        await sendEmailNotification(athletes[i], 'monthly', false);
+        if (testonly || !process.env.NODE_ENV || process.env.NODE_ENV !== 'production') {
+          if (-1 !== testAthleteIds.indexOf(athletes[i].get('_id'))) {
+            await sendEmailNotification(athletes[i], 'monthly', false);
+          }
+        } else {
+          await sendEmailNotification(athletes[i], 'monthly', false);
+        }
       }
       process.exit(0);
     }

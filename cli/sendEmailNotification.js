@@ -59,6 +59,8 @@ async function sendEmailNotification(userId, type, shouldExitProcess = true) {
     }
   }
 
+  console.log(`Sending to ${athleteDoc.get('athlete.email')}`);
+
   if (!process.env.MAILGUN_API_KEY) {
     console.log('Missing Mailgun API key')
     if (shouldExitProcess) {

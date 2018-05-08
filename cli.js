@@ -82,10 +82,11 @@ const argv = require('yargs')
    * Send an email notification via Mailgun
    */
   .command(
-    'mailgun-all [--override]',
+    'mailgun-all [--override] [--testonly]',
     false,
     createPositionals(
       ['override', { type: 'boolean', default: false }],
+      ['testonly', { type: 'boolean', default: false }],
     ),
     async (argv) => await callbackMailgunAll(argv),
   )
