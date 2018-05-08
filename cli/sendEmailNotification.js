@@ -7,19 +7,38 @@ const {
 const { shouldSendMonthlyEmail } = require('../utils/emails');
 const { listAliases } = require('../config/email');
 
-async function sendToList(userId) {
-  const result = await sendMonthlyListEmail(listAliases[userId]);
+/**
+ * Send email to Mailgun list
+ *
+ * @param {Number} listIdx Index of list alias in listAliases
+ */
+async function sendToList(listIdx) {
+  if (!listAliases[listIdx]) {
+    console.log(`Index ${listIdx} not found in listAliases`);
+    process.exit(0);
+  }
+
+  const result = await sendMonthlyListEmail(listAliases[listIdx]);
   if (result) {
-    console.log(`Email sent successfully to ${listAliases[userId]}`);
+    console.log(`Email sent successfully to ${listAliases[listIdx]}`);
   } else {
-    console.log(`Email failed to send to ${listAliases[userId]}`);
+    console.log(`Email failed to send to ${listAliases[listIdx]}`);
   }
   process.exit(0);
 }
 
-async function sendEmailNotification(userId, type) {
+/**
+ * Send email notification to user
+ *
+ * @param {Number|Document} userId Id or Athlete document
+ * @param {String} type 'monthly' or 'ingest'
+ * @param {Bool} shouldExitProcess Defaults to true, will exit process after sending. false to return
+ * @return {Bool} Sent successfully?
+ */
+async function sendEmailNotification(userId, type, shouldExitProcess = true) {
   // List alias w/ general sanity check
-  if (userId < listAliases.length &&
+  if ('number' === typeof userId &&
+    userId < listAliases.length &&
     userId < 30 &&
     'monthly' === type
   ) {
@@ -27,16 +46,26 @@ async function sendEmailNotification(userId, type) {
     return;
   }
 
-  const athleteDoc = await Athlete.findById(userId);
+  const athleteDoc = 'number' === typeof userId ?
+    await Athlete.findById(userId) :
+    userId;
 
   if (!athleteDoc) {
     console.log(`Could not find user id ${userId}`);
-    process.exit(0);
+    if (shouldExitProcess) {
+      process.exit(0);
+    } else {
+      return false;
+    }
   }
 
   if (!process.env.MAILGUN_API_KEY) {
     console.log('Missing Mailgun API key')
-    process.exit(0);
+    if (shouldExitProcess) {
+      process.exit(0);
+    } else {
+      return false;
+    }
   }
 
   let result;
@@ -45,8 +74,13 @@ async function sendEmailNotification(userId, type) {
     const { notifications } = athleteDoc.get('preferences');
     if (!notifications[type]) {
       console.log(`User has opted out of ${type} emails`);
-      process.exit(0);
+      if (shouldExitProcess) {
+        process.exit(0);
+      } else {
+        return false;
+      }
     }
+
     result = await sendMonthlyEmail(athleteDoc);
   } else if ('ingest' === type) {
     // Send ingest email
@@ -63,7 +97,11 @@ async function sendEmailNotification(userId, type) {
     console.log('Email failed to send');
   }
 
-  process.exit(0);
+  if (shouldExitProcess) {
+    process.exit(0);
+  } else {
+    return false;
+  }
 }
 
 module.exports = sendEmailNotification;

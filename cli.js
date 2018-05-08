@@ -5,6 +5,7 @@ const {
   callbackRefreshUser,
   callbackActivityInfo,
   callbackMailgun,
+  callbackMailgunAll,
   callbackRefreshBatch,
   callbackUpdateSubscriptions,
 } = require ('./cli/callbacks');
@@ -76,6 +77,17 @@ const argv = require('yargs')
       ['type', { type: 'string', default: 'monthly' }],
     ),
     async (argv) => await callbackMailgun(argv),
+  )
+  /**
+   * Send an email notification via Mailgun
+   */
+  .command(
+    'mailgun-all [--override]',
+    false,
+    createPositionals(
+      ['override', { type: 'boolean', default: false }],
+    ),
+    async (argv) => await callbackMailgunAll(argv),
   )
   /**
    * Process batch of athletes w/ simulated nightly refresh

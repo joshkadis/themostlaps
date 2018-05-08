@@ -99,6 +99,28 @@ const callbackMailgun = async ({ user, type }) => {
   );
 }
 
+const callbackMailgunAll = async ({ override }) => {
+  await doCommand(
+    `Enter admin code to send monthly email notification to all subscribed users`,
+    async () => {
+      const athletes = await Athlete.find(override ? {} : {
+        preferences: {
+          notifications: {
+            monthly: true,
+          },
+        },
+      });
+      console.log(`Sending to ${athletes.length} users`);
+
+      for (let i = 0; i < athletes.length; i++) {
+        console.log(`Sending to ${athletes[i].get('athlete.email')}`);
+        await sendEmailNotification(athletes[i], 'monthly', false);
+      }
+      process.exit(0);
+    }
+  );
+}
+
 const callbackRefreshBatch = async ({ limit, skip, activities }) => {
   await doCommand(
     `Enter admin code to refresh batch of ${limit} athletes with offset ${skip}`,
@@ -159,6 +181,7 @@ module.exports = {
   callbackRefreshUser,
   callbackActivityInfo,
   callbackMailgun,
+  callbackMailgunAll,
   callbackRefreshBatch,
   callbackUpdateSubscriptions,
 };
