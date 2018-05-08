@@ -9,4 +9,9 @@ module.exports = {
     ingest: 'Ready to ride laps?',
     default: 'A message from The Most Laps',
   },
+  listAliases: [
+    'test@themostlaps.com',
+    'friends@themostlaps.com',
+  ],
+  unsubTemplateTag: '%mailing_list_unsubscribe_url%',
 };

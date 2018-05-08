@@ -9,6 +9,7 @@ const refreshAthlete = require('../utils/refreshAthlete');
 const getActivityInfo = require('./getActivityInfo');
 const sendEmailNotification = require('./sendEmailNotification')
 const { refreshAthletes } = require('../utils/scheduleNightlyRefresh');
+const { listAliases } = require('../config/email');
 
 /**
  * Prompt for admin code then connect and run command
@@ -78,8 +79,22 @@ const callbackActivityInfo = async ({ user, activity }) => {
 }
 
 const callbackMailgun = async ({ user, type }) => {
+  let recipient;
+  switch (user) {
+    case 0:
+      recipient = `mailing list ${listAliases[0]}`;
+      break;
+
+    case 1:
+      recipient = `mailing list ${listAliases[1]}`;
+      break;
+
+    default:
+      recipient = `user ${user}`;
+  }
+
   await doCommand(
-    `Enter admin code to send ${type} email notification to user ${user}`,
+    `Enter admin code to send ${type} email notification to ${recipient}`,
     () => sendEmailNotification(user, type)
   );
 }

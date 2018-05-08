@@ -1,11 +1,22 @@
 const Athlete = require('../schema/Athlete');
 const {
   sendMonthlyEmail,
+  sendMonthlyListEmail,
   sendIngestEmail,
 } = require('../utils/emails');
 const { shouldSendMonthlyEmail } = require('../utils/emails');
+const { listAliases } = require('../config/email');
 
 async function sendEmailNotification(userId, type) {
+  // List alias w/ general sanity check
+  if (userId < listAliases.length &&
+    userId < 30 &&
+    'monthly' === type
+  ) {
+    await sendMonthlyListEmail(listAliases[userId]);
+    return;
+  }
+
   const athleteDoc = await Athlete.findById(userId);
 
   if (!athleteDoc) {
