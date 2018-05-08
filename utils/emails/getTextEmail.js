@@ -1,5 +1,21 @@
 const { getEnvOrigin } = require('../envUtils');
 const { getPersonalUpdate } = require('./utils');
+const { unsubscribeLinkVar } = require('../../config/email');
+
+/**
+ * Get plain-text email
+ *
+ * @param {String} updateContent
+ * @return {String} Text of email
+ */
+const getTextMonthlyListEmail = (
+  updateContent,
+) => `Hello!
+
+${updateContent}
+
+PS - Click here to stop monthly updates: ${unsubTemplateTag}`;
+
 /**
  * Get plain-text email
  *
@@ -48,5 +64,6 @@ See you in the park!`;
 
 module.exports = {
   getTextMonthlyEmail,
+  getTextMonthlyListEmail,
   getTextIngestEmail,
 };

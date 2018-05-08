@@ -64,7 +64,7 @@ function getPersonalUpdate(laps, monthName) {
 /**
  * Get body HTML for monthly email
  *
- * @param {String} firstname
+ * @param {String|null} firstname Name or null for list
  * @param {String} monthName E.g. "December"
  * @param {Number} laps Number of laps ridden in month
  * @param {String} updateContent HTML content
@@ -72,7 +72,7 @@ function getPersonalUpdate(laps, monthName) {
  */
 function getMonthlyHTMLBody(firstname, monthName, laps, updateContent = '') {
   return [
-    `<p>Hello ${firstname}!</p>`,
+    `<p>Hello${firstname ? ` ${firstname}` : ''}!</p>`,
     (laps > 0 ?
      `<p>${getPersonalUpdate(laps, monthName)}</p>` :
      ''
@@ -106,15 +106,14 @@ function getIngestHTMLBody(firstname, id) {
  * @param {String} hash
  * @return {String} HTML for email footer
  */
-function getHTMLFooter(type, hash = false) {
+function getHTMLFooter(type, unsubLink = false) {
   const base = `<p>Email sent by <a href="${getEnvOrigin()}">The Most Laps</a>.</p>`;
-  if (!hash) {
+  if (!unsubLink) {
     return base;
   }
 
-  const unsubUrl = `${getEnvOrigin()}/notifications/${hash}`;
   return `${base}
-<p>To unsubscribe from ${type} updates, <a href="${unsubUrl}">click here</a>.</p>`;
+<p>To unsubscribe from ${type} updates, <a href="${unsubLink}">click here</a>.</p>`;
 }
 
 module.exports = {

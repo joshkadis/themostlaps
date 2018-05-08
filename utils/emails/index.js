@@ -7,6 +7,7 @@ const { timePartString, getMonthName, getMonthKey } = require('../dateTimeUtils'
 const sendMailgun = require('./sendMailgun');
 const {
   getTextMonthlyEmail,
+  getTextMonthlyListEmail,
   getTextIngestEmail,
 } = require('./getTextEmail');
 const getHTMLEmail = require('./getHTMLEmail');
@@ -16,7 +17,19 @@ const {
   getIngestHTMLBody,
   getHTMLFooter,
 } = require('./utils');
+const { getEnvOrigin } = require('../envUtils');
 const { encrypt } = require('../encryption');
+const { unsubTemplateTag } = require('../../config/email');
+
+/**
+ * Get local unsubscribe URL from a user's hash
+ *
+ * @param {String} unsubHash
+ * @return {String}
+ */
+function getUnsubUrlFromHash(unsubHash) {
+  return `${getEnvOrigin()}/notifications/${unsubHash}`;
+}
 
 /**
  * Get _YYYY_MM key for *last month* relative to today's date
@@ -99,7 +112,38 @@ async function sendMonthlyEmail(athleteDoc) {
         lastMonthLaps,
         updateContent.markdown,
       ),
-      getHTMLFooter('monthly', unsubHash),
+      getHTMLFooter('monthly', getUnsubUrlFromHash(unsubHash)),
+    ),
+  });
+
+  return sendResult;
+}
+
+/**
+ * Send monthly email update to mailing list
+ *
+ * @param {String} listAddress
+ * @return {Bool} Success or fail
+ */
+async function sendMonthlyListEmail(listAddress) {
+  const current = new Date();
+  const subject = getHTMLEmailTitle('monthly');
+  const updateContent = await getMonthlyUpdateContent(current);
+
+  const sendResult = await sendMailgun({
+    listAddress,
+    subject,
+    text: getTextMonthlyListEmail(
+      updateContent.raw,
+    ),
+    html: await getHTMLEmail(
+      getMonthlyHTMLBody(
+        null,
+        '',
+        0,
+        updateContent.markdown,
+      ),
+      getHTMLFooter('monthly', unsubTemplateTag),
     ),
   });
 
@@ -134,6 +178,7 @@ async function sendIngestEmail(athleteDoc) {
 
 module.exports = {
   sendMonthlyEmail,
+  sendMonthlyListEmail,
   sendIngestEmail,
   getMonthlyUpdateContent,
 };
