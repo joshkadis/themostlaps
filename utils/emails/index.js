@@ -131,7 +131,7 @@ async function sendMonthlyListEmail(listAddress) {
   const updateContent = await getMonthlyUpdateContent(current);
 
   const sendResult = await sendMailgun({
-    listAddress,
+    to: listAddress,
     subject,
     text: getTextMonthlyListEmail(
       updateContent.raw,

@@ -1,6 +1,6 @@
 const { getEnvOrigin } = require('../envUtils');
 const { getPersonalUpdate } = require('./utils');
-const { unsubscribeLinkVar } = require('../../config/email');
+const { unsubTemplateTag } = require('../../config/email');
 
 /**
  * Get plain-text email
