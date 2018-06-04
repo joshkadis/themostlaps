@@ -11,3 +11,7 @@ mongoexport -h $REMOTE_HOST -d $REMOTE_DB -c athletes -u $REMOTE_USER -p $REMOTE
 # Import to database
 mongoimport -h $LOCAL_HOST -d $LOCAL_DB -c activities --file activities.json
 mongoimport -h $LOCAL_HOST -d $LOCAL_DB -c athletes --file athletes.json
+
+# Delete temp files
+rm activities.json
+rm athletes.json
