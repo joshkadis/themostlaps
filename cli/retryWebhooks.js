@@ -12,10 +12,9 @@ const intToDateString = (int) => {
   return digits.join('');
 }
 
-function retryWebhooks(startdate, dryrun) {
+async function retryWebhooks(startdate, dryrun) {
   const logFilesPath = path.resolve(__dirname, '../slack-logs');
-  const logFiles = glob
-    .sync(logFilesPath + '/*.json')
+  const logFiles = glob.sync(logFilesPath + '/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9].json')
     .map((filename) => path.basename(filename, '.json'))
     .map(dateStringToInt)
     .filter((logDate) => (!isNaN(logDate) && logDate >= startdate))
