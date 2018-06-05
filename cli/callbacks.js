@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const promptly = require('promptly');
 const deleteUser = require('./deleteUser');
 const deleteUserActivities = require('./deleteUserActivities');
+const retryWebhooks = require('./retryWebhooks');
 const { daysAgoTimestamp } = require('./utils');
 const Athlete = require('../schema/Athlete');
 const refreshAthlete = require('../utils/refreshAthlete');
@@ -181,6 +182,13 @@ const callbackUpdateSubscriptions = async ({ dryrun }) => {
   );
 };
 
+const callbackRetryWebhooks = async ({ startdate, dryrun }) => {
+  await doCommand(
+    `Enter admin code to reimport failed activities since ${startdate}.`,
+    () => retryWebhooks(startdate, dryrun),
+  );
+};
+
 module.exports = {
   callbackDeleteUser,
   callbackDeleteUserActivities,
@@ -190,4 +198,5 @@ module.exports = {
   callbackMailgunAll,
   callbackRefreshBatch,
   callbackUpdateSubscriptions,
+  callbackRetryWebhooks,
 };
