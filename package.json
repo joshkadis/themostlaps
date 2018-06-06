@@ -28,6 +28,7 @@
     "dotenv": "^5.0.1",
     "express": "^4.16.2",
     "geolib": "^2.0.24",
+    "glob": "^7.1.2",
     "inline-css": "^2.4.0",
     "isomorphic-fetch": "^2.2.1",
     "isomorphic-unfetch": "^2.0.0",

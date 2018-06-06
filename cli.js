@@ -8,6 +8,7 @@ const {
   callbackMailgunAll,
   callbackRefreshBatch,
   callbackUpdateSubscriptions,
+  callbackRetryWebhooks,
 } = require ('./cli/callbacks');
 
 function createPositionals(...args) {
@@ -113,5 +114,14 @@ const argv = require('yargs')
       ['dryrun', { type: 'boolean', default: false }],
     ),
     async (argv) => await callbackUpdateSubscriptions(argv),
+  )
+  .command(
+    'retrywebhooks startdate [--dryrun]',
+    false,
+    createPositionals(
+      ['startdate', { type: 'number' }],
+      ['dryrun', { type: 'boolean', default: false }],
+    ),
+    async (argv) => await callbackRetryWebhooks(argv),
   )
   .argv;
