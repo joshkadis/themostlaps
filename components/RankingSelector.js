@@ -79,10 +79,12 @@ class RankingSelector extends Component {
 
   onChangePrimary({ value }) {
     const parts = value.split('.');
+    const type = this.getRankingType(parts[0]);
     const newState = {
-      type: this.getRankingType(parts[0]),
+      type,
       year: ('timePeriod' == parts[0] && parts.length > 1) ?
         parts[1] : null,
+      filter: 'special' === type ? parts[0] : null,
     };
 
     if ('timePeriod' !== parts[0]) {
@@ -107,11 +109,20 @@ class RankingSelector extends Component {
   }
 
   handleStateChange() {
-    const { type, year, month } = this.state;
-    let pathname = `/ranking/${'timePeriod' === type ? year : type}`;
-    if ('timePeriod' === type && month) {
-      pathname = `${pathname}/${timePartString(month)}`;
+    const { type, year, month, filter } = this.state;
+
+    let pathname = '/ranking';
+    if ('timePeriod' === type) {
+      pathname = `${pathname}/${year}`;
+      if (month) {
+        pathname = `${pathname}/${timePartString(month)}`;
+      }
+    } else if ('special' ===  type) {
+      pathname = `${pathname}/${filter}`;
+    } else {
+      pathname = `${pathname}/${type}`;
     }
+
     trackRankingSelector('handleStateChange', this.getStateLabel(this.state));
     Router.push(`/ranking?${stringify(this.state)}`, pathname);
   }
