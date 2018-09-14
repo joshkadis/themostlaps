@@ -5,6 +5,7 @@ const startYear = 2010;
 const primaryOptions = [
   { value: 'allTime', label: 'All Time' },
   { value: 'single', label: 'Single Ride' },
+  { value: 'giro2018', label: '2018 Giro di Laps' },
 ];
 
 const current = new Date();
@@ -30,5 +31,6 @@ for (let mo = 1; mo <= 12; mo++) {
 module.exports = {
   primaryOptions,
   secondaryOptions,
+  specialOptions: ['giro2018'],
   startYear,
 };

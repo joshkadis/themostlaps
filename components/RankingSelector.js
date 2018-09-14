@@ -3,7 +3,11 @@ import PropTypes from 'prop-types';
 import Select from 'react-select';
 import Router from 'next/router';
 import { stringify } from 'query-string';
-import { primaryOptions, secondaryOptions } from '../config/rankingsOpts';
+import {
+  primaryOptions,
+  secondaryOptions,
+  specialOptions
+} from '../config/rankingsOpts';
 import { timePartString } from '../utils/dateTimeUtils';
 import * as styles from './Layout.css';
 import { trackRankingSelector } from '../utils/analytics';
@@ -63,10 +67,20 @@ class RankingSelector extends Component {
     ].filter((item) => !!item).join('|');
   }
 
+  /**
+   * Checks for "special" ranking types like 'giro2018'
+   */
+  getRankingType(initial) {
+    if (specialOptions.indexOf(initial) !== -1) {
+      return 'special';
+    }
+    return initial;
+  }
+
   onChangePrimary({ value }) {
     const parts = value.split('.');
     const newState = {
-      type: parts[0],
+      type: this.getRankingType(parts[0]),
       year: ('timePeriod' == parts[0] && parts.length > 1) ?
         parts[1] : null,
     };
