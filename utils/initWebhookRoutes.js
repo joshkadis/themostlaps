@@ -54,10 +54,7 @@ async function handleEvent(req, res) {
 
     if ('create' === aspect_type) {
       const shouldUpdateDb = !process.env.DISABLE_REFRESH_FROM_WEBHOOK;
-      const activityLaps = await refreshAthleteFromActivity(owner_id, object_id, shouldUpdateDb);
-      if (activityLaps > 0) {
-        slackSuccess(`New activity ${object_id} by athlete ${owner_id} has ${activityLaps} laps${shouldUpdateDb ? ', saved to database' : ''}`);
-      }
+      await refreshAthleteFromActivity(owner_id, object_id, shouldUpdateDb);
     }
   } catch (err) {
     slackError(110, JSON.stringify(req.body, null, 2));
