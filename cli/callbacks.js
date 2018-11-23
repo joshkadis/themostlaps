@@ -9,6 +9,7 @@ const Athlete = require('../schema/Athlete');
 const refreshAthlete = require('../utils/refreshAthlete');
 const getActivityInfo = require('./getActivityInfo');
 const sendEmailNotification = require('./sendEmailNotification')
+const migrateUser = require('./migrateUser');
 const { refreshAthletes } = require('../utils/scheduleNightlyRefresh');
 const { listAliases } = require('../config/email');
 const { testAthleteIds } = require('../config');
@@ -189,6 +190,13 @@ const callbackRetryWebhooks = async ({ startdate, dryrun }) => {
   );
 };
 
+const callbackMigrateUser = async ({ user, force }) => {
+  await doCommand(
+    `Enter admin code to migrate user ${user} to GraphQL API.`,
+    () => migrateUser(user, force),
+  );
+};
+
 module.exports = {
   callbackDeleteUser,
   callbackDeleteUserActivities,
@@ -199,4 +207,5 @@ module.exports = {
   callbackRefreshBatch,
   callbackUpdateSubscriptions,
   callbackRetryWebhooks,
+  callbackMigrateUser,
 };
