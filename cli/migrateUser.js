@@ -17,16 +17,16 @@ function reformatAthleteSchema(oldSchema) {
 
   try {
     newAthlete = `{
-      strava_id: ${oldSchema._id}
-      firstname: "${oldSchema.athlete.firstname}"
-      lastname: "${oldSchema.athlete.lastname}"
-      photo: "${oldSchema.athlete.profile}"
-      email: "${oldSchema.athlete.email || ''}"
-      status: "${oldSchema.status || 'migrating'}"
-      notifications: ${notifications ? 'true' : 'false'}
       access_token: "${oldSchema.access_token}"
-      migrated_athlete: true
+      email: "${oldSchema.athlete.email || ''}"
+      firstname: "${oldSchema.athlete.firstname}"
       last_refreshed: ${Math.floor(Date.now() / 1000)}
+      lastname: "${oldSchema.athlete.lastname}"
+      migrated_athlete: true
+      notifications: ${notifications ? 'true' : 'false'}
+      photo: "${oldSchema.athlete.profile}"
+      status: "${oldSchema.status || 'migrating'}"
+      strava_id: ${oldSchema._id}
     }`;
     return newAthlete;
   } catch (err) {
