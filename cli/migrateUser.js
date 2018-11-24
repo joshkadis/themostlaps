@@ -1,20 +1,38 @@
 const Athlete = require('../schema/Athlete');
 const gqlQuery = require('../migration/gqlQuery');
 
-const reformatAthleteSchema = (oldSchema) => ({
-  strava_id:
-  firstname: String!
-  lastname: String!
-  photo: String!
-  email: String
-  status: String! @default(value: "ingesting")
-  notifications: Boolean! @default(value: true)
-  access_token: String! @unique
-  refresh_token: String
-  expires_at: Int
-  migrated_token: Boolean! @default(value: false)
+function reformatAthleteSchema(oldSchema) {
+  // rough validation check;
+  if (!oldSchema.athlete || !oldSchema._id || !oldSchema.access_token) {
+    return null;
+  }
 
-});
+  // try/catch instead of testing every level here
+  let notifications;
+  try {
+    notifications = oldSchema.preferences.notifications.monthly;
+  } catch (err) {
+    notifications = true;
+  }
+
+  try {
+    newAthlete = `{
+      strava_id: ${oldSchema._id}
+      firstname: "${oldSchema.athlete.firstname}"
+      lastname: "${oldSchema.athlete.lastname}"
+      photo: "${oldSchema.athlete.profile}"
+      email: "${oldSchema.athlete.email || ''}"
+      status: "${oldSchema.status || 'migrating'}"
+      notifications: ${notifications ? 'true' : 'false'}
+      access_token: "${oldSchema.access_token}"
+      migrated_athlete: true
+      last_refreshed: ${Math.floor(Date.now() / 1000)}
+    }`;
+    return newAthlete;
+  } catch (err) {
+    return null;
+  }
+}
 
 async function migrateUser(user, force) {
   const gqlUser = await gqlQuery(`query {
@@ -23,8 +41,6 @@ async function migrateUser(user, force) {
     }
   }`);
 
-  console.log(gqlUser);
-
   if (gqlUser.athlete) {
     if (force) {
       const gqlUserDeleted = await gqlQuery(`mutation {
@@ -32,7 +48,6 @@ async function migrateUser(user, force) {
             strava_id
         }
       }`);
-      console.log(gqlUserDeleted);
       if (!gqlUserDeleted.deleteAthlete) {
         console.error('Failed to delete user via GraphQL API');
         process.exit(1);
@@ -49,7 +64,37 @@ async function migrateUser(user, force) {
     process.exit(0);
   }
 
-  console.log(athleteDoc.toJSON());
+  const reformattedAthlete = reformatAthleteSchema(athleteDoc.toJSON());
+  if (!reformattedAthlete) {
+    console.log('Could not reformat athlete data');
+    console.log(athleteDoc.toJSON());
+    process.exit(1);
+  }
+
+  let athleteCreated;
+  athleteCreated = await gqlQuery(`mutation {
+    createAthlete(
+      data: ${newAthlete}
+    ) {
+      strava_id
+      firstname
+      lastname
+      email
+    }
+  }`);
+
+  if (!athleteCreated.createAthlete) {
+    console.log('GraphQL createAthlete failed');
+    console.log(newAthlete);
+    process.exit(1);
+  }
+
+  const {
+    strava_id,
+    firstname,
+    lastname,
+  } = athleteCreated.createAthlete;
+  console.log(`Created athlete ${strava_id} | ${firstname} ${lastname}`);
 
   process.exit(0);
 }

@@ -6,7 +6,7 @@ async function gqlQuery(query, variables = {}) {
   try {
     return await client.request(query, variables);
   } catch (err) {
-    console.error(JSON.stringify(error, undefined, 2))
+    console.error(JSON.stringify(err, undefined, 2))
     process.exit(1)
   }
 }
