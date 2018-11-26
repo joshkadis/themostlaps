@@ -190,10 +190,10 @@ const callbackRetryWebhooks = async ({ startdate, dryrun }) => {
   );
 };
 
-const callbackMigrateUser = async ({ user, force }) => {
+const callbackMigrateUser = async ({ type, user, force }) => {
   await doCommand(
     `Enter admin code to migrate user ${user} to GraphQL API.`,
-    () => migrateUser(user, force),
+    () => migrateUser(type, user, force),
   );
 };
 

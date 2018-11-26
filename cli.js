@@ -129,9 +129,10 @@ const argv = require('yargs')
    * Migrate a user to PostgreSQL/GraphQL API Server
    */
   .command(
-    'migrate user [--force]',
+    'migrate type user [--force]',
     false,
     createPositionals(
+      ['type', { type: 'string', default: 'athlete' }],
       ['user', { type: 'number' }],
       ['force', { type: 'boolean', default: false }]
     ),
