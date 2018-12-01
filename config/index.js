@@ -45,5 +45,5 @@ module.exports = {
   notificationSubscribeAction: 'sub',
   timezoneOffset: 240, // NYC offset from UTC in mintues
   testAthleteIds: [541773],
+  conditionPadding: 150,
 };
-
