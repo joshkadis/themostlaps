@@ -11,6 +11,7 @@ const conditionSchema = new Schema({
   precipIntensity: Number,
   precipType: String,
   summary: String,
+  temperature: { type: Number, required: true },
   time: { type: Number, required: true },
   windSpeed: Number,
   windGust: Number,

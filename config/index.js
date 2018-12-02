@@ -46,4 +46,9 @@ module.exports = {
   timezoneOffset: 240, // NYC offset from UTC in mintues
   testAthleteIds: [541773],
   conditionPadding: 150,
+  darkSkyRequestOpts: {
+    exclude: 'minutely,hourly,daily,alerts,flags',
+    lang: 'en',
+    units: 'us',
+  },
 };

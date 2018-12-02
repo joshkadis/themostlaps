@@ -1,5 +1,13 @@
+const { stringify } = require('querystring');
+const fetch = require('isomorphic-unfetch');
 const Condition = require('../schema/Condition');
-const { timezoneOffset, conditionPadding } = require('../config');
+const {
+  timezoneOffset,
+  conditionPadding,
+  parkCenter,
+  darkSkyRequestOpts
+} = require('../config');
+const { slackError } = require('../slackNotifications');
 
 /**
  * Update athlete special stats data from new activity
@@ -16,6 +24,10 @@ function compileSpecialStats(activity, activityDateStr, stats = {}) {
     cold2019: (stats.cold2019 || 0) + getColdLapsFromActivity(activity, activityDateStr),
   });
 }
+
+const darkSkyApiUrl = (timestamp) =>
+  `https://api.darksky.net/forecast/${process.env.DARK_SKY_API_KEY}/${parkCenter.latitude},${parkCenter.longitude},${timestamp}?${stringify(darkSkyRequestOpts)}`;
+
 
 /**
  * Get temperature from database or fall back to DarkSky API
@@ -34,7 +46,43 @@ async function getTempFromTimestamp(timestamp) {
   }
 
   // If condition not found in database, query DarkSky API
-  
+  try {
+    const response = await fetch(darkSkyApiUrl(timestamp));
+  } catch (err) {
+    slackError(115, darkSkyApiUrl(timestamp));
+    return null;
+  }
+
+  if (200 !== response.status) {
+    return null;
+  }
+
+  let weatherData;
+  try {
+    weatherData = await response.json().currently;
+    await Condition.create({
+      apparentTemperature: typeof weatherData.apparentTemperature !== 'undefined' ?
+        weatherData.apparentTemperature : null,
+      humidity: typeof weatherData.humidity !== 'undefined' ?
+        weatherData.humidity : null,
+      icon: weatherData.icon || null,
+      precipIntensity: typeof weatherData.precipIntensity !== 'undefined' ?
+        weatherData.precipIntensity : null,
+      precipType: weatherData.precipType || null,
+      summary: weatherData.summary || null,
+      temperature: weatherData.temperature,
+      time: weatherData.time,
+      windSpeed: typeof weatherData.windSpeed !== 'undefined' ?
+        weatherData.windSpeed : null,
+      windGust: typeof weatherData.windGust !== 'undefined' ?
+        weatherData.windGust : null,
+    });
+  } catch (err) {
+    slackError(116, JSON.stringify(response.json()));
+    return null;
+  }
+
+  return weatherData.temperature;
 }
 
 /**
@@ -50,7 +98,7 @@ async function getColdLapsFromActivity(activity, activityDateStr) {
   const timeOffset = timezoneOffset * -60;
 
   // Get array of timestamps to check
-  let lapStartTimes = segmentEfforts.map(({ start_date_local }) => {
+  let lapStartTimestamps = segmentEfforts.map(({ start_date_local }) => {
     const effortDate = new Date(start_date_local);
     return (effortDate.valueOf() / 1000) + timeOffset;
   });
@@ -64,12 +112,12 @@ async function getColdLapsFromActivity(activity, activityDateStr) {
 
     // Each extra lap is 1 average lap earlier than the first segment
     for (let i = 1; i <= extraLaps; i++) {
-      const extraLapTimestamp = lapStartTimes[0] - avgLapTime;
-      lapStartTimes = [extraLapTimestamp, ...lapStartTimes];
+      const extraLapTimestamp = lapStartTimestamps[0] - avgLapTime;
+      lapStartTimestamps = [extraLapTimestamp, ...lapStartTimestamps];
     }
   }
 
-
+  lapStartTimestamps.forEach((timestamp) => console.log(getTempFromTimestamp(timestamp)));
 }
 
 /**
@@ -108,4 +156,5 @@ function compileGiro2018(laps, activityDateStr, currentTotal) {
 module.exports = {
   compileSpecialStats,
   compileGiro2018,
+  getColdLapsFromActivity,
 };
