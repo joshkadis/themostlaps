@@ -5,7 +5,8 @@ const {
   timezoneOffset,
   conditionPadding,
   parkCenter,
-  darkSkyRequestOpts
+  darkSkyRequestOpts,
+  coldLapsMax,
 } = require('../../config');
 const { slackError } = require('../slackNotification');
 
@@ -21,7 +22,7 @@ function compileSpecialStats(activity, activityDateStr, stats = {}) {
   const activityLaps = activity.get('laps');
   return Object.assign({}, stats, {
     giro2018: compileGiro2018(activityLaps, activityDateStr, stats.giro2018 || 0),
-    cold2019: (stats.cold2019 || 0) + getColdLapsFromActivity(activity, activityDateStr),
+    cold2019: (stats.cold2019 || 0) + getColdLapsFromActivity(activity),
   });
 }
 
@@ -33,9 +34,10 @@ const darkSkyApiUrl = (timestamp) =>
  * Get temperature from database or fall back to DarkSky API
  *
  * @param {Int} timestamp
+ * @param {Int} activityId
  * @return {Int}
  */
-async function getTempFromTimestamp(timestamp) {
+async function getTempFromTimestamp(timestamp, activityId) {
   const condition = await Condition.findOne({ time: {
     $gte: (timestamp - conditionPadding),
     $lte: (timestamp + conditionPadding),
@@ -46,8 +48,9 @@ async function getTempFromTimestamp(timestamp) {
   }
 
   // If condition not found in database, query DarkSky API
+  let response;
   try {
-    const response = await fetch(darkSkyApiUrl(timestamp));
+    response = await fetch(darkSkyApiUrl(timestamp));
   } catch (err) {
     slackError(115, darkSkyApiUrl(timestamp));
     return null;
@@ -58,8 +61,9 @@ async function getTempFromTimestamp(timestamp) {
   }
 
   let weatherData;
+  const resJson = await response.json();
   try {
-    weatherData = await response.json().currently;
+    weatherData = resJson.currently;
     await Condition.create({
       apparentTemperature: typeof weatherData.apparentTemperature !== 'undefined' ?
         weatherData.apparentTemperature : null,
@@ -69,6 +73,7 @@ async function getTempFromTimestamp(timestamp) {
       precipIntensity: typeof weatherData.precipIntensity !== 'undefined' ?
         weatherData.precipIntensity : null,
       precipType: weatherData.precipType || null,
+      sourceActivity: activityId,
       summary: weatherData.summary || null,
       temperature: weatherData.temperature,
       time: weatherData.time,
@@ -78,7 +83,7 @@ async function getTempFromTimestamp(timestamp) {
         weatherData.windGust : null,
     });
   } catch (err) {
-    slackError(116, JSON.stringify(response.json()));
+    slackError(116, JSON.stringify(resJson, null, 2));
     return null;
   }
 
@@ -89,13 +94,12 @@ async function getTempFromTimestamp(timestamp) {
  * Calculate laps below threshold temperature
  *
  * @param {Activity} activity
- * @param {String} activityDateStr ISO string of activity local start time
  * @return {Int}
  */
-async function getColdLapsFromActivity(activity, activityDateStr) {
+async function getColdLapsFromActivity(activity, debug = false) {
   const activityLaps = activity.get('laps');
   const segmentEfforts = activity.get('segment_efforts');
-  const timeOffset = timezoneOffset * -60;
+  const timeOffset = timezoneOffset * 60;
 
   // Get array of timestamps to check
   let lapStartTimestamps = segmentEfforts.map(({ start_date_local }) => {
@@ -108,7 +112,7 @@ async function getColdLapsFromActivity(activity, activityDateStr) {
     const totalMovingTime = segmentEfforts
       .reduce((acc, { moving_time }) => (acc + moving_time), 0);
     const extraLaps = activityLaps - segmentEfforts.length;
-    const avgLapTime = totalMovingTime / segmentEfforts.length;
+    const avgLapTime = Math.floor(totalMovingTime / segmentEfforts.length);
 
     // Each extra lap is 1 average lap earlier than the first segment
     for (let i = 1; i <= extraLaps; i++) {
@@ -117,7 +121,24 @@ async function getColdLapsFromActivity(activity, activityDateStr) {
     }
   }
 
-  lapStartTimestamps.forEach((timestamp) => console.log(getTempFromTimestamp(timestamp)));
+  const startDate = new Date(lapStartTimestamps[0]);
+
+  let coldLaps = 0;
+  for (let i = 0; i < lapStartTimestamps.length; i++) {
+    const temp = await getTempFromTimestamp(lapStartTimestamps[i], activity.get('_id'));
+    if (debug) {
+      console.log(`Lap ${i + 1}: ${temp.toFixed(2)}º ${temp < coldLapsMax ? ' ☃️' : ''}`);
+    }
+    if (temp < coldLapsMax) {
+      coldLaps = coldLaps + 1;
+    }
+  }
+
+  if (debug) {
+    console.log(`${coldLaps} cold lap${coldLaps === 1 ? '' : 's'}`)
+  }
+
+  return coldLaps;
 }
 
 /**

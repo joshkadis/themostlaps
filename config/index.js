@@ -51,4 +51,5 @@ module.exports = {
     lang: 'en',
     units: 'us',
   },
+  coldLapsMax: 40,
 };

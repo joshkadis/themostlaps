@@ -10,6 +10,7 @@ const conditionSchema = new Schema({
   icon: String,
   precipIntensity: Number,
   precipType: String,
+  sourceActivity: { type: Number, required: true },
   summary: String,
   temperature: { type: Number, required: true },
   time: { type: Number, required: true },
