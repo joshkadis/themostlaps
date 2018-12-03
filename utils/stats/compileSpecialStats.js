@@ -1,13 +1,13 @@
 const { stringify } = require('querystring');
 const fetch = require('isomorphic-unfetch');
-const Condition = require('../schema/Condition');
+const Condition = require('../../schema/Condition');
 const {
   timezoneOffset,
   conditionPadding,
   parkCenter,
   darkSkyRequestOpts
-} = require('../config');
-const { slackError } = require('../slackNotifications');
+} = require('../../config');
+const { slackError } = require('../slackNotification');
 
 /**
  * Update athlete special stats data from new activity
