@@ -8,6 +8,7 @@ const {
   darkSkyRequestOpts,
   coldLapsMax,
 } = require('../../config');
+const { isTestUser } = require('../athleteUtils');
 const { slackError } = require('../slackNotification');
 
 /**
@@ -20,9 +21,20 @@ const { slackError } = require('../slackNotification');
  */
 function compileSpecialStats(activity, activityDateStr, stats = {}) {
   const activityLaps = activity.get('laps');
+
+  let activityColdLaps = 0;
+  if (isTestUser(activity.get('athlete_id'))) {
+    try {
+      activityColdLaps = getColdLapsFromActivity(activity);
+    } catch (err) {
+      console.log(err);
+      slackError(114, `getColdLapsFromActivity(${activity.get('_id')}) failed; see server log`);
+    }
+  }
+
   return Object.assign({}, stats, {
     giro2018: compileGiro2018(activityLaps, activityDateStr, stats.giro2018 || 0),
-    cold2019: (stats.cold2019 || 0) + getColdLapsFromActivity(activity),
+    cold2019: (stats.cold2019 || 0) + activityColdLaps,
   });
 }
 
