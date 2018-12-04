@@ -25,7 +25,7 @@ function compileSpecialStats(activity, activityDateStr, stats = {}) {
   let activityColdLaps = 0;
   if (isTestUser(activity.get('athlete_id'))) {
     try {
-      activityColdLaps = getColdLapsFromActivity(activity);
+      activityColdLaps = getColdLapsFromActivity(activity, true);
     } catch (err) {
       console.log(err);
       slackError(114, `getColdLapsFromActivity(${activity.get('_id')}) failed; see server log`);
