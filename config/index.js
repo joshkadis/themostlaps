@@ -47,7 +47,7 @@ module.exports = {
   testAthleteIds: [541773],
   conditionPadding: 150,
   darkSkyRequestOpts: {
-    exclude: 'minutely,hourly,daily,alerts,flags',
+    exclude: 'minutely,hourly,alerts,flags',
     lang: 'en',
     units: 'us',
   },

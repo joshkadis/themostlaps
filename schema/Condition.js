@@ -12,6 +12,8 @@ const conditionSchema = new Schema({
   precipType: String,
   sourceActivity: { type: Number, required: true },
   summary: String,
+  sunriseTime: Number,
+  sunsetTime: Number,
   temperature: { type: Number, required: true },
   time: { type: Number, required: true },
   windSpeed: Number,

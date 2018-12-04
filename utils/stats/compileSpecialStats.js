@@ -64,6 +64,16 @@ async function getTempFromTimestamp(timestamp, activityId) {
   const resJson = await response.json();
   try {
     weatherData = resJson.currently;
+
+    let sunriseTime = null;
+    let sunsetTime = null;
+    try {
+      sunriseTime = resJson.daily.data[0].sunriseTime;
+      sunsetTime = resJson.daily.data[0].sunsetTime;
+    } catch (err) {
+      console.log(err);
+    }
+
     await Condition.create({
       apparentTemperature: typeof weatherData.apparentTemperature !== 'undefined' ?
         weatherData.apparentTemperature : null,
@@ -75,6 +85,8 @@ async function getTempFromTimestamp(timestamp, activityId) {
       precipType: weatherData.precipType || null,
       sourceActivity: activityId,
       summary: weatherData.summary || null,
+      sunriseTime,
+      sunsetTime,
       temperature: weatherData.temperature,
       time: weatherData.time,
       windSpeed: typeof weatherData.windSpeed !== 'undefined' ?
