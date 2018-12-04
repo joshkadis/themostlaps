@@ -126,11 +126,15 @@ async function getColdLapsFromActivity(activity, debug = false) {
   let coldLaps = 0;
   for (let i = 0; i < lapStartTimestamps.length; i++) {
     const temp = await getTempFromTimestamp(lapStartTimestamps[i], activity.get('_id'));
-    if (debug) {
-      console.log(`Lap ${i + 1}: ${temp.toFixed(2)}º ${temp < coldLapsMax ? ' ☃️' : ''}`);
-    }
-    if (temp < coldLapsMax) {
-      coldLaps = coldLaps + 1;
+    if (temp !== null) {
+      if (debug) {
+        console.log(`Lap ${i + 1}: ${temp.toFixed(2)}º ${temp < coldLapsMax ? ' ☃️' : ''}`);
+      }
+      if (temp < coldLapsMax) {
+        coldLaps = coldLaps + 1;
+      }
+    } else if (debug) {
+      console.log(`Lap ${i + 1}: could not find temperature`);
     }
   }
 
