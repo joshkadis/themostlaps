@@ -40,7 +40,7 @@ function compileStatsForActivities(
       acc.single = activityLaps;
     }
 
-    acc.special = compileSpecialStats(activity, startDate, acc.special || {});
+    acc.special = await compileSpecialStats(activity, startDate, acc.special || {});
 
     return acc;
   }, initial);
