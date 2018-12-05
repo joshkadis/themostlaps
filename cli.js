@@ -126,11 +126,12 @@ const argv = require('yargs')
     async (argv) => await callbackRetryWebhooks(argv),
   )
   .command(
-    'coldlaps activity',
+    'coldlaps [startactivity] [--dryrun]',
     false,
     createPositionals(
-      ['activity', { type: 'number' }],
-    ),
+      ['startactivity', { type: 'number', default: 1978706706 }],
+      ['dryrun', { type: 'boolean', default: false }],
+  ),
     async (argv) => await callbackColdLaps(argv),
   )
   .argv;

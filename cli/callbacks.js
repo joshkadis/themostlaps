@@ -13,7 +13,7 @@ const sendEmailNotification = require('./sendEmailNotification')
 const { refreshAthletes } = require('../utils/scheduleNightlyRefresh');
 const { listAliases } = require('../config/email');
 const { testAthleteIds } = require('../config');
-const { getColdLapsFromActivity } = require('../utils/stats/compileSpecialStats');
+const calculateColdLaps = require('./calculateColdLaps');
 
 /**
  * Prompt for admin code then connect and run command
@@ -193,19 +193,10 @@ const callbackRetryWebhooks = async ({ startdate, dryrun }) => {
   );
 };
 
-const callbackColdLaps = async ({ activity }) => {
+const callbackColdLaps = async ({ startactivity, dryrun }) => {
   await doCommand(
-    false,
-    async () => {
-      const activityDoc = await Activity.findById(activity);
-      if (!activityDoc) {
-        console.log(`Activity id ${activity} not found in database`);
-        process.exit(0);
-      }
-
-      await getColdLapsFromActivity(activityDoc, true);
-      process.exit(0);
-    },
+    `Enter admin code to recalculate Cold Laps for all athletes.`,
+    () => calculateColdLaps(startactivity, dryrun),
   );
 };
 
