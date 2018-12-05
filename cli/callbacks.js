@@ -6,26 +6,29 @@ const deleteUserActivities = require('./deleteUserActivities');
 const retryWebhooks = require('./retryWebhooks');
 const { daysAgoTimestamp } = require('./utils');
 const Athlete = require('../schema/Athlete');
+const Activity = require('../schema/Activity');
 const refreshAthlete = require('../utils/refreshAthlete');
 const getActivityInfo = require('./getActivityInfo');
 const sendEmailNotification = require('./sendEmailNotification')
-const migrateUser = require('./migrateUser');
 const { refreshAthletes } = require('../utils/scheduleNightlyRefresh');
 const { listAliases } = require('../config/email');
 const { testAthleteIds } = require('../config');
+const { getColdLapsFromActivity } = require('../utils/stats/compileSpecialStats');
 
 /**
  * Prompt for admin code then connect and run command
  *
- * @param {String} prompt
+ * @param {String|false} prompt Prompt text or false to skip
  * @param {Func} callback Callback function is responsible for exiting the process
  * @param {Bool} Return true or exit if invalid admin code
  */
 async function doCommand(prompt, callback) {
-  const code = await promptly.prompt(prompt, { silent: true });
-  if (code !== process.env.ADMIN_CODE) {
-    console.log('Invalid admin code.');
-    process.exit(0);
+  if (prompt) {
+    const code = await promptly.prompt(prompt, { silent: true });
+    if (code !== process.env.ADMIN_CODE) {
+      console.log('Invalid admin code.');
+      process.exit(0);
+    }
   }
 
   mongoose.connect(process.env.MONGODB_URI);
@@ -190,10 +193,19 @@ const callbackRetryWebhooks = async ({ startdate, dryrun }) => {
   );
 };
 
-const callbackMigrateUser = async ({ user, force }) => {
+const callbackColdLaps = async ({ activity }) => {
   await doCommand(
-    `Enter admin code to migrate user ${user} to GraphQL API.`,
-    () => migrateUser(user, force),
+    false,
+    async () => {
+      const activityDoc = await Activity.findById(activity);
+      if (!activityDoc) {
+        console.log(`Activity id ${activity} not found in database`);
+        process.exit(0);
+      }
+
+      await getColdLapsFromActivity(activityDoc, true);
+      process.exit(0);
+    },
   );
 };
 
@@ -207,5 +219,5 @@ module.exports = {
   callbackRefreshBatch,
   callbackUpdateSubscriptions,
   callbackRetryWebhooks,
-  callbackMigrateUser,
+  callbackColdLaps,
 };
