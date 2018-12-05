@@ -52,6 +52,7 @@ module.exports = {
     units: 'us',
   },
   coldLapsPoints: {
+    startTimestamp: 1542844800,
     tempPoints: [
       [40, 1],
       [35, 1.5],
