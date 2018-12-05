@@ -29,23 +29,20 @@ test('compileGiro2018()', () => {
     .toBe(37);
 });
 
-// @todo Rewrite with first param as Document instead of Integer
-// test('compileSpecialStats()', async () => {
-//   let expected;
-//
-//   // OK year and month but day too early
-//   expected = await compileSpecialStats(4, '2018-05-01T08:41:36Z', {});
-//   expect(expected).toEqual({ giro2018: 0});
-//
-//   // Date OK, merge into object
-//   expected = await compileSpecialStats(4, '2018-05-04T08:41:36Z', { test: 'string' });
-//   expect(expected).toEqual({ giro2018: 4, test: 'string' });
-//
-//   // After end of race
-//   expected = await compileSpecialStats(4, '2018-05-29T08:41:36Z', {});
-//   expect(expected).toEqual({ giro2018: 0});
-//
-//   // Update total and merge
-//   expected = await compileSpecialStats(4, '2018-05-10T08:41:36Z', { giro2018: 9, test: 'string' });
-//   expect(expected).toEqual({ test: 'string', giro2018: 13});
-// });
+test('compileSpecialStats()', () => {
+  // OK year and month but day too early
+  expect(compileSpecialStats(4, '2018-05-01T08:41:36Z', {}))
+    .toEqual({ giro2018: 0});
+
+  // Date OK, merge into object
+  expect(compileSpecialStats(4, '2018-05-04T08:41:36Z', { test: 'string' }))
+    .toEqual({ giro2018: 4, test: 'string' });
+
+  // After end of race
+  expect(compileSpecialStats(4, '2018-05-29T08:41:36Z', {}))
+    .toEqual({ giro2018: 0});
+
+  // Update total and merge
+  expect(compileSpecialStats(4, '2018-05-10T08:41:36Z', { giro2018: 9, test: 'string' }))
+    .toEqual({ test: 'string', giro2018: 13});
+});

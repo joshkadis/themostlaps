@@ -111,7 +111,7 @@ async function refreshAthleteFromActivity(athleteId, activityId, shouldUpdateDb 
   }
 
   // Update athlete stats
-  const stats = await compileStatsForActivities([savedDoc], athleteDoc.toJSON().stats);
+  const stats = compileStatsForActivities([savedDoc], athleteDoc.toJSON().stats);
   console.log(`Added ${stats.allTime - athleteDoc.get('stats.allTime')} to stats.allTime`);
 
   // Update user stats and last_updated
