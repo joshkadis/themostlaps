@@ -25,7 +25,7 @@ async function compileSpecialStats(activity, activityDateStr, stats = {}) {
   let activityColdLaps = 0;
   if (isTestUser(activity.get('athlete_id'))) {
     try {
-      activityColdLaps = await getColdLapsFromActivity(activity);
+      activityColdLaps = await getColdLapsFromActivity(activity, true);
       activity.set('coldLapPoints', activityColdLaps);
       await activity.save();
     } catch (err) {
