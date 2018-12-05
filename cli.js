@@ -9,7 +9,6 @@ const {
   callbackRefreshBatch,
   callbackUpdateSubscriptions,
   callbackRetryWebhooks,
-  callbackMigrateUser,
 } = require ('./cli/callbacks');
 
 function createPositionals(...args) {
@@ -124,17 +123,5 @@ const argv = require('yargs')
       ['dryrun', { type: 'boolean', default: false }],
     ),
     async (argv) => await callbackRetryWebhooks(argv),
-  )
-  /**
-   * Migrate a user to PostgreSQL/GraphQL API Server
-   */
-  .command(
-    'migrate user [--force]',
-    false,
-    createPositionals(
-      ['user', { type: 'number' }],
-      ['force', { type: 'boolean', default: false }]
-    ),
-    async (argv) => await callbackMigrateUser(argv),
   )
   .argv;
