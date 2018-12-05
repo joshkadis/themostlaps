@@ -16,6 +16,7 @@ const activitySchema = new Schema({
   segment_efforts: [SegmentEffort],
   source: String,
   start_date_local: String,
+  coldLapPoints: Number,
 });
 
 const Activity = mongoose.model('Activity', activitySchema);

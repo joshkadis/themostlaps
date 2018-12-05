@@ -9,6 +9,7 @@ const {
   callbackRefreshBatch,
   callbackUpdateSubscriptions,
   callbackRetryWebhooks,
+  callbackColdLaps,
 } = require ('./cli/callbacks');
 
 function createPositionals(...args) {
@@ -123,5 +124,13 @@ const argv = require('yargs')
       ['dryrun', { type: 'boolean', default: false }],
     ),
     async (argv) => await callbackRetryWebhooks(argv),
+  )
+  .command(
+    'coldlaps activity',
+    false,
+    createPositionals(
+      ['activity', { type: 'number' }],
+    ),
+    async (argv) => await callbackColdLaps(argv),
   )
   .argv;

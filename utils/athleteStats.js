@@ -8,7 +8,7 @@ const { compileSpecialStats } = require('./stats/compileSpecialStats');
  * @param {Object} initial Optional initial stats value
  * @return {Object}
  */
-function compileStatsForActivities(
+async function compileStatsForActivities(
   activities,
   initial = {
     allTime: 0,
@@ -40,7 +40,7 @@ function compileStatsForActivities(
       acc.single = activityLaps;
     }
 
-    acc.special = compileSpecialStats(activityLaps, startDate, acc.special || {});
+    acc.special = await compileSpecialStats(activity, startDate, acc.special || {});
 
     return acc;
   }, initial);

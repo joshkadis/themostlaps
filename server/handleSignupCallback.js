@@ -181,7 +181,7 @@ async function handleSignupCallback(req, res) {
   // Calculate stats and update athlete document
   // Compile and update stats
   try {
-    const stats = compileStatsForActivities(savedActivities || []);
+    const stats = await compileStatsForActivities(savedActivities || []);
     const updated = await updateAthleteStats(athleteDoc, stats);
     sendIngestEmail(updated);
     const successMessage = getSlackSuccessMessage(updated);
