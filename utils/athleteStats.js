@@ -8,7 +8,7 @@ const { compileSpecialStats } = require('./stats/compileSpecialStats');
  * @param {Object} initial Optional initial stats value
  * @return {Object}
  */
-function compileStatsForActivities(
+async function compileStatsForActivities(
   activities,
   initial = {
     allTime: 0,

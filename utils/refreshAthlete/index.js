@@ -110,7 +110,7 @@ module.exports = async (athlete, after = false, verbose = false) => {
   }
 
   // Merge into user document's stats
-  const stats = compileStatsForActivities(filtered, athleteDoc.toJSON().stats);
+  const stats = await compileStatsForActivities(filtered, athleteDoc.toJSON().stats);
   console.log(`Found ${stats.allTime - athleteDoc.get('stats.allTime')} new laps`);
 
   // Update user stats and last_updated
