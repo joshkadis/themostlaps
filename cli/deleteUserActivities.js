@@ -48,7 +48,7 @@ module.exports = async (user, after) => {
   }
 
   // Recalculate stats and update the user
-  const stats = compileStatsForActivities(savedActivities);
+  const stats = await compileStatsForActivities(savedActivities);
   await updateAthleteStats(athlete, stats);
   console.log(`Updated stats for ${savedActivities.length} activities. New total is ${stats.allTime}`);
   process.exit(0);
