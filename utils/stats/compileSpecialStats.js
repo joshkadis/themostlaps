@@ -6,7 +6,7 @@ const {
   conditionPadding,
   parkCenter,
   darkSkyRequestOpts,
-  coldLapsMax,
+  coldLapsPoints,
 } = require('../../config');
 const { isTestUser } = require('../athleteUtils');
 const { slackError } = require('../slackNotification');
@@ -19,13 +19,15 @@ const { slackError } = require('../slackNotification');
  * @param {Object} stats Existing stats, may be empty object
  * @return {Object} Updated stats object
  */
-function compileSpecialStats(activity, activityDateStr, stats = {}) {
+async function compileSpecialStats(activity, activityDateStr, stats = {}) {
   const activityLaps = activity.get('laps');
 
   let activityColdLaps = 0;
   if (isTestUser(activity.get('athlete_id'))) {
     try {
-      activityColdLaps = getColdLapsFromActivity(activity);
+      activityColdLaps = await getColdLapsFromActivity(activity);
+      activity.set('coldLapPoints', activityColdLaps);
+      await activity.save();
     } catch (err) {
       console.log(err);
       slackError(114, `getColdLapsFromActivity(${activity.get('_id')}) failed; see server log`);
@@ -47,16 +49,16 @@ const darkSkyApiUrl = (timestamp) =>
  *
  * @param {Int} timestamp
  * @param {Int} activityId
- * @return {Int}
+ * @return {Object|null}
  */
-async function getTempFromTimestamp(timestamp, activityId) {
+async function getConditionsForTimestamp(timestamp, activityId) {
   const condition = await Condition.findOne({ time: {
     $gte: (timestamp - conditionPadding),
     $lte: (timestamp + conditionPadding),
   }});
 
   if (condition) {
-    return condition.get('temperature');
+    return condition.toJSON();
   }
 
   // If condition not found in database, query DarkSky API
@@ -86,7 +88,7 @@ async function getTempFromTimestamp(timestamp, activityId) {
       console.log(err);
     }
 
-    await Condition.create({
+    const newCondition = await Condition.create({
       apparentTemperature: typeof weatherData.apparentTemperature !== 'undefined' ?
         weatherData.apparentTemperature : null,
       humidity: typeof weatherData.humidity !== 'undefined' ?
@@ -106,12 +108,42 @@ async function getTempFromTimestamp(timestamp, activityId) {
       windGust: typeof weatherData.windGust !== 'undefined' ?
         weatherData.windGust : null,
     });
+    return newCondition.toJSON();
   } catch (err) {
     slackError(116, JSON.stringify(resJson, null, 2));
     return null;
   }
+}
 
-  return weatherData.temperature;
+/**
+ * Calculate points from conditions object
+ *
+ * @param {Object} conditions
+ * @return {Int}
+ */
+function getColdLapPointsFromConditions(conditions) {
+  let points = 0;
+  const {
+    apparentTemperature = null,
+    precipType = null,
+  } = conditions;
+
+  // Assumes points are in descending order by temp
+  if (apparentTemperature !== null) {
+    const tempPoints = coldLapsPoints.tempPoints.reduce((acc, [_temp, _points]) => {
+      if (apparentTemperature <= _temp) {
+        return _points;
+      }
+      return acc;
+    }, 0);
+    points = points + tempPoints;
+  }
+
+  if (precipType && coldLapsPoints.precipPoints[precipType]) {
+    points = points + coldLapsPoints.precipPoints[precipType];
+  }
+
+  return points;
 }
 
 /**
@@ -149,16 +181,14 @@ async function getColdLapsFromActivity(activity, debug = false) {
 
   let coldLaps = 0;
   for (let i = 0; i < lapStartTimestamps.length; i++) {
-    const temp = await getTempFromTimestamp(lapStartTimestamps[i], activity.get('_id'));
-    if (temp !== null) {
-      if (debug) {
-        console.log(`Lap ${i + 1}: ${temp.toFixed(2)}º ${temp < coldLapsMax ? ' ☃️' : ''}`);
+    const conditions = await getConditionsForTimestamp(lapStartTimestamps[i], activity.get('_id'));
+    if (conditions !== null) {
+      if (debug && conditions.apparentTemperature) {
+        console.log(`Lap ${i + 1}: ${conditions.apparentTemperature.toFixed(2)}º, ${conditions.precipType || 'no precipitation'}`);
       }
-      if (temp < coldLapsMax) {
-        coldLaps = coldLaps + 1;
-      }
+      coldLaps = coldLaps + getColdLapPointsFromConditions(conditions);
     } else if (debug) {
-      console.log(`Lap ${i + 1}: could not find temperature`);
+      console.log(`Lap ${i + 1}: could not find apparentTemperature`);
     }
   }
 

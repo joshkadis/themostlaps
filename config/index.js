@@ -51,5 +51,18 @@ module.exports = {
     lang: 'en',
     units: 'us',
   },
-  coldLapsMax: 40,
+  coldLapsPoints: {
+    tempPoints: [
+      [40, 1],
+      [35, 1.5],
+      [30, 2],
+      [25, 2.5],
+      [10, 3.5],
+    ],
+    precipPoints: {
+      snow: 2.5,
+      rain: 2,
+      sleet: 3,
+    },
+  },
 };
