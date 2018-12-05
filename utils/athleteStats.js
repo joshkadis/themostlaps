@@ -19,7 +19,7 @@ async function compileStatsForActivities(
     return initial;
   }
 
-  return activities.reduce((acc, activity) => {
+  const updatedStats = activities.reduce((acc, activity) => {
     const activityLaps = activity.get('laps');
     const startDate = activity.get('start_date_local');
 
@@ -40,10 +40,19 @@ async function compileStatsForActivities(
       acc.single = activityLaps;
     }
 
-    acc.special = await compileSpecialStats(activity, startDate, acc.special || {});
-
     return acc;
   }, initial);
+
+  // Handle async special stats outside of Array.reduce()
+  let updatedSpecialStats = initial.special ?
+    Object.assign({}, initial.special) : {};
+  for (let i = 0; i < activities.length; i++) {
+    const activity = activities[i];
+    updatedSpecialStats = await compileSpecialStats(activity, startDate, updatedSpecialStats);
+  }
+
+  updatedStats.special = updatedSpecialStats;
+  return updatedStats;
 }
 
 /**
