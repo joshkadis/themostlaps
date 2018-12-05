@@ -48,7 +48,11 @@ async function compileStatsForActivities(
     Object.assign({}, initial.special) : {};
   for (let i = 0; i < activities.length; i++) {
     const activity = activities[i];
-    updatedSpecialStats = await compileSpecialStats(activity, startDate, updatedSpecialStats);
+    updatedSpecialStats = await compileSpecialStats(
+      activity,
+      activity.get('start_date_local'), 
+      updatedSpecialStats
+    );
   }
 
   updatedStats.special = updatedSpecialStats;
