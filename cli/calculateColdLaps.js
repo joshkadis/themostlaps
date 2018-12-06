@@ -52,7 +52,7 @@ async function calculateColdLaps(fromActivity, dryRun) {
       // Set athlete stats
       const athleteDoc = await Athlete.findById(athleteId);
       const athleteStats = athleteDoc.get('stats');
-      const { special: {} } = athleteStats;
+      const { special = {} } = athleteStats;
       special.cold2019 = totalPoints;
       athleteStats.special = special;
       try {
