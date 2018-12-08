@@ -150,6 +150,11 @@ function getColdLapPointsFromConditions(conditions) {
   return points;
 }
 
+function timestampFromLocalDateString(localDateStr) {
+  const theDate = new Date(localDateStr);
+  return (theDate.valueOf() / 1000) + (timezoneOffset * 60);
+}
+
 /**
  * Calculate laps below threshold temperature
  *
@@ -159,16 +164,13 @@ function getColdLapPointsFromConditions(conditions) {
 async function getColdLapsFromActivity(activity, debug = false) {
   const activityLaps = activity.get('laps');
   const segmentEfforts = activity.get('segment_efforts');
-  const timeOffset = timezoneOffset * 60;
 
   // Get array of timestamps to check
-  let lapStartTimestamps = segmentEfforts.map(({ start_date_local }) => {
-    const effortDate = new Date(start_date_local);
-    return (effortDate.valueOf() / 1000) + timeOffset;
-  });
+  let lapStartTimestamps = segmentEfforts.map(({ start_date_local }) =>
+    timestampFromLocalDateString(start_date_local));
 
   // Fudge extra timestamps for any laps not included in segment efforts
-  if (activityLaps > segmentEfforts.length) {
+  if (segmentEfforts.length && activityLaps > segmentEfforts.length) {
     const totalMovingTime = segmentEfforts
       .reduce((acc, { moving_time }) => (acc + moving_time), 0);
     const extraLaps = activityLaps - segmentEfforts.length;
@@ -179,9 +181,11 @@ async function getColdLapsFromActivity(activity, debug = false) {
       const extraLapTimestamp = lapStartTimestamps[0] - avgLapTime;
       lapStartTimestamps = [extraLapTimestamp, ...lapStartTimestamps];
     }
+  } else if (activityLaps > 0) {
+    // Handle if activity has laps but no segment efforts
+    lapStartTimestamps = Array(activityLaps)
+      .fill(timestampFromLocalDateString(activity.get('start_date_local')));
   }
-
-  const startDate = new Date(lapStartTimestamps[0]);
 
   let coldLaps = 0;
   for (let i = 0; i < lapStartTimestamps.length; i++) {

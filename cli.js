@@ -11,6 +11,7 @@ const {
   callbackRetryWebhooks,
   callbackColdLaps,
 } = require ('./cli/callbacks');
+const { coldLapsPoints: { startActivity } } = require('./config');
 
 function createPositionals(...args) {
   return (yargs) => {
@@ -126,11 +127,13 @@ const argv = require('yargs')
     async (argv) => await callbackRetryWebhooks(argv),
   )
   .command(
-    'coldlaps activity',
+    'coldlaps [startactivity] [--dryrun]',
     false,
     createPositionals(
-      ['activity', { type: 'number' }],
-    ),
-    async (argv) => await callbackColdLaps(argv),
+      ['startactivity', { type: 'number', default: startActivity }],
+      ['dryrun', { type: 'boolean', default: false }],
+  ),
+    (argv) => console.log(argv)
+    // async (argv) => await callbackColdLaps(argv),
   )
   .argv;

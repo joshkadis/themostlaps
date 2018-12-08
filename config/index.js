@@ -43,7 +43,7 @@ module.exports = {
   notificationTypes: ['monthly'],
   notificationActions: ['sub', 'unsub'],
   notificationSubscribeAction: 'sub',
-  timezoneOffset: 240, // NYC offset from UTC in mintues
+  timezoneOffset: 240, // Minutes from local time *to* UTC
   testAthleteIds: [541773],
   conditionPadding: 150,
   darkSkyRequestOpts: {
@@ -52,6 +52,7 @@ module.exports = {
     units: 'us',
   },
   coldLapsPoints: {
+    startActivity: 1978706706,
     startTimestamp: 1542844800,
     tempPoints: [
       [40, 1],
