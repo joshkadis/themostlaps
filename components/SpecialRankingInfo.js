@@ -5,9 +5,10 @@ const {
   tempPoints,
   precipPoints,
 } = coldLapsPoints;
+import * as styles from './Layout.css';
 
 const SpecialRankingInfo = ({ filter }) => (
-  <div style={{ textAlign: 'center' }}>
+  <div className={styles['special-ranking-info__container']}>
     {filter === 'giro2018'&& (
       <Fragment>
         <p className="big">
@@ -19,15 +20,15 @@ const SpecialRankingInfo = ({ filter }) => (
     )}
     {filter === 'cold2019' && (
       <Fragment>
-        <h4>Brave the elements this winter!</h4>
-        <div style={{ display: 'flex', textAlign: 'initial', justifyContent: 'center' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', marginRight: '1.5em' }}>
+        <h4>Brave the elements. Ride laps. Get points.</h4>
+        <div className={styles['special-ranking-info__cold2019--outer']}>
+          <div className={styles['special-ranking-info__cold2019--inner']}>
             <span><em>Points per lap</em></span>
             {tempPoints.map(([ temp, value ]) =>
               <span style={{ textAlign: 'right' }}>&lt;{temp}°: {value}</span>
             )}
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <div className={styles['special-ranking-info__cold2019--inner']}>
             <span><em>Bonus points!</em></span>
             {Object.keys(precipPoints).map((condition) =>
               <span style={{ textTransform: 'capitalize' }}>{condition}: +{precipPoints[condition]}</span>

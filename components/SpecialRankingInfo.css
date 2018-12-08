@@ -1,0 +1,18 @@
+.special-ranking-info__container {
+  text-align: center;
+}
+
+.special-ranking-info__cold2019--outer {
+  display: flex;
+  justify-content: center;
+  text-align: initial;
+}
+
+.special-ranking-info__cold2019--inner {
+  display: flex;
+  flex-direction: column;
+
+  &:first-of-type {
+    margin-right: 1.5em;
+  }
+}
