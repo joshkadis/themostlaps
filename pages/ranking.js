@@ -16,10 +16,23 @@ import {
 import * as styles from '../components/Layout.css';
 import { rankingPerPage } from '../api/apiConfig';
 
+function getSpecialRankingName(filter) {
+  switch (filter) {
+    case 'giro2018':
+      return 'Giro di Laps';
+
+    case 'cold2019':
+      return'❄️ Cold Laps ❄️';
+
+    default:
+      return 'Special Ranking';
+  }
+}
+
 function getRankingName({ type, year, month, filter = false }) {
   switch (type) {
     case 'special':
-      return filter === 'giro2018' ? 'Giro di Laps' : 'Special Ranking';
+      return getSpecialRankingName(filter);
 
     case 'single':
       return 'Single Ride Ranking';
@@ -93,7 +106,8 @@ class Ranking extends Component {
       >
         <h1>{getRankingName(query)}</h1>
 
-        {'giro2018' === query.filter && <SpecialRankingInfo />}
+        {'special' === query.type &&
+          <SpecialRankingInfo filter={query.filter}/>}
 
         <RankingSelector current={query} />
         {!!this.state.ranking.length ? (
@@ -109,6 +123,7 @@ class Ranking extends Component {
                     lastname={athlete.lastname}
                     img={athlete.profile}
                     value={this.getValue(stats, statsKey)}
+                    unit={query.filter === 'cold2019' ? 'point' : 'lap'}
                   />
                 ))}
               </tbody>
@@ -144,7 +159,7 @@ function getAPIQuery(pageQuery = {}) {
     return {
       type: pageQuery.type,
       params: {
-        filter: 'giro2018',
+        filter: pageQuery.filter,
       },
     };
   }

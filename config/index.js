@@ -62,8 +62,8 @@ module.exports = {
       [10, 3.5],
     ],
     precipPoints: {
-      snow: 2.5,
       rain: 2,
+      snow: 2.5,
       sleet: 3,
     },
   },
