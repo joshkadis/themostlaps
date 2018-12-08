@@ -127,18 +127,27 @@ class RankingSelector extends Component {
     Router.push(`/ranking?${stringify(this.state)}`, pathname);
   }
 
+  filterPrimaryOptions(year, primaryValue, primaryOptions) {
+    if (year) {
+      return primaryOptions;
+    }
+    return primaryOptions.filter(({ value }) => value !== primaryValue);
+  }
+
   render() {
     const { type, year, month } = this.state;
+    const primaryValue = `${type}${year ? '.' + year : ''}`;
 
     return (
       <div className={styles['ranking-selector__container']}>
+        <span className={styles['ranking-selector__label']}>Other rankings:</span>
         <div className={styles['ranking-selector__container--selects']}>
           <Select
             className={styles['ranking-selector__select']}
             name="primary"
             onChange={this.onChangePrimary}
-            options={primaryOptions}
-            value={`${type}${year ? '.' + year : ''}`}
+            options={this.filterPrimaryOptions(year, primaryValue, primaryOptions)}
+            value={primaryValue}
             clearable={false}
             searchable={false}
             autoBlur={true}
