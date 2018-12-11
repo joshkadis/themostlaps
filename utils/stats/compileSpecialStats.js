@@ -25,7 +25,6 @@ async function compileSpecialStats(activity, activityDateStr, stats = {}) {
   let activityColdLaps = 0;
   const startDateObj = new Date(activityDateStr);
   if (
-    isTestUser(activity.get('athlete_id')) &&
     startDateObj.valueOf() > (1000 * coldLapsPoints.startTimestamp)
   ) {
     try {
