@@ -11,7 +11,8 @@ const RankingRow = ({
   firstname,
   lastname,
   img,
-  value ,
+  value,
+  unit,
 }) => (
   <tr className="big">
     <td className={classNames(
@@ -31,9 +32,13 @@ const RankingRow = ({
         </a>
       </Link>
     </td>
-    <td>{value.toLocaleString(locale)} lap{value === 1 ? '' : 's'}</td>
+    <td>{value.toLocaleString(locale)} {unit}{value === 1 ? '' : 's'}</td>
   </tr>
 );
+
+RankingRow.defaultProps = {
+  unit: 'lap',
+};
 
 RankingRow.propTypes = {
   athleteId: PropTypes.number.isRequired,
@@ -42,6 +47,7 @@ RankingRow.propTypes = {
   lastname: PropTypes.string.isRequired,
   img: PropTypes.string.isRequired,
   value: PropTypes.number.isRequired,
+  unit: PropTypes.string
 };
 
 export default RankingRow;

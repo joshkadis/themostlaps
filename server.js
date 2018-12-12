@@ -36,10 +36,10 @@ app.prepare()
     /**
      * Next.js routing
      */
-    server.get(/^\/ranking\/giro2018$/, (req, res) => {
+    server.get(/^\/ranking\/(giro2018|cold2019)$/, (req, res) => {
       app.render(req, res, '/ranking', Object.assign({...req.query}, {
         type: 'special',
-        filter: 'giro2018',
+        filter: req.params[0],
       }));
     });
 
