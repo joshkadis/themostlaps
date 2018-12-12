@@ -11,8 +11,8 @@ async function getTotalPointsFromActivities(activities, dryRun) {
     const activityPoints = await getColdLapsFromActivity(activities[i]);
     console.log(`Activity ${activities[i].get('_id')} has ${activityPoints} points`);
     if (!dryRun) {
-      // Set coldLapPoints property of Activity document
-      activities[i].set('coldLapPoints', activityPoints);
+      // Set coldLapsPoints property of Activity document
+      activities[i].set('coldLapsPoints', activityPoints);
       await activities[i].save();
     }
     if (activityPoints) {

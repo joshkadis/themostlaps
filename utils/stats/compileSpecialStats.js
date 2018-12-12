@@ -25,12 +25,11 @@ async function compileSpecialStats(activity, activityDateStr, stats = {}) {
   let activityColdLaps = 0;
   const startDateObj = new Date(activityDateStr);
   if (
-    isTestUser(activity.get('athlete_id')) &&
     startDateObj.valueOf() > (1000 * coldLapsPoints.startTimestamp)
   ) {
     try {
       activityColdLaps = await getColdLapsFromActivity(activity, true);
-      activity.set('coldLapPoints', activityColdLaps);
+      activity.set('coldLapsPoints', activityColdLaps);
       await activity.save();
     } catch (err) {
       console.log(err);
@@ -125,7 +124,7 @@ async function getConditionsForTimestamp(timestamp, activityId) {
  * @param {Object} conditions
  * @return {Int}
  */
-function getColdLapPointsFromConditions(conditions) {
+function getColdLapsPointsFromConditions(conditions) {
   let points = 0;
   const {
     apparentTemperature = null,
@@ -194,14 +193,14 @@ async function getColdLapsFromActivity(activity, debug = false) {
       if (debug && conditions.apparentTemperature) {
         console.log(`Lap ${i + 1}: ${conditions.apparentTemperature.toFixed(2)}º, ${conditions.precipType || 'no precipitation'}`);
       }
-      coldLaps = coldLaps + getColdLapPointsFromConditions(conditions);
+      coldLaps = coldLaps + getColdLapsPointsFromConditions(conditions);
     } else if (debug) {
       console.log(`Lap ${i + 1}: could not find apparentTemperature`);
     }
   }
 
   if (debug) {
-    console.log(`${coldLaps} cold lap${coldLaps === 1 ? '' : 's'}`)
+    console.log(`${coldLaps} Cold Laps point${coldLaps === 1 ? '' : 's'}`)
   }
 
   return coldLaps;
