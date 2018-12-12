@@ -133,7 +133,6 @@ const argv = require('yargs')
       ['startactivity', { type: 'number', default: startActivity }],
       ['dryrun', { type: 'boolean', default: false }],
   ),
-    (argv) => console.log(argv)
-    // async (argv) => await callbackColdLaps(argv),
+    async (argv) => await callbackColdLaps(argv),
   )
   .argv;
