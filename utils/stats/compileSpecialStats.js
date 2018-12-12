@@ -9,7 +9,7 @@ const {
   coldLapsPoints,
 } = require('../../config');
 const { isTestUser } = require('../athleteUtils');
-const { slackError } = require('../slackNotification');
+const { slackError, slackSuccess } = require('../slackNotification');
 
 /**
  * Update athlete special stats data from new activity
@@ -200,7 +200,14 @@ async function getColdLapsFromActivity(activity, debug = false) {
   }
 
   if (debug) {
-    console.log(`${coldLaps} Cold Laps point${coldLaps === 1 ? '' : 's'}`)
+    console.log(`${coldLaps} Cold Laps point${coldLaps === 1 ? '' : 's'}`);
+  }
+
+  if (coldLaps > 0) {
+    slackSuccess(
+      'Cold Laps recorded!',
+      `Activity ${activity.get('_id')} | ${coldLaps} pts`
+    );
   }
 
   return coldLaps;
