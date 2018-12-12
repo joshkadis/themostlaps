@@ -140,7 +140,6 @@ class RankingSelector extends Component {
 
     return (
       <div className={styles['ranking-selector__container']}>
-        <span className={styles['ranking-selector__label']}>Other rankings:</span>
         <div className={styles['ranking-selector__container--selects']}>
           <Select
             className={styles['ranking-selector__select']}
@@ -151,6 +150,7 @@ class RankingSelector extends Component {
             clearable={false}
             searchable={false}
             autoBlur={true}
+            placeholder="Other rankings"
           />
           {type === 'timePeriod' && (
             <Select
@@ -162,6 +162,7 @@ class RankingSelector extends Component {
               searchable={false}
               autoBlur={true}
               ref={(el) => this.secondarySelect = el}
+              placeholder="Select a month"
             />
           )}
         </div>
