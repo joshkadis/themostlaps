@@ -138,6 +138,7 @@ class RankingSelector extends Component {
     const { type, year, month } = this.state;
     const primaryValue = `${type}${year ? '.' + year : ''}`;
 
+    // @todo Use a real label instead of placeholder to indicate "Other rankings"
     return (
       <div className={styles['ranking-selector__container']}>
         <div className={styles['ranking-selector__container--selects']}>
