@@ -36,3 +36,14 @@
   margin-right: 20px;
   display: inline-block;
 }
+
+.special-ranking-info__cold2019--notes {
+  display: inline-block;
+  margin: 0 auto;
+  text-align: left;
+  margin-top: 1rem;
+  font-size: .9rem;
+  & li {
+    margin: 0;
+  }
+}

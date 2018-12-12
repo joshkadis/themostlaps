@@ -12,7 +12,7 @@ import * as styles from './Layout.css';
 class SpecialRankingInfo extends Component {
 
   state = {
-    isExpanded: true,
+    isExpanded: false,
   };
 
   toggleExpand = (evt) => {
@@ -64,7 +64,11 @@ class SpecialRankingInfo extends Component {
                 )}
               </div>
             </div>
-            <p class="small" style={{ margin: '1rem 0 0' }}>Stay warm and be safe. <a href="https://darksky.net/poweredby/">Powered by Dark Sky</a>.</p>
+            <ul class={styles['special-ranking-info__cold2019--notes']}>
+              <li>Calculated with "feels like" temperature</li>
+              <li>Includes rides since Thanksgiving 2018</li>
+              <li><a href="https://darksky.net/poweredby/">Powered by Dark Sky</a></li>
+            </ul>
           </Fragment>}
         </Fragment>
       )}
