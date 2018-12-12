@@ -6,12 +6,14 @@ export default () => (
     style={{ textAlign: 'center' }}
   >
     <h4>
-      🇮🇹 Check out the <Link
-        href="/ranking?type=special&filter=giro2018"
-        as="/ranking/giro2018"
+      Check out the new ranking...
+      <br />
+      ❄️ <Link
+        href="/ranking?type=special&filter=cold2019"
+        as="/ranking/cold2019"
       >
-        <a>Giro di Laps</a>
-      </Link>! 🇮🇹
+        <a>Cold Laps</a>
+      </Link>! ❄️
     </h4>
   </div>
 );
