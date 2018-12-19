@@ -6,6 +6,7 @@ const Athlete = require('../schema/Athlete');
  * @return {Object} Stats object, except for 'single'
  */
 async function getTotals() {
+  // Include deauthorzed athletes in aggregate totals
   const athletes = await Athlete.find({}, 'stats');
 
   const data = athletes.reduce((acc, { stats }) => {
