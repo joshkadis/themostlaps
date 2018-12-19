@@ -13,7 +13,7 @@ async function refreshAthleteProfile(athlete) {
     athlete;
 
   if (!athleteDoc) {
-    console.log(`Could find athlete ${athlete} in db`);
+    console.log(`Could not find athlete ${athlete} in db`);
     return null;
   }
 
