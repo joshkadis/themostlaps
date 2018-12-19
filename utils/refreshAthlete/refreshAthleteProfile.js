@@ -13,7 +13,12 @@ async function refreshAthleteProfile(athlete) {
     athlete;
 
   if (!athleteDoc) {
-    console.log(`Could not refresh athlete ${athlete}`);
+    console.log(`Could find athlete ${athlete} in db`);
+    return null;
+  }
+
+  if (athleteDoc.get('status') === 'deauthorized') {
+    console.log(`Athlete ${athlete} is deauthorized`);
     return null;
   }
 
