@@ -57,8 +57,10 @@ app.prepare()
       const athleteId = parseInt(req.params[0], 10);
       let athleteExists = true;
       if (!isNaN(athleteId)) {
-        athleteExists = await Athlete.findById(athleteId);
-        athleteExists = !!athleteExists;
+        athleteDoc = await Athlete.findById(athleteId);
+        if (!athleteDoc || athleteDoc.get('status') === 'deauthorized') {
+          athleteExists = false;
+        }
       } else {
         athleteExists = false;
       }
