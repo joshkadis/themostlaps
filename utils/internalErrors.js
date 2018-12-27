@@ -42,6 +42,15 @@ module.exports = (code = 0, data = '') => {
     case 110:
       return 'Webhook payload error';
 
+    case 114:
+      return 'Failed to calculate Cold Laps';
+
+    case 115:
+      return 'Dark Sky API request error';
+
+    case 116:
+      return 'Dark Sky API malformed data';
+
     default:
       return 'An error occurred.';
   }

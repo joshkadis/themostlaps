@@ -8,7 +8,7 @@ const { compileSpecialStats } = require('./stats/compileSpecialStats');
  * @param {Object} initial Optional initial stats value
  * @return {Object}
  */
-function compileStatsForActivities(
+async function compileStatsForActivities(
   activities,
   initial = {
     allTime: 0,
@@ -19,7 +19,7 @@ function compileStatsForActivities(
     return initial;
   }
 
-  return activities.reduce((acc, activity) => {
+  const updatedStats = activities.reduce((acc, activity) => {
     const activityLaps = activity.get('laps');
     const startDate = activity.get('start_date_local');
 
@@ -40,10 +40,23 @@ function compileStatsForActivities(
       acc.single = activityLaps;
     }
 
-    acc.special = compileSpecialStats(activityLaps, startDate, acc.special || {});
-
     return acc;
   }, initial);
+
+  // Handle async special stats outside of Array.reduce()
+  let updatedSpecialStats = initial.special ?
+    Object.assign({}, initial.special) : {};
+  for (let i = 0; i < activities.length; i++) {
+    const activity = activities[i];
+    updatedSpecialStats = await compileSpecialStats(
+      activity,
+      activity.get('start_date_local'), 
+      updatedSpecialStats
+    );
+  }
+
+  updatedStats.special = updatedSpecialStats;
+  return updatedStats;
 }
 
 /**

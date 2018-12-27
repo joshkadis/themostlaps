@@ -127,9 +127,18 @@ class RankingSelector extends Component {
     Router.push(`/ranking?${stringify(this.state)}`, pathname);
   }
 
+  filterPrimaryOptions(year, primaryValue, primaryOptions) {
+    if (year) {
+      return primaryOptions;
+    }
+    return primaryOptions.filter(({ value }) => value !== primaryValue);
+  }
+
   render() {
     const { type, year, month } = this.state;
+    const primaryValue = `${type}${year ? '.' + year : ''}`;
 
+    // @todo Use a real label instead of placeholder to indicate "Other rankings"
     return (
       <div className={styles['ranking-selector__container']}>
         <div className={styles['ranking-selector__container--selects']}>
@@ -137,11 +146,12 @@ class RankingSelector extends Component {
             className={styles['ranking-selector__select']}
             name="primary"
             onChange={this.onChangePrimary}
-            options={primaryOptions}
-            value={`${type}${year ? '.' + year : ''}`}
+            options={this.filterPrimaryOptions(year, primaryValue, primaryOptions)}
+            value={primaryValue}
             clearable={false}
             searchable={false}
             autoBlur={true}
+            placeholder="Other rankings"
           />
           {type === 'timePeriod' && (
             <Select
@@ -153,6 +163,7 @@ class RankingSelector extends Component {
               searchable={false}
               autoBlur={true}
               ref={(el) => this.secondarySelect = el}
+              placeholder="Select a month"
             />
           )}
         </div>

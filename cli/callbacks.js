@@ -6,26 +6,29 @@ const deleteUserActivities = require('./deleteUserActivities');
 const retryWebhooks = require('./retryWebhooks');
 const { daysAgoTimestamp } = require('./utils');
 const Athlete = require('../schema/Athlete');
+const Activity = require('../schema/Activity');
 const refreshAthlete = require('../utils/refreshAthlete');
 const getActivityInfo = require('./getActivityInfo');
 const sendEmailNotification = require('./sendEmailNotification')
-const migrateUser = require('./migrateUser');
 const { refreshAthletes } = require('../utils/scheduleNightlyRefresh');
 const { listAliases } = require('../config/email');
 const { testAthleteIds } = require('../config');
+const calculateColdLaps = require('./calculateColdLaps');
 
 /**
  * Prompt for admin code then connect and run command
  *
- * @param {String} prompt
+ * @param {String|false} prompt Prompt text or false to skip
  * @param {Func} callback Callback function is responsible for exiting the process
  * @param {Bool} Return true or exit if invalid admin code
  */
 async function doCommand(prompt, callback) {
-  const code = await promptly.prompt(prompt, { silent: true });
-  if (code !== process.env.ADMIN_CODE) {
-    console.log('Invalid admin code.');
-    process.exit(0);
+  if (prompt) {
+    const code = await promptly.prompt(prompt, { silent: true });
+    if (code !== process.env.ADMIN_CODE) {
+      console.log('Invalid admin code.');
+      process.exit(0);
+    }
   }
 
   mongoose.connect(process.env.MONGODB_URI);
@@ -197,6 +200,13 @@ const callbackMigrateUser = async ({ type, user, force }) => {
   );
 };
 
+const callbackColdLaps = async ({ startactivity, dryrun }) => {
+  await doCommand(
+    `Enter admin code to recalculate Cold Laps for all athletes.`,
+    () => calculateColdLaps(startactivity, dryrun),
+  );
+};
+
 module.exports = {
   callbackDeleteUser,
   callbackDeleteUserActivities,
@@ -207,5 +217,5 @@ module.exports = {
   callbackRefreshBatch,
   callbackUpdateSubscriptions,
   callbackRetryWebhooks,
-  callbackMigrateUser,
+  callbackColdLaps,
 };

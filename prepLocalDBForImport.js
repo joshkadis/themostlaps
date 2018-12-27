@@ -6,3 +6,4 @@ db.copyDatabase('themostlaps', `themostlaps_backup_${Date.now()}`);
 use themostlaps;
 db.getCollection('athletes').remove({});
 db.getCollection('activities').remove({});
+db.getCollection('conditions').remove({});
