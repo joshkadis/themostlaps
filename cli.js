@@ -137,7 +137,6 @@ const argv = require('yargs')
     async (argv) => await callbackMigrateUser(argv),
   )
   .command(
-    'coldlaps [startactivity] [--dryrun]',
     'coldlaps [startactivity] [--dry-run]',
     false,
     createPositionals(
