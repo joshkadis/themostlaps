@@ -145,4 +145,13 @@ const argv = require('yargs')
     ),
     async (argv) => await callbackColdLaps(argv),
   )
+  .command(
+    'coldlaps [startactivity] [--dryrun]',
+    false,
+    createPositionals(
+      ['startactivity', { type: 'number', default: startActivity }],
+      ['dryrun', { type: 'boolean', default: false }],
+    ),
+    async (argv) => await callbackColdLaps(argv),
+  )
   .argv;

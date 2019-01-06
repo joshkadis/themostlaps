@@ -89,7 +89,10 @@ async function getRanking(rankingType = null, query) {
   const skip = limit * page;
 
   const ranking = await Athlete.find(
-    { [statsKey]: { $gt: 0 } },
+    {
+      [statsKey]: { $gt: 0 },
+      status: { $ne: 'deauthorized' },
+    },
     defaultAthleteFields.join(' ').replace('stats', statsKey),
     {
       limit,

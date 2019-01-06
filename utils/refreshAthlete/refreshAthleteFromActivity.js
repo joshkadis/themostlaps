@@ -79,6 +79,11 @@ async function refreshAthleteFromActivity(athleteId, activityId, shouldUpdateDb 
     return 0;
   }
 
+  if (athleteDoc.get('status') === 'deauthorized') {
+    console.log(`Athlete id ${athleteId} deauthorized the app`);
+    return 0;
+  }
+
   const activityExists = await Activity.findById(activityId);
   if (activityExists) {
     console.log(`Activity id ${activityId} already exists in database`);

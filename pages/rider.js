@@ -201,7 +201,7 @@ class Rider extends Component {
     } = this.props;
 
     // Athlete not found, would have returned a 404 if server-rendered
-    if (!Object.keys(athlete).length) {
+    if (!Object.keys(athlete).length || status === 'deauthorized') {
       return <Layout
         pathname={pathname}
         query={query}
