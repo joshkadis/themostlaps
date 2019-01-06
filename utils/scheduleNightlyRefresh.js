@@ -16,7 +16,7 @@ async function refreshAthletes(shouldRefreshActivities = false, findArgs = [{}])
   for (let i = 0; i < athletes.length; i++) {
     const athlete = athletes[i];
     const updatedAthlete = await refreshAthleteProfile(athlete);
-    if (shouldRefreshActivities) {
+    if (updatedAthlete && shouldRefreshActivities) {
       await refreshAthleteActivities(
         updatedAthlete,
         false,

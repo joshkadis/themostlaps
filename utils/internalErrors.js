@@ -15,6 +15,9 @@ module.exports = (code = 0, data = '') => {
     case 40:
       return 'Authentication failed, please try again later 🙅';
 
+    case 44:
+      return 'Attempted API call for unknown athlete';
+
     case 45:
       return 'Strava API response status error';
 
