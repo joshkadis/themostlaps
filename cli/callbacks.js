@@ -150,7 +150,8 @@ const callbackRefreshBatch = async ({ limit, skip, activities }) => {
   );
 };
 
-const callbackUpdateSubscriptions = async ({ dryrun }) => {
+const callbackUpdateSubscriptions = async (argv) => {
+  const dryRun = argv.dryRun || arv.dryrun;
   await doCommand(
     `Enter admin code to update user subscription statuses`,
     async () => {
@@ -175,7 +176,7 @@ const callbackUpdateSubscriptions = async ({ dryrun }) => {
 
         result[`${shouldBeSubscribed ? 's' : 'notS'}ubscribed`]++;
 
-        if (!dryrun) {
+        if (!dryRun) {
           await athleteDoc.save();
         }
       }
@@ -186,17 +187,19 @@ const callbackUpdateSubscriptions = async ({ dryrun }) => {
   );
 };
 
-const callbackRetryWebhooks = async ({ startdate, dryrun }) => {
+const callbackRetryWebhooks = async (argv) => {
+  const dryRun = argv.dryRun || arv.dryrun;
   await doCommand(
     `Enter admin code to reimport failed activities since ${startdate}.`,
-    () => retryWebhooks(startdate, dryrun),
+    () => retryWebhooks(argv.startdate, dryRun),
   );
 };
 
-const callbackColdLaps = async ({ startactivity, dryrun }) => {
+const callbackColdLaps = async (argv) => {
+  const dryRun = argv.dryRun || arv.dryrun;
   await doCommand(
     `Enter admin code to recalculate Cold Laps for all athletes.`,
-    () => calculateColdLaps(startactivity, dryrun),
+    () => calculateColdLaps(argv.startactivity, dryRun),
   );
 };
 

@@ -110,29 +110,29 @@ const argv = require('yargs')
    * Process batch of athletes w/ simulated nightly refresh
    */
   .command(
-    'updatesubscriptions [--dryrun]',
+    'updatesubscriptions [--dry-run]',
     false,
     createPositionals(
-      ['dryrun', { type: 'boolean', default: false }],
+      ['dry-run', { type: 'boolean', default: false }],
     ),
     async (argv) => await callbackUpdateSubscriptions(argv),
   )
   .command(
-    'retrywebhooks startdate [--dryrun]',
+    'retrywebhooks startdate [--dry-run]',
     false,
     createPositionals(
       ['startdate', { type: 'number' }],
-      ['dryrun', { type: 'boolean', default: false }],
+      ['dry-run', { type: 'boolean', default: false }],
     ),
     async (argv) => await callbackRetryWebhooks(argv),
   )
   .command(
-    'coldlaps [startactivity] [--dryrun]',
+    'coldlaps [startactivity] [--dry-run]',
     false,
     createPositionals(
       ['startactivity', { type: 'number', default: startActivity }],
-      ['dryrun', { type: 'boolean', default: false }],
-  ),
+      ['dry-run', { type: 'boolean', default: false }],
+    ),
     async (argv) => await callbackColdLaps(argv),
   )
   .argv;
