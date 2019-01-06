@@ -91,7 +91,7 @@ async function getRanking(rankingType = null, query) {
   const ranking = await Athlete.find(
     {
       [statsKey]: { $gt: 0 },
-      status: { $not: /deauthorized/ },
+      status: { $ne: 'deauthorized' },
     },
     defaultAthleteFields.join(' ').replace('stats', statsKey),
     {

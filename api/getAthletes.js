@@ -35,7 +35,7 @@ async function getAthletes(idsString = '', fields = defaultAthleteFields) {
   const athletes = await Athlete.find(
     {
       _id: { $in: athleteIds },
-      status: { $not: /deauthorized/ },
+      status: { $ne: 'deauthorized' },
     },
     fields.join(' ')
   );

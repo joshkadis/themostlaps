@@ -8,7 +8,7 @@ const Athlete = require('../schema/Athlete');
  */
 async function getSearchUsers(complete = true) {
   const athletes = await Athlete.find(
-    { status: { $not: /deauthorized/ } }, 
+    { status: { $ne: 'deauthorized' } }, 
     '_id athlete.firstname athlete.lastname'
   );
   const options = athletes.map(({ _id, athlete }) => ({
