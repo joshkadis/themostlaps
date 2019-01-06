@@ -14,7 +14,7 @@ const { refreshAthletes } = require('../utils/scheduleNightlyRefresh');
 const { listAliases } = require('../config/email');
 const { testAthleteIds } = require('../config');
 const calculateColdLaps = require('./calculateColdLaps');
-const migrateUser = require('./migrateUser');
+const migrateType = require('./migrateType');
 
 /**
  * Prompt for admin code then connect and run command
@@ -196,10 +196,10 @@ const callbackRetryWebhooks = async (argv) => {
   );
 };
 
-const callbackMigrateUser = async ({ type, user, force }) => {
+const callbackMigrate = async ({ type, user, force }) => {
   await doCommand(
     `Enter admin code to migrate user ${user} to GraphQL API.`,
-    () => migrateUser(type, user, force),
+    () => migrateType(type, user, force),
   );
 };
 
@@ -222,5 +222,5 @@ module.exports = {
   callbackUpdateSubscriptions,
   callbackRetryWebhooks,
   callbackColdLaps,
-  callbackMigrateUser,
+  callbackMigrate,
 };

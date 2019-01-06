@@ -10,7 +10,7 @@ const {
   callbackUpdateSubscriptions,
   callbackRetryWebhooks,
   callbackColdLaps,
-  callbackMigrateUser,
+  callbackMigrate,
 } = require ('./cli/callbacks');
 const { coldLapsPoints: { startActivity } } = require('./config');
 
@@ -128,14 +128,14 @@ const argv = require('yargs')
     async (argv) => await callbackRetryWebhooks(argv),
   )
   .command(
-    'migrate type user [--force]',
+    'migrate type [user] [--force]',
     false,
     createPositionals(
       ['type', { type: 'string', default: 'athlete' }],
       ['user', { type: 'number' }],
       ['force', { type: 'boolean', default: false }]
     ),
-    async (argv) => await callbackMigrateUser(argv),
+    async (argv) => await callbackMigrate(argv),
   )
   .command(
     'coldlaps [startactivity] [--dry-run]',

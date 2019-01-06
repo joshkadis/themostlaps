@@ -1,7 +1,7 @@
 const migrateAthleteData = require('../migration/types/athlete');
 const migrateAthleteStats = require('../migration/types/stats');
 
-function migrateUser(type, user, force) {
+function migrateType(type, user, force) {
   switch (type) {
     case 'athlete':
       migrateAthleteData(user, force);
@@ -19,4 +19,4 @@ function migrateUser(type, user, force) {
   }
 }
 
-module.exports = migrateUser;
+module.exports = migrateType;
