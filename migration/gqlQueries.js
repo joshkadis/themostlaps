@@ -11,4 +11,15 @@ async function gqlQuery(query, variables = {}) {
   }
 }
 
-module.exports = gqlQuery;
+async function getGqlAthlete(id, fields) {
+  const query = await gqlQuery(`query {
+    athlete(where: {strava_id: ${id}})
+      ${fields}
+  }`);
+  return query.athlete;
+}
+
+module.exports = {
+  gqlQuery,
+  getGqlAthlete,
+};

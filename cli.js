@@ -10,6 +10,7 @@ const {
   callbackUpdateSubscriptions,
   callbackRetryWebhooks,
   callbackColdLaps,
+  callbackMigrateUser,
 } = require ('./cli/callbacks');
 const { coldLapsPoints: { startActivity } } = require('./config');
 

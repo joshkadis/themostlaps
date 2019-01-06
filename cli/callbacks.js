@@ -14,6 +14,7 @@ const { refreshAthletes } = require('../utils/scheduleNightlyRefresh');
 const { listAliases } = require('../config/email');
 const { testAthleteIds } = require('../config');
 const calculateColdLaps = require('./calculateColdLaps');
+const migrateUser = require('./migrateUser');
 
 /**
  * Prompt for admin code then connect and run command
@@ -221,4 +222,5 @@ module.exports = {
   callbackUpdateSubscriptions,
   callbackRetryWebhooks,
   callbackColdLaps,
+  callbackMigrateUser,
 };
