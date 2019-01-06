@@ -16,6 +16,7 @@ function migrateType(type, user, force) {
 
     case TYPES[2]:
       migrateConditions(force);
+      break;
 
     default:
       console.log(`Migration type must be one of: ${TYPES.join(', ')}`);
