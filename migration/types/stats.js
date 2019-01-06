@@ -1,6 +1,5 @@
 const {
   gqlQuery,
-  getGqlAthlete,
 } = require('../gqlQueries');
 const { getAthleteDoc } = require('../helpers');
 
