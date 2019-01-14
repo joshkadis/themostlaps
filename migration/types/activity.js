@@ -1,11 +1,19 @@
+const prettier = require('prettier');
 const {
   gqlQuery,
   getGqlActivity,
 } = require('../gqlQueries');
+
 const {
-  getAthleteDoc,
+  getActivityDoc,
   checkIfExists,
 } = require('../helpers');
+
+const {
+  getActivityQueryData,
+  getActivityStatsQueriesData,
+  getSegmentEffortsQueriesData,
+} = require('./activityQueries');
 
 async function migrateActivityData(migrate_id, force) {
   await checkIfExists(
@@ -13,7 +21,7 @@ async function migrateActivityData(migrate_id, force) {
     (migrate_id) => getGqlActivity(migrate_id, '{ strava_id }'),
     force,
     `mutation {
-      deleteActivity(where: { athlete: { strava_id: ${migrate_id} } }) {
+      deleteActivity(where: { strava_id: ${migrate_id} }) {
           strava_id
       }
     }`,
@@ -21,8 +29,39 @@ async function migrateActivityData(migrate_id, force) {
     'Activity'
   );
 
-  console.log(`ready to migrate Activity ${migrate_id}`);
+  const activityDoc = await getActivityDoc(migrate_id);
+  const activityJson = activityDoc.toJSON();
+  const activityStatsData = getActivityStatsQueriesData(activityJson);
+  const segmentEffortsData = getSegmentEffortsQueriesData(activityJson);
+  const activityQueryData = getActivityQueryData(
+    activityJson,
+    activityStatsData,
+    segmentEffortsData
+  );
+
+  const mutation = `mutation {
+    createActivity(
+      data: ${activityQueryData}
+    ) {
+      strava_id
+      stats {
+        type
+      }
+      segment_efforts {
+        strava_id
+      }
+    }
+  }`
+
+  console.log(prettier.format(mutation, { parser: 'graphql' }));
   process.exit(0);
+
+  // mutation to create Activity
+  const activityCreated = await gqlQuery(mutation);
+
+  // mutations to create ActivityStats
+
+  // mutations to create SegmentEfforts
 }
 
 module.exports = migrateActivityData;
