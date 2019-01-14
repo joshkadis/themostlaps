@@ -196,10 +196,10 @@ const callbackRetryWebhooks = async (argv) => {
   );
 };
 
-const callbackMigrate = async ({ type, user, force }) => {
+const callbackMigrate = async ({ type, strava_id, force }) => {
   await doCommand(
-    `Enter admin code to migrate user ${user} to GraphQL API.`,
-    () => migrateType(type, user, force),
+    `Enter admin code to migrate ${type} ${strava_id} to Prisma.`,
+    () => migrateType(type, strava_id, force),
   );
 };
 
