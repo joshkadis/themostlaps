@@ -1,21 +1,27 @@
 const migrateAthleteData = require('../migration/types/athlete');
 const migrateAthleteStats = require('../migration/types/stats');
 const migrateConditions = require('../migration/types/conditions');
+const migrateActivityData = require('../migration/types/activity');
 
-const TYPES = ['athlete', 'stats', 'conditions'];
+const TYPES = ['athlete', 'stats', 'conditions', 'activity'];
 
-function migrateType(type, user, force) {
+function migrateType(type, strava_id, force) {
   switch (type) {
+
     case TYPES[0]:
-      migrateAthleteData(user, force);
+      migrateAthleteData(strava_id, force);
       break;
 
     case TYPES[1]:
-      migrateAthleteStats(user, force);
+      migrateAthleteStats(strava_id, force);
       break;
 
     case TYPES[2]:
       migrateConditions(force);
+      break;
+
+    case TYPES[3]:
+      migrateActivityData(strava_id, force);
       break;
 
     default:

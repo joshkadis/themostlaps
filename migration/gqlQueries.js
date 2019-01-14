@@ -19,7 +19,18 @@ async function getGqlAthlete(id, fields) {
   return query.athlete;
 }
 
+async function getGqlActivity(id, fields) {
+  const query = await gqlQuery(`query {
+  activity(
+    where: { strava_id: ${id} }
+  )
+    ${fields}
+}`);
+  return query.athlete;
+}
+
 module.exports = {
   gqlQuery,
   getGqlAthlete,
+  getGqlActivity,
 };

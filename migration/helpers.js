@@ -1,9 +1,24 @@
 const Athlete = require('../schema/Athlete');
+const Activity = require('../schema/Activity')
+const {
+  gqlQuery,
+  getGqlActivity,
+  getGqlAthlete,
+} = require('./gqlQueries');
 
 async function getAthleteDoc(id) {
   const doc = await Athlete.findById(id);
   if (!doc) {
-    console.log(`User ${id} was not found in MongoDB`);
+    console.log(`Athlete ${id} was not found in MongoDB`);
+    process.exit(0);
+  }
+  return doc;
+}
+
+async function getActivityDoc(id) {
+  const doc = await Activity.findById(id);
+  if (!doc) {
+    console.log(`Activity ${id} was not found in MongoDB`);
     process.exit(0);
   }
   return doc;
@@ -62,6 +77,7 @@ async function checkIfExists(
 
 module.exports = {
   getAthleteDoc,
+  getActivityDoc,
   processBatches,
   checkIfExists,
 };
