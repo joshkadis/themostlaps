@@ -37,7 +37,31 @@ async function processBatches(
   }
 }
 
+async function checkIfExists(
+  stravaId,
+  getGqlNode,
+  shouldForce,
+  deletionQuery,
+  deletionResponseKey,
+  typeName,
+) {
+  const gqlNode = await getGqlNode(stravaId);
+  if (gqlNode) {
+    if (shouldForce) {
+      const gqlNodeDeleted = await gqlQuery(deletionQuery);
+      if (!gqlNodeDeleted[deletionResponseKey]) {
+        console.error(`mutation ${deletionResponseKey} failed`);
+        process.exit(1);
+      }
+    } else {
+      console.log(`${typeName} ${stravaId} already exists on Prisma server. Use --force flag to overwrite.`)
+      process.exit(0);
+    }
+  }
+}
+
 module.exports = {
   getAthleteDoc,
   processBatches,
+  checkIfExists,
 };
