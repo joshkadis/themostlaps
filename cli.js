@@ -128,11 +128,11 @@ const argv = require('yargs')
     async (argv) => await callbackRetryWebhooks(argv),
   )
   .command(
-    'migrate type [user] [--force]',
+    'migrate type strava_id [--force]',
     false,
     createPositionals(
-      ['type', { type: 'string', default: 'athlete' }],
-      ['user', { type: 'number' }],
+      ['type', { type: 'string' }],
+      ['strava_id', { type: 'number' }],
       ['force', { type: 'boolean', default: false }]
     ),
     async (argv) => await callbackMigrate(argv),
