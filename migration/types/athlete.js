@@ -24,7 +24,7 @@ function reformatAthleteSchema(oldSchema) {
   const lastRefreshed = new Date(oldSchema.last_refreshed * 1000);
 
   try {
-    newAthlete = `{
+    const newAthlete = `{
       access_token: "${oldSchema.access_token}"
       email: "${oldSchema.athlete.email || ''}"
       firstname: "${oldSchema.athlete.firstname}"
@@ -67,7 +67,7 @@ async function migrateAthleteData(migrate_id, force) {
   let athleteCreated;
   athleteCreated = await gqlQuery(`mutation {
     createAthlete(
-      data: ${newAthlete}
+      data: ${reformattedAthlete}
     ) {
       strava_id
       firstname
@@ -78,7 +78,7 @@ async function migrateAthleteData(migrate_id, force) {
 
   if (!athleteCreated.createAthlete) {
     console.log('GraphQL createAthlete failed');
-    console.log(newAthlete);
+    console.log(reformattedAthlete);
     process.exit(1);
   }
 
