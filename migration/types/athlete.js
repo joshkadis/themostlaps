@@ -1,9 +1,11 @@
-const Athlete = require('../../schema/Athlete');
 const {
   gqlQuery,
   getGqlAthlete,
 } = require('../gqlQueries');
-const { getAthleteDoc } = require('../helpers');
+const {
+  getAthleteDoc,
+  checkIfExists,
+} = require('../helpers');
 
 function reformatAthleteSchema(oldSchema) {
   // rough validation check;
@@ -54,7 +56,7 @@ async function migrateAthleteData(migrate_id, force) {
     'Athlete'
   );
 
-  const athleteDoc = await getAthleteDoc(user);
+  const athleteDoc = await getAthleteDoc(migrate_id);
   const reformattedAthlete = reformatAthleteSchema(athleteDoc.toJSON());
   if (!reformattedAthlete) {
     console.log('Could not reformat athlete data');
