@@ -40,24 +40,19 @@ function reformatAthleteSchema(oldSchema) {
   }
 }
 
-async function migrateAthleteData(user, force) {
-  const gqlAthlete = await getGqlAthlete(user, '{ strava_id }');
-  if (gqlAthlete) {
-    if (force) {
-      const gqlUserDeleted = await gqlQuery(`mutation {
-        deleteAthlete(where: {strava_id: ${user}}) {
-            strava_id
-        }
-      }`);
-      if (!gqlUserDeleted.deleteAthlete) {
-        console.error('Failed to delete user via GraphQL API');
-        process.exit(1);
+async function migrateAthleteData(migrate_id, force) {
+  await checkIfExists(
+    migrate_id,
+    (migrate_id) => getGqlAthlete(migrate_id, '{ strava_id }'),
+    force,
+    `mutation {
+      deleteAthlete(where: {strava_id: ${migrate_id}}) {
+          strava_id
       }
-    } else {
-      console.log(`User ${user} already exists on GraphQL server. Use --force flag to overwrite.`)
-      process.exit(0);
-    }
-  }
+    }`,
+    'deleteAthlete',
+    'Athlete'
+  );
 
   const athleteDoc = await getAthleteDoc(user);
   const reformattedAthlete = reformatAthleteSchema(athleteDoc.toJSON());
