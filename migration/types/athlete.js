@@ -19,12 +19,14 @@ function reformatAthleteSchema(oldSchema) {
     notifications = true;
   }
 
+  const lastRefreshed = new Date(oldSchema.last_refreshed * 1000);
+
   try {
     newAthlete = `{
       access_token: "${oldSchema.access_token}"
       email: "${oldSchema.athlete.email || ''}"
       firstname: "${oldSchema.athlete.firstname}"
-      last_refreshed: ${Math.floor(Date.now() / 1000)}
+      last_refreshed: "${lastRefreshed.toISOString()}"
       lastname: "${oldSchema.athlete.lastname}"
       migrated_athlete: true
       notifications: ${notifications ? 'true' : 'false'}
