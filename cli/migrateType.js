@@ -1,5 +1,5 @@
 const migrateAthleteData = require('../migration/types/athlete');
-const migrateAthleteStats = require('../migration/types/stats');
+const { migrateAthleteStats } = require('../migration/types/stats');
 const migrateConditions = require('../migration/types/conditions');
 const migrateActivityData = require('../migration/types/activity');
 

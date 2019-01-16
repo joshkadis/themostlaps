@@ -1,3 +1,4 @@
+const prettier = require('prettier');
 const {
   gqlQuery,
   getGqlAthlete,
@@ -6,6 +7,7 @@ const {
   getAthleteDoc,
   checkIfExists,
 } = require('../helpers');
+const { getStatCreateArgs } = require('./stats');
 
 function reformatAthleteSchema(oldSchema) {
   // rough validation check;
@@ -35,9 +37,11 @@ function reformatAthleteSchema(oldSchema) {
       photo: "${oldSchema.athlete.profile}"
       status: "${oldSchema.status || 'migration'}"
       strava_id: ${oldSchema._id}
+      stats: {[${getStatCreateArgs(null, oldSchema.stats, false).join(',')}]}
     }`;
     return newAthlete;
   } catch (err) {
+    console.log(err);
     return null;
   }
 }
@@ -64,8 +68,7 @@ async function migrateAthleteData(migrate_id, force) {
     process.exit(1);
   }
 
-  let athleteCreated;
-  athleteCreated = await gqlQuery(`mutation {
+  const athleteCreated = await gqlQuery(`mutation {
     createAthlete(
       data: ${reformattedAthlete}
     ) {

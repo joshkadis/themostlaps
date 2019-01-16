@@ -7,11 +7,14 @@ const { getAthleteDoc } = require('../helpers');
 /**
   Get gql query for a specific stat
 **/
-const getStatCreateData = (id, key, type, value) => `{
-  athlete: {
-    connect: {
-      strava_id: ${id}
-    }
+const getStatCreateData = (userId, key, type, value, shouldConnectAthlete = true) =>
+`{
+  ${shouldConnectAthlete ?
+    `athlete: {
+      connect: {
+        strava_id: ${userId}
+      }
+    }` : ''
   }
   key: "${key}"
   type: "${type}"
@@ -25,38 +28,39 @@ const getStatCreateData = (id, key, type, value) => `{
   @todo: Monthly totals could be replaced by query ActivityLaps where
   Activity is within a date range then cached somewhere
 **/
-function getStatCreateArgs(user, stats) {
+function getStatCreateArgs(userId, stats, shouldConnectAthlete = true) {
   // use reduce instead of map because special contains giro2018 and cold2019
   return Object.keys(stats).reduce((acc, key) => {
     const stat = stats[key];
+    let statData;
+
     if (key === 'special') {
       if (stat.giro2018) {
-        acc = [...acc, getStatCreateData(user, 'giro2018', 'special', stat.giro2018)];
+        statData = getStatCreateData(userId, 'giro2018', 'special', stat.giro2018, shouldConnectAthlete);
       }
       if (stat.cold2019) {
-        acc = [...acc, getStatCreateData(user, 'cold2019', 'special', stat.cold2019)];
+        statData = getStatCreateData(userId, 'cold2019', 'special', stat.cold2019, shouldConnectAthlete);
+      }
+    } else if (key === 'allTime' || key === 'single') {
+      statData = getStatCreateData(userId, key, key, stat, shouldConnectAthlete);
+    } else {
+      const dateParts = key.split('_').filter(part => part.length);
+      // don't migrate year since we'll get that by adding up months
+      if (dateParts.length === 2) {
+        statData = getStatCreateData(userId, dateParts.join('_'), 'month', stat, shouldConnectAthlete);
       }
     }
 
-    // Handle all-time and single-ride totals
-    if (key === 'allTime' || key === 'single') {
-      acc = [...acc, getStatCreateData(user, key, key, stat)];
-    }
-
-    const dateParts = key.split('_').filter(part => part.length);
-    if (dateParts.length === 2) {
-      acc = [...acc, getStatCreateData(user, dateParts.join('_'), 'month', stat)];
-    }
-    return acc;
+    return [...acc, statData];
   }, []);
 }
 
 /**
-  Migrate all stats for Athlete by idea
+  Migrate all stats for Athlete by id
 **/
-async function migrateAthleteStats(user, force) {
+async function migrateAthleteStats(userId, force) {
   // Check that user's athlete data has been migrated
-  const gqlAthlete = await getGqlAthlete(user,`{
+  const gqlAthlete = await getGqlAthlete(userId,`{
     strava_id
       stats {
         key
@@ -71,7 +75,7 @@ async function migrateAthleteStats(user, force) {
   // Overwrite existing stats if --force flag is present
   if (gqlAthlete.stats && gqlAthlete.stats.length >= 1) {
     if (!force) {
-      console.log(`User ${user} stats have already been migrated. Use --force flag to overwrite`);
+      console.log(`User ${userId} stats have already been migrated. Use --force flag to overwrite`);
       process.exit(0);
     }
     const { deleteManyStats } = await gqlQuery(`mutation {
@@ -80,14 +84,14 @@ async function migrateAthleteStats(user, force) {
       }
     }`);
     if (!deleteManyStats.count) {
-      console.error('Failed to delete user stats via GraphQL API');
+      console.error('Failed to delete userId stats via GraphQL API');
       process.exit(1);
     }
   }
 
-  const athleteDoc = await getAthleteDoc(user);
+  const athleteDoc = await getAthleteDoc(userId);
   const stats = athleteDoc.get('stats');
-  const mutationsArgs = getStatCreateArgs(user, stats);
+  const mutationsArgs = getStatCreateArgs(userId, stats, true);
 
   let statsCreated;
   for (statsCreated = 0; statsCreated < mutationsArgs.length; statsCreated++) {
@@ -112,4 +116,7 @@ async function migrateAthleteStats(user, force) {
   process.exit(0);
 }
 
-module.exports = migrateAthleteStats;
+module.exports = {
+  migrateAthleteStats,
+  getStatCreateArgs,
+};
