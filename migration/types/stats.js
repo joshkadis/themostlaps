@@ -32,26 +32,26 @@ function getStatCreateArgs(userId, stats, shouldConnectAthlete = true) {
   // use reduce instead of map because special contains giro2018 and cold2019
   return Object.keys(stats).reduce((acc, key) => {
     const stat = stats[key];
-    let statData;
+    let append = [];
 
     if (key === 'special') {
       if (stat.giro2018) {
-        statData = getStatCreateData(userId, 'giro2018', 'special', stat.giro2018, shouldConnectAthlete);
+        append.push(getStatCreateData(userId, 'giro2018', 'special', stat.giro2018, shouldConnectAthlete));
       }
       if (stat.cold2019) {
-        statData = getStatCreateData(userId, 'cold2019', 'special', stat.cold2019, shouldConnectAthlete);
+        append.push(getStatCreateData(userId, 'cold2019', 'special', stat.cold2019, shouldConnectAthlete));
       }
     } else if (key === 'allTime' || key === 'single') {
-      statData = getStatCreateData(userId, key, key, stat, shouldConnectAthlete);
+      append.push(getStatCreateData(userId, key, key, stat, shouldConnectAthlete));
     } else {
       const dateParts = key.split('_').filter(part => part.length);
       // don't migrate year since we'll get that by adding up months
       if (dateParts.length === 2) {
-        statData = getStatCreateData(userId, dateParts.join('_'), 'month', stat, shouldConnectAthlete);
+        append.push(getStatCreateData(userId, dateParts.join('_'), 'month', stat, shouldConnectAthlete));
       }
     }
 
-    return [...acc, statData];
+    return [...acc, ...append];
   }, []);
 }
 
