@@ -37,23 +37,27 @@ function getActivityQueryData({
   _id,
   start_date_local,
 }, activityStatsData, segmentEffortsData) {
-
-  return `{
-    athlete: {
-      connect: {
-        strava_id: ${athlete_id}
+  try {
+    return `{
+      athlete: {
+        connect: {
+          strava_id: ${parseInt(athlete_id)}
+        }
       }
-    }
-    source: "${source}"
-    start_date: "${getISODateTimeFromLocal(start_date_local)}"
-    strava_id: ${_id}
-    stats: {
-      create: [${activityStatsData.join(',')}]
-    }
-    segment_efforts: {
-      create: [${segmentEffortsData.join(',')}]
-    }
-  }`;
+      source: "${source}"
+      start_date: "${getISODateTimeFromLocal(start_date_local)}"
+      strava_id: ${parseInt(_id)}
+      stats: {
+        create: [${activityStatsData.join(',')}]
+      }
+      segment_efforts: {
+        create: [${segmentEffortsData.join(',')}]
+      }
+    }`;
+  } catch (err) {
+    console.log(err);
+    process.exit(1);
+  }
 }
 
 function getActivityStatsQueriesData(activityJson) {
@@ -81,7 +85,7 @@ function getSegmentEffortsQueriesData({segment_efforts}) {
       elapsed_time: ${elapsed_time}
       moving_time: ${moving_time}
       start_date: "${getISODateTimeFromLocal(start_date_local)}"
-      strava_id: ${_id}
+      strava_id: ${parseInt(_id)}
     }`;
   })
   .filter((data) => !!data);

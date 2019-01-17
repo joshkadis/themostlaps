@@ -36,7 +36,7 @@ function reformatAthleteSchema(oldSchema) {
       notifications: ${notifications ? 'true' : 'false'}
       photo: "${oldSchema.athlete.profile}"
       status: "${oldSchema.status || 'migration'}"
-      strava_id: ${oldSchema._id}
+      strava_id: ${parseInt(oldSchema._id)}
       stats: {
         create: [${getStatCreateArgs(null, oldSchema.stats, false).join(',')}]
       }
@@ -51,7 +51,7 @@ function reformatAthleteSchema(oldSchema) {
 async function migrateAthleteData(migrate_id, force) {
   await checkIfExists(
     migrate_id,
-    (migrate_id) => getGqlAthlete(migrate_id, '{ strava_id }'),
+    [getGqlAthlete, [migrate_id, '{ strava_id }']],
     force,
     `mutation {
       deleteAthlete(where: {strava_id: ${migrate_id}}) {
@@ -77,7 +77,9 @@ async function migrateAthleteData(migrate_id, force) {
       strava_id
       firstname
       lastname
-      email
+      stats {
+        type
+      }
     }
   }`);
 
@@ -91,9 +93,9 @@ async function migrateAthleteData(migrate_id, force) {
     strava_id,
     firstname,
     lastname,
+    stats,
   } = athleteCreated.createAthlete;
-  console.log(`Created athlete ${strava_id} | ${firstname} ${lastname}`);
-
+  console.log(`Created Athlete ${strava_id} | ${firstname} ${lastname} | ${stats.length} Stats`);
   process.exit(0);
 }
 

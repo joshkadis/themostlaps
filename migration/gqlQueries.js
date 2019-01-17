@@ -6,8 +6,9 @@ async function gqlQuery(query, variables = {}) {
   try {
     return await client.request(query, variables);
   } catch (err) {
-    console.error(JSON.stringify(err, undefined, 2))
-    process.exit(1)
+    console.error(JSON.stringify(err, undefined, 2));
+    console.log(query);
+    process.exit(1);
   }
 }
 
@@ -21,12 +22,10 @@ async function getGqlAthlete(id, fields) {
 
 async function getGqlActivity(id, fields) {
   const query = await gqlQuery(`query {
-  activity(
-    where: { strava_id: ${id} }
-  )
+  activity( where: { strava_id: ${id} } )
     ${fields}
 }`);
-  return query.athlete;
+  return query.activity;
 }
 
 module.exports = {

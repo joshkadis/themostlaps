@@ -54,13 +54,14 @@ async function processBatches(
 
 async function checkIfExists(
   stravaId,
-  getGqlNode,
+  nodeQuery,
   shouldForce,
   deletionQuery,
   deletionResponseKey,
   typeName,
 ) {
-  const gqlNode = await getGqlNode(stravaId);
+  const [getGqlNode, args] = nodeQuery;
+  const gqlNode = await getGqlNode(...args);
   if (gqlNode) {
     if (shouldForce) {
       const gqlNodeDeleted = await gqlQuery(deletionQuery);
