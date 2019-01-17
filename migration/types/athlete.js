@@ -37,7 +37,9 @@ function reformatAthleteSchema(oldSchema) {
       photo: "${oldSchema.athlete.profile}"
       status: "${oldSchema.status || 'migration'}"
       strava_id: ${oldSchema._id}
-      stats: [${getStatCreateArgs(null, oldSchema.stats, false).join(',')}]
+      stats: {
+        create: [${getStatCreateArgs(null, oldSchema.stats, false).join(',')}]
+      }
     }`;
     return newAthlete;
   } catch (err) {
