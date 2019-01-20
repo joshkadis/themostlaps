@@ -10,7 +10,7 @@ const athleteSchema = new Schema({
     firstname: String,
     lastname: String,
     profile: String,
-    email: { type: String, required: true },
+    email: String,
     id: { type: Number, required: true },
   },
   status: { type: String, required: true, default: 'ingesting' },

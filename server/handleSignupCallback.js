@@ -84,7 +84,8 @@ async function handleActivitiesIngestError(
   await athleteDoc.save();
 
   // Welcome...
-  sendIngestEmail(athleteDoc, { error: true });
+  // @note Disabled after Strava API change, Jan 2019
+  // sendIngestEmail(athleteDoc, { error: true });
 }
 
 /**
@@ -183,7 +184,8 @@ async function handleSignupCallback(req, res) {
   try {
     const stats = await compileStatsForActivities(savedActivities || []);
     const updated = await updateAthleteStats(athleteDoc, stats);
-    sendIngestEmail(updated);
+    // @note Disabled after Strava API change, Jan 2019
+    // sendIngestEmail(updated);
     const successMessage = getSlackSuccessMessage(updated);
     console.log(`New signup: ${successMessage}`);
     slackSuccess('New signup!', successMessage);

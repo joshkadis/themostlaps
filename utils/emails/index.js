@@ -83,6 +83,12 @@ async function getMonthlyUpdateContent(dateObj = false) {
  */
 async function sendMonthlyEmail(athleteDoc) {
   const to = athleteDoc.get('athlete.email');
+
+  // @note Added after Strava API change, Jan 2019
+  if (typeof to === 'undefined' || !to) {
+    return;
+  }
+
   const firstname = athleteDoc.get('athlete.firstname');
   const current = new Date();
   const lastMonth = getLastMonth(current);
@@ -158,6 +164,12 @@ async function sendMonthlyListEmail(listAddress) {
  */
 async function sendIngestEmail(athleteDoc) {
   const to = athleteDoc.get('athlete.email');
+
+  // @note Added after Strava API change, Jan 2019
+  if (typeof to === 'undefined' || !to) {
+    return;
+  }
+
   const id = athleteDoc.get('_id');
   const firstname = athleteDoc.get('athlete.firstname');
   const subject = getHTMLEmailTitle('ingest');

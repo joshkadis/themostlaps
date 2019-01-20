@@ -22,12 +22,12 @@ async function refreshAthleteProfile(athlete) {
     return null;
   }
 
+  // @note Removed email after Strava API change, Jan 2019
   try {
     const {
       firstname,
       lastname,
       profile,
-      email,
     } = await fetchStravaAPI(
       '/athlete/',
       athleteDoc.get('access_token')
@@ -41,7 +41,6 @@ async function refreshAthleteProfile(athlete) {
         firstname,
         lastname,
         profile,
-        email,
       },
       last_updated: currentDate.toISOString(),
     });
