@@ -60,8 +60,10 @@ class Welcome extends Component {
           after we've downloaded your laps history from Strava.
         </p>
         <p>
-          Or if you want to go ride some laps, we'll also
-          send you an email when everything is ready.
+          Or if you want to go ride some laps, you can come back later to <br />
+          <Link href={`/rider?athleteId=${id}`} as={`/rider/${id}`}>
+            <a>https://themostlaps.com/rider/{id}</a>
+          </Link>
         </p>
       </div>
     )
