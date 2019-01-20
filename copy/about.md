@@ -34,11 +34,11 @@ Because of performance constraints during your initial setup, we give you the be
 
 #### Where is my profile page?
 
-There's no page on The Most Laps that "knows" if you're logged in. If you want to change your notification settings or unsubscribe from the newsletter, use the links in the emails. To be removed from The Most Laps, [email us](mailto:info@themostlaps.com).
+There's no page on The Most Laps that "knows" if you're logged in, but you can see the public page of your stats at https://themostlaps.com/rider/your-Strava-ID. To be removed from The Most Laps, [email us](mailto:info@themostlaps.com).
 
 #### What personal data is stored?
 
-From your Strava profile, we store your user id, first and last names, a link to your profile photo, and your email address. Unless you subscribe to our [newsletter][4], we will _only_ use your email address for administrative purposes. We'll never share it with anyone.
+From your Strava profile, we store your user id, first and last names, a link to your profile photo, and your email address. (Note: If you signed up after January 15, 2019, we don't have your email address.) Unless you subscribe to our [newsletter][4], we will _only_ use your email address for administrative purposes. We'll never share it with anyone.
 
 We also store, of course, the authentication token used to fetch your rides from the Strava API. However, this is only used "behind the scenes" on our server. It is never exposed to your browser.
 
