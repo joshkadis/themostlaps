@@ -51,13 +51,13 @@ class Welcome extends Component {
   renderIngesting(id) {
     return (
       <div style={{ textAlign: 'center' }}>
-        <h3>We're building your profile!</h3>
+        <h3>We are building your profile!</h3>
         <p>
-          You'll be redirected to{' '}
+          You will be redirected to{' '}
           <Link href={`/rider?athleteId=${id}`} as={`/rider/${id}`}>
             <a>your rider page</a>
           </Link>{' '}
-          after we've downloaded your laps history from Strava.
+          after we have downloaded your laps history from Strava.
         </p>
         <p>
           Or if you want to go ride some laps, you can come back later to <br />
