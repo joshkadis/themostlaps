@@ -79,7 +79,10 @@ const argv = require('yargs')
       ['user', { type: 'number' }],
       ['type', { type: 'string', default: 'monthly' }],
     ),
-    async (argv) => await callbackMailgun(argv),
+    () => {
+      console.log('Mailgun commands deprecated after Strava API change, Jan 2019');
+      process.exit(0);
+    },
   )
   /**
    * Send an email notification via Mailgun
@@ -91,7 +94,10 @@ const argv = require('yargs')
       ['override', { type: 'boolean', default: false }],
       ['testonly', { type: 'boolean', default: false }],
     ),
-    async (argv) => await callbackMailgunAll(argv),
+    () => {
+      console.log('Mailgun commands deprecated after Strava API change, Jan 2019');
+      process.exit(0);
+    },
   )
   /**
    * Process batch of athletes w/ simulated nightly refresh
