@@ -12,7 +12,8 @@ const { testAthleteIds } = require('../config');
  * @return {Object}
  */
 function getAthleteModelFormat({ athlete, access_token, token_type }, shouldSubscribe = true) {
-  const { firstname, lastname, profile, email, id } = athlete;
+  // @note Removed email after Strava API change, Jan 15
+  const { firstname, lastname, profile, id } = athlete;
   const currentDate = new Date();
   return {
     _id: id,
@@ -25,7 +26,6 @@ function getAthleteModelFormat({ athlete, access_token, token_type }, shouldSubs
       firstname,
       lastname,
       profile,
-      email,
       id,
     },
     preferences: {

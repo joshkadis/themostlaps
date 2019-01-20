@@ -16,6 +16,12 @@ async function sendMailgun(msgOpts) {
     return;
   }
 
+  if (!msgOpts.to) {
+    console.log('Attempted sendMail() to user with unknown email');
+    console.log(JSON.stringify(msgOpts, null, 2));
+    return;
+  }
+
   try {
     const result = await mailgun
       .messages()

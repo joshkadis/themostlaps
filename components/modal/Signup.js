@@ -29,14 +29,7 @@ class Signup extends Component {
           />
         </div>
         <p className={styles.subscribeContainer}>
-          <input
-            id="subscribe"
-            name="subscribe"
-            type="checkbox"
-            checked={this.state.subscribeChecked}
-            onChange={this.onChangeSubscribe}
-          />
-          <label htmlFor="subscribe">Subscribe me to monthly updates.</label>
+          {/* Removed subscribe option after Strava API change, Jan 2019 */}
         </p>
         <div style={{ textAlign: 'left' }}>
           <Markdown
