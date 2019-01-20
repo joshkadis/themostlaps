@@ -2,7 +2,7 @@
 
 SECTION 1 - WHAT DO WE DO WITH YOUR INFORMATION?
 
-When you authorize us to access your Strava data, we collect personal information such as your name and email address.
+When you authorize us to access your Strava data, we collect some personal information provided by the Strava API.
 
 Email marketing (if applicable): With your permission, we may send you promotional emails.
 
