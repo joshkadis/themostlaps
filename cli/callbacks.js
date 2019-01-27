@@ -36,6 +36,8 @@ async function doCommand(prompt, callback) {
   db.once('open', callback);
 }
 
+const isDryRun = (argv) => argv.dryRun || argv.dryrun;
+
 const callbackDeleteUser = async ({ user, deauthorize }) => {
   await doCommand(
     `Enter admin code to delete user ${user}.`,
@@ -151,7 +153,6 @@ const callbackRefreshBatch = async ({ limit, skip, activities }) => {
 };
 
 const callbackUpdateSubscriptions = async (argv) => {
-  const dryRun = argv.dryRun || argv.dryrun;
   await doCommand(
     `Enter admin code to update user subscription statuses`,
     async () => {
@@ -176,7 +177,7 @@ const callbackUpdateSubscriptions = async (argv) => {
 
         result[`${shouldBeSubscribed ? 's' : 'notS'}ubscribed`]++;
 
-        if (!dryRun) {
+        if (!isDryRun(argv)) {
           await athleteDoc.save();
         }
       }
@@ -188,18 +189,16 @@ const callbackUpdateSubscriptions = async (argv) => {
 };
 
 const callbackRetryWebhooks = async (argv) => {
-  const dryRun = argv.dryRun || argv.dryrun;
   await doCommand(
     `Enter admin code to reimport failed activities since ${startdate}.`,
-    () => retryWebhooks(argv.startdate, dryRun),
+    () => retryWebhooks(argv.startdate, isDryRun(argv)),
   );
 };
 
 const callbackColdLaps = async (argv) => {
-  const dryRun = argv.dryRun || argv.dryrun;
   await doCommand(
     `Enter admin code to recalculate Cold Laps for all athletes.`,
-    () => calculateColdLaps(argv.startactivity, dryRun),
+    () => calculateColdLaps(argv.startactivity, isDryRun(argv)),
   );
 };
 
@@ -214,4 +213,5 @@ module.exports = {
   callbackUpdateSubscriptions,
   callbackRetryWebhooks,
   callbackColdLaps,
+  callbackMigrateToken,
 };
