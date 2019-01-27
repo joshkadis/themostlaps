@@ -1,1 +1,4 @@
-export default (args) => console.log(args);
+module.exports = (...args) => {
+  console.log(args);
+  process.exit(0);
+};

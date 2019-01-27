@@ -37,7 +37,7 @@ async function doCommand(prompt, callback) {
   db.once('open', callback);
 }
 
-const isDryRun = (argv) => argv.dryRun || argv.dryrun;
+const isDryRun = (argv) => argv.dryRun || argv.dryrun || false;
 
 const callbackDeleteUser = async ({ user, deauthorize }) => {
   await doCommand(
