@@ -151,7 +151,7 @@ const callbackRefreshBatch = async ({ limit, skip, activities }) => {
 };
 
 const callbackUpdateSubscriptions = async (argv) => {
-  const dryRun = argv.dryRun || arv.dryrun;
+  const dryRun = argv.dryRun || argv.dryrun;
   await doCommand(
     `Enter admin code to update user subscription statuses`,
     async () => {
@@ -188,7 +188,7 @@ const callbackUpdateSubscriptions = async (argv) => {
 };
 
 const callbackRetryWebhooks = async (argv) => {
-  const dryRun = argv.dryRun || arv.dryrun;
+  const dryRun = argv.dryRun || argv.dryrun;
   await doCommand(
     `Enter admin code to reimport failed activities since ${startdate}.`,
     () => retryWebhooks(argv.startdate, dryRun),
@@ -196,7 +196,7 @@ const callbackRetryWebhooks = async (argv) => {
 };
 
 const callbackColdLaps = async (argv) => {
-  const dryRun = argv.dryRun || arv.dryrun;
+  const dryRun = argv.dryRun || argv.dryrun;
   await doCommand(
     `Enter admin code to recalculate Cold Laps for all athletes.`,
     () => calculateColdLaps(argv.startactivity, dryRun),
