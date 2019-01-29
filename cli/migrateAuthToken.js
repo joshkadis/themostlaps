@@ -1,4 +1,13 @@
-module.exports = (...args) => {
-  console.log(args);
-  process.exit(0);
+const Athlete = require('../schema/Athlete');
+
+function migrateSingleAthlete(athleteId, isDryRun) {
+    const 
+}
+
+module.exports = async (athleteId = null, migrateAllAthletes = false, isDryRun = false) => {
+  if (athleteId) {
+    await migrateSingleAthlete(athleteId, isDryRun);
+  } else if (migrateAllAthletes) {
+    await migrateAllAthletes(isDryRun);
+  }
 };
