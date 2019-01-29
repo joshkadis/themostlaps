@@ -3,7 +3,7 @@ const { testAthleteIds } = require('../config');
 
 /**
  * Convert API response for athlete to our model's format
- *
+ * @note Use new token refresh logic
  * @param {Object} athlete
  * @param {String} athlete.access_token
  * @param {String} athlete.access_type

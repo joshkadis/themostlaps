@@ -25,6 +25,7 @@ module.exports = async (id, shouldDeauthorize = false) => {
     console.log(`Deleted user ${id}'s activities`);
 
     // Maybe deauthorize Strava API access
+    // @note Use new token refresh logic
     if (shouldDeauthorize) {
       const { status } = await fetch('https://www.strava.com/oauth/deauthorize', {
         method: 'POST',

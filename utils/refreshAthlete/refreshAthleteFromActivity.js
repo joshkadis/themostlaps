@@ -91,6 +91,7 @@ async function refreshAthleteFromActivity(athleteId, activityId, shouldUpdateDb 
   }
 
   // Fetch activity details
+  // @note Use new token refresh logic
   const activity = await fetchActivity(activityId, athleteDoc.get('access_token'));
 
   // Update athlete's last_refreshed timestamp

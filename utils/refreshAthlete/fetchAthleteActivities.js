@@ -35,6 +35,7 @@ async function fetchAllAthleteActivities(
     console.log(`Fetching ${url}`);
   }
 
+  // @note Use new token refresh logic
   const response = await fetch(url, {
     headers: {
       Authorization: `Bearer ${athleteDoc.get('access_token')}`,

@@ -36,7 +36,8 @@ async function exchangeCodeForAthleteInfo(code) {
     }
 
     athlete = await response.json();
-
+    
+    // @note Use new token refresh logic
     if (!athlete || !athlete.access_token) {
       return getErrorResponseObject(30, athlete);
     }

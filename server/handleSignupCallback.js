@@ -129,6 +129,7 @@ async function handleSignupCallback(req, res) {
   // Create athlete record in database or update access_token
   let athleteDoc;
   try {
+    // @note Use new token refresh logic
     const existingAthleteDoc = await Athlete.findById(athleteInfo.athlete.id);
     if (existingAthleteDoc &&
       athleteInfo.access_token !== existingAthleteDoc.get('access_token')

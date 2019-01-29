@@ -112,6 +112,7 @@ function getActivitiesFromEfforts(efforts, source = 'signup') {
  * @return {Array} List of activities for athlete
  */
 async function fetchAthleteHistory(athlete) {
+  // @note Use new token refresh logic
   const lapEfforts = await getLapEffortsHistory(
     athlete.get('access_token'),
     athlete.get('_id')
@@ -173,4 +174,3 @@ module.exports = {
   saveAthleteHistory,
   formatSegmentEffort,
 };
-

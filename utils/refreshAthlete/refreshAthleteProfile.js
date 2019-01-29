@@ -23,6 +23,7 @@ async function refreshAthleteProfile(athlete) {
   }
 
   // @note Removed email after Strava API change, Jan 2019
+  // @note Use new token refresh logic
   try {
     const {
       firstname,

@@ -6,7 +6,7 @@ const Athlete = require('../schema/Athlete');
 
 /**
  * Fetch data from Strava API, throw error if unsuccessful
- *
+ * @note Use new token refresh logic
  * @param {String} endpoint Path to endpoint
  * @param {String} access_token Athlete access token
  * @param {Object} params Any optional params

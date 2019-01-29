@@ -4,12 +4,14 @@ const fetchLapsFromActivities = require('../utils/refreshAthlete/fetchLapsFromAc
 const { getColdLapsFromActivity } = require('../utils/stats/compileSpecialStats');
 
 async function getActivityInfo(userId, activityId) {
+  // @note Use new token refresh logic
   const athleteDoc = await Athlete.findById(userId, 'access_token');
   if (!athleteDoc) {
     console.log('Athete not found');
     process.exit(0);
   }
 
+  // @note Use new token refresh logic
   const activityInfo = await fetchLapsFromActivities(
     [activityId],
     athleteDoc.get('access_token'),
