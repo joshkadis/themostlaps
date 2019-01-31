@@ -35,27 +35,40 @@ async function fetchStravaAPI(endpoint, athleteDoc, params = false) {
   );
 
   if (200 !== response.status) {
-    const athleteDoc = await Athlete.findOne({ access_token });
-    if (!athleteDoc) {
-      slackError(44, { url });
+    let attemptedAthleteId = null;
+    let attemptedAthleteDoc = false;
+
+    if (typeof athleteDoc !== 'string') {
+      attemptedAthleteId = athleteDoc.get('_id');
+      attemptedAthleteDoc = athleteDoc;
+    } else {
+      // If string was passed as athleteDoc param,
+      // make sure it refers to a known athlete in database
+      attemptedAthleteDoc = await Athlete.findOne({ access_token: athleteDoc });
+      if (!attemptedAthleteDoc) {
+        slackError(44, { url });
+        return;
+      } else {
+        attemptedAthleteId = attemptedAthleteDoc.get('_id') ?
+      }
     }
 
-    const athleteId = athleteDoc ? athleteDoc.get('_id') : 0;
-
-    if (athleteDoc && 401 === response.status) {
+    if (attemptedAthleteDoc && attemptedAthleteId && 401 === response.status) {
       // Set athlete status to deauthorized
-      athleteDoc.set('status', 'deauthorized');
-      await athleteDoc.save();
-      console.log(`Athlete ${athleteId} is deauthorized; updated status`);
+      attemptedAthleteDoc.set('status', 'deauthorized');
+      await attemptedAthleteDoc.save();
+
+      slackError(46, { attemptedAthleteId, url });
+      console.log(`Athlete ${attemptedAthleteId} is deauthorized; updated status`);
     } else {
       // Notify for any other API error
       slackError(45, {
-        athleteId,
+        attemptedAthleteId,
         url,
         status: response.status,
       });
     }
-    throw new Error(`Error fetching ${url} for athlete ${athleteId}`);
+    throw new Error(`Error fetching ${url} for athlete ${attemptedAthleteId}`);
   }
 
   return await response.json();

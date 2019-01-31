@@ -21,6 +21,9 @@ module.exports = (code = 0, data = '') => {
     case 45:
       return 'Strava API response status error';
 
+    case 46:
+      return 'Attempted API call for deauthorized athlete; set status to deauthorized';
+
     case 50:
       return 'You only need to sign up once!';
 
