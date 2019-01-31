@@ -1,6 +1,6 @@
 const fetch = require('isomorphic-unfetch');
 const { stringify } = require('querystring');
-const { stravaTokenUrl, tokenExpirationTime } = require('../config');
+const { stravaTokenUrl, tokenExpirationBuffer } = require('../config');
 const { slackError } = require('./slackNotification');
 
 /**
@@ -28,8 +28,9 @@ async function getAccessTokenFromAthleteDoc(athleteDoc, now = null) {
 
   // Return current access token if it hasn't expired
   const currentTime = now || (Date.now() / 1000);
-  const isExpired = currentTime - expires_at < tokenExpirationTime;
-  if (!isExpired) {
+  const canRefreshTime = expires_at - tokenExpirationBuffer;
+  const shouldRefresh = currentTime - canRefreshTime > 0;
+  if (!shouldRefresh) {
     return access_token;
   }
 
