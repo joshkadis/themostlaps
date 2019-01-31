@@ -11,8 +11,10 @@ const { slackError } = require('./slackNotification');
   @param {Integer} now Optional stub for current time in seconds, for unit testing
   @returns {String|Boolean} The access token or false if error
 **/
-async function getAccessToken(athleteDoc, now = null) {
+async function getAccessTokenFromAthleteDoc(athleteDoc, now = null) {
   const tokenObj = athleteDoc.get('migrated_token');
+
+  // Return existing forever token if athlete hasn't been migrated yet
   if (!tokenObj) {
     return athleteDoc.get('access_token');
   }
@@ -24,12 +26,14 @@ async function getAccessToken(athleteDoc, now = null) {
     expires_at,
   } = tokenObj;
 
+  // Return current access token if it hasn't expired
   const currentTime = now || (Date.now() / 1000);
   const isExpired = currentTime - expires_at < tokenExpirationTime;
   if (!isExpired) {
     return access_token;
   }
 
+  // Fetch new access token and refresh token if needed
   const params = {
     client_id: process.env.CLIENT_ID,
     client_secret: process.env.CLIENT_SECRET,
@@ -49,6 +53,15 @@ async function getAccessToken(athleteDoc, now = null) {
     });
     return false
   }
+
+  // Update athlete.migrated_token in database
+  const responseJson = await response.json();
+  athleteDoc.set('migrated_token', Object.assign({}, tokenObj, responseJson));
+  await athleteDoc.save();
+
+  return responseJson.access_token;
 }
 
-module.exports = getAccessToken;
+module.exports = {
+  getAccessTokenFromAthleteDoc,
+};
