@@ -203,13 +203,6 @@ async function getColdLapsFromActivity(activity, debug = false) {
     console.log(`${coldLaps} Cold Laps point${coldLaps === 1 ? '' : 's'}`);
   }
 
-  if (coldLaps > 0) {
-    slackSuccess(
-      'Cold Laps recorded!',
-      `Activity ${activity.get('_id')} | ${coldLaps} pts`
-    );
-  }
-
   return coldLaps;
 }
 
