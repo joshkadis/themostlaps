@@ -54,6 +54,9 @@ module.exports = (code = 0, data = '') => {
     case 116:
       return 'Dark Sky API malformed data';
 
+    case 120:
+      return 'Could not refresh athlete access_token';
+
     default:
       return 'An error occurred.';
   }

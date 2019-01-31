@@ -67,4 +67,6 @@ module.exports = {
       sleet: 3,
     },
   },
+  tokenExpirationTime: 3600,
+  stravaTokenUrl: 'https://www.strava.com/oauth/token',
 };
