@@ -3,16 +3,23 @@ const { stringify } = require('querystring');
 const { apiUrl } = require('../config');
 const { slackError } = require('./slackNotification');
 const Athlete = require('../schema/Athlete');
-
+const { getAccessTokenFromAthleteDoc } = require('./getAccessToken');
 /**
  * Fetch data from Strava API, throw error if unsuccessful
  * @note Use new token refresh logic
  * @param {String} endpoint Path to endpoint
- * @param {String} access_token Athlete access token
+ * @param {Document|String} athleteDoc Athlete document or fallback to forever token string
  * @param {Object} params Any optional params
  * @return {Object} Response data
  */
-async function fetchStravaAPI(endpoint, access_token, params = false) {
+async function fetchStravaAPI(endpoint, athleteDoc, params = false) {
+  let access_token;
+  if (typeof athleteDoc === 'string') {
+    access_token = athleteDoc;
+  } else {
+    access_token = await getAccessTokenFromAthleteDoc(athleteDoc);
+  }
+
   const paramsString = params ? `?${stringify(params)}` : '';
   const url = (apiUrl + endpoint + paramsString);
 
