@@ -18,7 +18,11 @@ module.exports = {
     740668, // E Lake Drive
   ],
   prodDomain: 'themostlaps.com',
-  stravaClientId: 22415,
+  authRequestParams: {
+    client_id: 22415,
+    response_type: 'code',
+    scope: 'read_all,activity:read_all,profile:read_all',
+  },
   breakpointPx: 800,
   refreshSchedule: {
     hour: 8, // GMT

@@ -1,4 +1,7 @@
+import { stringify } from 'query-string';
+import { authRequestParams } from '../../config';
 const getInternalErrorMessage = require('../internalErrors');
+import { getEnvOrigin } from '..envUtils';
 
 /**
  * Get response object for error code
@@ -16,6 +19,16 @@ function getErrorResponseObject(code, errData = null, athlete = false) {
   }
 }
 
+function getStravaAuthRequestUrl(pathname = '/', shouldSubscribe = false) {
+  const params = Object.assign({}, authRequestParams, {
+    redirect_uri: getEnvOrigin() + '/auth-callback',
+    state: pathname + (shouldSubscribe ? '|shouldSubscribe' : ''),
+  });
+
+  return 'https://www.strava.com/oauth/authorize?' + stringify(params);
+}
+
 module.exports = {
   getErrorResponseObject,
+  getStravaAuthRequestUrl,
 };

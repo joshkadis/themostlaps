@@ -1,27 +1,13 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { stringify } from 'query-string';
 import * as styles from './ConnectWithStravaButton.css';
-import { stravaClientId } from '../config';
-import { getEnvOrigin } from '../utils/envUtils';
 import { trackConnectWithStrava } from '../utils/analytics';
-
-function getStravaAuthUrl(pathname = '/', shouldSubscribe = false) {
-  const params = {
-    client_id: stravaClientId,
-    response_type: 'code',
-    scope: 'view_private',
-    redirect_uri: getEnvOrigin() + '/auth-callback',
-    state: pathname + (shouldSubscribe ? '|shouldSubscribe' : ''),
-  };
-
-  return 'https://www.strava.com/oauth/authorize?' + stringify(params);
-}
+import { getStravaAuthRequestUrl } from '../utils/ingest/utils'
 
 const ConnectWithStravaButton = ({ className, pathname, shouldSubscribe }) => (
   <a
     className={className}
-    href={getStravaAuthUrl(pathname, shouldSubscribe)}
+    href={getStravaAuthRequestUrl(pathname, shouldSubscribe)}
     onClick={() => trackConnectWithStrava(shouldSubscribe)}
   >
     <img
