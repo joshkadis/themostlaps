@@ -9,14 +9,14 @@ const { slackError } = require('./slackNotification');
 
   @param {Document} athleteDoc
   @param {Integer} now Optional stub for current time in seconds, for unit testing
-  @returns {String|Boolean} The access token or false if error
+  @returns {Object|Boolean} Object containing access_token or false if error
 **/
 async function getAccessTokenFromAthleteDoc(athleteDoc, now = null) {
   const tokenObj = athleteDoc.get('migrated_token');
 
   // Return existing forever token if athlete hasn't been migrated yet
   if (!tokenObj) {
-    return athleteDoc.get('access_token');
+    return { access_token: athleteDoc.get('access_token') };
   }
 
   const {
@@ -26,12 +26,12 @@ async function getAccessTokenFromAthleteDoc(athleteDoc, now = null) {
     expires_at,
   } = tokenObj;
 
-  // Return current access token if it hasn't expired
-  const currentTime = now || (Date.now() / 1000);
-  const canRefreshTime = expires_at - tokenExpirationBuffer;
+  // Compare times in ms to reduce chance of currentTime === canRefreshTime
+  const currentTime = now ? 1000 * now : Date.now();
+  const canRefreshTime = 1000 * (expires_at + tokenExpirationBuffer);
   const shouldRefresh = currentTime - canRefreshTime > 0;
   if (!shouldRefresh) {
-    return access_token;
+    return tokenObj;
   }
 
   // Fetch new access token and refresh token if needed
@@ -57,10 +57,10 @@ async function getAccessTokenFromAthleteDoc(athleteDoc, now = null) {
 
   // Update athlete.migrated_token in database
   const responseJson = await response.json();
-  athleteDoc.set('migrated_token', Object.assign({}, tokenObj, responseJson));
+  const updatedTokenObj = Object.assign({}, tokenObj, responseJson);
+  athleteDoc.set('migrated_token', updatedTokenObj);
   await athleteDoc.save();
-
-  return responseJson.access_token;
+  return updatedTokenObj;
 }
 
 module.exports = {

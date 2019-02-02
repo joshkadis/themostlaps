@@ -14,10 +14,17 @@ const { getAccessTokenFromAthleteDoc } = require('./getAccessToken');
  */
 async function fetchStravaAPI(endpoint, athleteDoc, params = false) {
   let access_token;
+
   if (typeof athleteDoc === 'string') {
+    // If access_token is passed directly instead of Athlete document
     access_token = athleteDoc;
   } else {
-    access_token = await getAccessTokenFromAthleteDoc(athleteDoc);
+    // Get access_token using `forever token` or new auth logic
+    const tokenObj = await getAccessTokenFromAthleteDoc(athleteDoc);
+    if (!tokenObj || !tokenObj.access_token) {
+      return {};
+    }
+    access_token = tokenObj.access_token;
   }
 
   const paramsString = params ? `?${stringify(params)}` : '';
