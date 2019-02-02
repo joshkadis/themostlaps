@@ -1,6 +1,6 @@
 require('dotenv').config();
 const { getAccessTokenFromAthleteDoc } = require('./getAccessToken');
-const { stravaTokenUrl, tokenExpirationBuffer } = require('../config');
+const { tokenExpirationBuffer } = require('../config');
 
 const EXPIRES_AT = 1000;
 

@@ -1,6 +1,6 @@
 const fetch = require('isomorphic-unfetch');
 const { stringify } = require('querystring');
-const { stravaTokenUrl, tokenExpirationBuffer } = require('../config');
+const { stravaOauthUrl, tokenExpirationBuffer } = require('../config');
 const { slackError } = require('./slackNotification');
 
 /**
@@ -42,7 +42,7 @@ async function getAccessTokenFromAthleteDoc(athleteDoc, now = null) {
     refresh_token,
   };
   const response = await fetch(
-    `${stravaTokenUrl}/?${stringify(params)}`,
+    `${stravaOauthUrl}/token?${stringify(params)}`,
     { method: 'POST' }
   );
 

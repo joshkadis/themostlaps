@@ -68,5 +68,5 @@ module.exports = {
     },
   },
   tokenExpirationBuffer: 3600,
-  stravaTokenUrl: 'https://www.strava.com/oauth/token',
+  stravaOauthUrl: 'https://www.strava.com/oauth',
 };
