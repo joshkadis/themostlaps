@@ -1,11 +1,11 @@
 const { prodDomain } = require('../config');
 
 function _hasWindowOrigin() {
-  return 'undefined' !== typeof window &&
-    window.location &&
-    window.location.origin &&
-    window.location.origin.indexOf &&
-    window.location.origin.indexOf('http') === 0;
+  try {
+    return window.location.origin.indexOf('http') === 0;
+  } catch (err) {
+    return false;
+  }
 };
 
 function isProduction() {
