@@ -1,6 +1,7 @@
 const { stringify } = require('querystring');
 const  exchangeCodeForAthleteInfo = require('../utils/ingest/exchangeCodeForAthleteInfo');
 const Athlete = require('../schema/Athlete');
+const MigratedToken = require('../schema/MigratedToken');
 const { getAthleteModelFormat } = require('../utils/athleteUtils');
 const {
   fetchAthleteHistory,
@@ -14,6 +15,25 @@ const { sendIngestEmail } = require('../utils/emails');
 const { slackSuccess, slackError } = require('../utils/slackNotification');
 const shouldSubscribe = require('../utils/emails/shouldSubscribe');
 const refreshAthlete = require('../utils/refreshAthlete');
+
+async function createMigratedToken(athleteInfo) {
+  const {
+    access_token,
+    refresh_token,
+    token_type,
+    expires_at,
+  } = athleteInfo;
+  const athlete_id = athleteInfo.athlete.id;
+  await MigratedToken.create({
+    athlete_id,
+    migrated_token: {
+      access_token,
+      token_type,
+      refresh_token,
+      expires_at,
+    },
+  });
+}
 
 /**
  * Factory for handling error while creating athlete in db
@@ -151,7 +171,17 @@ async function handleSignupCallback(req, res) {
     console.log(`Saved ${athleteDoc.get('_id')} to database`);
   } catch (err) {
     const errCode = -1 !== err.message.indexOf('duplicate key') ? 50 : 55;
+    console.log(err, athleteInfo);
     handleSignupError(errCode, athleteInfo.athlete || false);
+    return;
+  }
+
+  // Create MigratedToken document
+  try {
+    await createMigratedToken(athleteInfo);
+  } catch (err) {
+    console.log(err);
+    handleSignupError(130, Object.assign({ process: 'handleSignupCallback' }, req.query));
     return;
   }
 

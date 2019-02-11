@@ -5,6 +5,9 @@ const Schema = mongoose.Schema;
 const athleteSchema = new Schema({
   _id: Number,
   access_token: { type: String, required: true, unique: true },
+  refresh_token: { type: String, default: '' },
+  expires_at: { type: Number, default: 0 },
+  did_migrate_token: { type: Boolean, default: false },
   token_type: { type: String, required: true },
   athlete: {
     firstname: String,
