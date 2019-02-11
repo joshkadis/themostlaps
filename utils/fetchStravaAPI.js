@@ -56,7 +56,7 @@ async function fetchStravaAPI(endpoint, athleteDoc, params = false) {
         slackError(44, { url });
         return;
       } else {
-        attemptedAthleteId = attemptedAthleteDoc.get('_id') ?
+        attemptedAthleteId = attemptedAthleteDoc.get('_id');
       }
     }
 
