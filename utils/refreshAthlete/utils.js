@@ -1,12 +1,13 @@
 const fetch = require('isomorphic-unfetch');
 const { getDistance } = require('geolib');
 const {
-  apiUrl,
   minDistance,
   allowedRadius,
   parkCenter,
   lapSegmentId,
 } = require('../../config');
+const { getDocFromMaybeToken } = require('../athleteUtils');
+const fetchStravaAPI = require('../fetchStravaAPI');
 const { formatSegmentEffort } = require('../athleteHistory');
 const calculateLapsFromSegmentEfforts = require('./calculateLapsFromSegmentEfforts');
 const { slackError } = require('../slackNotification');
@@ -37,28 +38,33 @@ function distFromParkCenter(latlng = null) {
  * Fetch single activity from Strava API
  *
  * @param {Number} activityId
- * @param {String} token
- * @return {Object}
+ * @param {String|Document} tokenOrDoc access_token or Athlete document
+ * @return {Object|false}
  */
-async function fetchActivity(activityId, token, includeAllEfforts = true) {
-  const url = `${apiUrl}/activities/${activityId}${includeAllEfforts ? '?include_all_efforts=true' : ''}`;
-  const response = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+async function fetchActivity(activityId, tokenOrDoc, includeAllEfforts = true) {
+  const athleteDoc = await getDocFromMaybeToken(tokenOrDoc);
+  if (typeof athleteDoc === 'undefined' || !athleteDoc) {
+    return false;
+  }
 
-  if (200 !== response.status) {
+  const params = includeAllEfforts ? { include_all_efforts: true } : false;
+
+  const response = await fetchStravaAPI(
+    `/activities/${activityId}`,
+    athleteDoc,
+    params
+  );
+
+  if (typeof response === 'undefined' || !response) {
     console.log(`Error fetching activity ${activityId}`)
     slackError(45, {
       activityId,
       status: response.status,
     });
-    return allActivities;
+    return false;
   }
 
-  const activity = await response.json();
-  return activity;
+  return response;
 }
 
 /**
