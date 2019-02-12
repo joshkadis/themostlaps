@@ -3,48 +3,49 @@ const querystring = require('querystring');
 const { apiUrl, lapSegmentId, addMakeupLap } = require('../config');
 const Activity = require('../schema/Activity');
 const { slackError } = require('./slackNotification');
+const fetchStravaAPI = require('./fetchStravaAPI');
 
 /**
  * Iterate though paginated history of segment efforts and concatenate
- * @param {String} token
+ * @param {Document} athleteDoc
  * @param {Number} athleteId
  * @param {Number} page
  * @param {Array} allEfforts
  * @return {Array}
  */
-async function getLapEffortsHistory(token, athleteId, page = 1, allEfforts = []) {
-  const params = querystring.stringify({
+async function getLapEffortsHistory(athleteDoc, page = 1, allEfforts = []) {
+  const athleteId = athleteDoc.get('_id');
+  const token = athleteDoc.get('access_token');
+  const params = {
     athlete_id: athleteId,
     per_page: 200,
     page,
-  });
+  };
+  const endpoint = `/segments/${lapSegmentId}/all_efforts`;
+  const fetchUrl = `${endpoint}?${querystring.stringify(params)}`;
+  console.log(`Fetching ${fetchUrl}`);
 
-  const url = `${apiUrl}/segments/${lapSegmentId}/all_efforts?${params}`;
-  console.log(`Fetching ${url}`)
+  const efforts = await fetchStravaAPI(
+    endpoint,
+    athleteDoc,
+    params
+  );
 
-  const response = await fetch(url, { headers: {
-    Authorization: `Bearer ${token}`,
-  } });
-
-  if (200 !== response.status) {
-    console.log(`Error fetching ${url}`)
+  if (typeof efforts === 'undefined' || !efforts) {
+    console.log(`Error fetching ${fetchUrl}`)
     slackError(45, {
       athleteId,
-      url,
-      status: response.status,
+      url: fetchUrl,
     });
     return allEfforts;
   }
-
-  const efforts = await response.json();
 
   if (!efforts.length) {
     return allEfforts;
   }
 
   return await getLapEffortsHistory(
-    token,
-    athleteId,
+    athleteDoc,
     (page + 1),
     allEfforts.concat(efforts)
   );
@@ -112,10 +113,7 @@ function getActivitiesFromEfforts(efforts, source = 'signup') {
  * @return {Array} List of activities for athlete
  */
 async function fetchAthleteHistory(athlete) {
-  const lapEfforts = await getLapEffortsHistory(
-    athlete.get('access_token'),
-    athlete.get('_id')
-  );
+  const lapEfforts = await getLapEffortsHistory(athlete);
 
   if (!lapEfforts || !lapEfforts.length) {
     return [];
@@ -173,4 +171,3 @@ module.exports = {
   saveAthleteHistory,
   formatSegmentEffort,
 };
-
