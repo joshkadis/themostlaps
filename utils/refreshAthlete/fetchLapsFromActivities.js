@@ -21,9 +21,11 @@ async function fetchActivityDetails(activityIds, token, idx = 0, allActivities, 
 
   try {
     const activity = await fetchActivity(activityIds[idx], token);
-    const activityData = getActivityData(activity, verbose);
-    if(activityData) {
-      allActivities.push(activityData);
+    if (typeof activity !== 'undefined' && activity) {
+      const activityData = getActivityData(activity, verbose);
+      if(activityData) {
+        allActivities.push(activityData);
+      }      
     }
   } catch (err) {
     console.log(`Error processing activity ${activityIds[idx]}`);
