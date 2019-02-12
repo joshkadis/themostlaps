@@ -30,7 +30,7 @@ async function refreshAthleteProfile(athlete) {
       profile,
     } = await fetchStravaAPI(
       '/athlete/',
-      athleteDoc.get('access_token')
+      athleteDoc
     );
 
     console.log(`Updating ${firstname} ${lastname} (${athleteDoc.get('_id')})`);
