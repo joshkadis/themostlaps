@@ -2,19 +2,29 @@ const fetch = require('isomorphic-unfetch');
 const { stringify } = require('querystring');
 const { apiUrl } = require('../config');
 const { slackError } = require('./slackNotification');
+const { getDocFromMaybeToken } = require('./athleteUtils')
 const Athlete = require('../schema/Athlete');
 
 /**
  * Fetch data from Strava API, throw error if unsuccessful
  *
  * @param {String} endpoint Path to endpoint
- * @param {String} access_token Athlete access token
+ * @param {String|Document} tokenOrDoc access token or Athlete document
  * @param {Object} params Any optional params
  * @return {Object} Response data
  */
-async function fetchStravaAPI(endpoint, access_token, params = false) {
+async function fetchStravaAPI(endpoint, tokenOrDoc, params = false) {
+  const athleteDoc = await getDocFromMaybeToken(tokenOrDoc);
+
   const paramsString = params ? `?${stringify(params)}` : '';
   const url = (apiUrl + endpoint + paramsString);
+
+  if (typeof athleteDoc === 'undefined' || !athleteDoc) {
+    slackError(44, { url });
+    return;
+  }
+
+  const access_token = athleteDoc.get('access_token');
 
   // @todo Should catch error here
   // but it's been stable up to this point...
@@ -28,14 +38,9 @@ async function fetchStravaAPI(endpoint, access_token, params = false) {
   );
 
   if (200 !== response.status) {
-    const athleteDoc = await Athlete.findOne({ access_token });
-    if (!athleteDoc) {
-      slackError(44, { url });
-    }
+    const athleteId = athleteDoc.get('_id');
 
-    const athleteId = athleteDoc ? athleteDoc.get('_id') : 0;
-
-    if (athleteDoc && 401 === response.status) {
+    if (401 === response.status) {
       // Set athlete status to deauthorized
       athleteDoc.set('status', 'deauthorized');
       await athleteDoc.save();
@@ -49,6 +54,7 @@ async function fetchStravaAPI(endpoint, access_token, params = false) {
       });
     }
     throw new Error(`Error fetching ${url} for athlete ${athleteId}`);
+    return;
   }
 
   return await response.json();
