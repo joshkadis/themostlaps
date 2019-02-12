@@ -1,4 +1,5 @@
 const Athlete = require('../schema/Athlete');
+const mongoose = require('mongoose');
 const { testAthleteIds } = require('../config');
 
 /**
@@ -73,9 +74,36 @@ function isTestUser(athlete) {
   return false;
 }
 
+/**
+  Get Athlete document from token string or just return a Document
+
+  @param {String|Document} tokenOrDoc
+  @returns {Document|null} Will return document or null if received nonexistent token string
+**/
+async function getDocFromMaybeToken(tokenOrDoc) {
+  try {
+    if (typeof tokenOrDoc !== 'string') {
+      // not a string
+      if (tokenOrDoc instanceof mongoose.Document) {
+        // is a mongoose document
+        return tokenOrDoc;
+      }
+      // neither a string nor a mongoose document
+      return null;
+    } else {
+      // is a string
+      athleteDoc = await Athlete.findOne({ access_token: tokenOrDoc });
+      return athleteDoc || null;
+    }
+  } catch (err) {
+    return null;
+  }
+}
+
 module.exports = {
   getAthleteModelFormat,
   createAthlete,
   getEpochSecondsFromDateObj,
   isTestUser,
+  getDocFromMaybeToken,
 };
