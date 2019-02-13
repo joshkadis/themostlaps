@@ -77,10 +77,10 @@ const callbackRefreshUser = async ({ user, daysago }) => {
   );
 }
 
-const callbackActivityInfo = async ({ user, activity }) => {
+const callbackActivityInfo = async ({ user, activity, fetch }) => {
   await doCommand(
-    `Enter admin code to fetch details for user ${user} activity ${activity}.`,
-    () => getActivityInfo(user, activity)
+    false,
+    () => getActivityInfo(user, activity, fetch)
   );
 }
 

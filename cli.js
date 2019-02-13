@@ -61,11 +61,12 @@ const argv = require('yargs')
    * Get info for a specific activity
    */
   .command(
-    'activityinfo user activity',
+    'activityinfo user activity [--fetch]',
     false,
     createPositionals(
       ['user', { type: 'number' }],
       ['activity', { type: 'number' }],
+      ['fetch', { type: 'boolean', default: false }],
     ),
     async (argv) => await callbackActivityInfo(argv),
   )
