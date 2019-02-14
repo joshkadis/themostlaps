@@ -72,6 +72,12 @@ async function updateAthleteLastRefreshed(athleteDoc, startDateString) {
  * @param {Bool} shouldUpdateDb If false, will validate without saving
  */
 async function refreshAthleteFromActivity(athleteId, activityId, shouldUpdateDb = true) {
+  // Handle int32 overflow
+  // https://groups.google.com/forum/#!topic/strava-api/eVCHNjaTOSA
+  if (activityId < 0) {
+    activityId += 2 * (2147483647 + 1)
+  }
+  
   // Check that athlete exists and activity is new
   let athleteDoc = await Athlete.findById(athleteId);
   if (!athleteDoc) {
