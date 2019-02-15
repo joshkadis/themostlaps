@@ -6,6 +6,8 @@ const athleteSchema = new Schema({
   _id: Number,
   access_token: { type: String, required: true, unique: true },
   token_type: { type: String, required: true },
+  refresh_token: String,
+  expires_at: Number,
   athlete: {
     firstname: String,
     lastname: String,
