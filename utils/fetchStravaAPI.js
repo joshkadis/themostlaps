@@ -4,6 +4,7 @@ const { apiUrl } = require('../config');
 const { slackError } = require('./slackNotification');
 const { getDocFromMaybeToken } = require('./athleteUtils')
 const Athlete = require('../schema/Athlete');
+const { getAccessToken } = require('./getAccessToken');
 
 /**
  * Fetch data from Strava API, throw error if unsuccessful
@@ -24,7 +25,7 @@ async function fetchStravaAPI(endpoint, tokenOrDoc, params = false) {
     return;
   }
 
-  const access_token = athleteDoc.get('access_token');
+  const access_token = await getAccessToken(athleteDoc);
 
   // @todo Should catch error here
   // but it's been stable up to this point...
