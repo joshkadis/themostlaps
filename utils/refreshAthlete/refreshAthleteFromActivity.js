@@ -97,7 +97,11 @@ async function refreshAthleteFromActivity(athleteId, activityId, shouldUpdateDb 
   }
 
   // Fetch activity details
-  const activity = await fetchActivity(activityId, athleteDoc.get('access_token'));
+  const activity = await fetchActivity(activityId, athleteDoc);
+
+  if (typeof activity === 'undefined' || !activity) {
+    return 0;
+  }
 
   // Update athlete's last_refreshed timestamp
   if (shouldUpdateDb) {

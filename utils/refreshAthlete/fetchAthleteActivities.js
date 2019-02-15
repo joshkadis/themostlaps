@@ -5,7 +5,7 @@ const config = require('../../config');
 const { getEpochSecondsFromDateObj } = require('../athleteUtils');
 const { activityCouldHaveLaps } = require('./utils');
 const { slackError } = require('../slackNotification');
-
+const fetchStravaAPI = require('../fetchStravaAPI');
 
 /**
  * Get all of a user's activities by iterating recursively over paginated API results
@@ -29,29 +29,26 @@ async function fetchAllAthleteActivities(
     per_page: config.apiPerPage,
   };
 
-  const url = `${config.apiUrl}/athlete/activities?${stringify(queryParams)}`;
-
+  const endpoint = '/athlete/activities';
+  const fetchPath = `${endpoint}?${stringify(queryParams)}`;
   if (verbose) {
-    console.log(`Fetching ${url}`);
+    console.log(`Fetching ${fetchPath}`);
   }
 
-  const response = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${athleteDoc.get('access_token')}`,
-    },
-  });
+  const activities = await fetchStravaAPI(
+    endpoint,
+    athleteDoc,
+    queryParams
+  );
 
-  if (200 !== response.status) {
-    console.log(`Error ${response.status} fetching ${url} in fetchAthleteActivities`)
+  if (typeof activities === 'undefined' || !activities) {
+    console.log(`Error fetching ${fetchPath} in fetchAthleteActivities`)
     await slackError(45, {
       athleteId: athleteDoc.get('_id'),
-      url,
-      status: response.status,
+      url: fetchPath,
     });
     return allActivities;
   }
-
-  const activities = await response.json();
 
   if (activities.length < config.apiPerPage) {
     return allActivities.concat(activities);
