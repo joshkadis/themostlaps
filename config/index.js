@@ -73,4 +73,5 @@ module.exports = {
   },
   tokenExpirationBuffer: 3600,
   stravaOauthUrl: 'https://www.strava.com/oauth',
+  tokenRefreshGrantType: 'refresh_token',
 };
