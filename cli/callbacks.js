@@ -190,7 +190,7 @@ const callbackUpdateSubscriptions = async (argv) => {
 const callbackRetryWebhooks = async (argv) => {
   const dryRun = argv.dryRun || arv.dryrun;
   await doCommand(
-    `Enter admin code to reimport failed activities since ${startdate}.`,
+    `Enter admin code to reimport failed activities since ${argv.startdate}.`,
     () => retryWebhooks(argv.startdate, dryRun),
   );
 };
