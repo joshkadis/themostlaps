@@ -20,11 +20,10 @@ async function fetchStravaAPI(endpoint, athleteDoc, params = false) {
     access_token = athleteDoc;
   } else {
     // Get access_token using `forever token` or new auth logic
-    const tokenObj = await getAccessToken(athleteDoc);
-    if (!tokenObj || !tokenObj.access_token) {
+    access_token = await getAccessToken(athleteDoc);
+    if (!access_token) {
       return {};
     }
-    access_token = tokenObj.access_token;
   }
 
   const paramsString = params ? `?${stringify(params)}` : '';
@@ -51,7 +50,7 @@ async function fetchStravaAPI(endpoint, athleteDoc, params = false) {
     } else {
       // If string was passed as athleteDoc param,
       // make sure it refers to a known athlete in database
-      attemptedAthleteDoc = await Athlete.findOne({ access_token: athleteDoc });
+      attemptedAthleteDoc = await Athlete.findOne({ access_token });
       if (!attemptedAthleteDoc) {
         slackError(44, { url });
         return;

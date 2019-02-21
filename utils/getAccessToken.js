@@ -19,7 +19,7 @@ function shouldRefreshToken(expires_at, now = null) {
 }
 
 async function refreshAccessToken(access_token, refresh_token) {
-  // Substitue access_token for refresh_token
+  // Substitute access_token for refresh_token
   // if we don't have a refresh_token, i.e. we're migrating
   const params = {
     client_id: process.env.CLIENT_ID,
@@ -33,14 +33,20 @@ async function refreshAccessToken(access_token, refresh_token) {
     { method: 'POST' }
   );
 
-  if (response.status !== 200) {
-    current_time = now || (Date.now() / 1000);
-    console.log(response);
-    slackError(120, {
+  if (!response || response.status !== 200) {
+    const responseJson = response ?
+      await response.json() :
+      { error: "No response" };
+      
+    const current_time = now || (Date.now() / 1000);
+    const log = Object.assign({}, responseJson, {
       athlete_id,
       current_time,
-      expires_at
+      expires_at,
     });
+
+    console.log(log);
+    slackError(120, log);
     return false;
   }
 
@@ -54,7 +60,7 @@ async function refreshAccessToken(access_token, refresh_token) {
   @param {Document} athleteDoc Athlete document
   @param {Boolean} shouldMigrateForeverToken Defaults to false. If true will use forever token to migrate to new auth logic
   @param {Integer} now Optional stub for current time in seconds, for unit testing
-  @returns {Object|Boolean} Object containing access_token or false if error
+  @returns {String|Boolean} access_token or false if error
 **/
 async function getAccessToken(
   athleteDoc,
@@ -67,17 +73,12 @@ async function getAccessToken(
   const refresh_token = athleteDoc.get('refresh_token');
 
   // If token not migrated yet and we're not migrating now
-  // or f already migrated and we don't need to refresh
+  // or if already migrated and we don't need to refresh
   if (
     (!shouldMigrateForeverToken && !refresh_token) ||
     !shouldRefreshToken(expires_at)
   ) {
-    return {
-      access_token
-      refresh_token,
-      expires_at,
-      token_type: athleteDoc.get('token_type')
-    };
+    return access_token;
   }
 
   // Now we refresh migrated token or
@@ -94,7 +95,7 @@ async function getAccessToken(
   athleteDoc.set(tokenData);
   await athleteDoc.save();
 
-  return tokenData;
+  return tokenData.access_token;
 }
 
 module.exports = {
