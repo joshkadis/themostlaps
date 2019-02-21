@@ -37,7 +37,7 @@ async function refreshAccessToken(access_token, refresh_token) {
     const responseJson = response ?
       await response.json() :
       { error: "No response" };
-      
+
     const current_time = now || (Date.now() / 1000);
     const log = Object.assign({}, responseJson, {
       athlete_id,
@@ -76,7 +76,7 @@ async function getAccessToken(
   // or if already migrated and we don't need to refresh
   if (
     (!shouldMigrateForeverToken && !refresh_token) ||
-    !shouldRefreshToken(expires_at)
+    !shouldRefreshToken(expires_at, now)
   ) {
     return access_token;
   }
