@@ -22,7 +22,7 @@ function getErrorResponseObject(code, errData = null, athlete = false) {
 function getStravaAuthRequestUrl(pathname = '/', shouldSubscribe = false) {
   const params = Object.assign({}, authRequestParams, {
     redirect_uri: getEnvOrigin() + '/auth-callback',
-    state: pathname + (shouldSubscribe ? '|shouldSubscribe' : ''),
+    state: `${pathname}${shouldSubscribe ? '|shouldSubscribe' : ''}`,
   });
 
   return `${stravaOauthUrl}/authorize?${stringify(params)}`;

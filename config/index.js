@@ -22,6 +22,9 @@ module.exports = {
     client_id: 22415,
     response_type: 'code',
     scope: 'read_all,activity:read_all,profile:read_all',
+    approval_prompt: 'auto',
+    // redirect_uri must be provided
+    // state must be provided
   },
   breakpointPx: 800,
   refreshSchedule: {
