@@ -1,7 +1,6 @@
 const { stringify } = require('querystring');
 const  exchangeCodeForAthleteInfo = require('../utils/ingest/exchangeCodeForAthleteInfo');
 const Athlete = require('../schema/Athlete');
-const MigratedToken = require('../schema/MigratedToken');
 const { getAthleteModelFormat } = require('../utils/athleteUtils');
 const {
   fetchAthleteHistory,

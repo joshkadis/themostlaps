@@ -1,8 +1,10 @@
 const Athlete = require('../schema/Athlete');
-const MigratedToken = require('../schema/MigratedToken');
 const { getAccessToken } = require('../utils/getAccessToken');
 
 async function migrateSingleAthlete(athleteId, isDryRun) {
+    console.log('Update to new Athlete schema')
+    process.exit(0);
+
     const athleteDoc = await Athlete.findById(athleteId);
     const existingMigratedTokenDoc = await MigratedToken.findOne({ athlete_id: athleteId });
 
