@@ -60,9 +60,6 @@ module.exports = (code = 0, data = '') => {
     case 120:
       return 'Could not refresh athlete access_token';
 
-    case 130:
-      return 'Could not create MigratedToken document';
-
     default:
       return 'An error occurred.';
   }

@@ -13,6 +13,8 @@ const { testAthleteIds } = require('../config');
  */
 function getAthleteModelFormat(athleteInfo, shouldSubscribe = true) {
   const { athlete, access_token, token_type } = athleteInfo; // @note Removed email after Strava API change, Jan 15
+
+  // @note Removed email from model format due to Strava API change
   const { firstname, lastname, profile, id } = athlete;
   const refresh_token = athleteInfo.refresh_token || '';
   const expires_at = athleteInfo.expires_at || 0;

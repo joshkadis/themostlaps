@@ -124,6 +124,37 @@ function getSlackSuccessMessage(athleteDoc) {
 }
 
 /**
+  If an existing athlete is found with this access code, update it
+
+  @param {Object} tokenExchangeResponse Response from token exchange process
+  @return {Boolean}
+**/
+async function didUpdateAthlete(tokenExchangeResponse) {
+  const {
+    athlete,
+    access_token
+  } = tokenExchangeResponse;
+
+  const athleteDoc = await Athlete.findById(athlete.id);
+  if (!athleteDoc || access_token === athleteDoc.get('access_token')
+  ) {
+    return false;
+  }
+
+  // Update access_token and refresh athlete activities + stats
+  console.log(`Updating access token for ${getSlackSuccessMessage(athleteDoc)}`);
+  athleteDoc.set('access_token', access_token)
+  const updatedAthleteDoc = await athleteDoc.save();
+
+  res.redirect(303, `/rider/${athlete.id}?updated=1`);
+  await refreshAthlete(updatedAthleteDoc);
+  console.log(`Updated access token for ${getSlackSuccessMessage(updatedAthleteDoc)}`);
+  slackSuccess('Updated access token', getSlackSuccessMessage(updatedAthleteDoc));
+
+  return true;
+}
+
+/**
  * Handle OAuth callback from signup
  *
  * @param {Next} app Next.js application
@@ -141,31 +172,20 @@ async function handleSignupCallback(req, res) {
 
   // Get athlete profile info
   const athleteInfo = await exchangeCodeForAthleteInfo(req.query.code);
-  if (athleteInfo.errorCode) {
+
+  // For some reason had 'errorCode' before and it never caused a problem
+  if (athleteInfo.error_code || athleteInfo.errorCode) {
     handleSignupError(athleteInfo.errorCode, athleteInfo.athlete || false);
     return;
   }
 
   // Create athlete record in database or update access_token
-  let athleteDoc;
   try {
-    // @note Use new token refresh logic
-    const existingAthleteDoc = await Athlete.findById(athleteInfo.athlete.id);
-    if (existingAthleteDoc &&
-      athleteInfo.access_token !== existingAthleteDoc.get('access_token')
-    ) {
-      // Update access_token and refresh athlete activities + stats
-      console.log(`Updating access token for ${getSlackSuccessMessage(existingAthleteDoc)}`);
-      existingAthleteDoc.set('access_token', athleteInfo.access_token)
-      const updatedAthleteDoc = await existingAthleteDoc.save();
-      res.redirect(303, `/rider/${athleteInfo.athlete.id}?updated=1`);
-      await refreshAthlete(updatedAthleteDoc);
-      console.log(`Updated access token for ${getSlackSuccessMessage(updatedAthleteDoc)}`);
-      slackSuccess('Updated access token', getSlackSuccessMessage(updatedAthleteDoc));
+    if (didUpdateAthlete) {
       return;
     }
 
-    athleteDoc = await Athlete.create(
+    const athleteDoc = await Athlete.create(
       getAthleteModelFormat(athleteInfo, shouldSubscribe(req.query))
     );
     console.log(`Saved ${athleteDoc.get('_id')} to database`);
@@ -173,15 +193,6 @@ async function handleSignupCallback(req, res) {
     const errCode = -1 !== err.message.indexOf('duplicate key') ? 50 : 55;
     console.log(err, athleteInfo);
     handleSignupError(errCode, athleteInfo.athlete || false);
-    return;
-  }
-
-  // Create MigratedToken document
-  try {
-    await createMigratedToken(athleteInfo);
-  } catch (err) {
-    console.log(err);
-    handleSignupError(130, Object.assign({ process: 'handleSignupCallback' }, req.query));
     return;
   }
 
