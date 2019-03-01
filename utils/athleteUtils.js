@@ -1,24 +1,30 @@
 const Athlete = require('../schema/Athlete');
 const { testAthleteIds } = require('../config');
+const { slackError } = require('./slackNotification');
 
 /**
  * Convert API response for athlete to our model's format
  * @note Use new token refresh logic
  * @param {Object} athlete
  * @param {String} athlete.access_token
- * @param {String} athlete.access_type
  * @param {Object} athlete.athlete
  * @param {Bool} shouldSubscribe
- * @return {Object}
+ * @return {Object|false}
  */
 function getAthleteModelFormat(athleteInfo, shouldSubscribe = true) {
-  const { athlete, access_token, token_type } = athleteInfo; // @note Removed email after Strava API change, Jan 15
+  try {
 
-  // @note Removed email from model format due to Strava API change
-  const { firstname, lastname, profile, id } = athlete;
-  const refresh_token = athleteInfo.refresh_token || '';
-  const expires_at = athleteInfo.expires_at || 0;
+    const { access_token, token_type } = athleteInfo; // @note Removed email after Strava API change, Jan 15
+    const refresh_token = athleteInfo.refresh_token || '';
+    const expires_at = athleteInfo.expires_at || 0;
 
+    // @note Removed email from model format due to Strava API change
+    const { firstname, lastname, profile, id } = athlete.athlete;
+
+  } catch (err) {
+    slackError(0, Object.assign(athleteInfo, { message: err.message || 'unknown' }));
+    return false;
+  }
   const currentDate = new Date();
   return {
     _id: id,

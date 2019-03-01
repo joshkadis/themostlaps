@@ -16,25 +16,6 @@ const { slackSuccess, slackError } = require('../utils/slackNotification');
 const shouldSubscribe = require('../utils/emails/shouldSubscribe');
 const refreshAthlete = require('../utils/refreshAthlete');
 
-async function createMigratedToken(athleteInfo) {
-  const {
-    access_token,
-    refresh_token,
-    token_type,
-    expires_at,
-  } = athleteInfo;
-  const athlete_id = athleteInfo.athlete.id;
-  await MigratedToken.create({
-    athlete_id,
-    migrated_token: {
-      access_token,
-      token_type,
-      refresh_token,
-      expires_at,
-    },
-  });
-}
-
 /**
  * Factory for handling error while creating athlete in db
  *
@@ -129,15 +110,15 @@ function getSlackSuccessMessage(athleteDoc) {
   @param {Object} tokenExchangeResponse Response from token exchange process
   @return {Boolean}
 **/
-async function didUpdateAthlete(tokenExchangeResponse) {
+async function didUpdateAthleteAccessToken(tokenExchangeResponse) {
   const {
     athlete,
     access_token
   } = tokenExchangeResponse;
 
+  // If existing athlete with this ID and access_token is unchanged
   const athleteDoc = await Athlete.findById(athlete.id);
-  if (!athleteDoc || access_token === athleteDoc.get('access_token')
-  ) {
+  if (!athleteDoc || access_token === athleteDoc.get('access_token')) {
     return false;
   }
 
@@ -171,34 +152,38 @@ async function handleSignupCallback(req, res) {
   }
 
   // Get athlete profile info
-  const athleteInfo = await exchangeCodeForAthleteInfo(req.query.code);
+  const tokenExchangeResponse = await exchangeCodeForAthleteInfo(req.query.code);
 
   // For some reason had 'errorCode' before and it never caused a problem
-  if (athleteInfo.error_code || athleteInfo.errorCode) {
-    handleSignupError(athleteInfo.errorCode, athleteInfo.athlete || false);
+  const error_code = tokenExchangeResponse.error_code || tokenExchangeResponse.errorCode;
+  if (error_code) {
+    handleSignupError(error_code, tokenExchangeResponse.athlete || false);
     return;
   }
 
   // Create athlete record in database or update access_token
   try {
-    if (didUpdateAthlete) {
+    if (didUpdateAthleteAccessToken) {
       return;
     }
 
-    const athleteDoc = await Athlete.create(
-      getAthleteModelFormat(athleteInfo, shouldSubscribe(req.query))
-    );
+    const formattedAthleteData =
+      getAthleteModelFormat(tokenExchangeResponse, shouldSubscribe(req.query));
+    if (!formattedAthleteData) {
+      return;
+    }
+    const athleteDoc = await Athlete.create(formattedAthleteData);
     console.log(`Saved ${athleteDoc.get('_id')} to database`);
   } catch (err) {
     const errCode = -1 !== err.message.indexOf('duplicate key') ? 50 : 55;
-    console.log(err, athleteInfo);
-    handleSignupError(errCode, athleteInfo.athlete || false);
+    console.log(err, tokenExchangeResponse);
+    handleSignupError(errCode, tokenExchangeResponse.athlete || false);
     return;
   }
 
   // Render the welcome page, athlete status will be 'ingesting'
   res.redirect(303, `/welcome?${stringify({
-    id: athleteInfo.athlete.id,
+    id: tokenExchangeResponse.athlete.id,
   })}`);
 
   // Fetch athlete history
