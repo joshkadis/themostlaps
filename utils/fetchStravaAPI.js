@@ -27,7 +27,8 @@ async function fetchStravaAPI(endpoint, athleteDoc, params = false) {
   }
 
   const paramsString = params ? `?${stringify(params)}` : '';
-  const url = (apiUrl + endpoint + paramsString);
+  const prependEndpoint = endpoint.indexOf('/') === 0 ? '' : '/';
+  const url = `${apiUrl}${prependEndpoint}${endpoint}${paramsString}`;
 
   // @todo Should catch error here
   // but it's been stable up to this point...
@@ -75,6 +76,7 @@ async function fetchStravaAPI(endpoint, athleteDoc, params = false) {
       });
     }
     throw new Error(`Error fetching ${url} for athlete ${attemptedAthleteId}`);
+    return response;
   }
 
   return await response.json();
