@@ -18,7 +18,11 @@ async function refreshAthleteProfile(athlete) {
   }
 
   if (athleteDoc.get('status') === 'deauthorized') {
-    console.log(`Athlete ${athlete} is deauthorized`);
+    const {
+      athlete: { firstname, lastname },
+      _id
+    } = athleteDoc.toJSON();
+    console.log(`${firstname} ${lastname} (${_id}) is already deauthorized`);
     return null;
   }
 

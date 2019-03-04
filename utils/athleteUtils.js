@@ -19,34 +19,34 @@ function getAthleteModelFormat(athleteInfo, shouldSubscribe = true) {
     const expires_at = athleteInfo.expires_at || 0;
 
     // @note Removed email from model format due to Strava API change
-    const { firstname, lastname, profile, id } = athlete.athlete;
+    const { firstname, lastname, profile, id } = athleteInfo.athlete;
 
+    const currentDate = new Date();
+    return {
+      _id: id,
+      last_updated: currentDate.toISOString(),
+      created: currentDate.toISOString(),
+      last_refreshed: getEpochSecondsFromDateObj(currentDate),
+      access_token,
+      token_type,
+      refresh_token,
+      expires_at,
+      athlete: {
+        firstname,
+        lastname,
+        profile,
+        id,
+      },
+      preferences: {
+        notifications: {
+          monthly: shouldSubscribe,
+        },
+      },
+    };
   } catch (err) {
     slackError(0, Object.assign(athleteInfo, { message: err.message || 'unknown' }));
     return false;
-  }
-  const currentDate = new Date();
-  return {
-    _id: id,
-    last_updated: currentDate.toISOString(),
-    created: currentDate.toISOString(),
-    last_refreshed: getEpochSecondsFromDateObj(currentDate),
-    access_token,
-    token_type,
-    refresh_token,
-    expires_at,
-    athlete: {
-      firstname,
-      lastname,
-      profile,
-      id,
-    },
-    preferences: {
-      notifications: {
-        monthly: shouldSubscribe,
-      },
-    },
-  };
+  }  
 }
 
 /**

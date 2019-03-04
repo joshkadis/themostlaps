@@ -5,7 +5,7 @@ const config = require('../../config');
 const { getEpochSecondsFromDateObj } = require('../athleteUtils');
 const { activityCouldHaveLaps } = require('./utils');
 const { slackError } = require('../slackNotification');
-
+const fetchStravaAPI = require('../../utils/fetchStravaAPI');
 
 /**
  * Get all of a user's activities by iterating recursively over paginated API results
@@ -23,27 +23,23 @@ async function fetchAllAthleteActivities(
   allActivities = [],
   verbose = false
 ) {
-  const queryParams = {
-    after: afterTimestamp,
-    page,
-    per_page: config.apiPerPage,
-  };
-
-  const url = `${config.apiUrl}/athlete/activities?${stringify(queryParams)}`;
-
   if (verbose) {
-    console.log(`Fetching ${url}`);
+    console.log(`Fetching /athlete/activities for ${athleteDoc.get('_id')}`);
   }
 
   // @note Use new token refresh logic
-  const response = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${athleteDoc.get('access_token')}`,
-    },
-  });
+  const response = await fetchStravaAPI(
+    '/athlete/activities',
+    athleteDoc,
+    {
+      after: afterTimestamp,
+      page,
+      per_page: config.apiPerPage,
+    }
+  );
 
-  if (200 !== response.status) {
-    console.log(`Error ${response.status} fetching ${url} in fetchAthleteActivities`)
+  if (response.status && 200 !== response.status) {
+    console.log(`Error ${response.status} fetching /athlete/activities in fetchAthleteActivities`)
     await slackError(45, {
       athleteId: athleteDoc.get('_id'),
       url,

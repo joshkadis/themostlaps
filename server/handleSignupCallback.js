@@ -116,8 +116,8 @@ async function didUpdateAthleteAccessToken(tokenExchangeResponse) {
   } = tokenExchangeResponse;
 
   // If existing athlete with this ID and access_token is unchanged
-  const athleteDoc = await Athlete.findById(athlete.id);
-  if (!athleteDoc || access_token === athleteDoc.get('access_token')) {
+  const athleteDoc = await Athlete.find({ access_token });
+  if (athleteDoc) {
     return false;
   }
 
@@ -161,8 +161,10 @@ async function handleSignupCallback(req, res) {
   }
 
   // Create athlete record in database or update access_token
+  let athleteDoc;
   try {
-    if (didUpdateAthleteAccessToken) {
+    const updatedAthleteToken = await didUpdateAthleteAccessToken(tokenExchangeResponse);
+    if (updatedAthleteToken) {
       return;
     }
 
@@ -171,7 +173,7 @@ async function handleSignupCallback(req, res) {
     if (!formattedAthleteData) {
       return;
     }
-    const athleteDoc = await Athlete.create(formattedAthleteData);
+    athleteDoc = await Athlete.create(formattedAthleteData);
     console.log(`Saved ${athleteDoc.get('_id')} to database`);
   } catch (err) {
     const errCode = -1 !== err.message.indexOf('duplicate key') ? 50 : 55;
@@ -188,9 +190,9 @@ async function handleSignupCallback(req, res) {
   // Fetch athlete history
   let athleteHistory;
   try {
-    athleteHistory = await fetchAthleteHistory(athleteDoc);
+    athleteHistory = await fetchAthleteHistory(athleteDoc, true);
   } catch (err) {
-    await handleActivitiesIngestError(athleteDoc, 70);
+    await handleActivitiesIngestError(athleteDoc, 70, err);
     return;
   }
 
