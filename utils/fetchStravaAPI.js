@@ -3,7 +3,7 @@ const { stringify } = require('querystring');
 const { apiUrl } = require('../config');
 const { slackError } = require('./slackNotification');
 const Athlete = require('../schema/Athlete');
-const { getAccessToken } = require('./getAccessToken');
+const { getUpdatedAccessToken } = require('./getUpdatedAccessToken');
 /**
  * Fetch data from Strava API, throw error if unsuccessful
  * @note Use new token refresh logic
@@ -20,7 +20,7 @@ async function fetchStravaAPI(endpoint, athleteDoc, params = false) {
     access_token = athleteDoc;
   } else {
     // Get access_token using `forever token` or new auth logic
-    access_token = await getAccessToken(athleteDoc);
+    access_token = await getUpdatedAccessToken(athleteDoc);
     if (!access_token) {
       return {};
     }

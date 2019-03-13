@@ -1,8 +1,8 @@
 const Athlete = require('../schema/Athlete');
 const {
-  getAccessToken,
+  getUpdatedAccessToken,
   shouldRefreshToken,
-} = require('../utils/getAccessToken');
+} = require('../utils/getUpdatedAccessToken');
 
 async function migrateSingle(athleteId, isDryRun) {
     // Check that Athlete exists
@@ -31,9 +31,9 @@ async function migrateSingle(athleteId, isDryRun) {
       process.exit(0);
     }
 
-    const receivedAccessToken = await getAccessToken(athleteDoc, true);
+    const receivedAccessToken = await getUpdatedAccessToken(athleteDoc, true);
     if (!receivedAccessToken) {
-      console.log('getAccessToken failed')
+      console.log('getUpdatedAccessToken failed')
       process.exit(0)
     }
 

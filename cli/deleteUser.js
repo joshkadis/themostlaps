@@ -1,7 +1,7 @@
 const fetch = require('isomorphic-unfetch');
 const Athlete = require('../schema/Athlete');
 const Activity = require('../schema/Activity');
-const { getAccessToken } = require('../utils/getAccessToken');
+const { getUpdatedAccessToken } = require('../utils/getUpdatedAccessToken');
 
 /**
  * Delete user and their activities from the database
@@ -25,7 +25,7 @@ module.exports = async (id, shouldDeauthorize = false) => {
 
     // Maybe deauthorize Strava API access
     if (shouldDeauthorize) {
-      const access_token = await getAccessToken(athleteDoc);
+      const access_token = await getUpdatedAccessToken(athleteDoc);
       const response = await fetch(
         `https://www.strava.com/oauth/deauthorize?access_token=${access_token}`,
         { method: 'POST' }

@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { getAccessToken } = require('./getAccessToken');
+const { getUpdatedAccessToken } = require('./getUpdatedAccessToken');
 const { tokenExpirationBuffer } = require('../config');
 
 const EXPIRES_AT = 1000;
@@ -31,7 +31,7 @@ const getMockAthleteDoc = () => ({
   _id: 1245,
 });
 
-describe('getAccessToken', () => {
+describe('getUpdatedAccessToken', () => {
   beforeEach(() => {
     fetch.resetMocks();
     jest.resetModules();
@@ -48,7 +48,7 @@ describe('getAccessToken', () => {
   it('returns forever token if not migrated yet', async () => {
     const athleteDoc = getMockAthleteDoc()
     athleteDoc.set({ refresh_token: null, expires_at: null });
-    const access_token = await getAccessToken(athleteDoc);
+    const access_token = await getUpdatedAccessToken(athleteDoc);
 
     expect(access_token).toEqual(athleteDoc.get('access_token'));
     expect(access_token).toEqual('FOREVER_TOKEN');
@@ -68,7 +68,7 @@ describe('getAccessToken', () => {
 
     const athleteDoc = getMockAthleteDoc();
     let now = EXPIRES_AT - tokenExpirationBuffer + 5;
-    const result = await getAccessToken(athleteDoc, false, now);
+    const result = await getUpdatedAccessToken(athleteDoc, false, now);
     const access_token = result;
     expect(access_token).toEqual('UPDATED_ACCESS_TOKEN');
     expect(athleteDoc.get('refresh_token')).toEqual('UPDATED_REFRESH_TOKEN');
@@ -89,7 +89,7 @@ describe('getAccessToken', () => {
     const athleteDoc = getMockAthleteDoc()
     athleteDoc.set('access_token', 'INITIAL_ACCESS_TOKEN');
     const now = (EXPIRES_AT - tokenExpirationBuffer) - 5;
-    const access_token = await getAccessToken(athleteDoc, false, now);
+    const access_token = await getUpdatedAccessToken(athleteDoc, false, now);
 
     expect(access_token).toEqual('INITIAL_ACCESS_TOKEN');
     expect(athleteDoc.get('refresh_token')).toEqual('INITIAL_REFRESH_TOKEN');

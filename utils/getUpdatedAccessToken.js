@@ -57,7 +57,7 @@ async function refreshAccessToken(access_token, refresh_token, now = null) {
   @param {Integer} now Optional stub for current time in seconds, for unit testing
   @returns {String|Boolean} access_token or false if error
 **/
-async function getAccessToken(
+async function getUpdatedAccessToken(
   athleteDoc,
   shouldMigrateForeverToken = false,
   now = null
@@ -99,6 +99,6 @@ async function getAccessToken(
 }
 
 module.exports = {
-  getAccessToken,
+  getUpdatedAccessToken,
   shouldRefreshToken,
 };
