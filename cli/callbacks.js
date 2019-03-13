@@ -14,7 +14,7 @@ const { refreshAthletes } = require('../utils/scheduleNightlyRefresh');
 const { listAliases } = require('../config/email');
 const { testAthleteIds } = require('../config');
 const calculateColdLaps = require('./calculateColdLaps');
-const migrateAuthToken = require('./migrateAuthToken');
+const { migrateSingle, migrateAll } = require('./migrateAuthToken');
 
 /**
  * Prompt for admin code then connect and run command
@@ -214,14 +214,17 @@ const callbackMigrateToken = async (argv) => {
     process.exit(0);
   }
 
+  _migrate = () => {
+    if (argv.allAthletes) {
+      return migrateAll(isDryRun(argv));
+    }
+    return migrateSingle(argv.athlete, isDryRun(argv));
+  };
+
   await doCommand(
     'Enter admin code to migrate auth token',
-    () => migrateAuthToken(
-      argv.athlete,
-      argv.allAthletes,
-      isDryRun(argv)
-    )
-  )
+    _migrate
+  );
 };
 
 module.exports = {

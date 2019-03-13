@@ -18,7 +18,7 @@ function shouldRefreshToken(expires_at, now = null) {
   return currentTime - canRefreshTime > 0;
 }
 
-async function refreshAccessToken(access_token, refresh_token) {
+async function refreshAccessToken(access_token, refresh_token, now = null) {
   // Substitute access_token for refresh_token
   // if we don't have a refresh_token, i.e. we're migrating
   const params = {
@@ -34,15 +34,10 @@ async function refreshAccessToken(access_token, refresh_token) {
   );
 
   if (!response || response.status !== 200) {
-    const responseJson = response ?
-      await response.json() :
-      { error: "No response" };
-
     const current_time = now || (Date.now() / 1000);
+    const responseJson = await response.json();
     const log = Object.assign({}, responseJson, {
-      athlete_id,
       current_time,
-      expires_at,
     });
 
     console.log(log);
@@ -85,9 +80,14 @@ async function getAccessToken(
   // migrate forever token
   let tokenData;
   try {
-    tokenData = await refreshAccessToken(access_token, refresh_token);
+    tokenData = await refreshAccessToken(access_token, refresh_token, now);
   } catch (err) {
-    slackError(120, `Refresh token failed for athlete ${athleteId}`);
+    slackError(120, `Refresh token failed for athlete ${athlete_id}`);
+    console.log(err);
+    return false;
+  }
+
+  if (!tokenData) {
     return false;
   }
 
@@ -100,4 +100,5 @@ async function getAccessToken(
 
 module.exports = {
   getAccessToken,
+  shouldRefreshToken,
 };

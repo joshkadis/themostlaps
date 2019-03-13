@@ -1,48 +1,63 @@
 const Athlete = require('../schema/Athlete');
-const { getAccessToken } = require('../utils/getAccessToken');
+const {
+  getAccessToken,
+  shouldRefreshToken,
+} = require('../utils/getAccessToken');
 
-async function migrateSingleAthlete(athleteId, isDryRun) {
-    console.log('Update to new Athlete schema')
-    process.exit(0);
-
+async function migrateSingle(athleteId, isDryRun) {
+    // Check that Athlete exists
     const athleteDoc = await Athlete.findById(athleteId);
-    const existingMigratedTokenDoc = await MigratedToken.findOne({ athlete_id: athleteId });
-
-    if (existingMigratedTokenDoc) {
-      if (athleteDoc.get('did_migrate_token')) {
-        console.log('Token already migrated');
-      } else {
-        athleteDoc.set('did_migrate_token', true);
-        await athleteDoc.save();
-        console.log('Token already migrated; updated Athlete.did_migrate_token')
-      }
+    if (!athleteDoc) {
+      console.log(`Could not locate athlete ${athleteId}`);
       process.exit(0);
     }
 
-    if (existingMigratedTokenDoc) {
-      console.log()
+    // Confirm not already migrated
+    const refreshToken = athleteDoc.get('refresh_token');
+    const expiresAt = athleteDoc.get('expires_at');
+    if (expiresAt > 0 && refreshToken.length) {
+      console.log(shouldRefreshToken(expiresAt) ?
+        'Athlete token already migrated but has expired.' :
+        'Athlete token already migrated and has not yet expired.'
+      );
+      process.exit(0);
     }
 
-    const migratedToken = await getAccessToken(athleteDoc, true);
-    console.log('Received from getAccessToken', migratedToken);
+    const oldAccessToken = athleteDoc.get('access_token');
+    console.log(`Migrating from access token: ${oldAccessToken}`);
 
-    const migratedTokenDoc = await MigratedToken.findOne({ athlete_id: athleteId });
-    if (!migratedTokenDoc) {
-      console.log('Did not create MigratedToken document');
-    } else {
-      console.log('Created MigratedToken document', migratedTokenDoc.toJSON());
+    if (isDryRun) {
+      console.log('dry run, exiting');
+      process.exit(0);
     }
 
-    const updatedAthleteDoc = await Athlete.findById(athleteId);
-    console.log(`Athlete document did_migrate_token is ${
-      updatedAthleteDoc.get('did_migrate_token').toString()}`);
+    const receivedAccessToken = await getAccessToken(athleteDoc, true);
+    if (!receivedAccessToken) {
+      console.log('getAccessToken failed')
+      process.exit(0)
+    }
+
+    console.log(`Received new access token: ${receivedAccessToken}`);
+
+    const newAthleteDoc = await Athlete.findById(athleteId);
+    console.log(receivedAccessToken === newAthleteDoc.get('access_token') ?
+      'Received token matches saved token' :
+      `Saved token ()${newAthleteDoc.get('refresh_token')}) does not match received token`
+    );
+
+    const newExpiresAt = newAthleteDoc.get('expires_at');
+    const expirationDate = new Date(newExpiresAt * 1000);
+    console.log(`Refresh token expires at ${expirationDate.toString()}`);
+
     process.exit(0);
 }
 
-module.exports = async (athleteId = null, migrateAllAthletes = false, isDryRun = false) => {
-  if (athleteId) {
-    await migrateSingleAthlete(athleteId, isDryRun);
-  } else if (migrateAllAthletes) {
-    await migrateAllAthletes(isDryRun);
-  }
+function migrateAll(isDryRun) {
+  console.log('TO DO');
+  process.exit(0);
+}
+
+module.exports = {
+  migrateSingle,
+  migrateAll,
 };
