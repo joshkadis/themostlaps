@@ -102,10 +102,11 @@ app.prepare()
     /**
      * Connect to database and start listening
      */
-    console.log(`MONGODB_URI: ${process.env.MONGODB_URI}`);
+    console.log(`MONGODB_URI before connection: ${process.env.MONGODB_URI}`);
     mongoose.connect(process.env.MONGODB_URI);
     const db = mongoose.connection;
     db.once('open', () => {
+      console.log(`MONGODB_URI after connection: ${process.env.MONGODB_URI}`);
       console.log('Connected to database');
       server.listen(process.env.PORT, () => {
         console.log(`App listening on port ${process.env.PORT}`);
