@@ -102,6 +102,7 @@ app.prepare()
     /**
      * Connect to database and start listening
      */
+    console.log(`MONGODB_URI: ${process.env.MONGODB_URI}`);
     mongoose.connect(process.env.MONGODB_URI);
     const db = mongoose.connection;
     db.once('open', () => {
