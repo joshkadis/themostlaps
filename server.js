@@ -103,7 +103,7 @@ app.prepare()
      * Connect to database and start listening
      */
     console.log(`Connecting to MONGODB_URI${process.env.MONGODB_URI ? '' : '_STAGING'} : ${process.env.MONGODB_URI || process.env.MONGODB_URI_STAGING}`);
-    mongoose.connect(process.env.MONGODB_URI || process.env.MONGODB_URI_STAGING);
+    mongoose.connect(process.env.MONGODB_URI_STAGING);
     const db = mongoose.connection;
     db.once('open', () => {
       console.log('Connected to database');
