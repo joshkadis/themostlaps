@@ -68,11 +68,12 @@ async function getUpdatedAccessToken(
   const refresh_token = athleteDoc.get('refresh_token');
 
   // If token not migrated yet and we're not migrating now
-  // or if already migrated and we don't need to refresh
-  if (
-    (!shouldMigrateForeverToken && !refresh_token) ||
-    !shouldRefreshToken(expires_at, now)
-  ) {
+  if (!refresh_token && !shouldMigrateForeverToken) {
+    return access_token;
+  }
+
+  // if already migrated and we don't need to refresh
+  if (!shouldRefreshToken(expires_at, now)) {
     return access_token;
   }
 
