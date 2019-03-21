@@ -106,7 +106,7 @@ app.prepare()
     mongoose.connect(process.env.MONGODB_URI_STAGING);
     const db = mongoose.connection;
     db.once('open', () => {
-      console.log('Connected to database');
+      console.log(`Connected to database: ${db.name}`);
       server.listen(process.env.PORT, () => {
         console.log(`App listening on port ${process.env.PORT}`);
         if (!process.env.DISABLE_NIGHTLY_REFRESH) {
