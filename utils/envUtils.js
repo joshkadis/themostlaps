@@ -1,4 +1,4 @@
-const { prodDomain } = require('../config');
+// const { prodDomain } = require('../config');
 
 function isProduction() {
   if ('undefined' !== typeof window && window.location) {
@@ -9,6 +9,14 @@ function isProduction() {
 }
 
 function getEnvOrigin() {
+  if (
+    process &&
+    process.env &&
+    process.env.APP_DOMAIN
+  ) {
+    return `https://${process.env.APP_DOMAIN}`;
+  }
+
   if ('undefined' !== typeof window && window.location) {
     return window.location.origin;
   }

@@ -1,4 +1,4 @@
-const { prodDomain } = require('../config');
+// const { prodDomain } = require('../config');
 
 /**
  * Should API request be allowed based on hostname?
@@ -11,7 +11,7 @@ const validateApiRequest = (hostname = null, queryKey = null) => {
   let error = false;
 
   // Production domain is always ok
-  if (hostname === prodDomain) {
+  if (hostname === process.env.APP_DOMAIN) {
     return { error };
   }
 
