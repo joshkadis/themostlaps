@@ -18,13 +18,15 @@ const validateApiRequest = (hostname, queryKey = null) => {
   // localhost is ok if env var allows
   if (isLocalEnv() && process.env.ALLOW_LOCALHOST !== 'true') {
     error = `Host ${hostname} not allowed to make API requests`;
+    valid = false;
   } else if (!queryKey || queryKey !== process.env.API_KEY) {
     // other domains may have a API key
     error = 'Missing or invalid API key';
+    valid = false;
   }
 
   return {
-    false,
+    valid,
     error,
   };
 };
