@@ -17,7 +17,6 @@ module.exports = {
     9699985, // Sprint between the lights
     740668, // E Lake Drive
   ],
-  prodDomain: 'themostlaps.com',
   stravaClientId: 22415,
   breakpointPx: 800,
   refreshSchedule: {

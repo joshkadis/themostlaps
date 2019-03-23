@@ -1,5 +1,3 @@
-const { prodDomain } = require('../config');
-
 function isLocalEnv() {
   return ['localhost', '127.0.0.1'].indexOf(process.env.APP_DOMAIN) !== -1;
 }
