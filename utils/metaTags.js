@@ -1,5 +1,5 @@
 const {
-  isProduction,
+  isLocalEnv,
   getEnvOrigin,
 } = require('./envUtils');
 const { openGraph } = require('../config/content');
@@ -12,7 +12,7 @@ const { openGraph } = require('../config/content');
  */
 function getDocumentTitle(pathname) {
   // Showing pathname in page tab is slightly useful in development;
-  return isProduction() ? 'The Most Laps' : pathname;
+  return isLocalEnv() ? pathname : 'The Most Laps';
 }
 
 /**
