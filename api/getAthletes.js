@@ -32,7 +32,6 @@ async function getAthletes(idsString = '', fields = defaultAthleteFields) {
     return { error: 'Requires at least one numeric id' };
   }
 
-  console.log(Athlete.db);
   const athletes = await Athlete.find(
     {
       _id: { $in: athleteIds },
