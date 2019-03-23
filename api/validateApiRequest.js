@@ -1,4 +1,5 @@
 const { isLocalEnv } = require('../utils/envUtils');
+
 /**
  * Should API request be allowed based on hostname?
  *
