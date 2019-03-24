@@ -10,7 +10,10 @@ module.exports = withCSS({
     importLoaders: 2,
   },
   webpack: (config) => {
-    const define = new webpack.EnvironmentPlugin(['APP_DOMAIN']);
+    const define = new webpack.EnvironmentPlugin([
+      'APP_DOMAIN',
+      'PORT',
+    ]);
     config.plugins.push(define);
     return config;
   },
