@@ -12,7 +12,6 @@ const { formatSegmentEffort } = require('../athleteHistory');
 const calculateLapsFromSegmentEfforts = require('./calculateLapsFromSegmentEfforts');
 const { slackError } = require('../slackNotification');
 const Athlete = require('../../schema/Athlete');
-const fetchStravaAPI = require('../fetchStravaAPI');
 /**
  * Get distance of [lat,lng] point from park center
  *
