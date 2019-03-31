@@ -13,6 +13,7 @@ module.exports = withCSS({
     const define = new webpack.EnvironmentPlugin([
       'APP_DOMAIN',
       'PORT',
+      'CLIENT_ID',
     ]);
     config.plugins.push(define);
     return config;

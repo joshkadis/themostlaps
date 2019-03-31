@@ -1,6 +1,7 @@
 const fetch = require('isomorphic-unfetch');
 const Athlete = require('../schema/Athlete');
 const Activity = require('../schema/Activity');
+const { getUpdatedAccessToken } = require('../utils/getUpdatedAccessToken');
 
 /**
  * Delete user and their activities from the database
@@ -11,35 +12,40 @@ const Activity = require('../schema/Activity');
  */
 module.exports = async (id, shouldDeauthorize = false) => {
   try {
-    // Remove from athletes collection
-    const athleteDoc = await Athlete.findByIdAndRemove(id);
+    // Find athlete to delete
+    const athleteDoc = await Athlete.findById(id);
     if (!athleteDoc) {
       console.log(`Could not find athlete ID ${id}`);
       process.exit(0);
-    } else {
-      console.log(`Deleted user ${id} from athletes collection`);
     }
 
-    // Remove from activities collection
+    // Delete athlete's activities
     await Activity.deleteMany({ athlete_id: id });
     console.log(`Deleted user ${id}'s activities`);
 
     // Maybe deauthorize Strava API access
     if (shouldDeauthorize) {
-      const { status } = await fetch('https://www.strava.com/oauth/deauthorize', {
-        method: 'POST',
-        body: `access_token=${athleteDoc.get('access_token')}`,
-      });
+      const access_token = await getUpdatedAccessToken(athleteDoc);
+      const response = await fetch(
+        `https://www.strava.com/oauth/deauthorize?access_token=${access_token}`,
+        { method: 'POST' }
+      );
 
-      if (200 === status) {
-        console.log('Deauthorized Strava API');
+      if (200 === response.status) {
+        console.log('Deauthorized Strava app');
       } else {
-        console.log('Error deauthorizing Strava API');
+        responseJson = await response.json()
+        console.log('Error deauthorizing Strava API', responseJson);
       }
     }
 
+    // Delete athlete
+    await athleteDoc.remove();
+    console.log(`Deleted user ${id} from athletes collection`);
+
     process.exit(0);
   } catch (err) {
-    throw err;
+    console.log(err);
+    process.exit(1);
   }
 };

@@ -17,7 +17,14 @@ module.exports = {
     9699985, // Sprint between the lights
     740668, // E Lake Drive
   ],
-  stravaClientId: 22415,
+  authRequestParams: {
+    client_id: process.env.CLIENT_ID,
+    response_type: 'code',
+    scope: 'read_all,activity:read_all,profile:read_all',
+    approval_prompt: 'auto',
+    // redirect_uri must be provided
+    // state must be provided
+  },
   breakpointPx: 800,
   refreshSchedule: {
     hour: 8, // GMT
@@ -66,4 +73,7 @@ module.exports = {
       sleet: 3,
     },
   },
+  tokenExpirationBuffer: 3600,
+  stravaOauthUrl: 'https://www.strava.com/oauth',
+  tokenRefreshGrantType: 'refresh_token',
 };

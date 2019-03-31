@@ -11,7 +11,7 @@ const fetchStravaAPI = require('../fetchStravaAPI');
 const { formatSegmentEffort } = require('../athleteHistory');
 const calculateLapsFromSegmentEfforts = require('./calculateLapsFromSegmentEfforts');
 const { slackError } = require('../slackNotification');
-
+const Athlete = require('../../schema/Athlete');
 /**
  * Get distance of [lat,lng] point from park center
  *
@@ -41,9 +41,9 @@ function distFromParkCenter(latlng = null) {
  * @param {String|Document} tokenOrDoc access_token or Athlete document
  * @return {Object|false}
  */
-async function fetchActivity(activityId, tokenOrDoc, includeAllEfforts = true) {
-  const athleteDoc = await getDocFromMaybeToken(tokenOrDoc);
-  if (typeof athleteDoc === 'undefined' || !athleteDoc) {
+async function fetchActivity(activityId, token, includeAllEfforts = true) {
+  const athleteDoc = await Athlete.findOne({ access_token: token });
+  if (!athleteDoc) {
     return false;
   }
 
@@ -55,7 +55,7 @@ async function fetchActivity(activityId, tokenOrDoc, includeAllEfforts = true) {
     params
   );
 
-  if (typeof response === 'undefined' || !response) {
+  if (response.status && 200 !== response.status) {
     console.log(`Error fetching activity ${activityId}`)
     slackError(45, {
       activityId,

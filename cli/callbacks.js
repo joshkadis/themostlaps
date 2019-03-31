@@ -14,6 +14,7 @@ const { refreshAthletes } = require('../utils/scheduleNightlyRefresh');
 const { listAliases } = require('../config/email');
 const { testAthleteIds } = require('../config');
 const calculateColdLaps = require('./calculateColdLaps');
+const { migrateSingle, migrateAll } = require('./migrateAuthToken');
 
 /**
  * Prompt for admin code then connect and run command
@@ -35,6 +36,8 @@ async function doCommand(prompt, callback) {
   const db = mongoose.connection;
   db.once('open', callback);
 }
+
+const isDryRun = (argv) => argv.dryRun || argv.dryrun || false;
 
 const callbackDeleteUser = async ({ user, deauthorize }) => {
   await doCommand(
@@ -151,7 +154,6 @@ const callbackRefreshBatch = async ({ limit, skip, activities }) => {
 };
 
 const callbackUpdateSubscriptions = async (argv) => {
-  const dryRun = argv.dryRun || arv.dryrun;
   await doCommand(
     `Enter admin code to update user subscription statuses`,
     async () => {
@@ -176,7 +178,7 @@ const callbackUpdateSubscriptions = async (argv) => {
 
         result[`${shouldBeSubscribed ? 's' : 'notS'}ubscribed`]++;
 
-        if (!dryRun) {
+        if (!isDryRun(argv)) {
           await athleteDoc.save();
         }
       }
@@ -188,18 +190,40 @@ const callbackUpdateSubscriptions = async (argv) => {
 };
 
 const callbackRetryWebhooks = async (argv) => {
-  const dryRun = argv.dryRun || arv.dryrun;
   await doCommand(
     `Enter admin code to reimport failed activities since ${argv.startdate}.`,
-    () => retryWebhooks(argv.startdate, dryRun),
+    () => retryWebhooks(argv.startdate, isDryRun(argv)),
   );
 };
 
 const callbackColdLaps = async (argv) => {
-  const dryRun = argv.dryRun || arv.dryrun;
   await doCommand(
     `Enter admin code to recalculate Cold Laps for all athletes.`,
-    () => calculateColdLaps(argv.startactivity, dryRun),
+    () => calculateColdLaps(argv.startactivity, isDryRun(argv)),
+  );
+};
+
+const callbackMigrateToken = async (argv) => {
+  if (!argv.athlete && !argv.allAthletes) {
+    console.log('You must provide an athlete ID or use the --all-athletes flag.')
+    process.exit(0);
+  }
+
+  if (argv.athlete && argv.allAthletes) {
+    console.log('You may not use an athlete ID and the --all-athletes flag at the same time.')
+    process.exit(0);
+  }
+
+  _migrate = () => {
+    if (argv.allAthletes) {
+      return migrateAll(isDryRun(argv));
+    }
+    return migrateSingle(argv.athlete, isDryRun(argv));
+  };
+
+  await doCommand(
+    'Enter admin code to migrate auth token',
+    _migrate
   );
 };
 
@@ -214,4 +238,5 @@ module.exports = {
   callbackUpdateSubscriptions,
   callbackRetryWebhooks,
   callbackColdLaps,
+  callbackMigrateToken,
 };
