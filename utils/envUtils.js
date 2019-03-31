@@ -1,32 +1,16 @@
-const { prodDomain } = require('../config');
-
-function _hasWindowOrigin() {
-  try {
-    return window.location.origin.indexOf('http') === 0;
-  } catch (err) {
-    return false;
-  }
-};
-
-function isProduction() {
-  if (_hasWindowOrigin()) {
-    return prodDomain === window.location.host;
-  }
-
-  return 'production' === process.env.NODE_ENV;
+function isLocalEnv() {
+  return ['localhost', '127.0.0.1'].indexOf(process.env.APP_DOMAIN) !== -1;
 }
 
 function getEnvOrigin() {
-  if (_hasWindowOrigin()) {
-    return window.location.origin;
-  }
-
-  return isProduction() ?
-    `https://${prodDomain}` :
-    `http://localhost:${process.env.PORT}`;
+  const protocol = isLocalEnv() ? 'http' : 'https';
+  const port = isLocalEnv() && process.env.PORT ?
+    `:${process.env.PORT}` :
+    '';
+  return `${protocol}://${process.env.APP_DOMAIN}${port}`;
 }
 
 module.exports = {
-  isProduction,
+  isLocalEnv,
   getEnvOrigin,
 };

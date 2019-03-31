@@ -1,12 +1,13 @@
 const fetch = require('isomorphic-unfetch');
 const { getDistance } = require('geolib');
 const {
-  apiUrl,
   minDistance,
   allowedRadius,
   parkCenter,
   lapSegmentId,
 } = require('../../config');
+const { getDocFromMaybeToken } = require('../athleteUtils');
+const fetchStravaAPI = require('../fetchStravaAPI');
 const { formatSegmentEffort } = require('../athleteHistory');
 const calculateLapsFromSegmentEfforts = require('./calculateLapsFromSegmentEfforts');
 const { slackError } = require('../slackNotification');
@@ -38,12 +39,15 @@ function distFromParkCenter(latlng = null) {
  * Fetch single activity from Strava API
  *
  * @param {Number} activityId
- * @param {String} token
- * @return {Object}
+ * @param {String|Document} tokenOrDoc access_token or Athlete document
+ * @return {Object|false}
  */
 async function fetchActivity(activityId, token, includeAllEfforts = true) {
   const athleteDoc = await Athlete.findOne({ access_token: token });
-  const url = `${apiUrl}/activities/${activityId}${includeAllEfforts ? '?include_all_efforts=true' : ''}`;
+  if (!athleteDoc) {
+    return false;
+  }
+
   const params = includeAllEfforts ? { include_all_efforts: true } : false;
 
   const response = await fetchStravaAPI(
@@ -58,10 +62,10 @@ async function fetchActivity(activityId, token, includeAllEfforts = true) {
       activityId,
       status: response.status,
     });
-    return allActivities;
+    return false;
   }
 
-  return activity;
+  return response;
 }
 
 /**

@@ -29,14 +29,8 @@ async function refreshAthleteProfile(athlete) {
   // @note Removed email after Strava API change, Jan 2019
   // @note Use new token refresh logic
   try {
-    const {
-      firstname,
-      lastname,
-      profile,
-    } = await fetchStravaAPI(
-      '/athlete/',
-      athleteDoc.get('access_token')
-    );
+    const athleteResult = await fetchStravaAPI('/athlete/', athleteDoc);
+    const { firstname, lastname, profile } = athleteResult;
 
     console.log(`Updating ${firstname} ${lastname} (${athleteDoc.get('_id')})`);
 

@@ -13,8 +13,8 @@ const getSearchUsers = require('./getSearchUsers');
  */
 async function handleAPIRequest(req, res, fetchData) {
   const validation = validateApiRequest(req.hostname, req.query.key || null);
-  if (validation.error) {
-    res.status(403).json(validation.error);
+  if(!validation.valid || validation.error) {
+    res.status(403).json(validation.error || 'unknown validation error');
     return;
   }
 

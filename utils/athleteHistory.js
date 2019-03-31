@@ -8,16 +8,15 @@ const fetchStravaAPI = require('./fetchStravaAPI');
 
 /**
  * Iterate though paginated history of segment efforts and concatenate
- * @param {String} token
- * @param {Number} athleteId
+ * @param {Document} athleteDoc
  * @param {Number} page
  * @param {Array} allEfforts
  * @return {Array}
  */
-async function getLapEffortsHistory(token, athleteId, page = 1, allEfforts = []) {
-  const athleteDoc = await Athlete.findById(athleteId)
+async function getLapEffortsHistory(athleteDoc, page = 1, allEfforts = []) {
+  const athleteId = athleteDoc.get('_id');
 
-  const response  = await fetchStravaAPI(
+  const efforts  = await fetchStravaAPI(
     `/segments/${lapSegmentId}/all_efforts`,
     athleteDoc,
     {
@@ -27,25 +26,24 @@ async function getLapEffortsHistory(token, athleteId, page = 1, allEfforts = [])
     }
   );
 
-  if (response.status && 200 !== response.status) {
-    console.log(`Error fetching ${url}`)
+  if (efforts.status && 200 !== efforts.status) {
+    console.log(`Error getLapEffortsHistory: ${athleteId}`);
     slackError(45, {
       athleteId,
-      url,
-      status: response.status,
+      path: `/segments/${lapSegmentId}/all_efforts`,
+      page,
     });
     return allEfforts;
   }
 
-  if (!response.length) {
+  if (!efforts.length) {
     return allEfforts;
   }
 
   return await getLapEffortsHistory(
-    token,
-    athleteId,
+    athleteDoc,
     (page + 1),
-    allEfforts.concat(response)
+    allEfforts.concat(efforts)
   );
 }
 
@@ -111,11 +109,7 @@ function getActivitiesFromEfforts(efforts, source = 'signup') {
  * @return {Array} List of activities for athlete
  */
 async function fetchAthleteHistory(athlete) {
-  // @note Use new token refresh logic
-  const lapEfforts = await getLapEffortsHistory(
-    athlete.get('access_token'),
-    athlete.get('_id')
-  );
+  const lapEfforts = await getLapEffortsHistory(athlete);
 
   if (!lapEfforts || !lapEfforts.length) {
     return [];

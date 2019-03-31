@@ -5,7 +5,7 @@ const config = require('../../config');
 const { getEpochSecondsFromDateObj } = require('../athleteUtils');
 const { activityCouldHaveLaps } = require('./utils');
 const { slackError } = require('../slackNotification');
-const fetchStravaAPI = require('../../utils/fetchStravaAPI');
+const fetchStravaAPI = require('../fetchStravaAPI');
 
 /**
  * Get all of a user's activities by iterating recursively over paginated API results
@@ -23,13 +23,14 @@ async function fetchAllAthleteActivities(
   allActivities = [],
   verbose = false
 ) {
+  const pathName = '/athlete/activities';
   if (verbose) {
-    console.log(`Fetching /athlete/activities for ${athleteDoc.get('_id')}`);
+    console.log(`Fetching ${pathName} for ${athleteDoc.get('_id')}`);
   }
 
   // @note Use new token refresh logic
   const response = await fetchStravaAPI(
-    '/athlete/activities',
+    pathName,
     athleteDoc,
     {
       after: afterTimestamp,
@@ -42,13 +43,10 @@ async function fetchAllAthleteActivities(
     console.log(`Error ${response.status} fetching /athlete/activities in fetchAthleteActivities`)
     await slackError(45, {
       athleteId: athleteDoc.get('_id'),
-      url,
-      status: response.status,
+      pathName,
     });
     return allActivities;
   }
-
-  const activities = await response.json();
 
   if (activities.length < config.apiPerPage) {
     return allActivities.concat(activities);

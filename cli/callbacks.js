@@ -80,10 +80,10 @@ const callbackRefreshUser = async ({ user, daysago }) => {
   );
 }
 
-const callbackActivityInfo = async ({ user, activity }) => {
+const callbackActivityInfo = async ({ user, activity, fetch }) => {
   await doCommand(
-    `Enter admin code to fetch details for user ${user} activity ${activity}.`,
-    () => getActivityInfo(user, activity)
+    false,
+    () => getActivityInfo(user, activity, fetch)
   );
 }
 
@@ -191,7 +191,7 @@ const callbackUpdateSubscriptions = async (argv) => {
 
 const callbackRetryWebhooks = async (argv) => {
   await doCommand(
-    `Enter admin code to reimport failed activities since ${startdate}.`,
+    `Enter admin code to reimport failed activities since ${argv.startdate}.`,
     () => retryWebhooks(argv.startdate, isDryRun(argv)),
   );
 };

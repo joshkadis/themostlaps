@@ -41,7 +41,7 @@ async function fetchStravaAPI(endpoint, athleteDoc, params = false) {
     }
   );
 
-  if (200 !== response.status) {
+  if (response.status && 200 !== response.status) {
     let attemptedAthleteId = null;
     let attemptedAthleteDoc = false;
 
@@ -75,7 +75,7 @@ async function fetchStravaAPI(endpoint, athleteDoc, params = false) {
         status: response.status,
       });
     }
-    throw new Error(`Error fetching ${url} for athlete ${attemptedAthleteId}`);
+    throw new Error(`${response.status} error fetching ${url} for athlete ${attemptedAthleteId}`);
     return response;
   }
 

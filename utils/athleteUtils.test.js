@@ -1,5 +1,10 @@
+require('dotenv').config();
+const mongoose = require('mongoose');
+const Mockgoose = require('mockgoose').Mockgoose;
+const Athlete = require('../schema/Athlete');
 const {
   getEpochSecondsFromDateObj,
+  getDocFromMaybeToken
 } = require('./athleteUtils');
 
 test('getEpochSecondsFromDateObj', () => {
@@ -14,3 +19,47 @@ test('getEpochSecondsFromDateObj', () => {
   expect(getEpochSecondsFromDateObj(dateLocal)).toBe(localTimestamp);
 });
 
+/**
+  Test hangs on fail
+  see  https://github.com/Mockgoose/Mockgoose/issues/75#issuecomment-444312930
+  should switch to https://github.com/nodkz/mongodb-memory-server/
+**/
+test('getDocFromMaybeToken', async () => {
+  const athlete = new Athlete({ _id: 1, access_token: 'my_token' });
+  expect(athlete instanceof mongoose.Document).toBe(true);
+
+  let expected = await getDocFromMaybeToken(athlete);
+  expect(expected instanceof mongoose.Document).toBe(true);
+  expect(expected.get('access_token')).toBe('my_token');
+
+  expected = await getDocFromMaybeToken(20);
+  expect(expected).toBe(null);
+
+  expected = await getDocFromMaybeToken({ hello: 'there' });
+  expect(expected).toBe(null);
+
+  const mockgoose = new Mockgoose(mongoose);
+  await mockgoose.prepareStorage();
+  mongoose.connect('mongodb://testing.com/jestdb');
+  const db = mongoose.connection;
+
+  expect(mockgoose.helper.isMocked()).toBe(true);
+
+  db.on('close', () => {
+    process.exit(0);
+  });
+
+  db.once('open', async () => {
+    // Save model then find in DB then delete
+    await athlete.save({ validateBeforeSave: false });
+    const found = await getDocFromMaybeToken('my_token');
+
+    expect(found instanceof mongoose.Document).toBe(true);
+    expect(found.get('_id')).toBe(1);
+    expect(found.get('access_token')).toBe('my_token');
+
+    const notFound = await getDocFromMaybeToken('not_a_real_token');
+    expect(notFound).toBe(null);
+    db.close();
+  });
+});
