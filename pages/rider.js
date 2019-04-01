@@ -50,6 +50,8 @@ class Rider extends Component {
     });
 
     this.state = this.defaultState;
+
+    // @todo Default this.state.chartProps that update after state change
   }
 
   componentWillReceiveProps(nextProps) {
