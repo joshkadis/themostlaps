@@ -280,6 +280,7 @@ class Rider extends Component {
             onClickBack={() => this.onSelectYear('all')}
             onChange={this.onChangeSearchUsers}
             onChartRendered={this.onChartRendered}
+            primaryId={parseInt(query.athleteId, 10)}
           />)
         }
         {this.state.chartRendered &&
