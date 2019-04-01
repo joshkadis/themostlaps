@@ -28,10 +28,17 @@ async function refreshAccessToken(access_token, refresh_token, now = null) {
     refresh_token: refresh_token ? refresh_token : access_token,
   };
 
-  const response = await fetch(
-    `${stravaOauthUrl}/token?${stringify(params)}`,
-    { method: 'POST' }
-  );
+  let response;
+  try {
+    response = await fetch(
+      `${stravaOauthUrl}/token?${stringify(params)}`,
+      { method: 'POST' }
+    );
+  } catch (err) {
+    console.log(err);
+    slackError(120, { error: err.message });
+    return false;
+  }
 
   if (!response || response.status !== 200) {
     const current_time = now || (Date.now() / 1000);
