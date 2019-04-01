@@ -218,7 +218,7 @@ const callbackMigrateToken = async (argv) => {
     if (argv.allAthletes) {
       return migrateAll(isDryRun(argv));
     }
-    return migrateSingle(argv.athlete, isDryRun(argv));
+    return migrateSingle(argv.athlete, isDryRun(argv), argv.refresh);
   };
 
   await doCommand(
