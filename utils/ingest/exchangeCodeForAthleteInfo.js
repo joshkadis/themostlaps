@@ -3,6 +3,9 @@ const { stringify } = require('querystring');
 const {
   getErrorResponseObject,
 } = require('./utils');
+const {
+  stravaOauthUrl,
+} = require('../../config')
 
 /**
  * Get query string for token request with oAuth code
@@ -26,7 +29,7 @@ function getTokenRequestBody(code) {
  */
 async function exchangeCodeForAthleteInfo(code) {
   try {
-    const response = await fetch('https://www.strava.com/oauth/token', {
+    const response = await fetch(`${stravaOauthUrl}/token`, {
       method: 'POST',
       body: getTokenRequestBody(code),
     });
@@ -35,13 +38,14 @@ async function exchangeCodeForAthleteInfo(code) {
       return getErrorResponseObject(20);
     }
 
-    athlete = await response.json();
+    const tokenExchangeResponse = await response.json();
 
-    if (!athlete || !athlete.access_token) {
-      return getErrorResponseObject(30, athlete);
+    // @note Use new token refresh logic
+    if (!tokenExchangeResponse || !tokenExchangeResponse.access_token) {
+      return getErrorResponseObject(30, tokenExchangeResponse);
     }
 
-    return athlete;
+    return tokenExchangeResponse;
   } catch (err) {
     return getErrorResponseObject(40);
   }

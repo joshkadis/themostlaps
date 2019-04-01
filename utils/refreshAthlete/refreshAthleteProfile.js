@@ -18,11 +18,16 @@ async function refreshAthleteProfile(athlete) {
   }
 
   if (athleteDoc.get('status') === 'deauthorized') {
-    console.log(`Athlete ${athlete} is deauthorized`);
+    const {
+      athlete: { firstname, lastname },
+      _id
+    } = athleteDoc.toJSON();
+    console.log(`${firstname} ${lastname} (${_id}) is already deauthorized`);
     return null;
   }
 
   // @note Removed email after Strava API change, Jan 2019
+  // @note Use new token refresh logic
   try {
     const athleteResult = await fetchStravaAPI('/athlete/', athleteDoc);
     const { firstname, lastname, profile } = athleteResult;

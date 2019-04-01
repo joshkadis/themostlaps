@@ -104,6 +104,37 @@ function getSlackSuccessMessage(athleteDoc) {
 }
 
 /**
+  If an existing athlete is found with this access code, update it
+
+  @param {Object} tokenExchangeResponse Response from token exchange process
+  @return {Boolean}
+**/
+async function didUpdateAthleteAccessToken(tokenExchangeResponse) {
+  const {
+    athlete,
+    access_token
+  } = tokenExchangeResponse;
+
+  // If existing athlete with this ID and access_token is unchanged
+  const athleteDoc = await Athlete.find({ access_token });
+  if (athleteDoc) {
+    return false;
+  }
+
+  // Update access_token and refresh athlete activities + stats
+  console.log(`Updating access token for ${getSlackSuccessMessage(athleteDoc)}`);
+  athleteDoc.set('access_token', access_token)
+  const updatedAthleteDoc = await athleteDoc.save();
+
+  res.redirect(303, `/rider/${athlete.id}?updated=1`);
+  await refreshAthlete(updatedAthleteDoc);
+  console.log(`Updated access token for ${getSlackSuccessMessage(updatedAthleteDoc)}`);
+  slackSuccess('Updated access token', getSlackSuccessMessage(updatedAthleteDoc));
+
+  return true;
+}
+
+/**
  * Handle OAuth callback from signup
  *
  * @param {Next} app Next.js application
@@ -120,51 +151,48 @@ async function handleSignupCallback(req, res) {
   }
 
   // Get athlete profile info
-  const athleteInfo = await exchangeCodeForAthleteInfo(req.query.code);
-  if (athleteInfo.errorCode) {
-    handleSignupError(athleteInfo.errorCode, athleteInfo.athlete || false);
+  const tokenExchangeResponse = await exchangeCodeForAthleteInfo(req.query.code);
+
+  // For some reason had 'errorCode' before and it never caused a problem
+  const error_code = tokenExchangeResponse.error_code || tokenExchangeResponse.errorCode;
+  if (error_code) {
+    handleSignupError(error_code, tokenExchangeResponse.athlete || false);
     return;
   }
 
   // Create athlete record in database or update access_token
   let athleteDoc;
   try {
-    const existingAthleteDoc = await Athlete.findById(athleteInfo.athlete.id);
-    if (existingAthleteDoc &&
-      athleteInfo.access_token !== existingAthleteDoc.get('access_token')
-    ) {
-      // Update access_token and refresh athlete activities + stats
-      console.log(`Updating access token for ${getSlackSuccessMessage(existingAthleteDoc)}`);
-      existingAthleteDoc.set('access_token', athleteInfo.access_token)
-      const updatedAthleteDoc = await existingAthleteDoc.save();
-      res.redirect(303, `/rider/${athleteInfo.athlete.id}?updated=1`);
-      await refreshAthlete(updatedAthleteDoc);
-      console.log(`Updated access token for ${getSlackSuccessMessage(updatedAthleteDoc)}`);
-      slackSuccess('Updated access token', getSlackSuccessMessage(updatedAthleteDoc));
+    const updatedAthleteToken = await didUpdateAthleteAccessToken(tokenExchangeResponse);
+    if (updatedAthleteToken) {
       return;
     }
 
-    athleteDoc = await Athlete.create(
-      getAthleteModelFormat(athleteInfo, shouldSubscribe(req.query))
-    );
+    const formattedAthleteData =
+      getAthleteModelFormat(tokenExchangeResponse, shouldSubscribe(req.query));
+    if (!formattedAthleteData) {
+      return;
+    }
+    athleteDoc = await Athlete.create(formattedAthleteData);
     console.log(`Saved ${athleteDoc.get('_id')} to database`);
   } catch (err) {
     const errCode = -1 !== err.message.indexOf('duplicate key') ? 50 : 55;
-    handleSignupError(errCode, athleteInfo.athlete || false);
+    console.log(err, tokenExchangeResponse);
+    handleSignupError(errCode, tokenExchangeResponse.athlete || false);
     return;
   }
 
   // Render the welcome page, athlete status will be 'ingesting'
   res.redirect(303, `/welcome?${stringify({
-    id: athleteInfo.athlete.id,
+    id: tokenExchangeResponse.athlete.id,
   })}`);
 
   // Fetch athlete history
   let athleteHistory;
   try {
-    athleteHistory = await fetchAthleteHistory(athleteDoc);
+    athleteHistory = await fetchAthleteHistory(athleteDoc, true);
   } catch (err) {
-    await handleActivitiesIngestError(athleteDoc, 70);
+    await handleActivitiesIngestError(athleteDoc, 70, err);
     return;
   }
 

@@ -10,7 +10,9 @@ const {
   callbackUpdateSubscriptions,
   callbackRetryWebhooks,
   callbackColdLaps,
+  callbackMigrateToken,
 } = require ('./cli/callbacks');
+
 const { coldLapsPoints: { startActivity } } = require('./config');
 
 function createPositionals(...args) {
@@ -141,5 +143,14 @@ const argv = require('yargs')
       ['dry-run', { type: 'boolean', default: false }],
     ),
     async (argv) => await callbackColdLaps(argv),
+  ).command(
+    'migratetoken athlete [--dry-run] [--refresh]',
+    false,
+    createPositionals(
+      ['athlete', { type: 'number' }],
+      ['dry-run', { type: 'boolean', default: false }],
+      ['refresh', { type: 'boolean', default: false }],
+    ),
+    async (argv) => await callbackMigrateToken(argv),
   )
   .argv;
