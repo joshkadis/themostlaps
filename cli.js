@@ -144,11 +144,10 @@ const argv = require('yargs')
     ),
     async (argv) => await callbackColdLaps(argv),
   ).command(
-    'migratetoken [athlete] [--all-athletes] [--dry-run] [--refresh]',
+    'migratetoken athlete [--dry-run] [--refresh]',
     false,
     createPositionals(
-      ['athlete', { type: 'number', default: null }],
-      ['all-athletes', { type: 'boolean', default: false }],
+      ['athlete', { type: 'number' }],
       ['dry-run', { type: 'boolean', default: false }],
       ['refresh', { type: 'boolean', default: false }],
     ),

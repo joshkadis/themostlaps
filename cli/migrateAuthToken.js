@@ -23,9 +23,13 @@ async function migrateSingle(athleteId, isDryRun, forceRefresh = false) {
         );
       } else {
         console.log('Refreshing access_token');
-        const refreshed = await getUpdatedAccessToken(athleteDoc);
-        if (refreshed) {
-          console.log('Access token successfully refreshed');
+        if (!isDryRun) {
+          const refreshed = await getUpdatedAccessToken(athleteDoc);
+          if (refreshed) {
+            console.log('Access token successfully refreshed');
+          }
+        } else {
+          console.log('Dry run, exiting.')
         }
       }
       process.exit(0);
@@ -60,12 +64,6 @@ async function migrateSingle(athleteId, isDryRun, forceRefresh = false) {
     process.exit(0);
 }
 
-function migrateAll(isDryRun) {
-  console.log('TO DO');
-  process.exit(0);
-}
-
 module.exports = {
   migrateSingle,
-  migrateAll,
 };
