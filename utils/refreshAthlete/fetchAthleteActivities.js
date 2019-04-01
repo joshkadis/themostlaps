@@ -29,7 +29,7 @@ async function fetchAllAthleteActivities(
   }
 
   // @note Use new token refresh logic
-  const response = await fetchStravaAPI(
+  const activities = await fetchStravaAPI(
     pathName,
     athleteDoc,
     {
@@ -39,8 +39,8 @@ async function fetchAllAthleteActivities(
     }
   );
 
-  if (response.status && 200 !== response.status) {
-    console.log(`Error ${response.status} fetching /athlete/activities in fetchAthleteActivities`)
+  if (activities.status && 200 !== activities.status) {
+    console.log(`Error ${activities.status} fetching /athlete/activities in fetchAthleteActivities`)
     await slackError(45, {
       athleteId: athleteDoc.get('_id'),
       pathName,
