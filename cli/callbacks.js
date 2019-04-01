@@ -14,7 +14,7 @@ const { refreshAthletes } = require('../utils/scheduleNightlyRefresh');
 const { listAliases } = require('../config/email');
 const { testAthleteIds } = require('../config');
 const calculateColdLaps = require('./calculateColdLaps');
-const { migrateSingle, migrateAll } = require('./migrateAuthToken');
+const { migrateSingle } = require('./migrateAuthToken');
 
 /**
  * Prompt for admin code then connect and run command
@@ -204,26 +204,9 @@ const callbackColdLaps = async (argv) => {
 };
 
 const callbackMigrateToken = async (argv) => {
-  if (!argv.athlete && !argv.allAthletes) {
-    console.log('You must provide an athlete ID or use the --all-athletes flag.')
-    process.exit(0);
-  }
-
-  if (argv.athlete && argv.allAthletes) {
-    console.log('You may not use an athlete ID and the --all-athletes flag at the same time.')
-    process.exit(0);
-  }
-
-  _migrate = () => {
-    if (argv.allAthletes) {
-      return migrateAll(isDryRun(argv));
-    }
-    return migrateSingle(argv.athlete, isDryRun(argv));
-  };
-
   await doCommand(
     'Enter admin code to migrate auth token',
-    _migrate
+    () => migrateSingle(argv.athlete, isDryRun(argv), argv.refresh),
   );
 };
 

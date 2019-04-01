@@ -4,7 +4,7 @@ const {
   shouldRefreshToken,
 } = require('../utils/getUpdatedAccessToken');
 
-async function migrateSingle(athleteId, isDryRun) {
+async function migrateSingle(athleteId, isDryRun, forceRefresh = false) {
     // Check that Athlete exists
     const athleteDoc = await Athlete.findById(athleteId);
     if (!athleteDoc) {
@@ -16,10 +16,22 @@ async function migrateSingle(athleteId, isDryRun) {
     const refreshToken = athleteDoc.get('refresh_token');
     const expiresAt = athleteDoc.get('expires_at');
     if (expiresAt > 0 && refreshToken.length) {
-      console.log(shouldRefreshToken(expiresAt) ?
-        'Athlete token already migrated but has expired.' :
-        'Athlete token already migrated and has not yet expired.'
-      );
+      if (!forceRefresh) {
+        console.log(shouldRefreshToken(expiresAt) ?
+          'Athlete token already migrated but has expired.' :
+          'Athlete token already migrated and has not yet expired.'
+        );
+      } else {
+        console.log('Refreshing access_token');
+        if (!isDryRun) {
+          const refreshed = await getUpdatedAccessToken(athleteDoc);
+          if (refreshed) {
+            console.log('Access token successfully refreshed');
+          }
+        } else {
+          console.log('Dry run, exiting.')
+        }
+      }
       process.exit(0);
     }
 
@@ -52,12 +64,6 @@ async function migrateSingle(athleteId, isDryRun) {
     process.exit(0);
 }
 
-function migrateAll(isDryRun) {
-  console.log('TO DO');
-  process.exit(0);
-}
-
 module.exports = {
   migrateSingle,
-  migrateAll,
 };
