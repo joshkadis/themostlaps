@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+require('dotenv').config();
 const {
   callbackDeleteUser,
   callbackDeleteUserActivities,
