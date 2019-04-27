@@ -208,7 +208,7 @@ const callbackColdLaps = async (argv) => {
 const callbackMigrateToken = async (argv) => {
   await doCommand(
     'Enter admin code to migrate auth token',
-    () => migrateSingle(argv.athlete, isDryRun(argv), argv.refresh),
+    () => migrateSingle(argv.athlete, argv.find, isDryRun(argv), argv.refresh),
   );
 };
 

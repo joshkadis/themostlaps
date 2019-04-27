@@ -1,3 +1,4 @@
+const JSON = require('JSON');
 const Athlete = require('../schema/Athlete');
 const {
   getUpdatedAccessToken,
@@ -5,6 +6,33 @@ const {
 } = require('../utils/getUpdatedAccessToken');
 
 async function migrateSingle(athleteId, isDryRun, forceRefresh = false) {
+async function migrateMany(findString, isDryRun, forceRefresh = false) {
+  let query;
+  try {
+    query = JSON.parse(findString);
+  } catch (err) {
+    console.error(`Malformed JSON input: "${findString}"`);
+    process.exit(0);
+  }
+
+  let athletes;
+  try {
+    athletes = await Athlete.find(query);
+  } catch (err) {
+    console.error(`Athlete.find failed, check input: "${findString}"`);
+    process.exit(0);
+  }
+
+  if (!athletes.length) {
+    console.log(`No results for query: "${findString}"`);
+    process.exit(0);
+  }
+
+  for (let i = 0; i < athletes.length; i++) {
+    await migrateSingle(athletes[1].get('id'), isDryRun, forceRefresh);
+  }
+}
+
     // Check that Athlete exists
     const athleteDoc = await Athlete.findById(athleteId);
     if (!athleteDoc) {
