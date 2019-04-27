@@ -220,7 +220,7 @@ const callbackMigrateToken = async (argv) => {
       if (athlete && find) {
         console.log('Cannot use athlete ID and find query simultaneously');
         process.exit(0);
-      } else if (athlete)
+      } else if (athlete) {
         migrateSingle(athlete, isDryRun(argv), refresh);
       } else if (find) {
         migrateMany(find, isDryRun(argv), refresh);
