@@ -21,7 +21,6 @@ async function fetchStravaAPI(endpoint, athleteDoc, params = false) {
   } else {
     // Get access_token using `forever token` or new auth logic
     const shouldMigrateOnFetch = process.env.SHOULD_MIGRATE_ON_FETCH;
-    console.log(`Getting access_token${shouldMigrateOnFetch ? ' will migrate if required' : ''}`)
     access_token = await getUpdatedAccessToken(athleteDoc, shouldMigrateOnFetch);
     if (!access_token) {
       return {};
