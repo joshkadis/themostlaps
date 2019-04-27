@@ -5,7 +5,6 @@ const {
   shouldRefreshToken,
 } = require('../utils/getUpdatedAccessToken');
 
-async function migrateSingle(athleteId, isDryRun, forceRefresh = false) {
 async function migrateMany(findString, isDryRun, forceRefresh = false) {
   let query;
   try {
@@ -17,7 +16,7 @@ async function migrateMany(findString, isDryRun, forceRefresh = false) {
 
   let athletes;
   try {
-    athletes = await Athlete.find(query);
+    athletes = await Athlete.find(query, '_id');
   } catch (err) {
     console.error(`Athlete.find failed, check input: "${findString}"`);
     process.exit(0);
@@ -29,10 +28,12 @@ async function migrateMany(findString, isDryRun, forceRefresh = false) {
   }
 
   for (let i = 0; i < athletes.length; i++) {
-    await migrateSingle(athletes[1].get('id'), isDryRun, forceRefresh);
+    console.log(`Migrating athlete: ${JSON.stringify(athletes[i])}`)
+    await migrateSingle(athletes[i]._id, isDryRun, forceRefresh);
   }
 }
 
+async function migrateSingle(athleteId, isDryRun, forceRefresh = false) {
     // Check that Athlete exists
     const athleteDoc = await Athlete.findById(athleteId);
     if (!athleteDoc) {
