@@ -28,16 +28,25 @@ async function migrateMany(findString, isDryRun, forceRefresh = false) {
 
   console.log(`Found ${athletes.length} athletes${"\n"}---------------${"\n"}`);
 
+  let succeeded = 0;
+  let failed = 0;
   for (let i = 0; i < athletes.length; i++) {
     console.log(`Migrating athlete: ${JSON.stringify(athletes[i])}`);
-    await migrateSingle(
+    const didMigrate = await migrateSingle(
       athletes[i]._id,
       isDryRun,
       forceRefresh,
       true // return instead exiting process
     );
+    if (didMigrate) {
+      succeeded += 1;
+    } else {
+      failed += 1;
+    }
     console.log("--------------------\n");
   }
+  console.log(`Found ${athletes.length}${"\n"}migrated ${succeeded}${"\n"}${failed} errors`);
+  process.exit(0);
 }
 
 async function migrateSingle(
@@ -59,7 +68,7 @@ async function migrateSingle(
   if (!athleteDoc) {
     console.log(`❌ Could not locate athlete ${athleteId}`);
     maybeExitProcess();
-    return;
+    return false;
   }
 
   // Check if token has been migrated; refresh if needed
@@ -83,7 +92,7 @@ async function migrateSingle(
       }
     }
     maybeExitProcess();
-    return;
+    return false;
   }
 
   const oldAccessToken = athleteDoc.get('access_token');
@@ -92,14 +101,14 @@ async function migrateSingle(
   if (isDryRun) {
     console.log('dry run, exiting');
     maybeExitProcess();
-    return;
+    return true;
   }
 
   const receivedAccessToken = await getUpdatedAccessToken(athleteDoc, true);
   if (!receivedAccessToken) {
     console.log('❌ getUpdatedAccessToken failed');
     maybeExitProcess();
-    return;
+    return false;
   }
 
   console.log(`Received new access token: ${receivedAccessToken}`);
@@ -115,7 +124,7 @@ async function migrateSingle(
   console.log(`✅ Refresh token expires at ${expirationDate.toString()}`);
 
   maybeExitProcess();
-  return;
+  return true;
 }
 
 module.exports = {
