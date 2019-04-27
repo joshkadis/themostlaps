@@ -66,6 +66,9 @@ const callbackRefreshUser = async ({ user, daysago }) => {
       if (!athleteDoc) {
         console.log(`User ${user} not found`)
         process.exit(0);
+      } else if (athleteDoc.get('status') === 'deauthorized') {
+        console.log(`User ${user} is deauthorized`)
+        process.exit(0);
       }
       await refreshAthlete(
         athleteDoc,
