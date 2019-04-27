@@ -118,4 +118,5 @@ async function migrateSingle(
 
 module.exports = {
   migrateSingle,
+  migrateMany,
 };
