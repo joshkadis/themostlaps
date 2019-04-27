@@ -26,13 +26,15 @@ async function migrateMany(findString, isDryRun, forceRefresh = false) {
     process.exit(0);
   }
 
+  console.log(`Found ${athletes.length} athletes${"\n"}---------------${"\n"}`);
+
   for (let i = 0; i < athletes.length; i++) {
     console.log(`Migrating athlete: ${JSON.stringify(athletes[i])}`);
     await migrateSingle(
       athletes[i]._id,
       isDryRun,
       forceRefresh,
-      false // return instead exiting process
+      true // return instead exiting process
     );
     console.log("--------------------\n");
   }
@@ -42,14 +44,14 @@ async function migrateSingle(
   athleteId,
   isDryRun,
   forceRefresh = false,
-  shouldExitProcess = true,
+  shouldReturn = false,
 ) {
   // Conditionally end process
   const maybeExitProcess = () => {
-    if (shouldExitProcess) {
-      process.exit(0);
+    if (shouldReturn) {
+      return;
     }
-    return;
+    process.exit(0);
   };
 
   // Check that Athlete exists
@@ -95,7 +97,7 @@ async function migrateSingle(
 
   const receivedAccessToken = await getUpdatedAccessToken(athleteDoc, true);
   if (!receivedAccessToken) {
-    console.log('❌ getUpdatedAccessToken failed')
+    console.log('❌ getUpdatedAccessToken failed');
     maybeExitProcess();
     return;
   }
