@@ -1,4 +1,3 @@
-maybeExitProcess();return;const JSON = require('JSON');
 const Athlete = require('../schema/Athlete');
 const {
   getUpdatedAccessToken,
