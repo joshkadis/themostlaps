@@ -113,21 +113,27 @@ async function migrateSingle(
   const receivedAccessToken = await getUpdatedAccessToken(athleteDoc, true);
   if (!receivedAccessToken) {
     console.log('❌ getUpdatedAccessToken failed');
-    maybeExitProcess();
-    return false;
+    process.exit(0);
   }
 
   console.log(`Received new access token: ${receivedAccessToken}`);
 
   const newAthleteDoc = await Athlete.findById(athleteId);
-  console.log(receivedAccessToken === newAthleteDoc.get('access_token') ?
-    '✅ Received token matches saved token' :
-    `❌ Saved token ()${newAthleteDoc.get('refresh_token')}) does not match received token`
-  );
+  if (receivedAccessToken === newAthleteDoc.get('access_token')) {
+    console.log('✅ Received token matches saved token');
+  } else {
+    console.log(`❌ Saved token ${newAthleteDoc.get('access_token')} does not match received token`);
+    process.exit(0);
+  }
 
-  const newExpiresAt = newAthleteDoc.get('expires_at');
-  const expirationDate = new Date(newExpiresAt * 1000);
-  console.log(`✅ Refresh token expires at ${expirationDate.toString()}`);
+  if (newAthleteDoc.get('refresh_token')) {
+    const newExpiresAt = newAthleteDoc.get('expires_at');
+    const expirationDate = new Date(newExpiresAt * 1000);
+    console.log(`✅ Refresh token expires at ${expirationDate.toString()}`);
+  } else {
+    console.log('❌ Did not receive access token');
+    process.exit(0);
+  }
 
   maybeExitProcess();
   return true;
