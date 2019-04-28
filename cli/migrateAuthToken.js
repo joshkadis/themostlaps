@@ -71,6 +71,12 @@ async function migrateSingle(
     return false;
   }
 
+  if (athleteDoc.get('status') === 'deauthorized') {
+    console.log(`❌ Athlete ${athleteId} has been deauthorized`);
+    maybeExitProcess();
+    return false;
+  }
+
   // Check if token has been migrated; refresh if needed
   const refreshToken = athleteDoc.get('refresh_token');
   const expiresAt = athleteDoc.get('expires_at');
