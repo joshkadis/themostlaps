@@ -3,6 +3,27 @@ const {
   getUpdatedAccessToken,
   shouldRefreshToken,
 } = require('../utils/getUpdatedAccessToken');
+const fetchStravaAPI = require('../utils/fetchStravaAPI');
+
+/**
+ * Confirm that migrated athlete token still works
+ * Exit if not
+ **/
+async function testMigratedAthlete(athleteDoc) {
+  let athleteResponse;
+  try {
+    athleteResponse = await fetchStravaAPI('/athlete', athleteDoc);
+  } catch (err) {
+    console.log(`❌ fetchStravaAPI failed for athlete ${athleteDoc.get('_id')}`);
+    process.exit(0);
+  }
+
+  if (!athleteResponse.id || athleteResponse.id !== athleteDoc.get('_id')) {
+    console.log(`❌ fetchStravaAPI incorrect response for athlete ${athleteDoc.get('_id')}`);
+    console.log(JSON.stringify(athleteResponse, null, 2));
+    process.exit(0);
+  }
+}
 
 async function migrateMany(findString, isDryRun, forceRefresh = false) {
   let query;
@@ -139,6 +160,7 @@ async function migrateSingle(
     process.exit(0);
   }
 
+  testMigratedAthlete(newAthleteDoc);
   maybeExitProcess();
   return true;
 }
