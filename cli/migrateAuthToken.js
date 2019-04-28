@@ -32,18 +32,22 @@ async function migrateMany(findString, isDryRun, forceRefresh = false) {
   let failed = 0;
   for (let i = 0; i < athletes.length; i++) {
     console.log(`Migrating athlete: ${JSON.stringify(athletes[i])}`);
-    const didMigrate = await migrateSingle(
-      athletes[i]._id,
-      isDryRun,
-      forceRefresh,
-      true // return instead exiting process
-    );
-    if (didMigrate) {
-      succeeded += 1;
-    } else {
-      failed += 1;
+    try {
+      const didMigrate = await migrateSingle(
+        athletes[i]._id,
+        isDryRun,
+        forceRefresh,
+        true // return instead exiting process
+      );
+      if (didMigrate) {
+        succeeded += 1;
+      } else {
+        failed += 1;
+      }
+      console.log("--------------------\n");
+    } catch (err) {
+      process.exit(1);
     }
-    console.log("--------------------\n");
   }
   console.log(`Found ${athletes.length}${"\n"}migrated ${succeeded}${"\n"}${failed} errors`);
   process.exit(0);
