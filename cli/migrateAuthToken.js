@@ -98,7 +98,7 @@ async function migrateSingle(
       }
     }
     maybeExitProcess();
-    return false;
+    return true;
   }
 
   const oldAccessToken = athleteDoc.get('access_token');
