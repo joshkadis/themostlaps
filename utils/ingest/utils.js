@@ -1,4 +1,7 @@
+const { stringify } = require('query-string');
+const { authRequestParams, stravaOauthUrl } = require('../../config');
 const getInternalErrorMessage = require('../internalErrors');
+const { getEnvOrigin } = require('../envUtils');
 
 /**
  * Get response object for error code
@@ -16,6 +19,16 @@ function getErrorResponseObject(code, errData = null, athlete = false) {
   }
 }
 
+function getStravaAuthRequestUrl(pathname = '/', shouldSubscribe = false) {
+  const params = Object.assign({}, authRequestParams, {
+    redirect_uri: getEnvOrigin() + '/auth-callback',
+    state: `${pathname}${shouldSubscribe ? '|shouldSubscribe' : ''}`,
+  });
+
+  return `${stravaOauthUrl}/authorize?${stringify(params)}`;
+}
+
 module.exports = {
   getErrorResponseObject,
+  getStravaAuthRequestUrl,
 };

@@ -102,13 +102,16 @@ app.prepare()
     /**
      * Connect to database and start listening
      */
+    console.log(`Connecting to MONGODB_URI: ${process.env.MONGODB_URI}`);
     mongoose.connect(process.env.MONGODB_URI);
     const db = mongoose.connection;
     db.once('open', () => {
-      console.log('Connected to database');
+      console.log(`Connected to database: ${db.name}`);
       server.listen(process.env.PORT, () => {
         console.log(`App listening on port ${process.env.PORT}`);
-        scheduleNightlyRefresh();
+        if (!process.env.DISABLE_NIGHTLY_REFRESH) {
+          scheduleNightlyRefresh();
+        }
       });
     });
   })

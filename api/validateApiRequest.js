@@ -1,4 +1,4 @@
-const { prodDomain } = require('../config');
+const { isLocalEnv } = require('../utils/envUtils');
 
 /**
  * Should API request be allowed based on hostname?
@@ -7,28 +7,29 @@ const { prodDomain } = require('../config');
  * @param {String} queryKey Optional API key
  * @return {Bool}
  */
-const validateApiRequest = (hostname = null, queryKey = null) => {
-  let error = false;
+const validateApiRequest = (hostname, queryKey = null) => {
+  let error = '';
+  let valid = true;
 
-  // Production domain is always ok
-  if (hostname === prodDomain) {
-    return { error };
+  // Matching hosts are always ok
+  if (hostname === process.env.APP_DOMAIN) {
+    return { valid, error };
   }
 
   // localhost is ok if env var allows
-  if (hostname === 'localhost') {
-    if (process.env.ALLOW_LOCALHOST !== 'true') {
-      error = `Host ${hostname} not allowed to make API requests`;
-    }
-    return { error };
-  }
-
-  // other domains may have a API key
-  if (!queryKey || queryKey !== process.env.API_KEY) {
+  if (isLocalEnv() && process.env.ALLOW_LOCALHOST !== 'true') {
+    error = `Host ${hostname} not allowed to make API requests`;
+    valid = false;
+  } else if (!queryKey || queryKey !== process.env.API_KEY) {
+    // other domains may have a API key
     error = 'Missing or invalid API key';
+    valid = false;
   }
 
-  return { error };
+  return {
+    valid,
+    error,
+  };
 };
 
 module.exports = validateApiRequest;

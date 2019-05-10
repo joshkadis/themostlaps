@@ -1,40 +1,53 @@
 const Athlete = require('../schema/Athlete');
 const mongoose = require('mongoose');
 const { testAthleteIds } = require('../config');
+const { slackError } = require('./slackNotification');
 
 /**
  * Convert API response for athlete to our model's format
- *
+ * @note Use new token refresh logic
  * @param {Object} athlete
  * @param {String} athlete.access_token
- * @param {String} athlete.access_type
  * @param {Object} athlete.athlete
  * @param {Bool} shouldSubscribe
- * @return {Object}
+ * @return {Object|false}
  */
-function getAthleteModelFormat({ athlete, access_token, token_type }, shouldSubscribe = true) {
-  // @note Removed email after Strava API change, Jan 15
-  const { firstname, lastname, profile, id } = athlete;
-  const currentDate = new Date();
-  return {
-    _id: id,
-    last_updated: currentDate.toISOString(),
-    created: currentDate.toISOString(),
-    last_refreshed: getEpochSecondsFromDateObj(currentDate),
-    access_token,
-    token_type,
-    athlete: {
-      firstname,
-      lastname,
-      profile,
-      id,
-    },
-    preferences: {
-      notifications: {
-        monthly: shouldSubscribe,
+function getAthleteModelFormat(athleteInfo, shouldSubscribe = true) {
+  try {
+
+    const { access_token, token_type } = athleteInfo; // @note Removed email after Strava API change, Jan 15
+    const refresh_token = athleteInfo.refresh_token || '';
+    const expires_at = athleteInfo.expires_at || 0;
+
+    // @note Removed email from model format due to Strava API change
+    const { firstname, lastname, profile, id } = athleteInfo.athlete;
+
+    const currentDate = new Date();
+    return {
+      _id: id,
+      last_updated: currentDate.toISOString(),
+      created: currentDate.toISOString(),
+      last_refreshed: getEpochSecondsFromDateObj(currentDate),
+      access_token,
+      token_type,
+      refresh_token,
+      expires_at,
+      athlete: {
+        firstname,
+        lastname,
+        profile,
+        id,
       },
-    },
-  };
+      preferences: {
+        notifications: {
+          monthly: shouldSubscribe,
+        },
+      },
+    };
+  } catch (err) {
+    slackError(0, Object.assign(athleteInfo, { message: err.message || 'unknown' }));
+    return false;
+  }  
 }
 
 /**

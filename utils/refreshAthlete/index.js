@@ -78,6 +78,7 @@ module.exports = async (athlete, after = false, verbose = false) => {
   }
 
   // Add new activities to database
+  // @note Use new token refresh logic
   const activitiesWithLaps = await fetchLapsFromActivities(
     eligibleActivities,
     athleteDoc.get('access_token'),
