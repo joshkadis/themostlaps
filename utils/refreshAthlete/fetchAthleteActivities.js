@@ -23,29 +23,27 @@ async function fetchAllAthleteActivities(
   allActivities = [],
   verbose = false
 ) {
-  const queryParams = {
-    after: afterTimestamp,
-    page,
-    per_page: config.apiPerPage,
-  };
-
-  const endpoint = '/athlete/activities';
-  const fetchPath = `${endpoint}?${stringify(queryParams)}`;
+  const pathName = '/athlete/activities';
   if (verbose) {
-    console.log(`Fetching ${fetchPath}`);
+    console.log(`Fetching ${pathName} for ${athleteDoc.get('_id')}`);
   }
 
+  // @note Use new token refresh logic
   const activities = await fetchStravaAPI(
-    endpoint,
+    pathName,
     athleteDoc,
-    queryParams
+    {
+      after: afterTimestamp,
+      page,
+      per_page: config.apiPerPage,
+    }
   );
 
-  if (typeof activities === 'undefined' || !activities) {
-    console.log(`Error fetching ${fetchPath} in fetchAthleteActivities`)
+  if (activities.status && 200 !== activities.status) {
+    console.log(`Error ${activities.status} fetching /athlete/activities in fetchAthleteActivities`)
     await slackError(45, {
       athleteId: athleteDoc.get('_id'),
-      url: fetchPath,
+      pathName,
     });
     return allActivities;
   }

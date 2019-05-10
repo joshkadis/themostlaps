@@ -1,4 +1,3 @@
-require('dotenv').config();
 const mongoose = require('mongoose');
 const promptly = require('promptly');
 const deleteUser = require('./deleteUser');
@@ -14,6 +13,10 @@ const { refreshAthletes } = require('../utils/scheduleNightlyRefresh');
 const { listAliases } = require('../config/email');
 const { testAthleteIds } = require('../config');
 const calculateColdLaps = require('./calculateColdLaps');
+const {
+  migrateSingle,
+  migrateMany,
+} = require('./migrateAuthToken');
 
 /**
  * Prompt for admin code then connect and run command
@@ -35,6 +38,8 @@ async function doCommand(prompt, callback) {
   const db = mongoose.connection;
   db.once('open', callback);
 }
+
+const isDryRun = (argv) => argv.dryRun || argv.dryrun || false;
 
 const callbackDeleteUser = async ({ user, deauthorize }) => {
   await doCommand(
@@ -63,6 +68,9 @@ const callbackRefreshUser = async ({ user, daysago }) => {
       const athleteDoc = await Athlete.findById(user);
       if (!athleteDoc) {
         console.log(`User ${user} not found`)
+        process.exit(0);
+      } else if (athleteDoc.get('status') === 'deauthorized') {
+        console.log(`User ${user} is deauthorized`)
         process.exit(0);
       }
       await refreshAthlete(
@@ -151,7 +159,6 @@ const callbackRefreshBatch = async ({ limit, skip, activities }) => {
 };
 
 const callbackUpdateSubscriptions = async (argv) => {
-  const dryRun = argv.dryRun || arv.dryrun;
   await doCommand(
     `Enter admin code to update user subscription statuses`,
     async () => {
@@ -176,7 +183,7 @@ const callbackUpdateSubscriptions = async (argv) => {
 
         result[`${shouldBeSubscribed ? 's' : 'notS'}ubscribed`]++;
 
-        if (!dryRun) {
+        if (!isDryRun(argv)) {
           await athleteDoc.save();
         }
       }
@@ -188,18 +195,38 @@ const callbackUpdateSubscriptions = async (argv) => {
 };
 
 const callbackRetryWebhooks = async (argv) => {
-  const dryRun = argv.dryRun || arv.dryrun;
   await doCommand(
-    `Enter admin code to reimport failed activities since ${startdate}.`,
-    () => retryWebhooks(argv.startdate, dryRun),
+    `Enter admin code to reimport failed activities since ${argv.startdate}.`,
+    () => retryWebhooks(argv.startdate, isDryRun(argv)),
   );
 };
 
 const callbackColdLaps = async (argv) => {
-  const dryRun = argv.dryRun || arv.dryrun;
   await doCommand(
     `Enter admin code to recalculate Cold Laps for all athletes.`,
-    () => calculateColdLaps(argv.startactivity, dryRun),
+    () => calculateColdLaps(argv.startactivity, isDryRun(argv)),
+  );
+};
+
+const callbackMigrateToken = async (argv) => {
+  await doCommand(
+    'Enter admin code to migrate auth token',
+    async () => {
+      const {
+        athlete,
+        find,
+        options,
+        refresh,
+      } = argv;
+      if (athlete && find) {
+        console.log('Cannot use athlete ID and find query simultaneously');
+        process.exit(0);
+      } else if (athlete) {
+        migrateSingle(athlete, isDryRun(argv), refresh);
+      } else if (find) {
+        migrateMany(find, options, isDryRun(argv), refresh);
+      }
+    },
   );
 };
 
@@ -214,4 +241,5 @@ module.exports = {
   callbackUpdateSubscriptions,
   callbackRetryWebhooks,
   callbackColdLaps,
+  callbackMigrateToken,
 };

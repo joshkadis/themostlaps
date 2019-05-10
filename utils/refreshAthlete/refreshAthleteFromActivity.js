@@ -77,7 +77,7 @@ async function refreshAthleteFromActivity(athleteId, activityId, shouldUpdateDb 
   if (activityId < 0) {
     activityId += 2 * (2147483647 + 1)
   }
-  
+
   // Check that athlete exists and activity is new
   let athleteDoc = await Athlete.findById(athleteId);
   if (!athleteDoc) {

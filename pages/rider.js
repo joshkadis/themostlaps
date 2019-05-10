@@ -50,6 +50,8 @@ class Rider extends Component {
     });
 
     this.state = this.defaultState;
+
+    // @todo Default this.state.chartProps that update after state change
   }
 
   componentWillReceiveProps(nextProps) {
@@ -280,6 +282,7 @@ class Rider extends Component {
             onClickBack={() => this.onSelectYear('all')}
             onChange={this.onChangeSearchUsers}
             onChartRendered={this.onChartRendered}
+            primaryId={parseInt(query.athleteId, 10)}
           />)
         }
         {this.state.chartRendered &&

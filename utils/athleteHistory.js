@@ -2,40 +2,36 @@ require('isomorphic-fetch');
 const querystring = require('querystring');
 const { apiUrl, lapSegmentId, addMakeupLap } = require('../config');
 const Activity = require('../schema/Activity');
+const Athlete = require('../schema/Athlete');
 const { slackError } = require('./slackNotification');
 const fetchStravaAPI = require('./fetchStravaAPI');
 
 /**
  * Iterate though paginated history of segment efforts and concatenate
  * @param {Document} athleteDoc
- * @param {Number} athleteId
  * @param {Number} page
  * @param {Array} allEfforts
  * @return {Array}
  */
 async function getLapEffortsHistory(athleteDoc, page = 1, allEfforts = []) {
   const athleteId = athleteDoc.get('_id');
-  const token = athleteDoc.get('access_token');
-  const params = {
-    athlete_id: athleteId,
-    per_page: 200,
-    page,
-  };
-  const endpoint = `/segments/${lapSegmentId}/all_efforts`;
-  const fetchUrl = `${endpoint}?${querystring.stringify(params)}`;
-  console.log(`Fetching ${fetchUrl}`);
 
-  const efforts = await fetchStravaAPI(
-    endpoint,
+  const efforts  = await fetchStravaAPI(
+    `/segments/${lapSegmentId}/all_efforts`,
     athleteDoc,
-    params
+    {
+      athlete_id: athleteId,
+      per_page: 200,
+      page,
+    }
   );
 
-  if (typeof efforts === 'undefined' || !efforts) {
-    console.log(`Error fetching ${fetchUrl}`)
+  if (efforts.status && 200 !== efforts.status) {
+    console.log(`Error getLapEffortsHistory: ${athleteId}`);
     slackError(45, {
       athleteId,
-      url: fetchUrl,
+      path: `/segments/${lapSegmentId}/all_efforts`,
+      page,
     });
     return allEfforts;
   }

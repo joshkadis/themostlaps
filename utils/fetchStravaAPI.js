@@ -2,29 +2,34 @@ const fetch = require('isomorphic-unfetch');
 const { stringify } = require('querystring');
 const { apiUrl } = require('../config');
 const { slackError } = require('./slackNotification');
-const { getDocFromMaybeToken } = require('./athleteUtils')
 const Athlete = require('../schema/Athlete');
-
+const { getUpdatedAccessToken } = require('./getUpdatedAccessToken');
 /**
  * Fetch data from Strava API, throw error if unsuccessful
- *
+ * @note Use new token refresh logic
  * @param {String} endpoint Path to endpoint
- * @param {String|Document} tokenOrDoc access token or Athlete document
+ * @param {Document|String} athleteDoc Athlete document or fallback to forever token string
  * @param {Object} params Any optional params
  * @return {Object} Response data
  */
-async function fetchStravaAPI(endpoint, tokenOrDoc, params = false) {
-  const athleteDoc = await getDocFromMaybeToken(tokenOrDoc);
+async function fetchStravaAPI(endpoint, athleteDoc, params = false) {
+  let access_token;
 
-  const paramsString = params ? `?${stringify(params)}` : '';
-  const url = (apiUrl + endpoint + paramsString);
-
-  if (typeof athleteDoc === 'undefined' || !athleteDoc) {
-    slackError(44, { url });
-    return;
+  if (typeof athleteDoc === 'string') {
+    // If access_token is passed directly instead of Athlete document
+    access_token = athleteDoc;
+  } else {
+    // Get access_token using `forever token` or new auth logic
+    const shouldMigrateOnFetch = process.env.SHOULD_MIGRATE_ON_FETCH;
+    access_token = await getUpdatedAccessToken(athleteDoc, shouldMigrateOnFetch);
+    if (!access_token) {
+      return {};
+    }
   }
 
-  const access_token = athleteDoc.get('access_token');
+  const paramsString = params ? `?${stringify(params)}` : '';
+  const prependEndpoint = endpoint.indexOf('/') === 0 ? '' : '/';
+  const url = `${apiUrl}${prependEndpoint}${endpoint}${paramsString}`;
 
   // @todo Should catch error here
   // but it's been stable up to this point...
@@ -37,24 +42,42 @@ async function fetchStravaAPI(endpoint, tokenOrDoc, params = false) {
     }
   );
 
-  if (200 !== response.status) {
-    const athleteId = athleteDoc.get('_id');
+  if (response.status && 200 !== response.status) {
+    let attemptedAthleteId = null;
+    let attemptedAthleteDoc = false;
 
-    if (401 === response.status) {
+    if (typeof athleteDoc !== 'string') {
+      attemptedAthleteId = athleteDoc.get('_id');
+      attemptedAthleteDoc = athleteDoc;
+    } else {
+      // If string was passed as athleteDoc param,
+      // make sure it refers to a known athlete in database
+      attemptedAthleteDoc = await Athlete.findOne({ access_token });
+      if (!attemptedAthleteDoc) {
+        slackError(44, { url });
+        return;
+      } else {
+        attemptedAthleteId = attemptedAthleteDoc.get('_id');
+      }
+    }
+
+    if (attemptedAthleteDoc && attemptedAthleteId && 401 === response.status) {
       // Set athlete status to deauthorized
-      athleteDoc.set('status', 'deauthorized');
-      await athleteDoc.save();
-      console.log(`Athlete ${athleteId} is deauthorized; updated status`);
+      attemptedAthleteDoc.set('status', 'deauthorized');
+      await attemptedAthleteDoc.save();
+
+      slackError(46, { attemptedAthleteId, url });
+      console.log(`Athlete ${attemptedAthleteId} is deauthorized; updated status`);
     } else {
       // Notify for any other API error
       slackError(45, {
-        athleteId,
+        attemptedAthleteId,
         url,
         status: response.status,
       });
     }
-    throw new Error(`Error fetching ${url} for athlete ${athleteId}`);
-    return;
+    throw new Error(`${response.status} error fetching ${url} for athlete ${attemptedAthleteId}`);
+    return response;
   }
 
   return await response.json();
