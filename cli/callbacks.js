@@ -215,6 +215,7 @@ const callbackMigrateToken = async (argv) => {
       const {
         athlete,
         find,
+        options,
         refresh,
       } = argv;
       if (athlete && find) {
@@ -223,7 +224,7 @@ const callbackMigrateToken = async (argv) => {
       } else if (athlete) {
         migrateSingle(athlete, isDryRun(argv), refresh);
       } else if (find) {
-        migrateMany(find, isDryRun(argv), refresh);
+        migrateMany(find, options, isDryRun(argv), refresh);
       }
     },
   );

@@ -25,18 +25,30 @@ async function testMigratedAthlete(athleteDoc) {
   }
 }
 
-async function migrateMany(findString, isDryRun, forceRefresh = false) {
-  let query;
+function parseJsonArg(inputString, required = true) {
+  if (!inputString) {
+    if (required) {
+      console.error(`Missing required JSON input`);
+      process.exit(0);
+    }
+    return false;
+  }
+
   try {
-    query = JSON.parse(findString);
+    return JSON.parse(inputString);
   } catch (err) {
-    console.error(`Malformed JSON input: "${findString}"`);
+    console.error(`Malformed JSON input: "${inputString}"`);
     process.exit(0);
   }
+}
+
+async function migrateMany(findString, optionsString, isDryRun, forceRefresh = false) {
+  const query = parseJsonArg(findString);
+  const options = parseJsonArg(optionsString, false) || {};
 
   let athletes;
   try {
-    athletes = await Athlete.find(query, '_id');
+    athletes = await Athlete.find(query, '_id', options);
   } catch (err) {
     console.error(`Athlete.find failed, check input: "${findString}"`);
     process.exit(0);
