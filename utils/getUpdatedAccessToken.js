@@ -103,10 +103,16 @@ async function getUpdatedAccessToken(
   athleteDoc.set(tokenData);
   await athleteDoc.save();
 
+  // Log if there was no refresh_token and we had to migrate
+  if (!refresh_token) {
+    console.log(`Migrated access_token for athlete ${athlete_id}`);
+  }
+
   return tokenData.access_token;
 }
 
 module.exports = {
   getUpdatedAccessToken,
   shouldRefreshToken,
+  refreshAccessToken,
 };

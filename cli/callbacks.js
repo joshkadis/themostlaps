@@ -13,7 +13,10 @@ const { refreshAthletes } = require('../utils/scheduleNightlyRefresh');
 const { listAliases } = require('../config/email');
 const { testAthleteIds } = require('../config');
 const calculateColdLaps = require('./calculateColdLaps');
-const { migrateSingle } = require('./migrateAuthToken');
+const {
+  migrateSingle,
+  migrateMany,
+} = require('./migrateAuthToken');
 
 /**
  * Prompt for admin code then connect and run command
@@ -65,6 +68,9 @@ const callbackRefreshUser = async ({ user, daysago }) => {
       const athleteDoc = await Athlete.findById(user);
       if (!athleteDoc) {
         console.log(`User ${user} not found`)
+        process.exit(0);
+      } else if (athleteDoc.get('status') === 'deauthorized') {
+        console.log(`User ${user} is deauthorized`)
         process.exit(0);
       }
       await refreshAthlete(
@@ -205,7 +211,22 @@ const callbackColdLaps = async (argv) => {
 const callbackMigrateToken = async (argv) => {
   await doCommand(
     'Enter admin code to migrate auth token',
-    () => migrateSingle(argv.athlete, isDryRun(argv), argv.refresh),
+    async () => {
+      const {
+        athlete,
+        find,
+        options,
+        refresh,
+      } = argv;
+      if (athlete && find) {
+        console.log('Cannot use athlete ID and find query simultaneously');
+        process.exit(0);
+      } else if (athlete) {
+        migrateSingle(athlete, isDryRun(argv), refresh);
+      } else if (find) {
+        migrateMany(find, options, isDryRun(argv), refresh);
+      }
+    },
   );
 };
 
