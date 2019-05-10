@@ -13,7 +13,10 @@ const { refreshAthletes } = require('../utils/scheduleNightlyRefresh');
 const { listAliases } = require('../config/email');
 const { testAthleteIds } = require('../config');
 const calculateColdLaps = require('./calculateColdLaps');
-const { migrateSingle } = require('./migrateAuthToken');
+const {
+  migrateSingle,
+  migrateMany,
+} = require('./migrateAuthToken');
 
 /**
  * Prompt for admin code then connect and run command
@@ -208,7 +211,21 @@ const callbackColdLaps = async (argv) => {
 const callbackMigrateToken = async (argv) => {
   await doCommand(
     'Enter admin code to migrate auth token',
-    () => migrateSingle(argv.athlete, isDryRun(argv), argv.refresh),
+    async () => {
+      const {
+        athlete,
+        find,
+        refresh,
+      } = argv;
+      if (athlete && find) {
+        console.log('Cannot use athlete ID and find query simultaneously');
+        process.exit(0);
+      } else if (athlete) {
+        migrateSingle(athlete, isDryRun(argv), refresh);
+      } else if (find) {
+        migrateMany(find, isDryRun(argv), refresh);
+      }
+    },
   );
 };
 

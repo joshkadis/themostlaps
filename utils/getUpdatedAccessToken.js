@@ -114,4 +114,5 @@ async function getUpdatedAccessToken(
 module.exports = {
   getUpdatedAccessToken,
   shouldRefreshToken,
+  refreshAccessToken,
 };
