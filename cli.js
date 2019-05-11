@@ -4,6 +4,7 @@ const {
   callbackDeleteUser,
   callbackDeleteUserActivities,
   callbackRefreshUser,
+  callbackRefreshMany,
   callbackActivityInfo,
   callbackMailgun,
   callbackMailgunAll,
@@ -61,6 +62,17 @@ const argv = require('yargs')
     async (argv) => await callbackRefreshUser(argv),
   )
   /**
+   * Refresh an array of athletes since last checked activity or for the last n days
+   */
+  .command(
+    'refresh-many <users...>',
+    false,
+    createPositionals(
+      ['users', { type: 'array' }],
+    ),
+    async (argv) => await callbackRefreshMany(argv),
+  )
+  /**
    * Get info for a specific activity
    */
   .command(
@@ -72,36 +84,6 @@ const argv = require('yargs')
       ['fetch', { type: 'boolean', default: false }],
     ),
     async (argv) => await callbackActivityInfo(argv),
-  )
-  /**
-   * Send an email notification via Mailgun
-   */
-  .command(
-    'mailgun user [type]',
-    false,
-    createPositionals(
-      ['user', { type: 'number' }],
-      ['type', { type: 'string', default: 'monthly' }],
-    ),
-    () => {
-      console.log('Mailgun commands deprecated after Strava API change, Jan 2019');
-      process.exit(0);
-    },
-  )
-  /**
-   * Send an email notification via Mailgun
-   */
-  .command(
-    'mailgun-all [--override] [--testonly]',
-    false,
-    createPositionals(
-      ['override', { type: 'boolean', default: false }],
-      ['testonly', { type: 'boolean', default: false }],
-    ),
-    () => {
-      console.log('Mailgun commands deprecated after Strava API change, Jan 2019');
-      process.exit(0);
-    },
   )
   /**
    * Process batch of athletes w/ simulated nightly refresh
