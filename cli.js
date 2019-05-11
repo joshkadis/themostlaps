@@ -4,6 +4,7 @@ const {
   callbackDeleteUser,
   callbackDeleteUserActivities,
   callbackRefreshUser,
+  callbackRefreshMany,
   callbackActivityInfo,
   callbackMailgun,
   callbackMailgunAll,
@@ -59,6 +60,17 @@ const argv = require('yargs')
       ['daysago', { type: 'number', default: 0 }],
     ),
     async (argv) => await callbackRefreshUser(argv),
+  )
+  /**
+   * Refresh an array of athletes since last checked activity or for the last n days
+   */
+  .command(
+    'refresh-many <users...>',
+    false,
+    createPositionals(
+      ['users', { type: 'array' }],
+    ),
+    async (argv) => await callbackRefreshMany(argv),
   )
   /**
    * Get info for a specific activity

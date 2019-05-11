@@ -76,11 +76,59 @@ const callbackRefreshUser = async ({ user, daysago }) => {
       }
       await refreshAthlete(
         athleteDoc,
-        'undefined' !== typeof daysago  && daysago ?
+        'undefined' !== typeof daysago && daysago ?
           daysAgoTimestamp(daysago) :
           false,
         true
       );
+      process.exit(0);
+    }
+  );
+}
+
+const callbackRefreshMany = async ({ users }) => {
+  await doCommand(
+    `Enter admin code to refresh ${users.length} users.`,
+    async () => {
+      /**
+        Get number of days back to check
+      **/
+      const daysagoInput = await promptly.prompt(
+        'Press return to refresh from date of last update or enter a number of days to check:',
+        { silent: false, default: 'last' }
+      );
+      const daysago = daysagoInput !== 'last' ? parseInt(daysagoInput, 10) : 0;
+      if (isNaN(daysago)) {
+        console.log(`${daysagoInput} is not a number!`)
+        process.exit(0);
+      }
+      console.log(`Checking ${daysago ? `${daysago} days back` : 'from last update'}`);
+
+      const userIds = users.reduce((acc, user) => {
+        if (typeof user === 'number') {
+          return [...acc, user];
+        }
+        console.log(`${user} is not a number!`);
+        return acc;
+      }, []);
+
+      const athleteDocs = await Athlete.find({ _id: { $in: userIds } });
+      console.log(`Found ${athleteDocs.length} Athlete documents from ${userIds.length} user IDs${"\n"}---------------------------`);
+
+      for (let idx = 0; idx < athleteDocs.length; idx++) {
+        const athleteDoc = athleteDocs[idx];
+        if (athleteDoc.get('status') === 'deauthorized') {
+          console.log(`User ${athleteDoc.get('_id')} is deauthorized`)
+        }
+
+        await refreshAthlete(
+          athleteDoc,
+          'undefined' !== typeof daysago && daysago ?
+            daysAgoTimestamp(daysago) :
+            false,
+          false
+        );
+      }
       process.exit(0);
     }
   );
@@ -235,6 +283,7 @@ module.exports = {
   callbackDeleteUser,
   callbackDeleteUserActivities,
   callbackRefreshUser,
+  callbackRefreshMany,
   callbackActivityInfo,
   callbackMailgun,
   callbackMailgunAll,
