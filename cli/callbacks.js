@@ -63,7 +63,8 @@ const callbackDeleteUserActivities = async ({ user, daysago }) => {
 
 const callbackRefreshUser = async ({ user, daysago }) => {
   await doCommand(
-    `Enter admin code to refresh user ${user}.`,
+    false,
+    //`Enter admin code to refresh user ${user}.`,
     async () => {
       const athleteDoc = await Athlete.findById(user);
       if (!athleteDoc) {
