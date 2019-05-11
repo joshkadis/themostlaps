@@ -41,9 +41,15 @@ function distFromParkCenter(latlng = null) {
  * @param {String|Document} tokenOrDoc access_token or Athlete document
  * @return {Object|false}
  */
-async function fetchActivity(activityId, token, includeAllEfforts = true) {
-  const athleteDoc = await Athlete.findOne({ access_token: token });
-  if (!athleteDoc) {
+async function fetchActivity(activityId, tokenOrDoc, includeAllEfforts = true) {
+  let athleteDoc;
+  if (typeof tokenOrDoc === 'string') {
+    athleteDoc = await Athlete.findOne({ access_token: tokenOrDoc });
+  } else if (tokenOrDoc instanceof Athlete) {
+    athleteDoc = tokenOrDoc;
+  }
+
+  if (typeof athleteDoc === 'undefined' || !athleteDoc) {
     return false;
   }
 
