@@ -74,36 +74,6 @@ const argv = require('yargs')
     async (argv) => await callbackActivityInfo(argv),
   )
   /**
-   * Send an email notification via Mailgun
-   */
-  .command(
-    'mailgun user [type]',
-    false,
-    createPositionals(
-      ['user', { type: 'number' }],
-      ['type', { type: 'string', default: 'monthly' }],
-    ),
-    () => {
-      console.log('Mailgun commands deprecated after Strava API change, Jan 2019');
-      process.exit(0);
-    },
-  )
-  /**
-   * Send an email notification via Mailgun
-   */
-  .command(
-    'mailgun-all [--override] [--testonly]',
-    false,
-    createPositionals(
-      ['override', { type: 'boolean', default: false }],
-      ['testonly', { type: 'boolean', default: false }],
-    ),
-    () => {
-      console.log('Mailgun commands deprecated after Strava API change, Jan 2019');
-      process.exit(0);
-    },
-  )
-  /**
    * Process batch of athletes w/ simulated nightly refresh
    */
   .command(
