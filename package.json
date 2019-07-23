@@ -60,6 +60,7 @@
   "jest": {
     "automock": false,
     "testURL": "http://localhost/",
+    "testEnvironment": "node",
     "setupFiles": [
       "./setupJest.js"
     ]
