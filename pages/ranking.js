@@ -106,9 +106,8 @@ class Ranking extends Component {
       >
         <h1>{getRankingName(query)}</h1>
 
-        {'special' === query.type ?
-          <SpecialRankingInfo filter={query.filter}/> :
-          <SpecialRankingPromo />
+        {'special' === query.type &&
+          (<SpecialRankingInfo filter={query.filter}/>)
         }
 
         <RankingSelector current={query} />
