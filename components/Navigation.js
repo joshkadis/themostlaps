@@ -124,10 +124,6 @@ class Navigation extends Component {
 
           {this.renderSearchUsersContainer()}
 
-          <SocialLink network="twitter">
-            <TwitterSvg />
-          </SocialLink>
-
           <SocialLink network="instagram">
             <InstagramSvg />
           </SocialLink>
