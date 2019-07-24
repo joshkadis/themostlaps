@@ -18,7 +18,7 @@ for (let yr = current.getFullYear(); yr >= startYear; yr--) {
   });
 }
 
-secondaryOptions = [{
+const secondaryOptions = [{
   value: null,
   label: 'clear month',
 }];
