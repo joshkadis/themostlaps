@@ -18,6 +18,9 @@ function shouldRefreshToken(expires_at, now = null) {
   return currentTime - canRefreshTime > 0;
 }
 
+const obfuscateToken = (token) => token.replace(/^\w{15}/, '***************');
+
+
 async function refreshAccessToken(
   access_token,
   refresh_token,
@@ -44,6 +47,8 @@ async function refreshAccessToken(
     slackError(120, {
       error: err.message,
       athlete_id,
+      refresh_token: obfuscateToken(refresh_token),
+      access_token: obfuscateToken(access_token),
     });
     return false;
   }
@@ -57,6 +62,8 @@ async function refreshAccessToken(
       {
         current_time,
         athlete_id,
+        refresh_token: obfuscateToken(refresh_token),
+        access_token: obfuscateToken(access_token),
       }
     );
 
