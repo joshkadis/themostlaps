@@ -41,7 +41,10 @@ async function refreshAccessToken(
     );
   } catch (err) {
     console.log(err);
-    slackError(120, { error: err.message });
+    slackError(120, {
+      error: err.message,
+      athlete_id,
+    });
     return false;
   }
 
