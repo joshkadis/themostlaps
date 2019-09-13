@@ -20,7 +20,6 @@ function shouldRefreshToken(expires_at, now = null) {
 
 const obfuscateToken = (token) => token.replace(/^\w{15}/, '***************');
 
-
 async function refreshAccessToken(
   access_token,
   refresh_token,
