@@ -67,6 +67,9 @@ describe('getUpdatedAccessToken', () => {
     }))
 
     const athleteDoc = getMockAthleteDoc();
+    expect(athleteDoc.get('access_token')).toEqual('FOREVER_TOKEN');
+    expect(athleteDoc.get('refresh_token')).toEqual('INITIAL_REFRESH_TOKEN');
+
     let now = EXPIRES_AT - tokenExpirationBuffer + 5;
     const result = await getUpdatedAccessToken(athleteDoc, false, now);
     const access_token = result;
