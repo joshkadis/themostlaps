@@ -128,19 +128,25 @@ describe('maybeDeauthorizeAthlete', () => {
     );
 
     let response = await fetch('https://fakeapi.com');
-    let result = await maybeDeauthorizeAthlete(response, athleteDoc);
+    let responseStatus = response.status;
+    let responseJson = await response.json();
+    let result = await maybeDeauthorizeAthlete(responseJson, responseStatus, athleteDoc);
     expect(result).toBe(true);
     expect(athleteDoc.get('status')).toEqual('deauthorized');
 
     athleteDoc = getMockAthleteDoc();
     response = await fetch('https://fakeapi.com');
-    result = await maybeDeauthorizeAthlete(response, athleteDoc);
+    responseStatus = response.status;
+    responseJson = await response.json();
+    result = await maybeDeauthorizeAthlete(responseJson, responseStatus, athleteDoc);
     expect(result).toBe(false);
     expect(athleteDoc.get('status')).toEqual('ready');
 
     athleteDoc = getMockAthleteDoc();
     response = await fetch('https://fakeapi.com');
-    result = await maybeDeauthorizeAthlete(response, athleteDoc);
+    responseStatus = response.status;
+    responseJson = await response.json();
+    result = await maybeDeauthorizeAthlete(responseJson, responseStatus, athleteDoc);
     expect(result).toBe(true);
     expect(athleteDoc.get('status')).toEqual('deauthorized');
   });

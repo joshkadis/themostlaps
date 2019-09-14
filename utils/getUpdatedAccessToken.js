@@ -8,10 +8,10 @@ const {
 const { slackError } = require('./slackNotification');
 const Athlete = require('../schema/Athlete');
 
-async function maybeDeauthorizeAthlete(response, athleteDoc) {
-  let shouldDeauthorize = response.status === 401;
+async function maybeDeauthorizeAthlete(responseData, status, athleteDoc) {
+  let shouldDeauthorize = status === 401;
   if (!shouldDeauthorize) {
-    const { errors = [] } = await response.json();
+    const { errors = [] } = responseData;
     const invalidTokens = errors.filter(({ resource = false, code = false }) =>
       resource === 'RefreshToken' && code === 'invalid');
     shouldDeauthorize = !!invalidTokens.length;
@@ -71,7 +71,8 @@ async function refreshAccessToken(
     return false;
   }
 
-  if (!response || response.status !== 200) {
+  const responseStatus = response.status;
+  if (!response || responseStatus !== 200) {
     const current_time = now || (Date.now() / 1000);
     const responseJson = await response.json();
     const log = Object.assign(
@@ -85,7 +86,7 @@ async function refreshAccessToken(
       }
     );
 
-    await maybeDeauthorizeAthlete(response, athleteDoc);
+    await maybeDeauthorizeAthlete(responseJson, responseStatus, athleteDoc);
 
     console.log(log);
     slackError(120, log);
