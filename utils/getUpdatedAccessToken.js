@@ -8,6 +8,23 @@ const {
 const { slackError } = require('./slackNotification');
 const Athlete = require('../schema/Athlete');
 
+async function maybeDeauthorizeAthlete(responseData, status, athleteDoc) {
+  let shouldDeauthorize = status === 401;
+  if (!shouldDeauthorize) {
+    const { errors = [] } = responseData;
+    const invalidTokens = errors.filter(({ resource = false, code = false }) =>
+      resource === 'RefreshToken' && code === 'invalid');
+    shouldDeauthorize = !!invalidTokens.length;
+  }
+
+  if (shouldDeauthorize) {
+    athleteDoc.set('status', 'deauthorized');
+    await athleteDoc.save();
+    return true;
+  }
+  return false;
+}
+
 // Compare times in ms to reduce chance of currentTime === canRefreshTime
 function shouldRefreshToken(expires_at, now = null) {
   if (!expires_at) {
@@ -24,8 +41,10 @@ async function refreshAccessToken(
   access_token,
   refresh_token,
   now = null,
-  athlete_id = null,
+  athleteDoc = null,
 ) {
+  const athlete_id = athleteDoc ? athleteDoc.get('_id') : null;
+
   // Substitute access_token for refresh_token
   // if we don't have a refresh_token, i.e. we're migrating
   const params = {
@@ -52,7 +71,8 @@ async function refreshAccessToken(
     return false;
   }
 
-  if (!response || response.status !== 200) {
+  const responseStatus = response.status;
+  if (!response || responseStatus !== 200) {
     const current_time = now || (Date.now() / 1000);
     const responseJson = await response.json();
     const log = Object.assign(
@@ -65,6 +85,8 @@ async function refreshAccessToken(
         access_token: obfuscateToken(access_token),
       }
     );
+
+    await maybeDeauthorizeAthlete(responseJson, responseStatus, athleteDoc);
 
     console.log(log);
     slackError(120, log);
@@ -107,7 +129,7 @@ async function getUpdatedAccessToken(
   // migrate forever token
   let tokenData;
   try {
-    tokenData = await refreshAccessToken(access_token, refresh_token, now, athlete_id);
+    tokenData = await refreshAccessToken(access_token, refresh_token, now, athleteDoc);
   } catch (err) {
     slackError(120, `Refresh token failed for athlete ${athlete_id}`);
     console.log(err);
@@ -134,4 +156,5 @@ module.exports = {
   getUpdatedAccessToken,
   shouldRefreshToken,
   refreshAccessToken,
+  maybeDeauthorizeAthlete,
 };

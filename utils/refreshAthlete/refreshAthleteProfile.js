@@ -30,6 +30,10 @@ async function refreshAthleteProfile(athlete) {
   // @note Use new token refresh logic
   try {
     const athleteResult = await fetchStravaAPI('/athlete/', athleteDoc);
+    if (!athleteResult || !Object.keys(athleteResult).length) {
+      return null;
+    }
+    
     const { firstname, lastname, profile } = athleteResult;
 
     console.log(`Updating ${firstname} ${lastname} (${athleteDoc.get('_id')})`);
