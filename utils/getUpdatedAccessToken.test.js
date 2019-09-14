@@ -1,5 +1,8 @@
 require('dotenv').config();
-const { getUpdatedAccessToken } = require('./getUpdatedAccessToken');
+const {
+  getUpdatedAccessToken,
+  maybeDeauthorizeAthlete,
+} = require('./getUpdatedAccessToken');
 const { tokenExpirationBuffer } = require('../config');
 
 const EXPIRES_AT = 1000;
@@ -25,6 +28,7 @@ const getMockAthleteDoc = () => ({
   athlete: {
     id: 1245,
   },
+  status: 'ready',
   refresh_token: 'INITIAL_REFRESH_TOKEN',
   expires_at: EXPIRES_AT,
   state: 'STATE',
@@ -96,5 +100,48 @@ describe('getUpdatedAccessToken', () => {
 
     expect(access_token).toEqual('INITIAL_ACCESS_TOKEN');
     expect(athleteDoc.get('refresh_token')).toEqual('INITIAL_REFRESH_TOKEN');
+  });
+});
+
+describe('maybeDeauthorizeAthlete', () => {
+  beforeEach(() => {
+    fetch.resetMocks();
+    jest.resetModules();
+  });
+  it('deauthorizes user after failed API call', async () => {
+    let athleteDoc = getMockAthleteDoc();
+    expect(athleteDoc.get('status')).toEqual('ready');
+
+    fetch.mockResponses(
+      [
+        '{"something": "does not matter"}',
+        { status: 401 },
+      ],
+      [
+        '{"something": "does not matter"}',
+        { status: 200 },
+      ],
+      [
+        '{"message":"Bad Request","errors":[{"resource":"RefreshToken","field":"code","code":"invalid"}]}',
+        { status: 400 },
+      ],
+    );
+
+    let response = await fetch('https://fakeapi.com');
+    let result = await maybeDeauthorizeAthlete(response, athleteDoc);
+    expect(result).toBe(true);
+    expect(athleteDoc.get('status')).toEqual('deauthorized');
+
+    athleteDoc = getMockAthleteDoc();
+    response = await fetch('https://fakeapi.com');
+    result = await maybeDeauthorizeAthlete(response, athleteDoc);
+    expect(result).toBe(false);
+    expect(athleteDoc.get('status')).toEqual('ready');
+
+    athleteDoc = getMockAthleteDoc();
+    response = await fetch('https://fakeapi.com');
+    result = await maybeDeauthorizeAthlete(response, athleteDoc);
+    expect(result).toBe(true);
+    expect(athleteDoc.get('status')).toEqual('deauthorized');
   });
 });
