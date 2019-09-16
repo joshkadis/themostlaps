@@ -1,6 +1,6 @@
 {
   "name": "themostlaps",
-  "version": "0.0.1",
+  "version": "2.0.1",
   "description": "Who rides the most laps of Prospect Park?",
   "main": "index.js",
   "scripts": {
