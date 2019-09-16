@@ -54,6 +54,8 @@
     "yargs": "^11.1.0"
   },
   "devDependencies": {
+    "eslint": "^6.4.0",
+    "eslint-plugin-react": "^7.14.3",
     "jest": "^22.4.4",
     "jest-fetch-mock": "^2.1.2",
     "mockgoose": "^8.0.2"
