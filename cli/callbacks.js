@@ -278,7 +278,7 @@ const callbackMigrateToken = async (argv) => {
   );
 };
 
-const callbackAddLocations = async (argv) => {
+const callbackMigrateLocation = async (argv) => {
   const { location } = argv;
   await doCommand(
     `Enter admin code to add location '${location}' to activities`,
@@ -306,6 +306,30 @@ const callbackAddLocations = async (argv) => {
   );
 };
 
+const callbackMigrateStats = async ({ location }) => {
+  await doCommand(
+    `Enter admin code to migrate athlete.stats to athlete.locations.${location}`,
+    async () => {
+      const queryKey = `locations.${location}`;
+      const query = {
+        'stats.allTime': { $gt: 0 },
+        [queryKey]: null,
+      };
+
+      for await (const athleteDoc of Athlete.find(query)) {
+        console.log(`Migrating stats for ${athleteDoc.get('_id')}`);
+        athleteDoc.set(
+          queryKey,
+          athleteDoc.get('stats')
+        );
+        await athleteDoc.save();
+      }
+
+      process.exit();
+    },
+  );
+};
+
 module.exports = {
   callbackDeleteUser,
   callbackDeleteUserActivities,
@@ -319,5 +343,6 @@ module.exports = {
   callbackRetryWebhooks,
   callbackColdLaps,
   callbackMigrateToken,
-  callbackAddLocations,
+  callbackMigrateLocation,
+  callbackMigrateStats,
 };

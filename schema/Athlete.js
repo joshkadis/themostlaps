@@ -20,6 +20,7 @@ const athleteSchema = new Schema({
   created: { type: String, required: true },
   last_refreshed: { type: Number, required: true },
   stats: { type: Mixed, required: true, default: {} },
+  locations: { type: Map, of: Mixed },
   preferences: {
     notifications: {
       monthly: { type: Boolean, default: true },
