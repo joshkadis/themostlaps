@@ -278,6 +278,34 @@ const callbackMigrateToken = async (argv) => {
   );
 };
 
+const callbackAddLocations = async (argv) => {
+  const { location } = argv;
+  await doCommand(
+    `Enter admin code to add location '${location}' to activities`,
+    async () => {
+      const query = {
+        location: null,
+      };
+
+      let result;
+      if (isDryRun(argv)) {
+        const docs = await Activity.find(query);
+        result = {
+          n: docs.length,
+          nModified: 'n/a',
+        };
+      } else {
+        result = await Activity.updateMany(query, { location });
+      }
+
+      const { n, nModified } = result;
+
+      console.log(`${n} activities found; ${nModified} modified`);
+      process.exit();
+    },
+  );
+};
+
 module.exports = {
   callbackDeleteUser,
   callbackDeleteUserActivities,
@@ -291,4 +319,5 @@ module.exports = {
   callbackRetryWebhooks,
   callbackColdLaps,
   callbackMigrateToken,
+  callbackAddLocations,
 };

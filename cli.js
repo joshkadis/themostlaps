@@ -13,9 +13,10 @@ const {
   callbackRetryWebhooks,
   callbackColdLaps,
   callbackMigrateToken,
+  callbackAddLocations,
 } = require ('./cli/callbacks');
 
-const { coldLapsPoints: { startActivity } } = require('./config');
+const { coldLapsPoints: { startActivity }, defaultLocation } = require('./config');
 
 function createPositionals(...args) {
   return (yargs) => {
@@ -137,5 +138,14 @@ const argv = require('yargs')
       ['refresh', { type: 'boolean', default: false }],
     ),
     async (argv) => await callbackMigrateToken(argv),
+  )
+  .command(
+    'addlocation [location] [--dry-run]',
+    false,
+    createPositionals(
+      ['location', { type: 'string', default: defaultLocation }],
+      ['dry-run', { type: 'boolean', default: false }],
+    ),
+    async (argv) => await callbackAddLocations(argv),
   )
   .argv;
