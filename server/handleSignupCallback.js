@@ -1,6 +1,7 @@
 const { stringify } = require('querystring');
 const  exchangeCodeForAthleteInfo = require('../utils/ingest/exchangeCodeForAthleteInfo');
 const Athlete = require('../schema/Athlete');
+const Activity = require('../schema/Activity');
 const { getAthleteModelFormat } = require('../utils/athleteUtils');
 const {
   fetchAthleteHistory,
@@ -173,13 +174,47 @@ async function handleSignupCallback(req, res) {
     if (!formattedAthleteData) {
       return;
     }
-    athleteDoc = await Athlete.create(formattedAthleteData);
+    console.log(`formattedAthleteData._id === ${formattedAthleteData._id}`);
+    athleteDoc = await Athlete.findByIdAndUpdate(
+      formattedAthleteData._id,
+      formattedAthleteData,
+      {
+        upsert: true,
+      }
+    );
     console.log(`Saved ${athleteDoc.get('_id')} to database`);
   } catch (err) {
     const errCode = -1 !== err.message.indexOf('duplicate key') ? 50 : 55;
     console.log(err, tokenExchangeResponse);
     handleSignupError(errCode, tokenExchangeResponse.athlete || false);
     return;
+  }
+
+  // Clear activities and status if reauthorizing
+  if (athleteDoc.get('status') === 'deauthorized') {
+    console.log(`reauthorizing ${athleteDoc.get('_id')}; clearing activities and stats`);
+    try {
+      // Delete athlete's actitivies
+      await Activity.deleteMany({
+        athlete_id: athleteDoc.get('_id'),
+      });
+
+      // Reset athlete's stats
+      athleteDoc.set({
+        stats: {
+          allTime: 0,
+          single: 0,
+        },
+        status: 'ingesting',
+      });
+      await athleteDoc.save();
+    } catch (err) {
+      handleSignupError(80, {
+        err,
+        athlete: athleteDoc.toJSON(),
+      });
+      return;
+    }
   }
 
   // Render the welcome page, athlete status will be 'ingesting'
