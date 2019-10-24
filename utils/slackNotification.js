@@ -79,10 +79,14 @@ function getFields(primary, secondary) {
   }];
 
   if ('undefined' !== typeof secondary) {
+    const value = 'string' === typeof secondary
+      ? secondary
+      : JSON.stringify(secondary, null, 2);
+
     fields.push({
       title: 'Details',
-      value: 'string' === typeof secondary ? secondary : JSON.stringify(secondary),
       short: false,
+      value,
     })
   }
 
