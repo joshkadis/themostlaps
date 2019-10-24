@@ -28,7 +28,7 @@ async function compileSpecialStats(activity, activityDateStr, stats = {}) {
     startDateObj.valueOf() > (1000 * coldLapsPoints.startTimestamp)
   ) {
     try {
-      activityColdLaps = await getColdLapsFromActivity(activity, true);
+      activityColdLaps = await getColdLapsFromActivity(activity);
       activity.set('coldLapsPoints', activityColdLaps);
       await activity.save();
     } catch (err) {
