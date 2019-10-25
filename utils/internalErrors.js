@@ -15,6 +15,9 @@ module.exports = (code = 0, data = '') => {
     case 40:
       return 'Authentication failed, please try again later 🙅';
 
+    case 43:
+      return 'Failed to clear existing athlete before ingest';
+
     case 44:
       return 'Attempted API call for unknown athlete';
 

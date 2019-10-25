@@ -1,6 +1,7 @@
 const { stringify } = require('querystring');
 const  exchangeCodeForAthleteInfo = require('../utils/ingest/exchangeCodeForAthleteInfo');
 const Athlete = require('../schema/Athlete');
+const Activity = require('../schema/Activity');
 const { getAthleteModelFormat } = require('../utils/athleteUtils');
 const {
   fetchAthleteHistory,
@@ -173,6 +174,23 @@ async function handleSignupCallback(req, res) {
     if (!formattedAthleteData) {
       return;
     }
+
+    // Clear existing athlete if possible
+    try {
+      const athlete_id = formattedAthleteData._id;
+      const exists = await Athlete.exists({ _id: athlete_id });
+      if (exists) {
+        console.log(`Clearing Athlete and Activities for ${athlete_id}`);
+        await Athlete.findByIdAndDelete(athlete_id);
+        await Activity.deleteMany({ athlete_id });
+      }
+    } catch(err) {
+      handleSignupError(43, {
+        err,
+        athlete_id: formattedAthleteData._id,
+      });
+    }
+
     athleteDoc = await Athlete.create(formattedAthleteData);
     console.log(`Saved ${athleteDoc.get('_id')} to database`);
   } catch (err) {

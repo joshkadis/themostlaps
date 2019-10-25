@@ -5,7 +5,10 @@ const {
   tokenExpirationBuffer,
   tokenRefreshGrantType,
 } = require('../config');
-const { slackError } = require('./slackNotification');
+const {
+  slackError,
+  slackSuccess,
+} = require('./slackNotification');
 const Athlete = require('../schema/Athlete');
 
 async function maybeDeauthorizeAthlete(responseData, status, athleteDoc) {
@@ -93,7 +96,22 @@ async function refreshAccessToken(
     return false;
   }
 
-  return await response.json();
+  const refreshedResponse = await response.json();
+
+  if (refresh_token
+    && refresh_token !== refreshedResponse.refresh_token
+  ) {
+    console.log(`${athlete_id} refresh token: ${refresh_token} -> ${refreshedResponse.refresh_token}`);
+    slackSuccess(
+      'refresh_token was changed',
+      {
+        athlete_id,
+        refresh_token,
+      }
+    );
+  }
+
+  return refreshedResponse;
 }
 
 /**

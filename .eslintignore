@@ -1,8 +1,11 @@
-api/
-cli/
-server/
-test/
-cli.js
-prepLocalDBForImport.js
-server.js
-setupJest.js
+# Always ignore
+.next/
+node_module/
+build/
+dist/
+
+# Ignore legacy code by default
+/*
+
+# Lint specific files/dirs as we go
+!server.js
