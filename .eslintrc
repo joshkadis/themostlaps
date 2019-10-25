@@ -1,0 +1,28 @@
+{
+  "extends": [
+    "eslint:recommended",
+    "airbnb-base",
+  ],
+  "env": {
+    "node": true,
+    "es6": true,
+    "jest": true,
+  },
+  "parser": "babel-eslint",
+  "rules": {
+    "max-len": [
+      2,
+      80,
+      4,
+      {
+        "ignoreComments": true,
+        "ignoreUrls": true,
+        "ignoreStrings": true,
+        "ignoreTemplateLiterals": true,
+        "ignoreRegExpLiterals": true,
+      }
+    ],
+    "no-console": [ 0 ],
+    "camelcase": [ 0 ],
+  },
+}
