@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
-const Mixed = mongoose.Schema.Types.Mixed;
-const Schema = mongoose.Schema;
+
+const { model, Schema } = mongoose;
 
 // DarkSky Data Point schema
 // https://darksky.net/dev/docs#data-point
@@ -20,6 +20,6 @@ const conditionSchema = new Schema({
   windGust: Number,
 });
 
-const Condition = mongoose.model('Condition', conditionSchema);
+const Condition = model('Condition', conditionSchema);
 
 module.exports = Condition;

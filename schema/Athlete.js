@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
-const Mixed = mongoose.Schema.Types.Mixed;
-const Schema = mongoose.Schema;
+
+const { model, Schema, Mixed } = mongoose;
 
 const athleteSchema = new Schema({
   _id: Number,
@@ -28,6 +28,5 @@ const athleteSchema = new Schema({
   },
 });
 
-const Athlete = mongoose.model('Athlete', athleteSchema);
-
+const Athlete = model('Athlete', athleteSchema);
 module.exports = Athlete;

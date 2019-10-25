@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+
+const { Schema } = mongoose;
 
 const SegmentEffort = new Schema({
   _id: Number,
@@ -9,7 +10,7 @@ const SegmentEffort = new Schema({
 });
 
 const activitySchema = new Schema({
-	_id: Number,
+  _id: Number,
   added_date: String,
   athlete_id: Number,
   laps: Number,
