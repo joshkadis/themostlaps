@@ -14,5 +14,5 @@ module.exports = {
     4362776, // Prospect Pure Downhill
     9699985, // Sprint between the lights
     740668, // E Lake Drive
-  ],  
+  ],
 };
