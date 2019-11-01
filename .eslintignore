@@ -5,9 +5,10 @@ build/
 dist/
 
 # Ignore legacy code by default
-/*
+/*/*.js
 
 # Lint specific files/dirs as we go
 !server.js
 !schema/
 !api/
+!pages/rider.js
