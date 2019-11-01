@@ -1,6 +1,6 @@
 const validateApiRequest = require('./validateApiRequest');
 const getRanking = require('./getRanking');
-const getAthletes = require('./getAthletes');
+const { getAthletes } = require('./getAthletes');
 const getTotals = require('./getTotals');
 const getSearchUsers = require('./getSearchUsers');
 

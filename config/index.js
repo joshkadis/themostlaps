@@ -1,10 +1,10 @@
-const prospectPark = require('./locations/prospectpark');
+const prospectpark = require('./locations/prospectpark');
 
 module.exports = {
   apiUrl: 'https://www.strava.com/api/v3',
-  defaultLocation: 'prospectPark',
+  defaultLocation: 'prospectpark',
   locations: [
-    prospectPark,
+    prospectpark,
   ],
   apiPerPage: 30,
   authRequestParams: {
