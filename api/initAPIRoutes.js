@@ -13,7 +13,7 @@ const getSearchUsers = require('./getSearchUsers');
  */
 async function handleAPIRequest(req, res, fetchData) {
   const validation = validateApiRequest(req.hostname, req.query.key || null);
-  if(!validation.valid || validation.error) {
+  if (!validation.valid || validation.error) {
     res.status(403).json(validation.error || 'unknown validation error');
     return;
   }
@@ -21,7 +21,9 @@ async function handleAPIRequest(req, res, fetchData) {
   const responseData = await fetchData(req);
 
   const status = responseData.error ? 500 : 200;
-  res.status(status).json(responseData.error ? responseData : responseData.data);
+  res.status(status).json(responseData.error
+    ? responseData
+    : responseData.data);
 }
 
 /**
@@ -31,27 +33,35 @@ async function handleAPIRequest(req, res, fetchData) {
  */
 async function initAPIRoutes(server) {
   server.get('/api/totals', async (req, res) => {
-    await handleAPIRequest(req, res, async () => {
-      return await getTotals();
-    });
+    await handleAPIRequest(
+      req,
+      res,
+      async () => getTotals(),
+    );
   });
 
   server.get('/api/ranking/:type', async (req, res) => {
-    await handleAPIRequest(req, res, async ({ params, query }) => {
-      return await getRanking(params.type, query);
-    });
+    await handleAPIRequest(
+      req,
+      res,
+      async ({ params: { type }, query }) => getRanking(type, query),
+    );
   });
 
   server.get('/api/athletes/:ids', async (req, res) => {
-    await handleAPIRequest(req, res, async ({ params }) => {
-      return await getAthletes(params.ids);
-    });
+    await handleAPIRequest(
+      req,
+      res,
+      async ({ params: { ids, locations } }) => getAthletes(ids, locations),
+    );
   });
 
   server.get('/api/searchUsers', async (req, res) => {
-    await handleAPIRequest(req, res, async ({ query }) => {
-      return await getSearchUsers(!!query.complete);
-    });
+    await handleAPIRequest(
+      req,
+      res,
+      async ({ query: { complete } }) => getSearchUsers(!!complete),
+    );
   });
 }
 

@@ -10,3 +10,4 @@ dist/
 # Lint specific files/dirs as we go
 !server.js
 !schema/
+!api/
