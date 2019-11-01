@@ -6,6 +6,7 @@ const next = require('next');
 
 const Athlete = require('./schema/Athlete');
 const { scheduleNightlyRefresh } = require('./utils/scheduleNightlyRefresh');
+const { defaultLocation } = require('./config');
 
 // Route handlers
 const handleSignupCallback = require('./server/handleSignupCallback');
@@ -54,9 +55,10 @@ app.prepare()
       }
     });
 
-    server.get(/^\/rider\/(\d+)$/, async (req, res) => {
-      const athleteId = parseInt(req.params[0], 10);
+    server.get('/rider/:athleteId(\\d+)/:location?', async (req, res) => {
+      const athleteId = parseInt(req.params.athleteId, 10);
       const athleteExists = await Athlete.exists({ _id: athleteId });
+      const location = req.params.location || defaultLocation;
       if (!athleteExists) {
         res.statusCode = 404;
         app.render(req, res, '/_error', {});
@@ -64,6 +66,7 @@ app.prepare()
         app.render(req, res, '/rider', {
           ...req.query,
           athleteId,
+          location,
         });
       }
     });
