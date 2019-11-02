@@ -5,7 +5,7 @@ build/
 dist/
 
 # Ignore legacy code by default
-/*/*.js
+/**/*.js
 
 # Lint specific files/dirs as we go
 !server.js
