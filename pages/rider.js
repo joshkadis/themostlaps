@@ -318,6 +318,7 @@ class Rider extends Component {
           && <div style={{ textAlign: 'right' }}>
             <a
               className="strava_link"
+              href={`https://www.strava.com/athletes/${query.athleteId}`} /* chromebug { ` } */
               rel="noopener noreferrer"
               target="_blank"
             >
