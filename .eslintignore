@@ -12,3 +12,4 @@ dist/
 !schema/
 !api/
 !pages/rider.js
+!utils/athleteStatsClient.js

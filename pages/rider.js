@@ -7,7 +7,7 @@ import Router from 'next/router';
 import { defaultLocation } from '../config';
 import { getPathnameFromContext, APIRequest } from '../utils';
 import {
-  statsForAthletePage,
+  getStatsForLocation,
   statsForSingleAthleteChart,
   statsForSingleAthleteYearChart,
 } from '../utils/athleteStatsClient';
@@ -189,7 +189,10 @@ class Rider extends Component {
         if (apiResponse.length) {
           return {
             athlete: apiResponse[0].athlete,
-            stats: statsForAthletePage(apiResponse[0].stats),
+            stats: getStatsForLocation(
+              apiResponse[0].stats,
+              this.props.location,
+            ),
           };
         }
         return false;
@@ -315,7 +318,6 @@ class Rider extends Component {
           && <div style={{ textAlign: 'right' }}>
             <a
               className="strava_link"
-              href={`https://www.strava.com/athletes/${query.athleteId}`}
               rel="noopener noreferrer"
               target="_blank"
             >
@@ -334,8 +336,8 @@ async function getInitialProps(context) {
   const defaultInitialProps = {
     pathname: getPathnameFromContext(context),
     query,
-    shouldShowWelcome: !!(typeof query.welcome !== 'undefined' && query.welcome),
-    shouldShowUpdated: !!(typeof query.updated !== 'undefined' && query.updated),
+    shouldShowWelcome: !!query.welcome,
+    shouldShowUpdated: !!query.updated,
   };
 
   if (!query.athleteId) {
@@ -348,7 +350,10 @@ async function getInitialProps(context) {
         return {
           ...defaultInitialProps,
           athlete: apiResponse[0].athlete,
-          stats: statsForAthletePage(apiResponse[0].stats),
+          stats: getStatsForLocation(
+            apiResponse[0].stats,
+            query.location,
+          ),
           status: apiResponse[0].status,
         };
       }

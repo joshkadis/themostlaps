@@ -1,5 +1,13 @@
 const { timePartString } = require('./dateTimeUtils');
-const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const { defaultLocation } = require('../config');
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const DEFAULT_OUTPUT = {
+  allTime: 0,
+  single: 0,
+  years: [],
+  data: {},
+};
 
 /**
  * Format athlete stats for rider page
@@ -7,28 +15,19 @@ const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
  * @param {Object} stats
  * @return {Object}
  */
-function statsForAthletePage(stats) {
+function statsForAthletePage(stats = {}) {
+  let output = {};
 
-  let output = {}
-  const defaultOutput = {
-    allTime: 0,
-    single: 0,
-    years: [],
-    data: {}
-  };
-
-  if ('undefined' === typeof stats || !stats) {
-    return defaultOutput;
+  // Something would be fishy in this case,
+  // so exit early
+  if (typeof stats.allTime === 'undefined'
+    || typeof stats.single === 'undefined'
+  ) {
+    return DEFAULT_OUTPUT;
   }
 
-  try {
-    const { allTime, single } = stats;
-    output = Object.assign(defaultOutput, { allTime, single });
-  } catch (err) {
-    // if either of those is undefined...
-    output = defaultOutput;
-  }
-
+  const { allTime, single } = stats;
+  output = Object.assign(DEFAULT_OUTPUT, { allTime, single });
 
   // Add years and months to output
   const data = Object.keys(stats).reduce((acc, key) => {
@@ -43,7 +42,7 @@ function statsForAthletePage(stats) {
 
     acc[year] = Object.assign(
       (acc[year] || {}),
-      {[month || 'total']: stats[key]}
+      { [month || 'total']: stats[key] },
     );
 
     return acc;
@@ -59,24 +58,16 @@ function statsForAthletePage(stats) {
 }
 
 /**
- * Transform rider page stats object for single athlete years chart
- * including any missing years
+ * Get rider's stats for a location
  *
- * @param {Object} data
- * @return {Array}
+ * @param {Object} stats
+ * @param {String} location
+ * @return {Object}
  */
-function statsForSingleAthleteChart(data) {
-  const output = [];
-  const { min, max } = getMinMaxYears(Object.keys(data));
-
-  for (let year = min; year <= max; year++) {
-    output.push({
-      year,
-      value: data[year] ? data[year].total : 0,
-    });
-  }
-
-  return output;
+function getStatsForLocation(stats = {}, location = defaultLocation) {
+  return stats.locations && stats.locations[location]
+    ? statsForAthletePage(stats.locations[location])
+    : DEFAULT_OUTPUT;
 }
 
 /**
@@ -97,6 +88,27 @@ function getMinMaxYears(years) {
 }
 
 /**
+ * Transform rider page stats object for single athlete years chart
+ * including any missing years
+ *
+ * @param {Object} data
+ * @return {Array}
+ */
+function statsForSingleAthleteChart(data) {
+  const output = [];
+  const { min, max } = getMinMaxYears(Object.keys(data));
+
+  for (let year = min; year <= max; year += 1) {
+    output.push({
+      year,
+      value: data[year] ? data[year].total : 0,
+    });
+  }
+
+  return output;
+}
+
+/**
  * Format stats for a specific year chart for a single athlete
  *
  * @param {String} year
@@ -108,7 +120,7 @@ function statsForSingleAthleteYearChart(year, data) {
     return [];
   }
 
-  return months.map((month, idx) => ({
+  return MONTHS.map((month, idx) => ({
     month,
     value: data[year][timePartString(1 + idx)] || 0,
   }));
@@ -123,7 +135,7 @@ function statsForSingleAthleteYearChart(year, data) {
  * @return {Number} Return 0 if year not found
  */
 function findValue(data, key, value) {
-  for (let idx = 0; idx < data.length; idx++ ) {
+  for (let idx = 0; idx < data.length; idx += 1) {
     if (value === data[idx][key]) {
       return data[idx].value;
     }
@@ -145,7 +157,7 @@ function mergeStats(primary, secondary) {
   ));
 
   let output = [];
-  for (let year = min; year <= max; year++) {
+  for (let year = min; year <= max; year += 1) {
     output = output.concat({
       year,
       primary: findValue(primary, 'year', year),
@@ -163,7 +175,7 @@ function mergeStats(primary, secondary) {
  * @return {Array}
  */
 function mergeStatsSingleYear(primary, secondary) {
-  return months.map((month) => ({
+  return MONTHS.map((month) => ({
     month,
     primary: findValue(primary, 'month', month),
     secondary: findValue(secondary, 'month', month),
@@ -174,6 +186,7 @@ module.exports = {
   mergeStats,
   mergeStatsSingleYear,
   getMinMaxYears,
+  getStatsForLocation,
   statsForAthletePage,
   statsForSingleAthleteChart,
   statsForSingleAthleteYearChart,
