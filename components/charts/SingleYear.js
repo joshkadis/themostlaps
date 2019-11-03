@@ -26,7 +26,6 @@ import { mergeStatsSingleYear } from '../../utils/athleteStatsClient';
 // onClickNextYear: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]),
 // onClickBack: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]),
 
-
 class SingleYear extends BaseChart {
   transformData({ hasCompare, compareData, primaryData }) {
     if (!hasCompare) {
