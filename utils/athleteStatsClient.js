@@ -12,8 +12,8 @@ const DEFAULT_OUTPUT = {
 const DEFAULT_OUTPUT_V2 = {
   allTime: 0,
   single: 0,
-  byYear: {},
-  byMonth: {},
+  byYear: [],
+  byMonth: [],
   availableYears: [],
 };
 

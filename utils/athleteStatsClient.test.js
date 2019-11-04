@@ -24,6 +24,25 @@ const SAMPLE_RAW_STATS = {
 };
 
 test('parseRawAthleteStats', () => {
+  expect(parseRawAthleteStats()).toEqual({
+    allTime: 0,
+    single: 0,
+    byYear: [],
+    byMonth: [],
+    availableYears: [],
+  });
+
+  expect(parseRawAthleteStats({
+    allTime: 2,
+    single: 2
+  })).toEqual({
+    allTime: 2,
+    single: 2,
+    byYear: [],
+    byMonth: [],
+    availableYears: [],
+  });
+
   expect(parseRawAthleteStats(SAMPLE_RAW_STATS)).toEqual({
     allTime: 189,
     single: 13,
