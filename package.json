@@ -58,7 +58,7 @@
   "devDependencies": {
     "@babel/core": "^7.6.4",
     "babel-eslint": "^10.0.3",
-    "babel-jest": "^23.6.0",
+    "babel-jest": "^24.9.0",
     "babel-loader": "^8.0.6",
     "babel-preset-airbnb": "^4.1.0",
     "eslint": "^6.5.1",
@@ -68,7 +68,7 @@
     "eslint-loader": "^3.0.2",
     "eslint-plugin-import": "^2.18.2",
     "eslint-plugin-react": "^7.14.3",
-    "jest": "^22.4.4",
+    "jest": "^24.9.0",
     "jest-fetch-mock": "^2.1.2",
     "mockgoose": "^8.0.2"
   },
