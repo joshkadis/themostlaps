@@ -1,5 +1,9 @@
+const { omit } = require('lodash');
 const Athlete = require('../schema/Athlete');
-const { defaultAthleteFields } = require('../config');
+const {
+  defaultLocation,
+  defaultAthleteFields,
+} = require('../config');
 
 /**
  * Parse CSV string of athlete IDs from URL
@@ -17,6 +21,38 @@ function parseIdsString(idsString) {
       }
       return acc;
     }, []);
+}
+
+function handleLegacyAthleteStats(athlete) {
+  const { stats } = athlete;
+  if (!stats) {
+    return athlete;
+  }
+
+  let locations = {};
+  if (!stats.locations) {
+    // Consider entire stats object as the default location
+    locations = {
+      [defaultLocation]: stats,
+    };
+  } else if (!stats.locations[defaultLocation]) {
+    // Consider entire stats object
+    // except stats.locations as the default location
+    const defaultLocationStats = omit(stats, 'locations');
+    locations = {
+      ...stats.locations,
+      [defaultLocation]: defaultLocationStats,
+    };
+  } else {
+    locations = stats.locations;
+  }
+
+  return {
+    ...athlete,
+    stats: {
+      locations,
+    },
+  };
 }
 
 /**
@@ -40,10 +76,18 @@ async function getAthletes(idsString = '', fields = defaultAthleteFields) {
     fields.join(' '),
   );
 
+  const mappedAthletes = athletes.map((athleteDoc) => {
+    const athlete = athleteDoc.toJSON();
+    return handleLegacyAthleteStats(athlete);
+  });
+
   return {
     error: false,
-    data: athletes.map((athlete) => athlete.toJSON()),
+    data: mappedAthletes,
   };
 }
 
-module.exports = getAthletes;
+module.exports = {
+  handleLegacyAthleteStats,
+  getAthletes,
+};
