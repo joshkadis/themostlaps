@@ -58,7 +58,7 @@ async function initApiRoutes(server) {
     await handleAPIRequest(
       req,
       res,
-      async ({ params: { ids, locations } }) => getAthletes(ids, locations),
+      async ({ params: { ids } }) => getAthletes(ids),
     );
   });
 
