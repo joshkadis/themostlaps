@@ -77,7 +77,7 @@ async function initApiRoutes(server) {
     await handleAPIRequest(
       req,
       res,
-      async ({ params: { ids, locations } }) => v2GetAthletes(ids, locations),
+      async ({ params, query }) => v2GetAthletes(params.ids, query.locations),
     );
   });
 }

@@ -4,6 +4,7 @@ const {
   defaultLocation,
   defaultAthleteFields,
 } = require('../../config');
+const { getStatsForLocation } = require('../../utils/v2/stats/athleteStats');
 
 /**
  * Parse CSV string of athlete IDs from URL
@@ -23,12 +24,13 @@ function parseIdsString(idsString) {
     }, []);
 }
 
-function handleLegacyAthleteStats(athlete) {
+function getV2AthleteStats(athlete, includeLocations = []) {
   const { stats } = athlete;
   if (!stats) {
     return athlete;
   }
 
+  // Handle legacy stats not within stats.locations[location]
   let locations = {};
   if (!stats.locations) {
     // Consider entire stats object as the default location
@@ -47,10 +49,21 @@ function handleLegacyAthleteStats(athlete) {
     locations = stats.locations;
   }
 
+
+  const transformedLocations = Object.keys(locations)
+    .reduce((acc, location) => {
+      if (!includeLocations.length // Include all locations if empty array
+        || includeLocations.indexOf(location) !== -1 // Include specified locations
+      ) {
+        acc[location] = getStatsForLocation(locations, location);
+      }
+      return acc;
+    }, {});
+
   return {
     ...athlete,
     stats: {
-      locations,
+      locations: transformedLocations,
     },
   };
 }
@@ -59,10 +72,10 @@ function handleLegacyAthleteStats(athlete) {
  * Get data for athletes API request
  *
  * @param {String} idsString Comma-separated string of athlete ids
- * @param {Array} fields Array of fields to return in Query results
+ * @param {String} locations CSV string locations to return in Query results
  * @return {Array}
  */
-async function getAthletes(idsString = '', fields = defaultAthleteFields) {
+async function getAthletes(idsString = '', locationsCsv = 'all') {
   const athleteIds = parseIdsString(idsString);
   if (!athleteIds.length) {
     return { error: 'Requires at least one numeric id' };
@@ -73,12 +86,16 @@ async function getAthletes(idsString = '', fields = defaultAthleteFields) {
       _id: { $in: athleteIds },
       status: { $ne: 'deauthorized' },
     },
-    fields.join(' '),
+    defaultAthleteFields.join(' '),
   );
+
+  const locations = locationsCsv === 'all'
+    ? []
+    : locationsCsv.split(',');
 
   const mappedAthletes = athletes.map((athleteDoc) => {
     const athlete = athleteDoc.toJSON();
-    return handleLegacyAthleteStats(athlete);
+    return getV2AthleteStats(athlete, locations);
   });
 
   return {
@@ -88,6 +105,6 @@ async function getAthletes(idsString = '', fields = defaultAthleteFields) {
 }
 
 module.exports = {
-  handleLegacyAthleteStats,
+  getV2AthleteStats,
   getAthletes,
 };

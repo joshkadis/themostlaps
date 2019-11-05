@@ -1,4 +1,4 @@
-import { defaultLocation } from '../../../config';
+const { defaultLocation } = require('../../../config');
 
 const DEFAULT_OUTPUT_V2 = {
   allTime: 0,
@@ -69,9 +69,9 @@ function transformAthleteStats(rawStats = {}) {
  * @param {String} location
  * @return {Object|Bool} Transformed stats of false if location not found
  */
-function getStatsForLocation(statsObj, location = defaultLocation) {
-  return statsObj.locations && statsObj.locations[location]
-    ? transformAthleteStats(statsObj.locations[location])
+function getStatsForLocation(locationsObj, location = defaultLocation) {
+  return locationsObj && locationsObj[location]
+    ? transformAthleteStats(locationsObj[location])
     : false;
 }
 
