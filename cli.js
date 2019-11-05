@@ -13,8 +13,8 @@ const {
   callbackRetryWebhooks,
   callbackColdLaps,
   callbackMigrateToken,
-  callbackMigrateLocation,
-  callbackMigrateStats,
+  // callbackMigrateLocation,
+  // callbackMigrateStats,
 } = require ('./cli/callbacks');
 
 const { coldLapsPoints: { startActivity }, defaultLocation } = require('./config');
@@ -147,7 +147,11 @@ const argv = require('yargs')
       ['location', { type: 'string', default: defaultLocation }],
       ['dry-run', { type: 'boolean', default: false }],
     ),
-    async (argv) => await callbackMigrateLocation(argv),
+    async (argv) => {
+      console.log('migratelocation is closed for renovations.');
+      process.exit();
+      // await callbackMigrateLocation(argv)
+    },
   )
   .command(
     'migratestats [location]',
@@ -155,6 +159,10 @@ const argv = require('yargs')
     createPositionals(
       ['location', { type: 'string', default: defaultLocation }],
     ),
-    async (argv) => await callbackMigrateStats(argv),
+    async (argv) => {
+      console.log('migratestats is closed for renovations.');
+      process.exit();
+      // await callbackMigrateStats(argv)
+    },
   )
   .argv;
