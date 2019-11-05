@@ -12,7 +12,7 @@ dist/
 !server/initApiRoutes.js
 !schema/**/*.js
 !api/**/*.js
-!pages/rider.js
+!pages/rider_v2.js
 !utils/athleteStatsClient.js
 !utils/v2/**/*.js
 !utils/server/**/*.js

@@ -1,26 +1,18 @@
-/* global window,localStorage */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Router from 'next/router';
-
-// Utils
-import { defaultLocation } from '../config';
-import { getPathnameFromContext, APIRequest } from '../utils';
-import {
-  getStatsForLocation,
-  statsForAthletePage,
-  statsForSingleAthleteChart,
-  statsForSingleAthleteYearChart,
-} from '../utils/athleteStatsClient';
-
-// Components
 import Layout from '../components/Layout';
+import { getPathnameFromContext, APIRequest } from '../utils';
 import RiderPageHeader from '../components/RiderPageHeader';
 import RiderPageWelcome from '../components/RiderPageWelcome';
 import RiderPageUpdated from '../components/RiderPageUpdated';
 import SearchUsers from '../components/lib/SearchUsers';
-/* eslint-disable-next-line */
 import * as styles from '../components/Layout.css';
+import {
+  statsForAthletePage,
+  statsForSingleAthleteChart,
+  statsForSingleAthleteYearChart,
+} from '../utils/athleteStatsClient';
 import AllYears from '../components/charts/AllYears';
 import SingleYear from '../components/charts/SingleYear';
 
@@ -29,29 +21,12 @@ function getCompareTo({ compareToId, compareAthlete }) {
     return { id: compareToId };
   }
 
-  return {
-    ...compareAthlete.athlete,
+  return Object.assign(compareAthlete.athlete, {
     id: compareToId,
     allTime: compareAthlete.stats.allTime,
-    single: compareAthlete.stats.single,
-  };
+    single: compareAthlete.stats.single
+  });
 }
-
-function navigateToRiderPage(selection) {
-  if (selection && selection.value) {
-    Router.push(
-      `/rider?athleteId=${selection.value}`,
-      `/rider/${selection.value}`,
-    );
-  }
-}
-
-const DEFAULT_COMPARE_ATHLETE = {
-  id: 0,
-  athlete: {},
-  byYear: {},
-  byMonth: {},
-};
 
 class Rider extends Component {
   constructor(props) {
@@ -62,49 +37,30 @@ class Rider extends Component {
     this.goToYear = this.goToYear.bind(this);
     this.onChartRendered = this.onChartRendered.bind(this);
 
-    const {
-      stats,
-      location,
-    } = props;
+    this.defaultCompareTo = {
+      compareAthlete: {},
+      compareData: [],
+      compareToId: 0,
+    }
 
-    const {
-      allTime,
-      data: byMonth,
-      single,
-      years,
-    } = getStatsForLocation(stats, location);
-    const byYear = statsForSingleAthleteChart(byMonth);
-
-    this.defaultState = {
-      availableYears: years,
+    this.defaultState = Object.assign({...this.defaultCompareTo}, {
+      primaryData: props.stats.data ? statsForSingleAthleteChart(props.stats.data) : [],
+      year: 'all',
       chartRendered: false,
-      currentYear: 'all',
-      location,
-      statsForPrimaryChart: byYear,
-      statsForCompareChart:
-      primaryAthlete: {
-        allTime,
-        single,
-        byYear,
-        byMonth,
-      },
-      compareAthlete: DEFAULT_COMPARE_ATHLETE,
-    };
+    });
 
     this.state = this.defaultState;
 
     // @todo Default this.state.chartProps that update after state change
   }
 
-  // @todo react-codemod/rename-unsafe-lifecycles
-  UNSAFE_componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps(nextProps) {
     // Reset state to defaults when athlete changes
     if (this.props.query.athleteId !== nextProps.query.athleteId) {
-      this.setState({
-        ...this.defaultState,
+      this.setState(Object.assign({...this.defaultState}, {
         primaryData: statsForSingleAthleteChart(nextProps.stats.data),
         chartRendered: true,
-      });
+      }));
     }
   }
 
@@ -112,10 +68,8 @@ class Rider extends Component {
     // If athlete not found but their ID is saved in localStorage, delete it
     // Handles edge case after athlete deleted from database
     if (!Object.keys(this.props.athlete).length && window.localStorage) {
-      // Use toString for handling numeric strings
-      if (this.props.query.athleteId.toString()
-        === localStorage.getItem('TMLAthleteId').toString()
-      ) {
+      // Loose comparison for numeric strings
+      if (this.props.query.athleteId == localStorage.getItem('TMLAthleteId')) {
         localStorage.removeItem('TMLAthleteId');
         // Assume we were pushed from index.js so go back there
         Router.push('/');
@@ -127,19 +81,19 @@ class Rider extends Component {
     this.setState({ chartRendered: true });
   }
 
-  /**
+ /**
   * Determine if next or prev year is inside data range for main user
   *
   * @param {Bool} shouldIncrement `true` to increment, `false` to decrement
   * @{return} Bool
   */
   canGoToYear(shouldIncrement) {
-    const compareToYear = shouldIncrement
-      ? [...this.props.stats.years].pop()
-      : [...this.props.stats.years].shift();
+    const compareToYear = shouldIncrement ?
+      [...this.props.stats.years].pop() :
+      [...this.props.stats.years].shift();
 
-    // Use toString for handling numeric strings
-    return this.state.year.toString() !== compareToYear.toString();
+    // Loose check because we have numeric strings
+    return this.state.year != compareToYear;
   }
 
   /**
@@ -157,7 +111,7 @@ class Rider extends Component {
       toYear = (currentYear - 1);
     }
 
-    if (toYear) {
+    if(toYear) {
       this.onSelectYear(toYear.toString());
     }
   }
@@ -167,30 +121,23 @@ class Rider extends Component {
    *
    * @param {String|Number|Object} year
    */
-  onSelectYear(yearSelected) {
-    if (typeof yearSelected === 'undefined' || !yearSelected) {
+  onSelectYear(year) {
+    if ('undefined' === typeof year || !year) {
       return;
     }
 
-    const year = yearSelected.value
-      ? yearSelected.value.toString()
-      : yearSelected.toString();
+    year = !!year.value ? year.value.toString() : year.toString();
 
-    const {
-      primaryData,
-      primaryByMonth
-    } = this.state;
-    const primaryData = year === 'all'
-      ? statsForSingleAthleteChart(primaryAthleteStats)
-      : statsForSingleAthleteYearChart(primaryAthleteStats);
+    const primaryData = 'all' === year ?
+      statsForSingleAthleteChart(this.props.stats.data) :
+      statsForSingleAthleteYearChart(year, this.props.stats.data);
 
     const newState = { year, primaryData };
 
     if (this.state.compareToId > 0) {
-      const { data: compareAthleteStats } = this.state.compareAthlete.stats;
-      newState.compareData = year === 'all'
-        ? statsForSingleAthleteChart(compareAthleteStats)
-        : statsForSingleAthleteYearChart(compareAthleteStats);
+      newState.compareData = 'all' === year ?
+        statsForSingleAthleteChart(this.state.compareAthlete.stats.data) :
+        statsForSingleAthleteYearChart(year, this.state.compareAthlete.stats.data);
     }
 
     this.setState(newState);
@@ -217,44 +164,43 @@ class Rider extends Component {
             stats: statsForAthletePage(apiResponse[0].stats),
           };
         }
-        return false;
+        return false
       })
       .then((athleteData) => {
         if (!athleteData) {
           return;
         }
-        const { data: athleteStats } = athleteData.stats;
-        const compareData = this.state.year === 'all'
-          ? statsForSingleAthleteChart(athleteStats)
-          : statsForSingleAthleteYearChart(this.state.year, athleteStats);
+        const compareData = 'all' === this.state.year ?
+          statsForSingleAthleteChart(athleteData.stats.data) :
+          statsForSingleAthleteYearChart(this.state.year, athleteData.stats.data);
 
         this.setState({
           compareAthlete: athleteData,
           compareData,
           compareToId: evt.value,
         });
-      });
+      })
+  }
+
+  navigateToRiderPage(selection) {
+    if (selection && selection.value) {
+      Router.push(
+        `/rider?athleteId=${selection.value}`,
+        `/rider/${selection.value}`,
+      );
+    }
   }
 
   render() {
     const {
       pathname,
       query,
+      stats,
       athlete,
       status,
       shouldShowWelcome,
       shouldShowUpdated,
     } = this.props;
-
-    const {
-      allTime,
-      single,
-      primaryData,
-      year,
-      compareData,
-      compareToId,
-      chartRendered,
-    } = this.state;
 
     // Athlete not found, would have returned a 404 if server-rendered
     if (!Object.keys(athlete).length || status === 'deauthorized') {
@@ -263,11 +209,11 @@ class Rider extends Component {
         query={query}
       >
         <h2 style={{ textAlign: 'center' }}>Rider not found 😧</h2>
-        <SearchUsers onChange={navigateToRiderPage} />
+        <SearchUsers onChange={this.navigateToRiderPage} />
       </Layout>;
     }
 
-    if (status !== 'ready') {
+    if ('ready' !== status) {
       return <Layout
         pathname={pathname}
         query={query}
@@ -277,14 +223,14 @@ class Rider extends Component {
           firstname={athlete.firstname}
           lastname={athlete.lastname}
           img={athlete.profile}
-          allTime={allTime}
-          single={single}
+          allTime={stats.allTime}
+          single={stats.single}
         />
         <h3 style={{ textAlign: 'center' }}>
           {
-            status === 'ingesting'
-              ? 'Compiling your stats. Please check back in a minute.'
-              : 'An error occurred. We\'re looking into it.'
+            'ingesting' === status ?
+              'Compiling your stats. Please check back in a minute.' :
+              'An error occurred. We\'re looking into it.'
           }
         </h3>
       </Layout>;
@@ -295,9 +241,9 @@ class Rider extends Component {
         pathname={pathname}
         query={query}
       >
-        {shouldShowWelcome
-          && <RiderPageWelcome
-            allTime={allTime}
+        {shouldShowWelcome &&
+          <RiderPageWelcome
+            allTime={stats.allTime}
             firstname={athlete.firstname}
           />
         }
@@ -308,49 +254,42 @@ class Rider extends Component {
           firstname={athlete.firstname}
           lastname={athlete.lastname}
           img={athlete.profile}
-          allTime={allTime}
-          single={single}
+          allTime={stats.allTime}
+          single={stats.single}
         />
-        {primaryData.length === 0
-          && <p style={{ textAlign: 'center', marginTop: '1.5rem' }}>Not even one lap, ever! 😱</p>
+        {this.state.primaryData.length === 0 &&
+          <p style={{ textAlign: 'center', marginTop: '1.5rem'}}>Not even one lap, ever! 😱</p>
         }
-        {primaryData.length > 0 && (year === 'all'
-          ? <AllYears
+        {this.state.primaryData.length > 0 && ('all' === this.state.year ?
+          <AllYears
             compareTo={getCompareTo(this.state)}
-            compareData={compareData || []}
-            hasCompare={(compareToId !== 0)}
-            primaryData={primaryData}
+            compareData={this.state.compareData || []}
+            hasCompare={(0 !== this.state.compareToId)}
+            primaryData={this.state.primaryData}
             onClickTick={this.onSelectYear}
             onChange={this.onChangeSearchUsers}
             primaryId={parseInt(query.athleteId, 10)}
             onChartRendered={this.onChartRendered}
-          />
-          : <SingleYear
+          /> :
+          <SingleYear
             compareTo={getCompareTo(this.state)}
-            compareData={compareData || []}
-            hasCompare={(compareToId !== 0)}
-            primaryData={primaryData}
-            year={year}
-            onClickPrevYear={this.canGoToYear(false)
-              ? () => this.goToYear(false)
-              : false
-            }
-            onClickNextYear={this.canGoToYear(true)
-              ? () => this.goToYear(true)
-              : false
-            }
+            compareData={this.state.compareData || []}
+            hasCompare={(0 !== this.state.compareToId)}
+            primaryData={this.state.primaryData}
+            year={this.state.year}
+            onClickPrevYear={this.canGoToYear(false) ? () => this.goToYear(false) : false}
+            onClickNextYear={this.canGoToYear(true) ? () => this.goToYear(true) : false}
             onClickBack={() => this.onSelectYear('all')}
             onChange={this.onChangeSearchUsers}
             onChartRendered={this.onChartRendered}
             primaryId={parseInt(query.athleteId, 10)}
           />)
         }
-        {chartRendered
-          && <div style={{ textAlign: 'right' }}>
+        {this.state.chartRendered &&
+          <div style={{ textAlign: 'right'}}>
             <a
               className="strava_link"
-              href={`https://www.strava.com/athletes/${query.athleteId}`} /* chromebug { ` } */
-              rel="noopener noreferrer"
+              href={`https://www.strava.com/athletes/${query.athleteId}`}
               target="_blank"
             >
               View on Strava
@@ -360,16 +299,16 @@ class Rider extends Component {
       </Layout>
     );
   }
-}
+};
 
-async function getInitialProps(context) {
+Rider.getInitialProps = async function(context) {
   const { query } = context;
 
   const defaultInitialProps = {
     pathname: getPathnameFromContext(context),
     query,
-    shouldShowWelcome: !!query.welcome,
-    shouldShowUpdated: !!query.updated,
+    shouldShowWelcome: !!('undefined' !== typeof query.welcome && query.welcome),
+    shouldShowUpdated: !!('undefined' !== typeof query.updated && query.updated),
   };
 
   if (!query.athleteId) {
@@ -379,18 +318,15 @@ async function getInitialProps(context) {
   return APIRequest(`/athletes/${query.athleteId}`, {}, {})
     .then((apiResponse) => {
       if (apiResponse.length) {
-        return {
-          ...defaultInitialProps,
+        return Object.assign({}, defaultInitialProps, {
           athlete: apiResponse[0].athlete,
-          stats: apiResponse[0].stats,
+          stats: statsForAthletePage(apiResponse[0].stats),
           status: apiResponse[0].status,
-        };
+         });
       }
       return defaultInitialProps;
     });
 }
-
-Rider.getInitialProps = getInitialProps;
 
 Rider.defaultProps = {
   stats: {},
@@ -400,8 +336,7 @@ Rider.defaultProps = {
   status: 'ready',
   shouldShowWelcome: false,
   shouldShowUpdated: false,
-  location: defaultLocation,
-};
+}
 
 Rider.propTypes = {
   stats: PropTypes.object.isRequired,
@@ -411,7 +346,6 @@ Rider.propTypes = {
   status: PropTypes.string.isRequired,
   shouldShowWelcome: PropTypes.bool,
   shouldShowUpdated: PropTypes.bool,
-  location: PropTypes.string,
 };
 
 export default Rider;
