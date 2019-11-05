@@ -13,3 +13,4 @@ dist/
 !api/
 !pages/rider.js
 !utils/athleteStatsClient.js
+!utils/v2/**/*.js

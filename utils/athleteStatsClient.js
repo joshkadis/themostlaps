@@ -9,63 +9,6 @@ const DEFAULT_OUTPUT = {
   data: {},
 };
 
-const DEFAULT_OUTPUT_V2 = {
-  allTime: 0,
-  single: 0,
-  byYear: [],
-  byMonth: [],
-  availableYears: [],
-};
-
-function parseRawAthleteStats(rawStats = {}) {
-  // If either of these is undefined or 0, we can exit
-  if (!rawStats.allTime || !rawStats.single) {
-    return DEFAULT_OUTPUT_V2;
-  }
-
-  const parsed = { ...DEFAULT_OUTPUT_V2 };
-  let byYear = [];
-  let byMonth = [];
-  let availableYears = [];
-
-  const keys = Object.keys(rawStats);
-  // Keys will be like _2018, _2018_01
-  // This sorts them by year and months within a year
-  keys.sort();
-  keys.forEach((key) => {
-    const value = rawStats[key];
-    if (key === 'allTime' || key === 'single') {
-      parsed[key] = value;
-      return;
-    }
-
-    const matches = /^_(\d{4,4})_?(\d{2,2})?$/.exec(key);
-    if (!matches) {
-      return;
-    }
-
-    const year = parseInt(matches[1], 10);
-    const month = matches[2]
-      ? parseInt(matches[2], 10)
-      : false;
-
-    if (month === false) {
-      byYear = [...byYear, [year, value]];
-      availableYears = [...availableYears, year];
-    } else {
-      byMonth = [...byMonth, [year, month, value]];
-    }
-  });
-
-  return {
-    ...parsed,
-    availableYears,
-    byMonth,
-    byYear,
-  };
-}
-
-
 /**
  * Format athlete stats for rider page
  *
@@ -112,19 +55,6 @@ function statsForAthletePage(stats = {}) {
     years,
     data,
   });
-}
-
-/**
- * Get rider's stats for a location
- *
- * @param {Object} stats
- * @param {String} location
- * @return {Object}
- */
-function getStatsForLocation(stats = {}, location = defaultLocation) {
-  return stats.locations && stats.locations[location]
-    ? statsForAthletePage(stats.locations[location])
-    : DEFAULT_OUTPUT;
 }
 
 /**
@@ -243,8 +173,6 @@ module.exports = {
   mergeStats,
   mergeStatsSingleYear,
   getMinMaxYears,
-  getStatsForLocation,
-  parseRawAthleteStats,
   statsForAthletePage,
   statsForSingleAthleteChart,
   statsForSingleAthleteYearChart,
