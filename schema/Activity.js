@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const defaultLocation = require('../config');
 
 const { Schema } = mongoose;
 
@@ -18,7 +19,7 @@ const activitySchema = new Schema({
   source: String,
   start_date_local: String,
   coldLapsPoints: Number,
-  location: String,
+  location: { type: String, required: true, default: defaultLocation },
 });
 
 const Activity = mongoose.model('Activity', activitySchema);
