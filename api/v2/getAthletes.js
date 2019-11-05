@@ -1,9 +1,9 @@
 const { omit } = require('lodash');
-const Athlete = require('../schema/Athlete');
+const Athlete = require('../../schema/Athlete');
 const {
   defaultLocation,
   defaultAthleteFields,
-} = require('../config');
+} = require('../../config');
 
 /**
  * Parse CSV string of athlete IDs from URL

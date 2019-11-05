@@ -1,8 +1,11 @@
 const validateApiRequest = require('./validateApiRequest');
+// v1
 const getRanking = require('./getRanking');
-const { getAthletes } = require('./getAthletes');
+const getAthletes = require('./getAthletes');
 const getTotals = require('./getTotals');
 const getSearchUsers = require('./getSearchUsers');
+// v2
+const { getAthletes: v2GetAthletes } = require('./v2/getAthletes');
 
 /**
  * Validate and fetch data for API request
@@ -32,6 +35,9 @@ async function handleAPIRequest(req, res, fetchData) {
  * @param {Express} server
  */
 async function initAPIRoutes(server) {
+  /**
+   * v1 routes
+   */
   server.get('/api/totals', async (req, res) => {
     await handleAPIRequest(
       req,
@@ -61,6 +67,17 @@ async function initAPIRoutes(server) {
       req,
       res,
       async ({ query: { complete } }) => getSearchUsers(!!complete),
+    );
+  });
+
+  /**
+   * v2 routes
+   */
+  server.get('/api/v2/athletes/:ids', async (req, res) => {
+    await handleAPIRequest(
+      req,
+      res,
+      async ({ params: { ids, locations } }) => v2GetAthletes(ids, locations),
     );
   });
 }
