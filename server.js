@@ -58,17 +58,23 @@ app.prepare()
     server.get('/rider/:athleteId(\\d+)/:location?', async (req, res) => {
       const athleteId = parseInt(req.params.athleteId, 10);
       const athleteExists = await Athlete.exists({ _id: athleteId });
-      const location = req.params.location || defaultLocation;
       if (!athleteExists) {
         res.statusCode = 404;
         app.render(req, res, '/_error', {});
-      } else {
-        app.render(req, res, '/rider', {
-          ...req.query,
-          athleteId,
-          location,
-        });
+        return;
       }
+
+      const pagePath = req.query.v2 ? '/rider_v2' : '/rider';
+      const context = {
+        ...req.query,
+        athleteId,
+      };
+
+      if (req.query.v2) {
+        context.location = req.params.location || defaultLocation;
+      }
+
+      app.render(req, res, pagePath, context);
     });
 
     server.get(/^\/(terms|privacy|about)$/, (req, res) => {
