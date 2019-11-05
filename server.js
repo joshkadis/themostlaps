@@ -11,7 +11,7 @@ const { defaultLocation } = require('./config');
 // Route handlers
 const handleSignupCallback = require('./server/handleSignupCallback');
 const handleNotification = require('./server/handleNotification');
-const initAPIRoutes = require('./api/initAPIRoutes');
+const initApiRoutes = require('./server/initApiRoutes');
 const initWebhookRoutes = require('./utils/initWebhookRoutes');
 const getRankingParams = require('./utils/getRankingParams');
 
@@ -94,7 +94,7 @@ app.prepare()
     /**
      * API routing
      */
-    initAPIRoutes(server);
+    initApiRoutes(server);
 
     /**
      * Catchall handler

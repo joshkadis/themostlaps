@@ -9,8 +9,10 @@ dist/
 
 # Lint specific files/dirs as we go
 !server.js
+!server/initApiRoutes.js
 !schema/
 !api/**/*.js
 !pages/rider.js
 !utils/athleteStatsClient.js
 !utils/v2/**/*.js
+!utils/server/**/*.js

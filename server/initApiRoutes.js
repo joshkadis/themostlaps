@@ -1,11 +1,11 @@
-const validateApiRequest = require('./validateApiRequest');
+const validateApiRequest = require('../utils/server/validateApiRequest');
 // v1
-const getRanking = require('./getRanking');
-const getAthletes = require('./getAthletes');
-const getTotals = require('./getTotals');
-const getSearchUsers = require('./getSearchUsers');
+const getRanking = require('../api/getRanking');
+const getAthletes = require('../api/getAthletes');
+const getTotals = require('../api/getTotals');
+const getSearchUsers = require('../api/getSearchUsers');
 // v2
-const { getAthletes: v2GetAthletes } = require('./v2/getAthletes');
+const { getAthletes: v2GetAthletes } = require('../api/v2/getAthletes');
 
 /**
  * Validate and fetch data for API request
@@ -34,7 +34,7 @@ async function handleAPIRequest(req, res, fetchData) {
  *
  * @param {Express} server
  */
-async function initAPIRoutes(server) {
+async function initApiRoutes(server) {
   /**
    * v1 routes
    */
@@ -82,4 +82,4 @@ async function initAPIRoutes(server) {
   });
 }
 
-module.exports = initAPIRoutes;
+module.exports = initApiRoutes;
