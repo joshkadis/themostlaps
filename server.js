@@ -64,13 +64,14 @@ app.prepare()
         return;
       }
 
-      const pagePath = req.query.v2 ? '/rider_v2' : '/rider';
+      const queryIsV2 = typeof req.query.v2 !== 'undefined';
+      const pagePath = queryIsV2 ? '/rider_v2' : '/rider';
       const context = {
         ...req.query,
         athleteId,
       };
 
-      if (req.query.v2) {
+      if (queryIsV2) {
         context.location = req.params.location || defaultLocation;
       }
 
