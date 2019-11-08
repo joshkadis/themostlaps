@@ -1,18 +1,78 @@
-const { handleLegacyAthleteStats } = require('./getAthletes');
+const { getV2AthleteStats } = require('./getAthletes');
 
-test('handleLegacyAthleteStats', () => {
+test('getV2AthleteStats', () => {
   const athlete = {
     name: 'Jan',
     stats: {
-      stat1: 0,
+      single: 1,
+      allTime: 1,
+      _2017: 1,
+      _2017_03: 1,
     },
   };
 
-  expect(handleLegacyAthleteStats(athlete).stats)
+  expect(getV2AthleteStats(athlete).stats)
     .toEqual({
       locations: {
         prospectpark: {
-          stat1: 0,
+          availableYears: [2017],
+          allTime: 1,
+          single: 1,
+          byYear: [
+            [2017, 1],
+          ],
+          byMonth: [
+            [2017, 3, 1],
+          ],
+        },
+      },
+    });
+
+  athlete.stats = {
+    single: 1,
+    allTime: 3,
+    _2015: 2,
+    _2015_04: 1,
+    _2015_05: 1,
+    _2017: 1,
+    _2017_03: 1,
+    locations: {
+      centralpark: {
+        single: 1,
+        allTime: 1,
+        _2017: 1,
+        _2017_03: 1,
+      },
+    },
+  };
+
+  expect(getV2AthleteStats(athlete).stats)
+    .toEqual({
+      locations: {
+        centralpark: {
+          availableYears: [2017],
+          allTime: 1,
+          single: 1,
+          byYear: [
+            [2017, 1],
+          ],
+          byMonth: [
+            [2017, 3, 1],
+          ],
+        },
+        prospectpark: {
+          availableYears: [2015, 2017],
+          allTime: 3,
+          single: 1,
+          byYear: [
+            [2015, 2],
+            [2017, 1],
+          ],
+          byMonth: [
+            [2015, 4, 1],
+            [2015, 5, 1],
+            [2017, 3, 1],
+          ],
         },
       },
     });
@@ -20,43 +80,44 @@ test('handleLegacyAthleteStats', () => {
   athlete.stats = {
     locations: {
       centralpark: {
-        stat1: 1,
+        single: 1,
+        allTime: 1,
+        _2017: 1,
+        _2017_03: 1,
       },
-    },
-    stat1: 2,
-  };
-
-  expect(handleLegacyAthleteStats(athlete).stats)
-    .toEqual({
-      locations: {
-        centralpark: {
-          stat1: 1,
-        },
-        prospectpark: {
-          stat1: 2,
-        },
-      },
-    });
-
-  athlete.stats = {
-    locations: {
       prospectpark: {
-        stat1: 3,
-      },
-      centralpark: {
-        stat1: 4,
+        single: 1,
+        allTime: 1,
+        _2017: 1,
+        _2017_03: 1,
       },
     },
   };
 
-  expect(handleLegacyAthleteStats(athlete).stats)
+  expect(getV2AthleteStats(athlete).stats)
     .toEqual({
       locations: {
         centralpark: {
-          stat1: 4,
+          availableYears: [2017],
+          allTime: 1,
+          single: 1,
+          byYear: [
+            [2017, 1],
+          ],
+          byMonth: [
+            [2017, 3, 1],
+          ],
         },
         prospectpark: {
-          stat1: 3,
+          availableYears: [2017],
+          allTime: 1,
+          single: 1,
+          byYear: [
+            [2017, 1],
+          ],
+          byMonth: [
+            [2017, 3, 1],
+          ],
         },
       },
     });
