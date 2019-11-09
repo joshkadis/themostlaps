@@ -16,3 +16,6 @@ dist/
 !utils/athleteStatsClient.js
 !utils/v2/**/*.js
 !utils/server/**/*.js
+
+# Components
+!components/RiderPageHeader.js
