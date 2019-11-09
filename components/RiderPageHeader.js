@@ -26,13 +26,13 @@ const RiderPageHeader = ({
       className={`biggest ${styles.riderPageHeader_athleteHeader}`}
     />
 
-    {allTime && (
+    {allTime > 0 && (
       <span className={getRiderInfoClassName()}>
         All-time laps: <strong>{allTime.toLocaleString(locale)}</strong>
       </span>
     )}
 
-    {single && (
+    {single > 0 && (
       <span className={getRiderInfoClassName()}>
         Biggest ride: <strong>{single} laps</strong>
       </span>
