@@ -19,7 +19,7 @@ test('getV2AthleteStats', () => {
           allTime: 1,
           single: 1,
           byYear: [
-            [2017, 1],
+            { year: 2017, value: 1 },
           ],
           byMonth: [
             [2017, 3, 1],
@@ -54,7 +54,7 @@ test('getV2AthleteStats', () => {
           allTime: 1,
           single: 1,
           byYear: [
-            [2017, 1],
+            { year: 2017, value: 1 },
           ],
           byMonth: [
             [2017, 3, 1],
@@ -65,8 +65,8 @@ test('getV2AthleteStats', () => {
           allTime: 3,
           single: 1,
           byYear: [
-            [2015, 2],
-            [2017, 1],
+            { year: 2015, value: 2 },
+            { year: 2017, value: 1 },
           ],
           byMonth: [
             [2015, 4, 1],
@@ -102,7 +102,7 @@ test('getV2AthleteStats', () => {
           allTime: 1,
           single: 1,
           byYear: [
-            [2017, 1],
+            { year: 2017, value: 1 },
           ],
           byMonth: [
             [2017, 3, 1],
@@ -113,7 +113,7 @@ test('getV2AthleteStats', () => {
           allTime: 1,
           single: 1,
           byYear: [
-            [2017, 1],
+            { year: 2017, value: 1 },
           ],
           byMonth: [
             [2017, 3, 1],

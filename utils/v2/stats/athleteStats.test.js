@@ -46,9 +46,9 @@ test('transformAthleteStats', () => {
       2018,
     ],
     byYear: [
-      [2016, 93],
-      [2017, 33],
-      [2018, 63],
+      { year: 2016, value: 93 },
+      { year: 2017, value: 33 },
+      { year: 2018, value: 63 },
     ],
     byMonth: [
       [2016, 1, 30],
