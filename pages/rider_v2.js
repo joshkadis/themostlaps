@@ -12,6 +12,9 @@ import RiderPageHeader from '../components/RiderPageHeader';
 import { APIRequest } from '../utils';
 import { defaultLocation } from '../config';
 
+// Error Layouts
+import RiderMessage from '../components/layouts/rider/RiderMessage';
+
 const NOT_FETCHED_STATUS = 'notFetched';
 const RIDER_MESSAGES = {
   ingesting: 'Compiling your stats. Please check back in a minute.',
@@ -111,31 +114,12 @@ class RiderPage extends Component {
     }
   }
 
-  renderMessage(msgName) {
-    const {
-      pathname,
-      query,
-      athlete: {
-        firstname,
-        lastname,
-        profile: img,
-      },
-    } = this.props;
-
-    return (
-      <Layout
-        pathname={pathname}
-        query={query}
-      >
-        <RiderPageHeader
-          firstname={firstname}
-          lastname={lastname}
-          img={img}
-        />
-        <h3 style={{ textAlign: 'center' }}>{RIDER_MESSAGES[msgName] || RIDER_MESSAGES.defaultMsg}</h3>
-      </Layout>
-    );
-  }
+  renderMessage = (msgName) => <RiderMessage
+      pathname={this.props.pathname}
+      query={this.props.query}
+      athlete={this.props.athlete}
+      msgName={msgName}
+    />;
 
   renderNotFound() {
     const {
