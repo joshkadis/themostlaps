@@ -5,7 +5,6 @@ import Router from 'next/router';
 
 // Components
 import Layout from '../components/Layout';
-import SearchUsers from '../components/lib/SearchUsers';
 import RiderPageHeader from '../components/RiderPageHeader';
 
 // Utils
@@ -14,16 +13,12 @@ import { defaultLocation } from '../config';
 
 // Error Layouts
 import RiderMessage from '../components/layouts/rider/RiderMessage';
+import RiderNotFound from '../components/layouts/rider/RiderNotFound';
 
 const NOT_FETCHED_STATUS = 'notFetched';
-const RIDER_MESSAGES = {
-  ingesting: 'Compiling your stats. Please check back in a minute.',
-  noLaps: 'Not even one lap, ever! 😱',
-  defaultMsg: 'An error occurred',
-};
 
 class RiderPage extends Component {
-  defaultProps = {
+  static defaultProps = {
     status: NOT_FETCHED_STATUS,
     athlete: {},
     locations: {},
@@ -32,7 +27,7 @@ class RiderPage extends Component {
     shouldShowUpdated: false,
   };
 
-  propTypes = {
+  static propTypes = {
     athlete: PropTypes.object,
     locations: PropTypes.object,
     pathname: PropTypes.string.isRequired,
@@ -121,22 +116,10 @@ class RiderPage extends Component {
       msgName={msgName}
     />;
 
-  renderNotFound() {
-    const {
-      pathname,
-      query,
-    } = this.props;
-
-    return (
-      <Layout
-        pathname={pathname}
-        query={query}
-      >
-        <h2 style={{ textAlign: 'center' }}>Rider not found 😧</h2>
-        <SearchUsers onChange={this.navigateToRiderPage} />
-      </Layout>
-    );
-  }
+  renderNotFound = () => <RiderNotFound
+      pathname={this.props.pathname}
+      query={this.props.query}
+    />;
 
   canRenderAthlete = () => this.props.status === 'ready' || this.props.status === 'ingesting';
 
@@ -172,7 +155,7 @@ class RiderPage extends Component {
         <RiderPageHeader
           firstname={athlete.firstname}
           lastname={athlete.lastname}
-          img={athlete.img}
+          img={athlete.profile}
           allTime={allTime}
           single={single}
         />
