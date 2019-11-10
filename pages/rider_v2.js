@@ -15,6 +15,9 @@ import { defaultLocation } from '../config';
 import RiderMessage from '../components/layouts/rider/RiderMessage';
 import RiderNotFound from '../components/layouts/rider/RiderNotFound';
 
+// Charts
+import AllYears from '../components/charts/AllYears';
+
 const NOT_FETCHED_STATUS = 'notFetched';
 
 class RiderPage extends Component {
@@ -132,9 +135,14 @@ class RiderPage extends Component {
     } = this.props;
 
     const {
-      allTime,
-      single,
-    } = this.state.currentLocationStats;
+      currentLocationStats: {
+        allTime,
+        single,
+        byYear: primaryAthleteByYear,
+        // byMonth: primaryAthleteByMonth,
+      },
+      showStatsBy,
+    } = this.state;
 
     if (!this.canRenderAthlete()) {
       return this.renderNotFound();
@@ -159,7 +167,14 @@ class RiderPage extends Component {
           allTime={allTime}
           single={single}
         />
-        {/* year === 'all' ? <AllYears> : <SingleYear> */}
+        {showStatsBy === 'byYear' && (
+          <AllYears
+            primaryData={primaryAthleteByYear}
+            primaryId={parseInt(query.athleteId, 10)}
+          />
+        )}
+
+        {/* <SingleYear> */}
         {/* StravaLink> */}
       </Layout>
     );

@@ -47,7 +47,7 @@ function transformAthleteStats(rawStats = {}) {
       : false;
 
     if (month === false) {
-      byYear = [...byYear, [year, value]];
+      byYear = [...byYear, { value, year }];
       availableYears = [...availableYears, year];
     } else {
       byMonth = [...byMonth, [year, month, value]];
