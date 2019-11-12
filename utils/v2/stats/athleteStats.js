@@ -1,12 +1,27 @@
 const { defaultLocation } = require('../../../config');
+const { getMonthName } = require('../../../utils/dateTimeUtils');
 
 const DEFAULT_OUTPUT_V2 = {
   allTime: 0,
   single: 0,
   byYear: [],
-  byMonth: [],
+  byMonth: {},
   availableYears: [],
 };
+
+/**
+ * Create array of month-value objects to receive monthly stats
+ *
+ * @return {Array}
+ */
+function setUpYearByMonths() {
+  return Array(12)
+    .fill(null)
+    .map((val, idx) => ({
+      month: getMonthName(idx + 1, 3), // Jan, Feb, Mar...
+      value: 0,
+    }));
+}
 
 /**
  * Transform stats from format in database to format for rider page
@@ -20,9 +35,9 @@ function transformAthleteStats(rawStats = {}) {
     return DEFAULT_OUTPUT_V2;
   }
 
-  const parsed = { ...DEFAULT_OUTPUT_V2 };
+  const namedStats = { ...DEFAULT_OUTPUT_V2 };
   let byYear = [];
-  let byMonth = [];
+  const byMonth = {};
   let availableYears = [];
 
   const keys = Object.keys(rawStats);
@@ -32,7 +47,7 @@ function transformAthleteStats(rawStats = {}) {
   keys.forEach((key) => {
     const value = rawStats[key];
     if (key === 'allTime' || key === 'single') {
-      parsed[key] = value;
+      namedStats[key] = value;
       return;
     }
 
@@ -50,12 +65,14 @@ function transformAthleteStats(rawStats = {}) {
       byYear = [...byYear, { value, year }];
       availableYears = [...availableYears, year];
     } else {
-      byMonth = [...byMonth, [year, month, value]];
+      byMonth[year] = byMonth[year] || setUpYearByMonths();
+      // Set value for month
+      byMonth[year][(month - 1)].value = value;
     }
   });
 
   return {
-    ...parsed,
+    ...namedStats,
     availableYears,
     byMonth,
     byYear,

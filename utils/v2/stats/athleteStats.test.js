@@ -17,12 +17,29 @@ const SAMPLE_RAW_STATS = {
   _2018_03: 22,
 };
 
+function mockYearByMonth(jan, feb, mar) {
+  return [
+    { month: 'Jan', value: jan },
+    { month: 'Feb', value: feb },
+    { month: 'Mar', value: mar },
+    { month: 'Apr', value: 0 },
+    { month: 'May', value: 0 },
+    { month: 'Jun', value: 0 },
+    { month: 'Jul', value: 0 },
+    { month: 'Aug', value: 0 },
+    { month: 'Sep', value: 0 },
+    { month: 'Oct', value: 0 },
+    { month: 'Nov', value: 0 },
+    { month: 'Dec', value: 0 },
+  ];
+}
+
 test('transformAthleteStats', () => {
   expect(transformAthleteStats()).toEqual({
     allTime: 0,
     single: 0,
     byYear: [],
-    byMonth: [],
+    byMonth: {},
     availableYears: [],
   });
 
@@ -33,7 +50,7 @@ test('transformAthleteStats', () => {
     allTime: 2,
     single: 2,
     byYear: [],
-    byMonth: [],
+    byMonth: {},
     availableYears: [],
   });
 
@@ -50,16 +67,10 @@ test('transformAthleteStats', () => {
       { year: 2017, value: 33 },
       { year: 2018, value: 63 },
     ],
-    byMonth: [
-      [2016, 1, 30],
-      [2016, 2, 31],
-      [2016, 3, 32],
-      [2017, 1, 10],
-      [2017, 2, 11],
-      [2017, 3, 12],
-      [2018, 1, 20],
-      [2018, 2, 21],
-      [2018, 3, 22],
-    ],
+    byMonth: {
+      2016: mockYearByMonth(30, 31, 32),
+      2017: mockYearByMonth(10, 11, 12),
+      2018: mockYearByMonth(20, 21, 22),
+    },
   });
 });

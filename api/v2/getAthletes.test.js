@@ -21,9 +21,22 @@ test('getV2AthleteStats', () => {
           byYear: [
             { year: 2017, value: 1 },
           ],
-          byMonth: [
-            [2017, 3, 1],
-          ],
+          byMonth: {
+            2017: [
+              { month: 'Jan', value: 0 },
+              { month: 'Feb', value: 0 },
+              { month: 'Mar', value: 1 },
+              { month: 'Apr', value: 0 },
+              { month: 'May', value: 0 },
+              { month: 'Jun', value: 0 },
+              { month: 'Jul', value: 0 },
+              { month: 'Aug', value: 0 },
+              { month: 'Sep', value: 0 },
+              { month: 'Oct', value: 0 },
+              { month: 'Nov', value: 0 },
+              { month: 'Dec', value: 0 },
+            ],
+          },
         },
       },
     });
@@ -56,9 +69,22 @@ test('getV2AthleteStats', () => {
           byYear: [
             { year: 2017, value: 1 },
           ],
-          byMonth: [
-            [2017, 3, 1],
-          ],
+          byMonth: {
+            2017: [
+              { month: 'Jan', value: 0 },
+              { month: 'Feb', value: 0 },
+              { month: 'Mar', value: 1 },
+              { month: 'Apr', value: 0 },
+              { month: 'May', value: 0 },
+              { month: 'Jun', value: 0 },
+              { month: 'Jul', value: 0 },
+              { month: 'Aug', value: 0 },
+              { month: 'Sep', value: 0 },
+              { month: 'Oct', value: 0 },
+              { month: 'Nov', value: 0 },
+              { month: 'Dec', value: 0 },
+            ],
+          },
         },
         prospectpark: {
           availableYears: [2015, 2017],
@@ -68,11 +94,36 @@ test('getV2AthleteStats', () => {
             { year: 2015, value: 2 },
             { year: 2017, value: 1 },
           ],
-          byMonth: [
-            [2015, 4, 1],
-            [2015, 5, 1],
-            [2017, 3, 1],
-          ],
+          byMonth: {
+            2015: [
+              { month: 'Jan', value: 0 },
+              { month: 'Feb', value: 0 },
+              { month: 'Mar', value: 0 },
+              { month: 'Apr', value: 1 },
+              { month: 'May', value: 1 },
+              { month: 'Jun', value: 0 },
+              { month: 'Jul', value: 0 },
+              { month: 'Aug', value: 0 },
+              { month: 'Sep', value: 0 },
+              { month: 'Oct', value: 0 },
+              { month: 'Nov', value: 0 },
+              { month: 'Dec', value: 0 },
+            ],
+            2017: [
+              { month: 'Jan', value: 0 },
+              { month: 'Feb', value: 0 },
+              { month: 'Mar', value: 1 },
+              { month: 'Apr', value: 0 },
+              { month: 'May', value: 0 },
+              { month: 'Jun', value: 0 },
+              { month: 'Jul', value: 0 },
+              { month: 'Aug', value: 0 },
+              { month: 'Sep', value: 0 },
+              { month: 'Oct', value: 0 },
+              { month: 'Nov', value: 0 },
+              { month: 'Dec', value: 0 },
+            ],
+          },
         },
       },
     });
@@ -104,9 +155,22 @@ test('getV2AthleteStats', () => {
           byYear: [
             { year: 2017, value: 1 },
           ],
-          byMonth: [
-            [2017, 3, 1],
-          ],
+          byMonth: {
+            2017: [
+              { month: 'Jan', value: 0 },
+              { month: 'Feb', value: 0 },
+              { month: 'Mar', value: 1 },
+              { month: 'Apr', value: 0 },
+              { month: 'May', value: 0 },
+              { month: 'Jun', value: 0 },
+              { month: 'Jul', value: 0 },
+              { month: 'Aug', value: 0 },
+              { month: 'Sep', value: 0 },
+              { month: 'Oct', value: 0 },
+              { month: 'Nov', value: 0 },
+              { month: 'Dec', value: 0 },
+            ],
+          },
         },
         prospectpark: {
           availableYears: [2017],
@@ -115,9 +179,22 @@ test('getV2AthleteStats', () => {
           byYear: [
             { year: 2017, value: 1 },
           ],
-          byMonth: [
-            [2017, 3, 1],
-          ],
+          byMonth: {
+            2017: [
+              { month: 'Jan', value: 0 },
+              { month: 'Feb', value: 0 },
+              { month: 'Mar', value: 1 },
+              { month: 'Apr', value: 0 },
+              { month: 'May', value: 0 },
+              { month: 'Jun', value: 0 },
+              { month: 'Jul', value: 0 },
+              { month: 'Aug', value: 0 },
+              { month: 'Sep', value: 0 },
+              { month: 'Oct', value: 0 },
+              { month: 'Nov', value: 0 },
+              { month: 'Dec', value: 0 },
+            ],
+          },
         },
       },
     });

@@ -17,6 +17,7 @@ import RiderNotFound from '../components/layouts/rider/RiderNotFound';
 
 // Charts
 import AllYears from '../components/charts/AllYears';
+import SingleYear from '../components/charts/SingleYear';
 
 const NOT_FETCHED_STATUS = 'notFetched';
 
@@ -43,6 +44,7 @@ class RiderPage extends Component {
 
   state = {
     showStatsBy: 'byYear',
+    showStatsYear: new Date().getFullYear(),
     hasCompareAthlete: false,
     currentLocationStats: {},
     compareAthlete: {},
@@ -139,9 +141,10 @@ class RiderPage extends Component {
         allTime,
         single,
         byYear: primaryAthleteByYear,
-        // byMonth: primaryAthleteByMonth,
+        byMonth: primaryAthleteByMonth,
       },
       showStatsBy,
+      showStatsYear,
     } = this.state;
 
     if (!this.canRenderAthlete()) {
@@ -173,8 +176,13 @@ class RiderPage extends Component {
             primaryId={parseInt(query.athleteId, 10)}
           />
         )}
-
-        {/* <SingleYear> */}
+        {showStatsBy === 'byMonth' && (
+          <SingleYear
+            year={showStatsYear.toString()}
+            primaryData={primaryAthleteByMonth[showStatsYear]}
+            primaryId={parseInt(query.athleteId, 10)}
+          />
+        )}
         {/* StravaLink> */}
       </Layout>
     );
