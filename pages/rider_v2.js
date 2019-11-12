@@ -59,17 +59,14 @@ class RiderPage extends Component {
   constructor(props) {
     super(props);
     const {
+      locations,
       currentLocation,
-      pathname,
-      query,
     } = props;
 
     this.state = {
       ...this.state,
       currentLocation,
-      pathname,
-      query,
-      currentLocationStats: this.props.locations[currentLocation],
+      currentLocationStats: locations[currentLocation],
     };
   }
 
@@ -224,9 +221,9 @@ class RiderPage extends Component {
     const lastYear = [...availableYears].pop();
 
     if (shouldIncrement && showStatsYear !== lastYear) {
-      this.onSelectYear({ value: availableYears[showIdx + 1] });
+      this.setState({ showStatsYear: availableYears[showIdx + 1] });
     } else if (!shouldIncrement && showStatsYear !== firstYear) {
-      this.onSelectYear({ value: availableYears[showIdx - 1] });
+      this.setState({ showStatsYear: availableYears[showIdx - 1] });
     }
   }
 
@@ -314,7 +311,7 @@ class RiderPage extends Component {
             onChartRendered={this.onChartRendered}
             onClickBack={() => this.setState({ showStatsBy: 'byYear' })}
             onClickPrevYear={() => this.updateYear(false)}
-            onClickNextYear={this.updateYear(true)}
+            onClickNextYear={() => this.updateYear(true)}
           />
         )}
         {this.state.chartRendered && (
