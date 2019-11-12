@@ -183,7 +183,18 @@ class RiderPage extends Component {
             primaryId={parseInt(query.athleteId, 10)}
           />
         )}
-        {/* StravaLink> */}
+        {this.state.chartRendered && (
+          <div style={{ textAlign: 'right' }}>
+            <a
+              className="strava_link"
+              href={`https://www.strava.com/athletes/${query.athleteId}`} /* ` */
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              View on Strava
+            </a>
+          </div>
+        )}
       </Layout>
     );
   }
