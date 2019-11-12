@@ -6,6 +6,8 @@ import Router from 'next/router';
 // Components
 import Layout from '../components/Layout';
 import RiderPageHeader from '../components/RiderPageHeader';
+import RiderPageWelcome from '../components/RiderPageWelcome';
+import RiderPageUpdated from '../components/RiderPageUpdated';
 
 // Utils
 import { APIRequest } from '../utils';
@@ -134,6 +136,8 @@ class RiderPage extends Component {
       query,
       status,
       athlete,
+      shouldShowUpdated,
+      shouldShowWelcome,
     } = this.props;
 
     const {
@@ -162,7 +166,15 @@ class RiderPage extends Component {
         pathname={pathname}
         query={query}
       >
-        {/* <RiderPageWelcome>? */}
+        {shouldShowWelcome && (
+          <RiderPageWelcome
+            allTime={allTime}
+            firstname={athlete.firstname}
+          />
+        )}
+
+        {shouldShowUpdated && <RiderPageUpdated />}
+
         <RiderPageHeader
           firstname={athlete.firstname}
           lastname={athlete.lastname}
