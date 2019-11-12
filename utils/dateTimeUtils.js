@@ -9,7 +9,7 @@ function timePartString(part) {
     return part.toString();
   }
   return `0${part}`;
-};
+}
 
 /**
  * Get _YYYY key
@@ -35,12 +35,12 @@ function getYearKey(year = null) {
  * @return {String}
  */
 function getMonthKey(dateObj = false, delimiter = '_') {
-  dateObj = dateObj || new Date();
+  const useDateObj = dateObj || new Date();
   return [
     delimiter,
-    dateObj.getFullYear(),
+    useDateObj.getFullYear(),
     delimiter,
-    timePartString(dateObj.getMonth() + 1),
+    timePartString(useDateObj.getMonth() + 1),
   ].join('');
 }
 

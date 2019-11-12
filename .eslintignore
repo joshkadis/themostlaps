@@ -4,7 +4,9 @@ node_module/
 build/
 dist/
 
+############
 # Ignore legacy code by default
+############
 /**/*.js
 
 # Lint specific files/dirs as we go
@@ -12,7 +14,10 @@ dist/
 !server/initApiRoutes.js
 !schema/**/*.js
 !api/**/*.js
+
+# Utils
 !utils/athleteStatsClient.js
+!utils/dateTimeUtils.js
 !utils/v2/**/*.js
 !utils/server/**/*.js
 
@@ -22,3 +27,8 @@ dist/
 # Components
 !components/RiderPageHeader.js
 !components/layouts/**/*.js
+!components/charts/**/*.js
+
+# Confic
+!config/index.js
+!config/locations/**/*.js
