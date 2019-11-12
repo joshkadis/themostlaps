@@ -22,6 +22,10 @@ import AllYears from '../components/charts/AllYears';
 import SingleYear from '../components/charts/SingleYear';
 
 const NOT_FETCHED_STATUS = 'notFetched';
+const DEFAULT_COMPARE_ATHLETE_STATE = {
+  hasCompareAthlete: false,
+  compareAthlete: {},
+};
 
 class RiderPage extends Component {
   static defaultProps = {
@@ -45,11 +49,11 @@ class RiderPage extends Component {
   }
 
   state = {
+    chartRendered: false,
     showStatsBy: 'byYear',
     showStatsYear: new Date().getFullYear(),
-    hasCompareAthlete: false,
     currentLocationStats: {},
-    compareAthlete: {},
+    ...DEFAULT_COMPARE_ATHLETE_STATE,
   }
 
   constructor(props) {
@@ -130,6 +134,74 @@ class RiderPage extends Component {
 
   canRenderAthlete = () => this.props.status === 'ready' || this.props.status === 'ingesting';
 
+  onChartRendered = () => {
+    this.setState({ chartRendered: true });
+  }
+
+  onSelectYear = (year) => {
+    this.setState({
+      showStatsBy: 'byMonth',
+      showStatsYear: year.value,
+    });
+  }
+
+  /**
+   * Handle change in search/select field for user to compare to
+   */
+  onChangeSearchUsers = (evt) => {
+    if (!evt || !evt.value) {
+      this.setState(DEFAULT_COMPARE_ATHLETE_STATE);
+      return;
+    }
+
+    if (evt.value === this.state.compareAthlete.id) {
+      return;
+    }
+
+    APIRequest(`/v2/athletes/${evt.value}`)
+      .then((apiResponse) => {
+        if (!Array.isArray(apiResponse) || !apiResponse.length) {
+          this.setState(DEFAULT_COMPARE_ATHLETE_STATE);
+        }
+        this.setState({
+          hasCompareAthlete: true,
+          compareAthlete: {
+            athlete: apiResponse[0].athlete,
+            stats: apiResponse[0].stats,
+          },
+        });
+      });
+  }
+
+  /**
+   * Get compare athlete's stats for location and year
+   *
+   * @return {Object}
+   */
+  getCompareAthleteStats = () => {
+    const {
+      hasCompareAthlete,
+      compareAthlete,
+      currentLocation,
+      showStatsYear,
+    } = this.state;
+
+    if (!hasCompareAthlete) {
+      return {
+        compareAthleteByYear: [],
+        compareAthleteByMonth: [],
+      };
+    }
+    const {
+      byYear,
+      byMonth,
+    } = compareAthlete.stats.locations[currentLocation];
+    return {
+      compareAthleteByYear: byYear,
+      compareAthleteByMonth: byMonth[showStatsYear],
+    };
+  }
+
   render() {
     const {
       pathname,
@@ -149,7 +221,15 @@ class RiderPage extends Component {
       },
       showStatsBy,
       showStatsYear,
+      hasCompareAthlete,
+      compareAthlete,
     } = this.state;
+
+    const compareAthleteMeta = compareAthlete.athlete;
+    const {
+      compareAthleteByYear,
+      compareAthleteByMonth,
+    } = this.getCompareAthleteStats();
 
     if (!this.canRenderAthlete()) {
       return this.renderNotFound();
@@ -184,6 +264,12 @@ class RiderPage extends Component {
         />
         {showStatsBy === 'byYear' && (
           <AllYears
+            compareTo={compareAthleteMeta}
+            compareData={compareAthleteByYear}
+            hasCompare={hasCompareAthlete}
+            onClickTick={this.onSelectYear}
+            onChange={this.onChangeSearchUsers}
+            onChartRendered={this.onChartRendered}
             primaryData={primaryAthleteByYear}
             primaryId={parseInt(query.athleteId, 10)}
           />
