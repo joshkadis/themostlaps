@@ -192,14 +192,42 @@ class RiderPage extends Component {
         compareAthleteByMonth: [],
       };
     }
+
+    // Default values are empty arrays.
     const {
-      byYear,
-      byMonth,
+      byYear = [],
+      byMonth = {
+        [showStatsYear]: [],
+      },
     } = compareAthlete.stats.locations[currentLocation];
     return {
       compareAthleteByYear: byYear,
       compareAthleteByMonth: byMonth[showStatsYear],
     };
+  }
+
+  /**
+   * Increment or decrement current state year
+   *
+   * @param {Bool} shouldIncrement `true` to increment, `false` to decrement
+   */
+  updateYear(shouldIncrement) {
+    if (this.state.showStatsBy !== 'byMonth') {
+      return;
+    }
+    const { availableYears } = this.state.currentLocationStats;
+    // Cast current year as int
+    const showStatsYear = parseInt(this.state.showStatsYear, 10);
+    const showIdx = availableYears.indexOf(showStatsYear);
+
+    const firstYear = [...availableYears].shift();
+    const lastYear = [...availableYears].pop();
+
+    if (shouldIncrement && showStatsYear !== lastYear) {
+      this.onSelectYear({ value: availableYears[showIdx + 1] });
+    } else if (!shouldIncrement && showStatsYear !== firstYear) {
+      this.onSelectYear({ value: availableYears[showIdx - 1] });
+    }
   }
 
   render() {
@@ -276,9 +304,17 @@ class RiderPage extends Component {
         )}
         {showStatsBy === 'byMonth' && (
           <SingleYear
-            year={showStatsYear.toString()}
+            year={showStatsYear}
             primaryData={primaryAthleteByMonth[showStatsYear]}
             primaryId={parseInt(query.athleteId, 10)}
+            compareTo={compareAthleteMeta}
+            compareData={compareAthleteByMonth}
+            hasCompare={hasCompareAthlete}
+            onChange={this.onChangeSearchUsers}
+            onChartRendered={this.onChartRendered}
+            onClickBack={() => this.setState({ showStatsBy: 'byYear' })}
+            onClickPrevYear={() => this.updateYear(false)}
+            onClickNextYear={this.updateYear(true)}
           />
         )}
         {this.state.chartRendered && (
