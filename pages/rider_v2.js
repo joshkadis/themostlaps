@@ -138,10 +138,10 @@ class RiderPage extends Component {
     this.setState({ chartRendered: true });
   }
 
-  onSelectYear = (year) => {
+  onSelectYear = ({ value }) => {
     this.setState({
       showStatsBy: 'byMonth',
-      showStatsYear: year.value,
+      showStatsYear: value,
     });
   }
 
