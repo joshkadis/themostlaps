@@ -61,32 +61,10 @@ class RiderPage extends Component {
       currentLocation,
     } = props;
 
-    this.resetAthlete = this.resetAthlete.bind(this);
-
     this.state = {
       ...this.state,
       currentLocation, // @todo Enable changing location
     };
-
-    // Router.events.on('routeChangeStart', this.resetAthlete);
-  }
-
-  resetAthlete(url) {
-    const matches = /\/rider\/(\d+)/.exec(url);
-    if (!matches) {
-      return;
-    }
-
-    const nextId = parseInt(matches[1], 10);
-    this.getInitialProps({
-      query: {
-        athleteId: nextId,
-      },
-    });
-  }
-
-  componentWillUnmount() {
-    // Router.events.off('routeChangeStart', this.resetAthlete);
   }
 
   static async getInitialProps({ query, req = {} }) {
