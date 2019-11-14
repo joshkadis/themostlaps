@@ -25,6 +25,7 @@ dist/
 !pages/*_v2.js
 
 # Components
+!components/Navigation.js
 !components/RiderPageHeader.js
 !components/layouts/**/*.js
 !components/charts/**/*.js
