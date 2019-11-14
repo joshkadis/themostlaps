@@ -25,9 +25,9 @@ $ npm run lint
 ```
 
 ### Babel
- Server-side code is not compiled by anything so Babel only runs on the frontend code. Next has its own setup for that.
+Server-side code is not compiled by anything so Babel only runs on the frontend code. Next has its own setup for that.
 
- Eventually we'll get around to separating client and server applications.
+Eventually we'll get around to separating client and server applications.
 
 ### Webpack
 Same as Babel: Next for frontend, nothing for server-side.
