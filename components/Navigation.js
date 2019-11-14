@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Link from 'next/link';
-import Router from 'next/router';
+import { withRouter } from 'next/router';
 import classNames from 'classnames';
 import Button from './lib/Button';
 import * as styles from './Navigation.css';
@@ -12,6 +12,7 @@ import { modalControlsShape } from '../utils/propTypes';
 import { trackModalOpen, setDimensions } from '../utils/analytics';
 import SearchUsers from './lib/SearchUsers';
 import { isSmallViewport } from '../utils/window';
+import { routeIsV2 } from '../utils/v2/router';
 
 class Navigation extends Component {
   constructor(props) {
@@ -47,11 +48,15 @@ class Navigation extends Component {
   navigateToRiderPage(selection) {
     if (selection && selection.value) {
       this.setState(this.defaultState);
-      const isV2 = process.env.APP_VERSION && process.env.APP_VERSION.indexOf('v2') === 0;
-      Router.push(
-        `/rider${isV2 ? '_v2' : ''}?athleteId=${selection.value}`,
-        `/rider/${selection.value}${isV2 ? '?v2' : ''}`,
-      );
+      const isV2 = routeIsV2(this.props.router);
+      const internal = isV2
+        ? `/rider_v2?athleteId=${selection.value}`
+        : `/rider?athleteId=${selection.value}`;
+      const external = isV2
+        ? `/rider/${selection.value}?v2`
+        : `/rider/${selection.value}`;
+
+      this.props.router.push(internal, external);
     }
   }
 
@@ -144,6 +149,7 @@ class Navigation extends Component {
 Navigation.propTypes = {
   modalControls: PropTypes.shape(modalControlsShape).isRequired,
   modalIsOpen: PropTypes.bool.isRequired,
+  router: PropTypes.object.isRequired,
 };
 
-export default Navigation;
+export default withRouter(Navigation);
