@@ -1,4 +1,4 @@
-/* global window,localStorage */
+/* global process, window,localStorage */
 import { Component } from 'react';
 import PropTypes from 'prop-types';
 import Router from 'next/router';
@@ -324,6 +324,11 @@ class RiderPage extends Component {
             >
               View on Strava
             </a>
+          </div>
+        )}
+        {process.env.APP_VERSION && (
+          <div style={{ textAlign: 'right' }}>
+            <span className="version-link">{` ${process.env.APP_VERSION}`}</span>{/* ` */}
           </div>
         )}
       </Layout>
