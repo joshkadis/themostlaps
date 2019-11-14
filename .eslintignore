@@ -28,7 +28,6 @@ dist/
 !components/Navigation.js
 !components/RiderPageHeader.js
 !components/layouts/**/*.js
-!components/charts/**/*.js
 
 # Confic
 !config/index.js

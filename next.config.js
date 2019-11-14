@@ -14,7 +14,6 @@ module.exports = withCSS({
       'APP_DOMAIN',
       'PORT',
       'CLIENT_ID',
-      'APP_VERSION',
     ]);
     config.plugins.push(define);
     return config;
