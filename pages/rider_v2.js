@@ -196,7 +196,7 @@ class RiderPage extends Component {
     } = compareAthlete.stats.locations[currentLocation];
     return {
       compareAthleteByYear: byYear,
-      compareAthleteByMonth: byMonth[showStatsYear],
+      compareAthleteByMonth: byMonth[showStatsYear] || [],
     };
   }
 
@@ -210,7 +210,7 @@ class RiderPage extends Component {
       return;
     }
     const availableYears = [
-      ...this.state.props.locations[this.state.currentLocation].availableYears,
+      ...this.props.locations[this.state.currentLocation].availableYears,
     ];
     // Cast current year as int
     const showStatsYear = parseInt(this.state.showStatsYear, 10);
