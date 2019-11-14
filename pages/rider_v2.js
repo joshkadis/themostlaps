@@ -1,7 +1,6 @@
-/* global process */
 import { Component } from 'react';
 import PropTypes from 'prop-types';
-import Router from 'next/router';
+import { withRouter } from 'next/router';
 
 // Components
 import Layout from '../components/Layout';
@@ -12,6 +11,7 @@ import RiderPageUpdated from '../components/RiderPageUpdated';
 // Utils
 import { APIRequest } from '../utils';
 import { defaultLocation } from '../config';
+import { routeIsV2 } from '../utils/v2/router';
 
 // Error Layouts
 import RiderMessage from '../components/layouts/rider/RiderMessage';
@@ -43,6 +43,7 @@ class RiderPage extends Component {
     pathname: PropTypes.string.isRequired,
     query: PropTypes.object.isRequired,
     currentLocation: PropTypes.string,
+    router: PropTypes.object.isRequired,
     shouldShowWelcome: PropTypes.bool,
     shouldShowUpdated: PropTypes.bool,
     status: PropTypes.string,
@@ -107,7 +108,7 @@ class RiderPage extends Component {
 
   navigateToRiderPage = ({ value = '' }) => {
     if (value.length) {
-      Router.push(
+      this.props.router.push(
         `/rider?athleteId=${value}`,
         `/rider/${value}`,
       );
@@ -236,6 +237,7 @@ class RiderPage extends Component {
       shouldShowWelcome,
       locations,
       currentLocation,
+      router: routerProp,
     } = this.props;
 
     const {
@@ -329,9 +331,9 @@ class RiderPage extends Component {
             </a>
           </div>
         )}
-        {process.env.APP_VERSION && (
+        {routeIsV2(routerProp) && (
           <div style={{ textAlign: 'right' }}>
-            <span className="version-link">{` ${process.env.APP_VERSION}`}</span>{/* ` */}
+            <span className="version-link">v2</span>
           </div>
         )}
       </Layout>
@@ -339,4 +341,4 @@ class RiderPage extends Component {
   }
 }
 
-export default RiderPage;
+export default withRouter(RiderPage);
