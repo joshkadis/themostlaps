@@ -1,4 +1,4 @@
-/* global process, window,localStorage */
+/* global process */
 import { Component } from 'react';
 import PropTypes from 'prop-types';
 import Router from 'next/router';
@@ -52,34 +52,53 @@ class RiderPage extends Component {
     chartRendered: false,
     showStatsBy: 'byYear',
     showStatsYear: new Date().getFullYear(),
-    currentLocationStats: {},
     ...DEFAULT_COMPARE_ATHLETE_STATE,
   }
 
   constructor(props) {
     super(props);
     const {
-      locations,
       currentLocation,
     } = props;
 
+    this.resetAthlete = this.resetAthlete.bind(this);
+
     this.state = {
       ...this.state,
-      currentLocation,
-      currentLocationStats: locations[currentLocation],
+      currentLocation, // @todo Enable changing location
     };
+
+    // Router.events.on('routeChangeStart', this.resetAthlete);
   }
 
-  static async getInitialProps({ req: { path }, query }) {
+  resetAthlete(url) {
+    const matches = /\/rider\/(\d+)/.exec(url);
+    if (!matches) {
+      return;
+    }
+
+    const nextId = parseInt(matches[1], 10);
+    this.getInitialProps({
+      query: {
+        athleteId: nextId,
+      },
+    });
+  }
+
+  componentWillUnmount() {
+    // Router.events.off('routeChangeStart', this.resetAthlete);
+  }
+
+  static async getInitialProps({ query, req = {} }) {
     // Basic props from context
     const { athleteId = false, location = defaultLocation } = query;
 
     const defaultInitialProps = {
       currentLocation: location,
-      pathname: path,
+      pathname: req.path || `/rider/${athleteId}`,
       query,
-      shouldShowWelcome: typeof query.welcome !== 'undefined' && query.welcome,
-      shouldShowUpdated: typeof query.updated !== 'undefined' && query.updated,
+      shouldShowWelcome: !!query.welcome,
+      shouldShowUpdated: !!query.updated,
       status: NOT_FETCHED_STATUS,
     };
 
@@ -212,7 +231,9 @@ class RiderPage extends Component {
     if (this.state.showStatsBy !== 'byMonth') {
       return;
     }
-    const { availableYears } = this.state.currentLocationStats;
+    const availableYears = [
+      ...this.state.props.locations[this.state.currentLocation].availableYears,
+    ];
     // Cast current year as int
     const showStatsYear = parseInt(this.state.showStatsYear, 10);
     const showIdx = availableYears.indexOf(showStatsYear);
@@ -235,20 +256,24 @@ class RiderPage extends Component {
       athlete,
       shouldShowUpdated,
       shouldShowWelcome,
+      locations,
+      currentLocation,
     } = this.props;
 
     const {
-      currentLocationStats: {
-        allTime,
-        single,
-        byYear: primaryAthleteByYear,
-        byMonth: primaryAthleteByMonth,
-      },
       showStatsBy,
       showStatsYear,
       hasCompareAthlete,
       compareAthlete,
+      chartRendered,
     } = this.state;
+
+    const {
+      allTime,
+      single,
+      byYear: primaryAthleteByYear,
+      byMonth: primaryAthleteByMonth,
+    } = locations[currentLocation];
 
     const compareAthleteMeta = compareAthlete.athlete;
     const {
@@ -314,7 +339,7 @@ class RiderPage extends Component {
             onClickNextYear={() => this.updateYear(true)}
           />
         )}
-        {this.state.chartRendered && (
+        {chartRendered && (
           <div style={{ textAlign: 'right' }}>
             <a
               className="strava_link"
