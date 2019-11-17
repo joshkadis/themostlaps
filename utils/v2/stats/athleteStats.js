@@ -35,6 +35,7 @@ function transformAthleteStats(rawStats = {}) {
     return DEFAULT_OUTPUT_V2;
   }
 
+  // Ready to override default properties
   const namedStats = { ...DEFAULT_OUTPUT_V2 };
   let byYear = [];
   const byMonth = {};
@@ -42,7 +43,7 @@ function transformAthleteStats(rawStats = {}) {
 
   const keys = Object.keys(rawStats);
   // Keys will be like _2018, _2018_01
-  // This sorts them by year and months within a year
+  // So this sorts them by year and months within a year
   keys.sort();
   keys.forEach((key) => {
     const value = rawStats[key];
@@ -51,7 +52,8 @@ function transformAthleteStats(rawStats = {}) {
       return;
     }
 
-    const matches = /^_(\d{4,4})_?(\d{2,2})?$/.exec(key);
+    // Only match _YYYY and _YYYY_MM
+    const matches = /^_(\d{4})(?:_(\d{2}))?$/.exec(key);
     if (!matches) {
       return;
     }
@@ -64,9 +66,9 @@ function transformAthleteStats(rawStats = {}) {
     if (month === false) {
       byYear = [...byYear, { value, year }];
       availableYears = [...availableYears, year];
-    } else {
+    } else if (month <= 12) {
       byMonth[year] = byMonth[year] || setUpYearByMonths();
-      // Set value for month
+      // Set value for 1-based month as 0-based index
       byMonth[year][(month - 1)].value = value;
     }
   });
@@ -84,7 +86,7 @@ function transformAthleteStats(rawStats = {}) {
  *
  * @param {Object} stats
  * @param {String} location
- * @return {Object|Bool} Transformed stats of false if location not found
+ * @return {Object|Bool} Transformed stats or false if location not found
  */
 function getStatsForLocation(locationsObj, location = defaultLocation) {
   return locationsObj && locationsObj[location]

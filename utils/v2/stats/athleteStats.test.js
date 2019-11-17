@@ -10,18 +10,27 @@ const SAMPLE_RAW_STATS = {
   _2016: 93,
   _2016_01: 30,
   _2016_02: 31,
-  _2016_03: 32,
+  _2016_12: 32,
   _2018: 63,
   _2018_01: 20,
   _2018_02: 21,
-  _2018_03: 22,
+  _2018_08: 22,
 };
 
-function mockYearByMonth(jan, feb, mar) {
-  return [
-    { month: 'Jan', value: jan },
-    { month: 'Feb', value: feb },
-    { month: 'Mar', value: mar },
+/**
+ * Provide monthly totals to an empty byMonth array
+ *
+ * @param {Array} List of [month, value] arrays
+ * @return {Array}
+ */
+function mockYearByMonth(...args) {
+  return args.reduce((acc, [idx, value]) => {
+    acc[idx].value = value;
+    return acc;
+  }, [
+    { month: 'Jan', value: 0 },
+    { month: 'Feb', value: 0 },
+    { month: 'Mar', value: 0 },
     { month: 'Apr', value: 0 },
     { month: 'May', value: 0 },
     { month: 'Jun', value: 0 },
@@ -31,7 +40,7 @@ function mockYearByMonth(jan, feb, mar) {
     { month: 'Oct', value: 0 },
     { month: 'Nov', value: 0 },
     { month: 'Dec', value: 0 },
-  ];
+  ]);
 }
 
 test('transformAthleteStats', () => {
@@ -68,9 +77,30 @@ test('transformAthleteStats', () => {
       { year: 2018, value: 63 },
     ],
     byMonth: {
-      2016: mockYearByMonth(30, 31, 32),
-      2017: mockYearByMonth(10, 11, 12),
-      2018: mockYearByMonth(20, 21, 22),
+      2016: mockYearByMonth([0, 30], [1, 31], [11, 32]),
+      2017: mockYearByMonth([0, 10], [1, 11], [2, 12]),
+      2018: mockYearByMonth([0, 20], [1, 21], [7, 22]),
     },
   });
+
+  // Discard months > 12
+  // No big deal if yearly total no longer adds up
+  // since extra months would break the chart
+  expect(transformAthleteStats({
+    allTime: 10,
+    single: 5,
+    _2018: 10,
+    _2018_01: 5,
+    _2018_02: 3,
+    _2018_18: 2,
+  }))
+    .toEqual({
+      allTime: 10,
+      single: 5,
+      availableYears: [2018],
+      byYear: [{ year: 2018, value: 10 }],
+      byMonth: {
+        2018: mockYearByMonth([0, 5], [1, 3]),
+      },
+    });
 });
