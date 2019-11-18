@@ -34,7 +34,11 @@ async function doCommand(prompt, callback) {
     }
   }
 
-  mongoose.connect(process.env.MONGODB_URI);
+  mongoose.connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useCreateIndex: true,
+    useUnifiedTopology: true,
+  });
   const db = mongoose.connection;
   db.once('open', callback);
 }

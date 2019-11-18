@@ -115,6 +115,7 @@ app.prepare()
     mongoose.connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
       useCreateIndex: true,
+      useUnifiedTopology: true,
     });
     const db = mongoose.connection;
     db.once('open', () => {
