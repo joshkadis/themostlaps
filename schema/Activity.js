@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const defaultLocation = require('../config');
+const { defaultLocation } = require('../config');
 
 const { Schema } = mongoose;
 
