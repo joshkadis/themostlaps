@@ -21,8 +21,8 @@ function validateInput(rankingType, filter = '') {
   // Will allow _2017_18 but we can live with that
   const timeRegex = /^_20[1-2]\d(?:_[0-1]\d)?$/;
 
-  if (rankingType === 'timePeriod' &&
-    !timeRegex.test(filter.toString())
+  if (rankingType === 'timePeriod'
+    && !timeRegex.test(filter.toString())
   ) {
     return { error: `Invalid timePeriod filter: ${filter}` };
   }
@@ -76,14 +76,14 @@ async function getRanking(rankingType = null, query) {
   const statsKey = getStatsKey(rankingType, filter);
 
   // Default to first page, 0-based
-  const page = query.page && !isNaN(query.page) ?
-    parseInt(query.page, 10) - 1 :
-    0;
+  const page = query.page && !Number.isNaN(query.page)
+    ? parseInt(query.page, 10) - 1
+    : 0;
 
   // Allow limit query param
-  const limit = query.per_page && !isNaN(query.per_page) ?
-    parseInt(query.per_page, 10) :
-    rankingPerPage;
+  const limit = query.per_page && !Number.isNaN(query.per_page)
+    ? parseInt(query.per_page, 10)
+    : rankingPerPage;
 
   // Calculate offset
   const skip = limit * page;
@@ -98,13 +98,16 @@ async function getRanking(rankingType = null, query) {
       limit,
       skip,
       sort: { [statsKey]: -1 },
-    }
+    },
   );
 
-  return { error: false, data: {
-    statsKey: statsKey.replace(/^stats\./, ''), // remove leading `stats.`
-    ranking,
-  } };
+  return {
+    error: false,
+    data: {
+      statsKey: statsKey.replace(/^stats\./, ''), // remove leading `stats.`
+      ranking,
+    },
+  };
 }
 
 module.exports = getRanking;

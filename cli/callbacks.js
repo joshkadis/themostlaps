@@ -12,6 +12,7 @@ const sendEmailNotification = require('./sendEmailNotification')
 const { refreshAthletes } = require('../utils/scheduleNightlyRefresh');
 const { listAliases } = require('../config/email');
 const { testAthleteIds } = require('../config');
+const { mongooseConnectionOptions } = require('../config/mongodb');
 const calculateColdLaps = require('./calculateColdLaps');
 const {
   migrateSingle,
@@ -34,7 +35,7 @@ async function doCommand(prompt, callback) {
     }
   }
 
-  mongoose.connect(process.env.MONGODB_URI);
+  mongoose.connect(process.env.MONGODB_URI, mongooseConnectionOptions);
   const db = mongoose.connection;
   db.once('open', callback);
 }
@@ -278,6 +279,58 @@ const callbackMigrateToken = async (argv) => {
   );
 };
 
+const callbackMigrateLocation = async (argv) => {
+  const { location } = argv;
+  await doCommand(
+    `Enter admin code to add location '${location}' to activities`,
+    async () => {
+      const query = {
+        location: null,
+      };
+
+      let result;
+      if (isDryRun(argv)) {
+        const docs = await Activity.find(query);
+        result = {
+          n: docs.length,
+          nModified: 'n/a',
+        };
+      } else {
+        result = await Activity.updateMany(query, { location });
+      }
+
+      const { n, nModified } = result;
+
+      console.log(`${n} activities found; ${nModified} modified`);
+      process.exit();
+    },
+  );
+};
+
+const callbackMigrateStats = async ({ location }) => {
+  await doCommand(
+    `Enter admin code to migrate athlete.stats to athlete.locations.${location}`,
+    async () => {
+      const queryKey = `locations.${location}`;
+      const query = {
+        'stats.allTime': { $gt: 0 },
+        [queryKey]: null,
+      };
+
+      for await (const athleteDoc of Athlete.find(query)) {
+        console.log(`Migrating stats for ${athleteDoc.get('_id')}`);
+        athleteDoc.set(
+          queryKey,
+          athleteDoc.get('stats')
+        );
+        await athleteDoc.save();
+      }
+
+      process.exit();
+    },
+  );
+};
+
 module.exports = {
   callbackDeleteUser,
   callbackDeleteUserActivities,
@@ -291,4 +344,6 @@ module.exports = {
   callbackRetryWebhooks,
   callbackColdLaps,
   callbackMigrateToken,
+  callbackMigrateLocation,
+  callbackMigrateStats,
 };

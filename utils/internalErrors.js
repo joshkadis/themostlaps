@@ -37,7 +37,7 @@ module.exports = (code = 0, data = '') => {
       return 'Sorry, we couldn\'t find your laps history. 🕵';
 
     case 80:
-      return 'We\'re having troubling saving your laps history, sorry 😞';
+      return 'We\'re having trouble saving your laps history, sorry 😞';
 
     case 90:
       return 'We couldn\'t update your stats, sorry 😞';

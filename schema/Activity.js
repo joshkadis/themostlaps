@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+const { defaultLocation } = require('../config');
+
+const { Schema } = mongoose;
 
 const SegmentEffort = new Schema({
   _id: Number,
@@ -9,7 +11,7 @@ const SegmentEffort = new Schema({
 });
 
 const activitySchema = new Schema({
-	_id: Number,
+  _id: Number,
   added_date: String,
   athlete_id: Number,
   laps: Number,
@@ -17,6 +19,7 @@ const activitySchema = new Schema({
   source: String,
   start_date_local: String,
   coldLapsPoints: Number,
+  location: { type: String, required: true, default: defaultLocation },
 });
 
 const Activity = mongoose.model('Activity', activitySchema);

@@ -1,4 +1,8 @@
-const { getMonthKey, timePartString } = require('./dateTimeUtils');
+const {
+  getMonthKey,
+  timePartString,
+  getMonthName,
+ } = require('./dateTimeUtils');
 
 test('getMonthKey()', () => {
   const current = new Date();
@@ -15,4 +19,9 @@ test('getMonthKey()', () => {
 
   expect(getMonthKey(past)).toBe('_2016_05');
   expect(getMonthKey(past, '+')).toBe('+2016+05');
+});
+
+test('getMonthName', () => {
+  expect(getMonthName(1)).toEqual('January');
+  expect(getMonthName(1, 3)).toEqual('Jan');
 });

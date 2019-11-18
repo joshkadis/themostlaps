@@ -1,5 +1,11 @@
+const prospectpark = require('./locations/prospectpark');
+
 module.exports = {
   apiUrl: 'https://www.strava.com/api/v3',
+  defaultLocation: 'prospectpark',
+  locations: {
+    prospectpark,
+  },
   apiPerPage: 30,
   parkCenter: {
     latitude: 40.661990,

@@ -1,18 +1,18 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Link from 'next/link';
-import Router from 'next/router';
+import { withRouter } from 'next/router';
 import classNames from 'classnames';
 import Button from './lib/Button';
-import { lapSegmentId } from '../config';
 import * as styles from './Navigation.css';
 import * as layoutStyles from './Layout.css';
-import { MenuSvg, InstagramSvg, TwitterSvg } from './lib/svg';
+import { MenuSvg, InstagramSvg } from './lib/svg';
 import SocialLink from './lib/SocialLink';
 import { modalControlsShape } from '../utils/propTypes';
 import { trackModalOpen, setDimensions } from '../utils/analytics';
 import SearchUsers from './lib/SearchUsers';
 import { isSmallViewport } from '../utils/window';
+import { routeIsV2 } from '../utils/v2/router';
 
 class Navigation extends Component {
   constructor(props) {
@@ -20,6 +20,7 @@ class Navigation extends Component {
     this.mobileToggleNav = this.mobileToggleNav.bind(this);
     this.onClickButton = this.onClickButton.bind(this);
     this.onClickRidersButton = this.onClickRidersButton.bind(this);
+    /* eslint-disable-next-line max-len */
     this.renderSearchUsersContainer = this.renderSearchUsersContainer.bind(this);
     this.navigateToRiderPage = this.navigateToRiderPage.bind(this);
 
@@ -46,11 +47,16 @@ class Navigation extends Component {
 
   navigateToRiderPage(selection) {
     if (selection && selection.value) {
-      this.setState(this.defaultState)
-      Router.push(
-        `/rider?athleteId=${selection.value}`,
-        `/rider/${selection.value}`,
-      );
+      this.setState(this.defaultState);
+      const isV2 = routeIsV2(this.props.router);
+      const internal = isV2
+        ? `/rider_v2?athleteId=${selection.value}`
+        : `/rider?athleteId=${selection.value}`;
+      const external = isV2
+        ? `/rider/${selection.value}?v2`
+        : `/rider/${selection.value}`;
+
+      this.props.router.push(internal, external);
     }
   }
 
@@ -67,8 +73,8 @@ class Navigation extends Component {
    * @return {JSX}
    */
   renderSearchUsersContainer(shouldShowForSmallViewport = true) {
-    if (!this.state.shouldShowSearchUsers ||
-      isSmallViewport() !== shouldShowForSmallViewport
+    if (!this.state.shouldShowSearchUsers
+      || isSmallViewport() !== shouldShowForSmallViewport
     ) {
       return null;
     }
@@ -138,11 +144,12 @@ class Navigation extends Component {
       {this.renderSearchUsersContainer(false)}
     </div>);
   }
-};
+}
 
 Navigation.propTypes = {
   modalControls: PropTypes.shape(modalControlsShape).isRequired,
   modalIsOpen: PropTypes.bool.isRequired,
+  router: PropTypes.object.isRequired,
 };
 
-export default Navigation;
+export default withRouter(Navigation);

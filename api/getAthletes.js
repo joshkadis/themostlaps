@@ -12,7 +12,7 @@ function parseIdsString(idsString) {
     .split(',')
     .reduce((acc, idStr) => {
       const id = parseInt(idStr, 10);
-      if (!isNaN(id) && acc.indexOf(id) === -1) {
+      if (!Number.isNaN(id) && acc.indexOf(id) === -1) {
         acc.push(id);
       }
       return acc;
@@ -37,12 +37,12 @@ async function getAthletes(idsString = '', fields = defaultAthleteFields) {
       _id: { $in: athleteIds },
       status: { $ne: 'deauthorized' },
     },
-    fields.join(' ')
+    fields.join(' '),
   );
 
   return {
     error: false,
-    data: athletes.map((athlete) => athlete.toJSON())
+    data: athletes.map((athlete) => athlete.toJSON()),
   };
 }
 

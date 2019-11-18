@@ -5,6 +5,23 @@ const {
   statsForSingleAthleteChart,
 } = require('./athleteStatsClient');
 
+const SAMPLE_RAW_STATS = {
+  allTime: 189,
+  single: 13,
+  _2017: 33,
+  _2017_01: 10,
+  _2017_02: 11,
+  _2017_03: 12,
+  _2016: 93,
+  _2016_01: 30,
+  _2016_02: 31,
+  _2016_03: 32,
+  _2018: 63,
+  _2018_01: 20,
+  _2018_02: 21,
+  _2018_03: 22,
+};
+
 test('statsForAthletePage', () => {
   expect(statsForAthletePage({
     allTime: 10,
@@ -33,22 +50,7 @@ test('statsForAthletePage', () => {
       },
     });
 
-  expect(statsForAthletePage({
-    allTime: 189,
-    single: 13,
-    _2017: 33,
-    _2017_01: 10,
-    _2017_02: 11,
-    _2017_03: 12,
-    _2016: 93,
-    _2016_01: 30,
-    _2016_02: 31,
-    _2016_03: 32,
-    _2018: 63,
-    _2018_01: 20,
-    _2018_02: 21,
-    _2018_03: 22,
-  }))
+  expect(statsForAthletePage(SAMPLE_RAW_STATS))
     .toEqual({
       allTime: 189,
       single: 13,

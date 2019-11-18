@@ -11,7 +11,7 @@ async function getTotals() {
 
   const data = athletes.reduce((acc, { stats }) => {
     Object.keys(stats).forEach((key) => {
-      if ('single' !== key) {
+      if (key !== 'single') {
         acc[key] = (acc[key] || 0) + stats[key];
       }
     });
