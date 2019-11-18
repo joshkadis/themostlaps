@@ -6,7 +6,7 @@ import SearchUsers from '../../lib/SearchUsers';
 const navigateToRiderPage = ({ value = 0 }) => {
   if (parseInt(value, 10) > 0) {
     Router.push(
-      `/rider?athleteId=${value}&v2`,
+      `/rider_v2?athleteId=${value}`,
       `/rider/${value}?v2`,
     );
   }
