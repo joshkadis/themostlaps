@@ -7,6 +7,7 @@ const next = require('next');
 const Athlete = require('./schema/Athlete');
 const { scheduleNightlyRefresh } = require('./utils/scheduleNightlyRefresh');
 const { defaultLocation } = require('./config');
+const { mongooseConnectionOptions } = require('./config/mongodb');
 
 // Route handlers
 const handleSignupCallback = require('./server/handleSignupCallback');
@@ -112,11 +113,7 @@ app.prepare()
      * Connect to database and start listening
      */
     console.log(`Connecting to MONGODB_URI: ${process.env.MONGODB_URI}`);
-    mongoose.connect(process.env.MONGODB_URI, {
-      useNewUrlParser: true,
-      useCreateIndex: true,
-      useUnifiedTopology: true,
-    });
+    mongoose.connect(process.env.MONGODB_URI, mongooseConnectionOptions);
     const db = mongoose.connection;
     db.once('open', () => {
       console.log(`Connected to database: ${db.name}`);

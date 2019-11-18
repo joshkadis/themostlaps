@@ -12,6 +12,7 @@ const sendEmailNotification = require('./sendEmailNotification')
 const { refreshAthletes } = require('../utils/scheduleNightlyRefresh');
 const { listAliases } = require('../config/email');
 const { testAthleteIds } = require('../config');
+const { mongooseConnectionOptions } = require('../config/mongodb');
 const calculateColdLaps = require('./calculateColdLaps');
 const {
   migrateSingle,
@@ -34,11 +35,7 @@ async function doCommand(prompt, callback) {
     }
   }
 
-  mongoose.connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useCreateIndex: true,
-    useUnifiedTopology: true,
-  });
+  mongoose.connect(process.env.MONGODB_URI, mongooseConnectionOptions);
   const db = mongoose.connection;
   db.once('open', callback);
 }
