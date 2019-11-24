@@ -27,6 +27,8 @@ $ npm run lint
 ### Babel
 Server-side code is not compiled by anything so Babel only runs on the frontend code. Next has its own setup for that.
 
+Rather than relying purely no Next for Babel configuration, we have a `.babelrc` file so that the same config is also available to Jest.
+
 Eventually we'll get around to separating client and server applications.
 
 ### Webpack
