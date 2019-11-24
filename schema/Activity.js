@@ -19,7 +19,12 @@ const activitySchema = new Schema({
   source: String,
   start_date_local: String,
   coldLapsPoints: Number,
-  location: { type: String, required: true, default: defaultLocation },
+  location: {
+    type: String,
+    required: true,
+    default: defaultLocation,
+    index: true,
+  },
 });
 
 const Activity = mongoose.model('Activity', activitySchema);
