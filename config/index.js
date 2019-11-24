@@ -1,3 +1,4 @@
+const centralpark = require('./locations/centralpark');
 const prospectpark = require('./locations/prospectpark');
 
 module.exports = {
@@ -5,16 +6,18 @@ module.exports = {
   defaultLocation: 'prospectpark',
   locations: {
     prospectpark,
+    centralpark,
   },
   apiPerPage: 30,
+  addMakeupLap: true, // Avoids excess API calls when ingesting new user
+  devFetchActivities: 10,
+  /* v1 legacy PP properties */
   parkCenter: {
     latitude: 40.661990,
     longitude: -73.969681,
   },
   allowedRadius: 50000,
   minDistance: 3300,
-  addMakeupLap: true, // Avoids excess API calls when ingesting new user
-  devFetchActivities: 10,
   lapSegmentId: 5313629, // Prospect Park Race Lap
   sectionSegmentIds: [
     613198, // Prospect Park hill
@@ -23,6 +26,7 @@ module.exports = {
     9699985, // Sprint between the lights
     740668, // E Lake Drive
   ],
+  /* /end v1 legacy PP properties */
   authRequestParams: {
     client_id: process.env.CLIENT_ID,
     response_type: 'code',
