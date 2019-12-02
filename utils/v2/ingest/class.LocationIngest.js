@@ -3,8 +3,9 @@ const Activity = require('../../../schema/Activity');
 const Athlete = require('../../../schema/Athlete');
 
 // Other
-const { slackError, slackSuccess } = require('../../slackNotification');
+const { slackError } = require('../../slackNotification');
 const { isValidCanonicalSegmentId } = require('../locations');
+const fetchStravaAPI = require('../../fetchStravaAPI');
 
 class LocationIngest {
   /**
@@ -72,7 +73,12 @@ class LocationIngest {
    * Fetch and process historical activities for a location
    */
   async ingest() {
-    this.segmentEfforts = await this.fetchSegmentEfforts();
+    try {
+      this.segmentEfforts = await this.fetchSegmentEfforts();
+    } catch (err) {
+      // TBD
+    }
+
     if (!this.segmentEfforts.length) {
       return;
     }
@@ -90,10 +96,10 @@ class LocationIngest {
     } = effortRaw;
 
     // Process for activities history
-    const id = activity.id;
+    const id = { activity };
     const effortFormatted = this.formatSegmentEffort(effortRaw);
     if (!this.activities[id]) {
-      this.activities[id] = this.createActivity(activity);
+      this.activities[id] = this.formatActivity(activity);
     }
     this.activities[id].laps += 1;
     this.activities[id].segmentEfforts.push(effortFormatted);
@@ -120,9 +126,66 @@ class LocationIngest {
     // Upsert or skip if _id already exists
   }
 
-  // fetchSegmentEfforts
-  // formatSegmentEffort
-  // createActivity
+  /**
+   * Get complete history of athlete's efforts for canonical segment
+   * @return {Array}
+   */
+  async fetchSegmentEfforts(page = 1, allEfforts = []) {
+    const athleteId = this.athleteDoc.get('_id');
+
+    const efforts = await fetchStravaAPI(
+      `/segments/${this.segmentId}/all_efforts`,
+      this.athleteDoc,
+      {
+        athlete_id: athleteId,
+        per_page: 200,
+        page,
+      },
+    );
+
+    if (efforts.status && efforts.status !== 200) {
+      console.log(`Error getLapEffortsHistory: ${athleteId}`);
+      slackError(45, {
+        athleteId,
+        path: `/segments/${this.segmentId}/all_efforts`,
+        page,
+        efforts,
+      });
+      return allEfforts;
+    }
+
+    if (!efforts.length) {
+      return allEfforts;
+    }
+
+    /* eslint-disable-next-line no-return-await */
+    return await this.fetchSegmentEfforts(
+      (page + 1),
+      [...allEfforts, ...efforts],
+    );
+  }
+
+  /**
+   * Format segment effort into our database model shape
+   *
+   * @param {Object} effort Segment effort from Strava API
+   * @return {Object}
+   */
+  formatSegmentEffort = ({
+    id: _id,
+    elapsed_time,
+    moving_time,
+    start_date_local,
+  }) => ({
+    _id,
+    elapsed_time,
+    moving_time,
+    start_date_local,
+  });
+
+  formatActivity = ({}) => {
+
+  };
 }
 
 module.exports = LocationIngest;
