@@ -91,18 +91,25 @@ class LocationIngest {
    */
   processEffort(effortRaw) {
     const {
-      activity,
+      activity: { id: activityId },
       start_date,
     } = effortRaw;
 
-    // Process for activities history
-    const { id: activityId } = activity;
-    const effortFormatted = this.formatSegmentEffort(effortRaw);
+    // Create activity if not exists
     if (!this.activities[activityId]) {
-      this.activities[activityId] = this.formatActivity(effortRaw);
+      const activityModel = this.formatActivity(effortRaw);
+      if (activityModel) {
+        this.activities[activityId] = activityModel;
+      } else {
+        return;
+      }
     }
-    this.activities[activityId].laps += 1;
-    this.activities[activityId].segmentEfforts.push(effortFormatted);
+
+    // Increment activity laps
+    this.incrementActivityLaps(activityId);
+
+    // Create and add SegmentEffort to activity
+    this.addSegmentEffort(activityId, effortRaw);
 
     // Process for stats, assume start date in ISO format
     const yearKey = `_${start_date.slice(0, 4)}`;
@@ -115,6 +122,35 @@ class LocationIngest {
     this.stats[monthKey] = this.stats[monthKey]
       ? (this.stats[monthKey] + 1)
       : 1;
+  }
+
+  /**
+   * Increment laps for a known activity
+   *
+   * @param {Integer} activityId
+   */
+  incrementActivityLaps(activityId) {
+    if (!this.activities[activityId]) {
+      return;
+    }
+    this.activities[activityId].laps += 1;
+  }
+
+  /**
+   * Append new segment effort to an activity
+   */
+  addSegmentEffort(activityId, effortRaw) {
+    if (!this.activities[activityId]) {
+      return;
+    }
+    const newSegmentEffort = this.formatSegmentEffort(effortRaw);
+    if (newSegmentEffort) {
+      const segmentEfforts = this.activities[activityId].segmentEfforts
+        ? [...this.activities[activityId].segmentEfforts, newSegmentEffort]
+        : [newSegmentEffort];
+
+      this.activities[activityId].segmentEfforts = segmentEfforts;
+    }
   }
 
   /**
@@ -166,7 +202,7 @@ class LocationIngest {
   }
 
   /**
-   * Format segment effort into our database model shape
+   * Format segment effort into SegmentEffort model shape
    *
    * @param {Object} effort Segment effort from Strava API
    * @return {Object}
@@ -185,6 +221,12 @@ class LocationIngest {
     startDateUtc: start_date,
   });
 
+  /**
+   * Format segment effort into Activity model shape
+   *
+   * @param {Object} effort Segment effort from Strava API
+   * @return {Object}
+   */
   formatActivity = ({
     activity,
     start_date_local,
@@ -200,6 +242,27 @@ class LocationIngest {
     startDateUtc: start_date,
     location: getLocationNameFromSegmentId(this.segmentId),
   });
+
+  /**
+   * Get array of activities for this segment as JS objects
+   *
+   * @return {[Activity]}
+   */
+  getActivities = () => Object.values(this.activities);
+
+  /**
+   * Get array of activity ids for this segment
+   *
+   * @return {[Integer]}
+   */
+  getActivityIds = () => Object.keys(this.activities);
+
+  /**
+   * Get stats object for this segment
+   *
+   * @return {Object}
+   */
+  getStats = () => this.stats;
 }
 
 module.exports = LocationIngest;
