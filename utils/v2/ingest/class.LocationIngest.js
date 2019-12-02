@@ -35,17 +35,12 @@ class LocationIngest {
   segmentEfforts = [];
 
   /**
-   * @type {Array} Activity IDs in segment history
-   */
-  activitiesIds = [];
-
-  /**
    * @type {Object} Activities derived from segment efforts as JSON
    */
   activities = [];
 
   /**
-   * @type {Object} Stats calculated for location
+   * @type {Object} Stats calculated for this location
    */
   stats = {
     allTime: 0,
