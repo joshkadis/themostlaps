@@ -8,6 +8,7 @@ const SegmentEffort = new Schema({
   elapsed_time: Number,
   moving_time: Number,
   start_date_local: String,
+  startDateUtc: Date,
 });
 
 const activitySchema = new Schema({
@@ -18,6 +19,7 @@ const activitySchema = new Schema({
   segment_efforts: [SegmentEffort],
   source: String,
   start_date_local: String,
+  startDateUtc: Date,
   coldLapsPoints: Number,
   location: {
     type: String,
