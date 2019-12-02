@@ -7,12 +7,14 @@ const { slackError } = require('../../slackNotification');
 const { isValidCanonicalSegmentId } = require('../locations');
 const fetchStravaAPI = require('../../fetchStravaAPI');
 
+const INGEST_SOURCE = 'signup';
+
 class LocationIngest {
   /**
    * @type {Boolean} Whether to add a lap to each activity to simulate
    * partial laps at start and end of activity
    */
-  shouldAddExtraLaps = true;
+  shouldAddExtraLap = true;
 
   /**
    * @type {Number} ID of canonical segment for location
@@ -92,14 +94,16 @@ class LocationIngest {
   processEffort(effortRaw) {
     const {
       activity,
+      athlete,
       start_date,
     } = effortRaw;
 
     // Process for activities history
-    const id = { activity };
+    const { id } = activity;
+    const { id: athleteId } = { athlete };
     const effortFormatted = this.formatSegmentEffort(effortRaw);
     if (!this.activities[id]) {
-      this.activities[id] = this.formatActivity(activity);
+      this.activities[id] = this.formatActivity(activity, athleteId);
     }
     this.activities[id].laps += 1;
     this.activities[id].segmentEfforts.push(effortFormatted);
@@ -176,16 +180,29 @@ class LocationIngest {
     elapsed_time,
     moving_time,
     start_date_local,
+    start_date,
   }) => ({
     _id,
     elapsed_time,
     moving_time,
     start_date_local,
+    startDateUtc: start_date,
   });
 
-  formatActivity = ({}) => {
-
-  };
+  formatActivity = ({
+    id,
+    start_date_local,
+    start_date,
+  }, athleteId) => ({
+    _id: id,
+    added_date: new Date().toISOString(),
+    athlete_id: athleteId,
+    laps: this.shouldAddExtraLap ? 1 : 0,
+    segmentEfforts: [],
+    source: INGEST_SOURCE,
+    start_date_local,
+    startDateUtc: start_date,
+  });
 }
 
 module.exports = LocationIngest;
