@@ -19,9 +19,13 @@ function isValidCanonicalSegmentId(segmentId) {
   return getCanonicalSegmentIds().indexOf(segmentId) >= 0;
 }
 
+const getLocationNameFromSegmentId = (segmentId) => Object.keys(locations)
+  .find((name) => locations[name].canonicalSegmentId === segmentId);
+
 module.exports = {
   getLocationNames,
   isValidLocation,
   getCanonicalSegmentIds,
   isValidCanonicalSegmentId,
+  getLocationNameFromSegmentId,
 };

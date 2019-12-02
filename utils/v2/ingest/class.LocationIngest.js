@@ -4,7 +4,10 @@ const Athlete = require('../../../schema/Athlete');
 
 // Other
 const { slackError } = require('../../slackNotification');
-const { isValidCanonicalSegmentId } = require('../locations');
+const {
+  isValidCanonicalSegmentId,
+  getLocationNameFromSegmentId,
+} = require('../locations');
 const fetchStravaAPI = require('../../fetchStravaAPI');
 
 const INGEST_SOURCE = 'signup';
@@ -94,19 +97,17 @@ class LocationIngest {
   processEffort(effortRaw) {
     const {
       activity,
-      athlete,
       start_date,
     } = effortRaw;
 
     // Process for activities history
-    const { id } = activity;
-    const { id: athleteId } = { athlete };
+    const { id: activityId } = activity;
     const effortFormatted = this.formatSegmentEffort(effortRaw);
-    if (!this.activities[id]) {
-      this.activities[id] = this.formatActivity(activity, athleteId);
+    if (!this.activities[activityId]) {
+      this.activities[activityId] = this.formatActivity(effortRaw);
     }
-    this.activities[id].laps += 1;
-    this.activities[id].segmentEfforts.push(effortFormatted);
+    this.activities[activityId].laps += 1;
+    this.activities[activityId].segmentEfforts.push(effortFormatted);
 
     // Process for stats, assume start date in ISO format
     const yearKey = `_${start_date.slice(0, 4)}`;
@@ -190,18 +191,19 @@ class LocationIngest {
   });
 
   formatActivity = ({
-    id,
+    activity,
     start_date_local,
     start_date,
-  }, athleteId) => ({
-    _id: id,
+  }) => ({
+    _id: activity.id,
     added_date: new Date().toISOString(),
-    athlete_id: athleteId,
+    athlete_id: this.athleteDoc.get('_id'),
     laps: this.shouldAddExtraLap ? 1 : 0,
     segmentEfforts: [],
     source: INGEST_SOURCE,
     start_date_local,
     startDateUtc: start_date,
+    location: getLocationNameFromSegmentId(this.segmentId),
   });
 }
 
