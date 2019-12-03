@@ -334,14 +334,16 @@ const callbackMigrateStats = async ({ location }) => {
 };
 
 const callbackIngestAthleteV2 = async ({ athleteId }) => {
-  const athleteDoc = await Athlete.findById('athleteId');
-  if (!athleteDoc) {
-    throw new Error(`Athlete ${athleteId} not found`);
-  }
   await doCommand(
-    `Enter admin code to ingest activities for ${getAthleteIdentifier(athleteDoc)}`,
+    `Enter admin code to ingest activities for athlete ${athleteId}`,
     async() => {
+      athleteDoc = await Athlete.findById(athleteId);
+      if (!athleteDoc) {
+        console.error(`Athlete ${athleteId} not found`);
+        process.exit();
+      }
       await ingestAthleteHistory(athleteDoc);
+      process.exit();
     },
   )
 };
