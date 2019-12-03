@@ -9,10 +9,8 @@ function isValidLocation(location) {
 }
 
 function getCanonicalSegmentIds() {
-  return Object.keys(locations).reduce((acc, locationName) => {
-    acc.push(locations[locationName].canonicalSegmentId);
-    return acc;
-  }, []);
+  return Object.keys(locations)
+    .map((location) => locations[location].canonicalSegmentId);
 }
 
 function isValidCanonicalSegmentId(segmentId) {

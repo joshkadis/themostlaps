@@ -82,7 +82,7 @@ class LocationIngest {
   /**
    * Fetch and process historical activities for a location
    */
-  async ingest() {
+  async getActivities() {
     try {
       this.segmentEfforts = await this.fetchSegmentEfforts();
     } catch (err) {
@@ -181,6 +181,7 @@ class LocationIngest {
    * Save documents for validated Activities
    */
   async saveActivities() {
+    // @todo Handle async iterable!
     this.getActivities().forEach(async (activity) => {
       const model = new Activity(activity);
       const err = model.validateSync();
@@ -277,6 +278,13 @@ class LocationIngest {
     startDateUtc: start_date,
     location: getLocationNameFromSegmentId(this.segmentId),
   });
+
+  /**
+   * Does the athlete have activities for this location?
+   *
+   * @return {Boolean}
+   */
+  hasActivities = () => Object.keys(this.activities).length > 0;
 
   /**
    * Get array of activities for this segment as JS objects

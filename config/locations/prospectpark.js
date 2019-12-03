@@ -17,4 +17,5 @@ module.exports = {
   ],
   // v2 updated properties
   canonicalSegmentId: 5313629,
+  locationName: 'prospectpark',
 };
