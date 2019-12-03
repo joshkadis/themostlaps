@@ -1,4 +1,5 @@
 const Athlete = require('../../../schema/Athlete');
+const Activity = require('../../../schema/Activity');
 const LocationIngest = require('./class.LocationIngest');
 const cpSegmentEffort = require('./segmentEffort.testData');
 
@@ -8,6 +9,7 @@ let locationIngest;
 beforeEach(() => {
   athleteDoc = new Athlete({ _id: 541773 });
   locationIngest = new LocationIngest(athleteDoc, 1532085);
+  locationIngest.isMock = true;
 });
 
 test('setup class instance', () => {
@@ -71,4 +73,38 @@ test('formats activity from segment effort', () => {
   const expectedStartDateUtc = new Date('2016-08-28T10:16:15Z');
   expect(actualStartDateUTC.toISOString())
     .toEqual(expectedStartDateUtc.toISOString());
+});
+
+test('converts segment efforts to Activity model shapes', () => {
+  // These should fail gracefully
+  locationIngest.processEffort({ isSegmentEffort: 'no' });
+  expect(locationIngest.getActivities().length).toEqual(0);
+
+  locationIngest.processEffort({ activity: 'no' });
+  expect(locationIngest.getActivities().length).toEqual(0);
+
+  locationIngest.processEffort({ activity: { id: 10 } });
+  expect(locationIngest.getActivities().length).toEqual(0);
+
+  // Segment effort processing should succeed
+  locationIngest.processEffort(cpSegmentEffort);
+  expect(locationIngest.getActivityIds()).toEqual([692349426]);
+
+  const activities = locationIngest.getActivities();
+  expect(activities.length).toEqual(1);
+  // eslint-disable-next-line
+  expect(activities[0]._id).toEqual(692349426);
+  // 1 lap from shouldAddExtraLap + 1 from the segment effort
+  expect(activities[0].laps).toEqual(2);
+});
+
+test('validates activities data during saveActivities', () => {
+  locationIngest.processEffort(cpSegmentEffort);
+  locationIngest.activities['692349426'].athlete_id = 'Invalid';
+  expect(locationIngest.getActivityIds().sort()).toEqual([692349426]);
+
+  locationIngest.saveActivities();
+  expect(locationIngest.invalidActivities.length).toEqual(1);
+  expect(locationIngest.invalidActivities[0].athlete_id)
+    .toEqual('Invalid');
 });

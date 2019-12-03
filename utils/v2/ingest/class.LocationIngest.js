@@ -11,7 +11,7 @@ const {
 const fetchStravaAPI = require('../../fetchStravaAPI');
 
 const INGEST_SOURCE = 'signup';
-
+const MIN_ACTIVITY_ID = 1000;
 class LocationIngest {
   /**
    * @type {Boolean} Whether to add a lap to each activity to simulate
@@ -30,14 +30,24 @@ class LocationIngest {
   athleteDoc = false;
 
   /**
+   * @type {Boolean} Does not save to database if true
+   */
+  isMock = false;
+
+  /**
    * @type {Array} Segment effort history for location
    */
   segmentEfforts = [];
 
   /**
-   * @type {Object} Activities derived from segment efforts as JSON
+   * @type {Object} Activities data derived from segment efforts
    */
-  activities = [];
+  activities = {};
+
+  /**
+   * @type {Array} Activities that were not validated
+   */
+  invalidActivities = [];
 
   /**
    * @type {Object} Stats calculated for this location
@@ -91,9 +101,23 @@ class LocationIngest {
    */
   processEffort(effortRaw) {
     const {
-      activity: { id: activityId },
-      start_date,
+      activity = false,
+      start_date = false,
     } = effortRaw;
+
+    if (!activity || !start_date) {
+      return;
+    }
+
+    const { id = null } = activity;
+    const activityId = parseInt(id, 10);
+    if (
+      !activityId
+      || Number.isNaN(activityId)
+      || activityId < MIN_ACTIVITY_ID
+    ) {
+      return;
+    }
 
     // Create activity if not exists
     if (!this.activities[activityId]) {
@@ -154,12 +178,23 @@ class LocationIngest {
   }
 
   /**
-   * Validate activities and save
+   * Save documents for validated Activities
    */
   async saveActivities() {
-    // Filter is valid
-
-    // Upsert or skip if _id already exists
+    this.getActivities().forEach(async (activity) => {
+      const model = new Activity(activity);
+      const err = model.validateSync();
+      if (err) {
+        this.invalidActivities = [...this.invalidActivities, activity];
+      } else if (!this.isMock) {
+        try {
+          await model.save();
+        } catch (saveErr) {
+          this.invalidActivities = [...this.invalidActivities, activity];
+          console.log(saveErr);
+        }
+      }
+    });
   }
 
   /**
@@ -255,7 +290,8 @@ class LocationIngest {
    *
    * @return {[Integer]}
    */
-  getActivityIds = () => Object.keys(this.activities);
+  getActivityIds = () => Object.keys(this.activities)
+    .map((id) => this.activities[id]._id);
 
   /**
    * Get stats object for this segment
