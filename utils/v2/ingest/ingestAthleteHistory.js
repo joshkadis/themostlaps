@@ -1,89 +1,24 @@
-const { uniq } = require('lodash');
-const LocationIngest = require('./class.LocationIngest');
-const { locations: configLocations } = require('../../../config');
-const { getAthleteIdentifier } = require('../models/athlete');
-const { getLocationNames } = require('../locations');
+const getNumber = async (number) => number;
 
-let scopedAthleteDoc = false;
-const locationsToIngest = getLocationNames();
-let idx = 0;
+var asyncIterable = {
+  [Symbol.asyncIterator]() {
+    return {
+      idx: 0,
+      next: async function() {
+        if (this.idx < 3) {
+          const theIdx = await getNumber(this.idx);
+          this.idx++;
+          return Promise.resolve({ value: theIdx, done: false });
+        }
 
-async function* asyncIngestLocation(allLocations) {
-  if (idx < locationsToIngest.length) {
-    idx += 1;
-    const locationToIngest = allLocations[idx];
-    const {
-      locationName,
-      canonicalSegmentId,
-    } = configLocations[locationToIngest];
-
-    try {
-      const ingestor = new LocationIngest(scopedAthleteDoc, canonicalSegmentId);
-      console.log(`LocationIngest created for segment ${ingestor.segmentId}`);
-      await ingestor.getActivities();
-      // await ingestor.saveActivities();
-
-      yield {
-        [locationName]: { yep: locationName },
-      };
-    } catch (err) {
-      console.warn(`Error ingesting ${locationName} | ${canonicalSegmentId}`);
-      console.log(err);
-      // eslint-disable-next-line quotes
-      console.log("----------------------\n\n");
-    } finally {
-      console.log('DONE!');
-    }
-  }
-}
-
-/**
- * Handle historical activities for new athlete
- *
- * @param Athlete athleteDoc
- */
-async function ingestAthleteHistory(athleteDoc) {
-  scopedAthleteDoc = athleteDoc;
-  // Make sure scopedAthleteDoc is set up correctly
-  console.log(`Ingesting ${getAthleteIdentifier(scopedAthleteDoc)} from scopedAthleteDoc`);
-
-  // @todo revert back to existing athlete stats propery
-  let athleteStats = {};
-  let athleteLocations = [];
-
-  // eslint-disable-next-line
-  for await (const locationStats of asyncIngestLocation(getLocationNames())) {
-    if (!locationStats) {
-      console.log(`asyncIngestLocation returned ${JSON.stringify(locationStats)}`);
-      return;
-    }
-    // receives something like { prospectpark: { allTime: 0, etc. } }
-    const locationName = Object.keys(locationStats)[0];
-    console.log(`asyncIngestLocation for ${locationName} returned ${JSON.stringify(locationStats)}`);
-    athleteStats = {
-      ...athleteStats,
-      locations: {
-        [locationName]: locationStats[locationName],
-      },
+        return Promise.resolve({ done: true });
+      }
     };
-    athleteLocations = [...athleteLocations, locationName];
   }
+};
 
-  // Set stats and locations to athlete document
-  athleteDoc.set('stats', athleteStats);
-  athleteLocations = uniq(athleteLocations);
-  athleteDoc.set('locations', athleteLocations);
-  const athleteIdentifier = getAthleteIdentifier(athleteDoc);
-  try {
-    await athleteDoc.save();
-    console.log(`Processed stats and locations for ${athleteIdentifier}`);
-    console.log(athleteStats);
-    console.log(athleteLocations);
-  } catch (err) {
-    // @todo Handle error
-    console.warn(`Error saving ${athleteIdentifier}`);
-    console.log(err);
-  }
-}
-
-module.exports = ingestAthleteHistory;
+module.exports = async function() {
+   for await (let num of asyncIterable) {
+     console.log(num);
+   }
+};
