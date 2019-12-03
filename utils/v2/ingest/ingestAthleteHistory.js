@@ -1,3 +1,4 @@
+const { uniq } = require('lodash');
 const LocationIngest = require('./class.LocationIngest');
 const { locations: configLocations } = require('../../../config');
 const { getAthleteIdentifier } = require('../models/athlete');
@@ -37,8 +38,8 @@ async function* asyncIngestLocation(location) {
  */
 async function ingestAthleteHistory(athleteDoc) {
   scopedAthleteDoc = athleteDoc;
-  let athleteStats = {};
-  let athleteLocations = [];
+  let athleteStats = athleteDoc.get('stats');
+  let athleteLocations = athleteDoc.get('locations');
 
   // eslint-disable-next-line
   for await (const locationStats of asyncIngestLocation(configLocations)) {
@@ -55,6 +56,7 @@ async function ingestAthleteHistory(athleteDoc) {
 
   // Set stats and locations to athlete document
   athleteDoc.set('stats', athleteStats);
+  athleteLocations = uniq(athleteLocations);
   athleteDoc.set('locations', athleteLocations);
   const athleteIdentifier = getAthleteIdentifier(athleteDoc);
   try {
