@@ -1,5 +1,4 @@
 const Athlete = require('../../../schema/Athlete');
-const Activity = require('../../../schema/Activity');
 const LocationIngest = require('./class.LocationIngest');
 const cpSegmentEffort = require('./segmentEffort.testData');
 
@@ -92,7 +91,6 @@ test('converts segment efforts to Activity model shapes', () => {
 
   const activities = locationIngest.getActivities();
   expect(activities.length).toEqual(1);
-  // eslint-disable-next-line
   expect(activities[0]._id).toEqual(692349426);
   // 1 lap from shouldAddExtraLap + 1 from the segment effort
   expect(activities[0].laps).toEqual(2);
