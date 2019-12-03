@@ -5,34 +5,35 @@ const { getAthleteIdentifier } = require('../models/athlete');
 const { getLocationNames } = require('../locations');
 
 let scopedAthleteDoc = false;
-const locationsForIngest = getLocationNames();
+const locationsToIngest = getLocationNames();
+let idx = 0;
 
 async function* asyncIngestLocation(allLocations) {
-  if (!scopedAthleteDoc || !locationsForIngest.length) {
-    yield false;
-  }
-  // Keep going until we've ingested all locations
-  const locationToIngest = locationsForIngest.pop();
+  if (idx < locationsToIngest.length) {
+    idx += 1;
+    const locationToIngest = allLocations[idx];
+    const {
+      locationName,
+      canonicalSegmentId,
+    } = configLocations[locationToIngest];
 
-  const {
-    locationName,
-    canonicalSegmentId,
-  } = allLocations[locationToIngest];
+    try {
+      const ingestor = new LocationIngest(scopedAthleteDoc, canonicalSegmentId);
+      console.log(`LocationIngest created for segment ${ingestor.segmentId}`);
+      await ingestor.getActivities();
+      // await ingestor.saveActivities();
 
-  try {
-    const ingestor = new LocationIngest(scopedAthleteDoc, canonicalSegmentId);
-    console.log(`LocationIngest created for segment ${ingestor.segmentId}`);
-    await ingestor.getActivities();
-    // await ingestor.saveActivities();
-
-    yield {
-      [locationName]: { yep: locationName },
-    };
-  } catch (err) {
-    console.warn(`Error ingesting ${locationName} | ${canonicalSegmentId}`);
-    console.log(err);
-    // eslint-disable-next-line quotes
-    console.log("----------------------\n\n");
+      yield {
+        [locationName]: { yep: locationName },
+      };
+    } catch (err) {
+      console.warn(`Error ingesting ${locationName} | ${canonicalSegmentId}`);
+      console.log(err);
+      // eslint-disable-next-line quotes
+      console.log("----------------------\n\n");
+    } finally {
+      console.log('DONE!');
+    }
   }
 }
 
@@ -51,7 +52,7 @@ async function ingestAthleteHistory(athleteDoc) {
   let athleteLocations = [];
 
   // eslint-disable-next-line
-  for await (const locationStats of asyncIngestLocation(configLocations)) {
+  for await (const locationStats of asyncIngestLocation(getLocationNames())) {
     if (!locationStats) {
       console.log(`asyncIngestLocation returned ${JSON.stringify(locationStats)}`);
       return;
