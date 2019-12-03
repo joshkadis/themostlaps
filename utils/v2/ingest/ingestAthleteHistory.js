@@ -1,5 +1,6 @@
 const LocationIngest = require('./class.LocationIngest');
 const { locations: configLocations } = require('../../../config');
+const { getAthleteIdentifier } = require('../models/athlete');
 
 let scopedAthleteDoc = false;
 
@@ -55,7 +56,7 @@ async function ingestAthleteHistory(athleteDoc) {
   // Set stats and locations to athlete document
   athleteDoc.set('stats', athleteStats);
   athleteDoc.set('locations', athleteLocations);
-  const athleteIdentifier = `${athleteDoc.get('firstname')} ${athleteDoc.get('lastname')} | ${athleteDoc.get('_id')}`;
+  const athleteIdentifier = getAthleteIdentifier(athleteDoc);
   try {
     await athleteDoc.save();
     console.log(`Ingested activities for ${athleteIdentifier}`);
