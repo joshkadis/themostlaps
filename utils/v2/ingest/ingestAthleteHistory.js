@@ -8,13 +8,13 @@ async function* asyncIngestLocation(location) {
     yield false;
   }
 
-  try {
-    const {
-      locationName,
-      canonicalSegmentId,
-    } = location;
+  const {
+    locationName,
+    canonicalSegmentId,
+  } = location;
 
-    const ingestor = new LocationIngest(canonicalSegmentId);
+  try {
+    const ingestor = new LocationIngest(scopedAthleteDoc, canonicalSegmentId);
     await ingestor.getActivities();
     await ingestor.saveActivities();
 
@@ -22,7 +22,7 @@ async function* asyncIngestLocation(location) {
       [locationName]: ingestor.getStats(),
     };
   } catch (err) {
-    console.warn(`Error ingesting ${location.locationName} | ${location.canonicalSegmentId}`);
+    console.warn(`Error ingesting ${locationName} | ${canonicalSegmentId}`);
     console.log(err);
     // eslint-disable-next-line quotes
     console.log("----------------------\n\n");
@@ -55,10 +55,16 @@ async function ingestAthleteHistory(athleteDoc) {
   // Set stats and locations to athlete document
   athleteDoc.set('stats', athleteStats);
   athleteDoc.set('locations', athleteLocations);
+  const athleteIdentifier = `${athleteDoc.get('firstname')} ${athleteDoc.get('lastname')} | ${athleteDoc.get('_id')}`;
   try {
     await athleteDoc.save();
+    console.log(`Ingested activities for ${athleteIdentifier}`);
+    console.log(athleteStats);
+    console.log(athleteLocations);
   } catch (err) {
     // @todo Handle error
+    console.warn(`Error saving ${athleteIdentifier}`);
+    console.log(err);
   }
 }
 
