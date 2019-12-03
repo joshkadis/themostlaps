@@ -5,8 +5,10 @@
  */
 function getAthleteIdentifier(athleteDoc) {
   const {
-    firstname,
-    lastname,
+    athlete: {
+      firstname,
+      lastname,
+    },
     _id,
   } = athleteDoc.toJSON();
   return `${firstname} ${lastname} | ${_id}`;

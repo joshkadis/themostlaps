@@ -2,26 +2,31 @@ const { uniq } = require('lodash');
 const LocationIngest = require('./class.LocationIngest');
 const { locations: configLocations } = require('../../../config');
 const { getAthleteIdentifier } = require('../models/athlete');
+const { getLocationNames } = require('../locations');
 
 let scopedAthleteDoc = false;
+const locationsForIngest = getLocationNames();
 
-async function* asyncIngestLocation(location) {
-  if (!scopedAthleteDoc) {
+async function* asyncIngestLocation(allLocations) {
+  if (!scopedAthleteDoc || !locationsForIngest.length) {
     yield false;
   }
+  // Keep going until we've ingested all locations
+  const locationToIngest = locationsForIngest.pop();
 
   const {
     locationName,
     canonicalSegmentId,
-  } = location;
+  } = allLocations[locationToIngest];
 
   try {
     const ingestor = new LocationIngest(scopedAthleteDoc, canonicalSegmentId);
+    console.log(`LocationIngest created for segment ${ingestor.segmentId}`);
     await ingestor.getActivities();
-    await ingestor.saveActivities();
+    // await ingestor.saveActivities();
 
     yield {
-      [locationName]: ingestor.getStats(),
+      [locationName]: { yep: locationName },
     };
   } catch (err) {
     console.warn(`Error ingesting ${locationName} | ${canonicalSegmentId}`);
@@ -38,20 +43,29 @@ async function* asyncIngestLocation(location) {
  */
 async function ingestAthleteHistory(athleteDoc) {
   scopedAthleteDoc = athleteDoc;
-  let athleteStats = athleteDoc.get('stats');
-  let athleteLocations = athleteDoc.get('locations');
+  // Make sure scopedAthleteDoc is set up correctly
+  console.log(`Ingesting ${getAthleteIdentifier(scopedAthleteDoc)} from scopedAthleteDoc`);
+
+  // @todo revert back to existing athlete stats propery
+  let athleteStats = {};
+  let athleteLocations = [];
 
   // eslint-disable-next-line
   for await (const locationStats of asyncIngestLocation(configLocations)) {
     if (!locationStats) {
+      console.log(`asyncIngestLocation returned ${JSON.stringify(locationStats)}`);
       return;
     }
     // receives something like { prospectpark: { allTime: 0, etc. } }
+    const locationName = Object.keys(locationStats)[0];
+    console.log(`asyncIngestLocation for ${locationName} returned ${JSON.stringify(locationStats)}`);
     athleteStats = {
       ...athleteStats,
-      locationStats,
+      locations: {
+        [locationName]: locationStats[locationName],
+      },
     };
-    athleteLocations = [...athleteLocations, Object.keys(locationStats)[0]];
+    athleteLocations = [...athleteLocations, locationName];
   }
 
   // Set stats and locations to athlete document
@@ -61,7 +75,7 @@ async function ingestAthleteHistory(athleteDoc) {
   const athleteIdentifier = getAthleteIdentifier(athleteDoc);
   try {
     await athleteDoc.save();
-    console.log(`Ingested activities for ${athleteIdentifier}`);
+    console.log(`Processed stats and locations for ${athleteIdentifier}`);
     console.log(athleteStats);
     console.log(athleteLocations);
   } catch (err) {
