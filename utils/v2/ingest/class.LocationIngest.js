@@ -183,6 +183,13 @@ class LocationIngest {
   async saveActivities() {
     // @todo Handle async iterable!
     this.getActivities().forEach(async (activity) => {
+      try {
+        // Will remove if exists
+        await Activity.remove({ _id: activity._id }, { single: true });
+      } catch (err) {
+        // Let's move on, shall we?
+      }
+
       const model = new Activity(activity);
       const err = model.validateSync();
       if (err) {
