@@ -131,6 +131,7 @@ class LocationIngest {
       const activityData = this.formatActivity(effortRaw);
       if (activityData) {
         this.activities[activityId] = activityData;
+        this.stats.allTime += activityData.laps;
       } else {
         return;
       }
