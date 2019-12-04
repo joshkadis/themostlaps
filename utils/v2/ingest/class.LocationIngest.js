@@ -81,13 +81,13 @@ class LocationIngest {
 
   /**
    * Fetch and process historical activities for a location
+   *
+   * @param {Object} opts
+   * @param {Integer} opts.limitPages Limit number of pages of activities to import
    */
-  async getActivities() {
-    try {
-      this.segmentEfforts = await this.fetchSegmentEfforts();
-    } catch (err) {
-      // TBD
-    }
+  async fetchActivitiesHELLO(opts = {}) {
+    // Error should be caught by caller
+    this.segmentEfforts = await this.fetchSegmentEfforts(1, [], opts);
 
     if (!this.segmentEfforts.length) {
       return;
@@ -207,9 +207,10 @@ class LocationIngest {
 
   /**
    * Get complete history of athlete's efforts for canonical segment
+   *
    * @return {Array}
    */
-  async fetchSegmentEfforts(page = 1, allEfforts = []) {
+  async fetchSegmentEfforts(page = 1, allEfforts = [], opts = {}) {
     const athleteId = this.athleteDoc.get('_id');
 
     const efforts = await fetchStravaAPI(
@@ -234,6 +235,12 @@ class LocationIngest {
     }
 
     if (!efforts.length) {
+      return allEfforts;
+    }
+
+    // Enforce page limit
+    if (opts.limitPages && page >= opts.limitPages) {
+      // FIX HERE
       return allEfforts;
     }
 
