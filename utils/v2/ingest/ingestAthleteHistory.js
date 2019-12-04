@@ -1,15 +1,27 @@
 /* eslint-disable quotes */
 // const { uniq } = require('lodash');
+const Athlete = require('../../../schema/Athlete');
 const LocationIngest = require('./class.LocationIngest');
 const { locations: configLocations } = require('../../../config');
 const { getAthleteIdentifier } = require('../models/athlete');
 const { getLocationNames } = require('../locations');
+const { makeArrayAsyncIterable } = require('../asyncUtils');
 
 let scopedAthleteDoc = false;
 
 async function asyncIngestSingleLocation(locationName) {
+  if (!(scopedAthleteDoc instanceof Athlete)) {
+    // @todo Report error
+    console.log(`scopedAthleteDoc was not an instance of Athlete`);
+    return false;
+  }
+
+  // Make sure scopedAthleteDoc is set up correctly
+  console.log(`Ingesting ${getAthleteIdentifier(scopedAthleteDoc)} from scopedAthleteDoc`);
+
   if (!configLocations[locationName]) {
-    console.log(locationName);
+    // @todo Report error
+    console.log(`Couldn't find location: ${JSON.stringify(locationName)}`);
     return false;
   }
 
@@ -34,20 +46,10 @@ async function asyncIngestSingleLocation(locationName) {
   return false;
 }
 
-const asyncIngestAllLocations = getLocationNames();
-asyncIngestAllLocations[Symbol.asyncIterator] = () => ({
-  // eslint-disable-next-line func-names
-  async next() {
-    if (asyncIngestAllLocations.length) {
-      // Keep going until all locations have been ingested
-      const parkResult = await asyncIngestSingleLocation(
-        asyncIngestAllLocations.pop(),
-      );
-      return Promise.resolve({ value: parkResult, done: false });
-    }
-    return Promise.resolve({ done: true });
-  },
-});
+const asyncIngestAllLocations = makeArrayAsyncIterable(
+  getLocationNames(),
+  asyncIngestSingleLocation,
+);
 
 /**
  * Handle historical activities for new athlete
@@ -56,8 +58,6 @@ asyncIngestAllLocations[Symbol.asyncIterator] = () => ({
  */
 async function ingestAthleteHistory(athleteDoc) {
   scopedAthleteDoc = athleteDoc;
-  // Make sure scopedAthleteDoc is set up correctly
-  console.log(`Ingesting ${getAthleteIdentifier(scopedAthleteDoc)} from scopedAthleteDoc$`);
 
   // @todo revert back to existing athlete stats propery
   const athleteStats = {};
