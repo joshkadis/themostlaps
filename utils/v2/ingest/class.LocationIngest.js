@@ -37,7 +37,7 @@ class LocationIngest {
   /**
    * @type {Boolean} Does not save to database if true
    */
-  isMock = false;
+  isUnitTest = false;
 
   /**
    * @type {Array} Segment effort history for location
@@ -127,45 +127,54 @@ class LocationIngest {
     }
 
     // Create activity if not exists
+    let lapsFromCreatedActivity = 0;
     if (!this.activities[activityId]) {
       const activityData = this.formatActivity(effortRaw);
       if (activityData) {
         this.activities[activityId] = activityData;
-        this.stats.allTime += activityData.laps;
+        lapsFromCreatedActivity = activityData.laps;
       } else {
         return;
       }
     }
-
-    // Increment activity laps
-    this.incrementActivityLaps(activityId);
-
     // Create and add SegmentEffort to activity
     this.addSegmentEffortToActivity(activityId, effortRaw);
 
+    // Increment activity's laps
+    this.activities[activityId].laps += 1;
+
+    this.updateStatsFromSegmentEffort(
+      start_date,
+      (lapsFromCreatedActivity + 1),
+      this.activities[activityId].laps,
+    );
+  }
+
+  /**
+   * Update location's stats after handling new segment effort
+   *
+   * @param {String} start_date
+   * @param {Integer} incrementStatsBy
+   * @param {Integer} activityLaps
+   */
+  updateStatsFromSegmentEffort(start_date, incrementStatsBy, activityLaps) {
     // Process for stats, assume start date in ISO format
     const yearKey = `_${start_date.slice(0, 4)}`;
     const monthKey = `${yearKey}_${start_date.slice(5, 7)}`;
 
-    this.stats.allTime += 1;
+    // Increment allTime, yearly, monthly
+    this.stats.allTime += incrementStatsBy;
     this.stats[yearKey] = this.stats[yearKey]
-      ? (this.stats[yearKey] + 1)
-      : 1;
+      ? (this.stats[yearKey] + incrementStatsBy)
+      : incrementStatsBy;
     this.stats[monthKey] = this.stats[monthKey]
-      ? (this.stats[monthKey] + 1)
-      : 1;
-  }
+      ? (this.stats[monthKey] + incrementStatsBy)
+      : incrementStatsBy;
 
-  /**
-   * Increment laps for a known activity
-   *
-   * @param {Integer} activityId
-   */
-  incrementActivityLaps(activityId) {
-    if (!this.activities[activityId]) {
-      return;
+    // Check for single ride max
+    if (activityLaps > this.stats.single) {
+      this.stats.single = activityLaps;
     }
-    this.activities[activityId].laps += 1;
   }
 
   /**
@@ -202,7 +211,7 @@ class LocationIngest {
       const err = model.validateSync();
       if (err) {
         this.invalidActivities = [...this.invalidActivities, activity];
-      } else if (!this.isMock) {
+      } else if (!this.isUnitTest) {
         try {
           await model.save();
         } catch (saveErr) {

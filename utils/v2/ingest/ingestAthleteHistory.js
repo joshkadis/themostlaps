@@ -1,12 +1,11 @@
-/* eslint-disable */
-const { uniq, cloneDeep } = require('lodash');
+/* eslint-disable quotes */
+// const { uniq } = require('lodash');
 const LocationIngest = require('./class.LocationIngest');
 const { locations: configLocations } = require('../../../config');
 const { getAthleteIdentifier } = require('../models/athlete');
 const { getLocationNames } = require('../locations');
 
 let scopedAthleteDoc = false;
-let idx = 0;
 
 async function asyncIngestSingleLocation(locationName) {
   if (!configLocations[locationName]) {
@@ -37,13 +36,17 @@ async function asyncIngestSingleLocation(locationName) {
 
 const asyncIngestAllLocations = getLocationNames();
 asyncIngestAllLocations[Symbol.asyncIterator] = () => ({
-  next: async function() {
+  // eslint-disable-next-line func-names
+  async next() {
     if (asyncIngestAllLocations.length) {
-      const parkResult = await asyncIngestSingleLocation(asyncIngestAllLocations.pop());
+      // Keep going until all locations have been ingested
+      const parkResult = await asyncIngestSingleLocation(
+        asyncIngestAllLocations.pop(),
+      );
       return Promise.resolve({ value: parkResult, done: false });
     }
     return Promise.resolve({ done: true });
-  }
+  },
 });
 
 /**
@@ -77,22 +80,22 @@ async function ingestAthleteHistory(athleteDoc) {
   // await updateAthleteDoc(athleteDoc, athleteStats, athleteLocations);
 }
 
-async function updateAthleteDoc(athleteDoc, athleteStats, athleteLocations) {
-  // Set stats and locations to athlete document
-  athleteDoc.set('stats', athleteStats);
-  athleteLocations = uniq(athleteLocations);
-  athleteDoc.set('locations', athleteLocations);
-  const athleteIdentifier = getAthleteIdentifier(athleteDoc);
-  try {
-    await athleteDoc.save();
-    console.log(`Processed stats and locations for ${athleteIdentifier}`);
-    console.log(athleteStats);
-    console.log(athleteLocations);
-  } catch (err) {
-    // @todo Handle error
-    console.warn(`Error saving ${athleteIdentifier}`);
-    console.log(err);
-  }
-}
+// async function updateAthleteDoc(athleteDoc, athleteStats, athleteLocations) {
+//   // Set stats and locations to athlete document
+//   athleteDoc.set('stats', athleteStats);
+//   athleteLocations = uniq(athleteLocations);
+//   athleteDoc.set('locations', athleteLocations);
+//   const athleteIdentifier = getAthleteIdentifier(athleteDoc);
+//   try {
+//     await athleteDoc.save();
+//     console.log(`Processed stats and locations for ${athleteIdentifier}`);
+//     console.log(athleteStats);
+//     console.log(athleteLocations);
+//   } catch (err) {
+//     // @todo Handle error
+//     console.warn(`Error saving ${athleteIdentifier}`);
+//     console.log(err);
+//   }
+// }
 
 module.exports = ingestAthleteHistory;
