@@ -12,6 +12,11 @@ const fetchStravaAPI = require('../../fetchStravaAPI');
 
 const INGEST_SOURCE = 'signup';
 const MIN_ACTIVITY_ID = 1000;
+const DEFAULT_FETCH_OPTS = {
+  limitPages: 0,
+  limitPerPage: 200,
+};
+
 class LocationIngest {
   /**
    * @type {Boolean} Whether to add a lap to each activity to simulate
@@ -85,7 +90,7 @@ class LocationIngest {
    * @param {Object} opts
    * @param {Integer} opts.limitPages Limit number of pages of activities to import
    */
-  async fetchActivitiesHELLO(opts = {}) {
+  async fetchActivities(opts = {}) {
     // Error should be caught by caller
     this.segmentEfforts = await this.fetchSegmentEfforts(1, [], opts);
 
@@ -93,7 +98,9 @@ class LocationIngest {
       return;
     }
 
-    this.segmentEfforts.forEach(this.processEffort);
+    this.segmentEfforts.forEach((effort) => {
+      this.processEffort(effort);
+    });
   }
 
   /**
@@ -121,9 +128,9 @@ class LocationIngest {
 
     // Create activity if not exists
     if (!this.activities[activityId]) {
-      const activityModel = this.formatActivity(effortRaw);
-      if (activityModel) {
-        this.activities[activityId] = activityModel;
+      const activityData = this.formatActivity(effortRaw);
+      if (activityData) {
+        this.activities[activityId] = activityData;
       } else {
         return;
       }
@@ -133,16 +140,16 @@ class LocationIngest {
     this.incrementActivityLaps(activityId);
 
     // Create and add SegmentEffort to activity
-    this.addSegmentEffort(activityId, effortRaw);
+    this.addSegmentEffortToActivity(activityId, effortRaw);
 
     // Process for stats, assume start date in ISO format
     const yearKey = `_${start_date.slice(0, 4)}`;
     const monthKey = `${yearKey}_${start_date.slice(5, 7)}`;
 
+    this.stats.allTime += 1;
     this.stats[yearKey] = this.stats[yearKey]
       ? (this.stats[yearKey] + 1)
       : 1;
-
     this.stats[monthKey] = this.stats[monthKey]
       ? (this.stats[monthKey] + 1)
       : 1;
@@ -163,7 +170,7 @@ class LocationIngest {
   /**
    * Append new segment effort to an activity
    */
-  addSegmentEffort(activityId, effortRaw) {
+  addSegmentEffortToActivity(activityId, effortRaw) {
     if (!this.activities[activityId]) {
       return;
     }
@@ -212,13 +219,17 @@ class LocationIngest {
    */
   async fetchSegmentEfforts(page = 1, allEfforts = [], opts = {}) {
     const athleteId = this.athleteDoc.get('_id');
+    const {
+      limitPages = DEFAULT_FETCH_OPTS.limitPages,
+      limitPerPage = DEFAULT_FETCH_OPTS.limitPerPage,
+    } = opts;
 
     const efforts = await fetchStravaAPI(
       `/segments/${this.segmentId}/all_efforts`,
       this.athleteDoc,
       {
         athlete_id: athleteId,
-        per_page: 200,
+        per_page: limitPerPage,
         page,
       },
     );
@@ -239,15 +250,15 @@ class LocationIngest {
     }
 
     // Enforce page limit
-    if (opts.limitPages && page >= opts.limitPages) {
-      // FIX HERE
-      return allEfforts;
+    const returnEfforts = [...allEfforts, ...efforts];
+    if (limitPages && page >= limitPages) {
+      return returnEfforts;
     }
 
     /* eslint-disable-next-line no-return-await */
     return await this.fetchSegmentEfforts(
       (page + 1),
-      [...allEfforts, ...efforts],
+      returnEfforts,
     );
   }
 

@@ -21,7 +21,7 @@ async function asyncIngestSingleLocation(locationName) {
   try {
     const ingestor = new LocationIngest(scopedAthleteDoc, canonicalSegmentId);
     console.log(`${"\n"}LocationIngest created for segment ${ingestor.segmentId} (${locationName})`);
-    await ingestor.fetchActivitiesHELLO({ limitPages: 1 });
+    await ingestor.fetchActivities();
     // await ingestor.saveActivities();
 
     return {
@@ -35,7 +35,7 @@ async function asyncIngestSingleLocation(locationName) {
   return false;
 }
 
-const asyncIngestAllLocations = ['prospectpark'];
+const asyncIngestAllLocations = getLocationNames();
 asyncIngestAllLocations[Symbol.asyncIterator] = () => ({
   next: async function() {
     if (asyncIngestAllLocations.length) {
