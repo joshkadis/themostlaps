@@ -160,6 +160,10 @@ function getActivityData(activity, verbose = false) {
     start_date_local,
   } = activity;
 
+  if (verbose) {
+    console.log(`Activity ${id} has ${segment_efforts.length} segment efforts`);
+  }
+
   const laps = segment_efforts.length ?
     calculateLapsFromSegmentEfforts(segment_efforts) : 0;
 
