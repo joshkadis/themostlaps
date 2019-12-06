@@ -9,6 +9,7 @@ const {
   getLocationNameFromSegmentId,
 } = require('../locations');
 const fetchStravaAPI = require('../../fetchStravaAPI');
+const { makeArrayAsyncIterable } = require('../asyncUtils');
 
 const INGEST_SOURCE = 'signup';
 const MIN_ACTIVITY_ID = 1000;
@@ -195,31 +196,76 @@ class LocationIngest {
   }
 
   /**
-   * Save documents for validated Activities
+   * Save documents for validated activities sequentially,
+   * which is how Model.create() does it anyway. But we want to
+   * catch validation errors one at a time.
    */
   async saveActivities() {
-    // @todo Handle async iterable!
-    this.getActivities().forEach(async (activity) => {
-      try {
-        // Will remove if exists
-        await Activity.remove({ _id: activity._id }, { single: true });
-      } catch (err) {
-        // Let's move on, shall we?
-      }
+    const iterable = makeArrayAsyncIterable(
+      this.getActivityIds(),
+      this.validateAndSaveActivity,
+    );
 
-      const model = new Activity(activity);
-      const err = model.validateSync();
-      if (err) {
+    // eslint-disable-next-line
+    for await (const invalidActivity of iterable) {
+      // Will return empty object if no errors
+      const {
+        activity = false,
+        error = false,
+      } = invalidActivity;
+      if (activity) {
         this.invalidActivities = [...this.invalidActivities, activity];
-      } else if (!this.isUnitTest) {
-        try {
-          await model.save();
-        } catch (saveErr) {
-          this.invalidActivities = [...this.invalidActivities, activity];
-          console.log(saveErr);
-        }
       }
-    });
+      if (error) {
+        console.log(error);
+      }
+    }
+  }
+
+  /**
+   * Validates an activity and saves it to the database
+   *
+   * @param {Integer} id
+   */
+  validateAndSaveActivity = async (id) => {
+    const data = this.getActivityById(id);
+    if (!data) {
+      return {
+        activity: { id },
+        error: new Error(`Unknown activity id: ${JSON.stringify(id)}`),
+      };
+    }
+
+    // Validate activity against Activity model
+
+    // Upsert Activity
+    // If an activity has laps in 2 locations,
+    // the previously saved document will be overwritten
+    // Stats will be accurate for both locations though.
+    // Model.update(upsert, omitUndefined, setDefaultsOnInsert)
+
+    //
+    //   try {
+    //     // Will remove if exists AND LOCATION MATCHES
+    //     await Activity.remove({ _id: activity._id }, { single: true });
+    //   } catch (err) {
+    //     // Let's move on, shall we?
+    //   }
+    //
+    //   const model = new Activity(activity);
+    //   const err = model.validateSync();
+    //   if (err) {
+    //     this.invalidActivities = [...this.invalidActivities, activity];
+    //   } else if (!this.isUnitTest) {
+    //     try {
+    //       await model.save();
+    //     } catch (saveErr) {
+    //       this.invalidActivities = [...this.invalidActivities, activity];
+    //       console.log(saveErr);
+    //     }
+    //   }
+    // });
+    return {};
   }
 
   /**
@@ -327,6 +373,14 @@ class LocationIngest {
    * @return {[Activity]}
    */
   getActivities = () => Object.values(this.activities);
+
+  /**
+   * Get an activity data object by ID
+   *
+   * @param {Integer} id
+   * @return {Object|false}
+   */
+  getActivityById = (id) => this.activities[id] || false;
 
   /**
    * Get array of activity ids for this segment
