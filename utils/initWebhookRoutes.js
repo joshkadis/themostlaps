@@ -53,10 +53,8 @@ async function handleEvent(req, res) {
       owner_id,
     } = req.body;
 
-    slackSuccess('Received webhook', req.body);
-
     if ('athlete' === object_type) {
-      // slackSuccess('Received athlete webhook', req.body);
+      slackSuccess('Received athlete webhook', req.body);
     } else if ('create' === aspect_type) {
       const shouldUpdateDb = !process.env.DISABLE_REFRESH_FROM_WEBHOOK;
       await refreshAthleteFromActivity(owner_id, object_id, shouldUpdateDb);
