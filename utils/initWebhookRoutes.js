@@ -53,6 +53,8 @@ async function handleEvent(req, res) {
       owner_id,
     } = req.body;
 
+    console.log(`Received webhook: ${aspect_type} | ${object_type} | ${object_id} | ${owner_id}`);
+
     if ('athlete' === object_type) {
       slackSuccess('Received athlete webhook', req.body);
     } else if ('create' === aspect_type) {

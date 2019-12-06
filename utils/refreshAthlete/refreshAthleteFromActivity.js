@@ -100,6 +100,10 @@ async function refreshAthleteFromActivity(athleteId, activityId, shouldUpdateDb 
   const activity = await fetchActivity(activityId, athleteDoc);
 
   if (typeof activity === 'undefined' || !activity) {
+    const toLog = typeof activity === 'undefined'
+      ? 'response undefined'
+      : activity;
+    console.log(toLog);
     return 0;
   }
 
@@ -115,6 +119,11 @@ async function refreshAthleteFromActivity(athleteId, activityId, shouldUpdateDb 
 
   // Check for laps
   const activityData = getActivityData(activity, true);
+  const afterLapsCheckLog =
+`activityData after checking for laps:
+${JSON.stringify(activityData, null, 2)}
+`;
+console.log(afterLapsCheckLog);
   if (!activityData) {
     return 0;
   }
