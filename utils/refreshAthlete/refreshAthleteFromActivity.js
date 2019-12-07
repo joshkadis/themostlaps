@@ -12,7 +12,7 @@ const {
 const {
   getEpochSecondsFromDateObj,
 } = require('../athleteUtils');
-
+const { slackError } = require('../slackNotification');
 /**
  * Validate activity model and save to database
  *
@@ -23,8 +23,8 @@ const {
 async function validateActivityAndSave(activity, shouldUpdateDb = true) {
   const activityDoc = new Activity(activity);
   // Mongoose returns error here instead of throwing
-  const err = activityDoc.validateSync();
-  if (err) {
+  const invalid = activityDoc.validateSync();
+  if (invalid) {
     console.warn(`Failed to validate activity ${activity.get('_id')}`);
     return false;
   }
@@ -71,11 +71,16 @@ async function updateAthleteLastRefreshed(athleteDoc, startDateString) {
  * @param {Number} activityId
  * @param {Bool} shouldUpdateDb If false, will validate without saving
  */
-async function refreshAthleteFromActivity(athleteId, activityId, shouldUpdateDb = true) {
+async function refreshAthleteFromActivity(
+  athleteId,
+  activityId,
+  shouldUpdateDb = true,
+) {
   // Handle int32 overflow
   // https://groups.google.com/forum/#!topic/strava-api/eVCHNjaTOSA
   if (activityId < 0) {
-    activityId += 2 * (2147483647 + 1)
+    // eslint-disable-next-line no-param-reassign
+    activityId += 2 * (2147483647 + 1);
   }
 
   // Check that athlete exists and activity is new
@@ -109,7 +114,10 @@ async function refreshAthleteFromActivity(athleteId, activityId, shouldUpdateDb 
 
   // Update athlete's last_refreshed timestamp
   if (shouldUpdateDb) {
-    athleteDoc = await updateAthleteLastRefreshed(athleteDoc, activity.start_date);
+    athleteDoc = await updateAthleteLastRefreshed(
+      athleteDoc,
+      activity.start_date,
+    );
   }
 
   // Check eligibility
@@ -119,11 +127,11 @@ async function refreshAthleteFromActivity(athleteId, activityId, shouldUpdateDb 
 
   // Check for laps
   const activityData = getActivityData(activity, true);
-  const afterLapsCheckLog =
-`activityData after checking for laps:
+  const afterLapsCheckLog = `activityData after checking for laps:
 ${JSON.stringify(activityData, null, 2)}
 `;
-console.log(afterLapsCheckLog);
+
+  console.log(afterLapsCheckLog);
   if (!activityData) {
     return 0;
   }
@@ -135,12 +143,23 @@ console.log(afterLapsCheckLog);
   }
 
   // Update athlete stats
-  const stats = await compileStatsForActivities([savedDoc], athleteDoc.toJSON().stats);
+  const stats = await compileStatsForActivities(
+    [savedDoc],
+    athleteDoc.toJSON().stats,
+  );
   console.log(`Added ${stats.allTime - athleteDoc.get('stats.allTime')} to stats.allTime`);
 
   // Update user stats and last_updated
   if (shouldUpdateDb) {
-    const updatedAthleteDoc = await updateAthleteStats(athleteDoc, stats);
+    try {
+      await updateAthleteStats(athleteDoc, stats);
+    } catch (err) {
+      console.log(`Error with updateAthleteStats() for ${athleteId} after activity ${activityId}`);
+      slackError(90, {
+        athleteId,
+        activityId,
+      });
+    }
   }
 
   // Return laps found
