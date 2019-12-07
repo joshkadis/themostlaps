@@ -1,6 +1,8 @@
 const { slackError, slackSuccess } = require('./slackNotification');
 const refreshAthleteFromActivity = require('./refreshAthlete/refreshAthleteFromActivity');
 
+const REFRESH_DELAY = 15 * 60 * 1000; // 15min delay
+
 /**
  * See https://developers.strava.com/docs/webhooks/
  */
@@ -50,6 +52,28 @@ function validateSubscription(req, res) {
 }
 
 /**
+ * Delay refresh after activity webhook to account for
+ * delay until segment efforts are ready
+ *
+ * @param {Integer} athleteId
+ * @param {Integer} activityId
+ */
+async function scheduleActivityRefresh(athleteId, activityId) {
+  const receivedAtTime = new Date().toISOString();
+  setTimeout(
+    async () => {
+      console.log(`Refreshing: Athlete ${athleteId} | Activity ${activityId} | Received at ${receivedAtTime}`);
+      await refreshAthleteFromActivity(
+        athleteId,
+        activityId,
+        !process.env.DISABLE_REFRESH_FROM_WEBHOOK,
+      );
+    },
+    REFRESH_DELAY,
+  );
+}
+
+/**
  * Handle webhook event
  *
  * @param {Request} req
@@ -70,8 +94,7 @@ async function handleEvent(req, res) {
     if (object_type === 'athlete') {
       slackSuccess('Received athlete webhook', req.body);
     } else if (aspect_type === 'create') {
-      const shouldUpdateDb = !process.env.DISABLE_REFRESH_FROM_WEBHOOK;
-      await refreshAthleteFromActivity(owner_id, object_id, shouldUpdateDb);
+      await scheduleActivityRefresh(owner_id, object_id);
     }
   } catch (err) {
     slackError(110, JSON.stringify(req.body, null, 2));
