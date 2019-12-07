@@ -1,6 +1,5 @@
 const { slackError, slackSuccess } = require('./slackNotification');
 const refreshAthleteFromActivity = require('./refreshAthlete/refreshAthleteFromActivity');
-const { isTestUser } = require('./athleteUtils');
 
 /**
  * See https://developers.strava.com/docs/webhooks/
@@ -13,23 +12,36 @@ const { isTestUser } = require('./athleteUtils');
  * @param {Response} res
  */
 function validateSubscription(req, res) {
-  const { headers, params, query, url, method } = req;
-  console.log({ headers, params, query, url, method });
+  const {
+    headers,
+    params,
+    query,
+    url,
+    method,
+  } = req;
+
+  console.log({
+    headers,
+    params,
+    query,
+    url,
+    method,
+  });
 
   if (
-    'string' !== typeof query['hub.mode'] ||
-    'subscribe' !== query['hub.mode'] ||
-    'string' !== typeof query['hub.verify_token'] ||
-    'string' !== typeof query['hub.challenge']
+    typeof query['hub.mode'] !== 'string'
+    || query['hub.mode'] !== 'subscribe'
+    || typeof query['hub.verify_token'] !== 'string'
+    || typeof query['hub.challenge'] !== 'string'
   ) {
     res.statusCode = 401;
-    res.send('malformed validation query')
+    res.send('malformed validation query');
     return;
   }
 
-  if ('STRAVA' !== query['hub.verify_token']) {
+  if (query['hub.verify_token'] !== 'STRAVA') {
     res.statusCode = 401;
-    res.send(`incorrect verify_token: ${query['hub.verify_token']}`)
+    res.send(`incorrect verify_token: ${query['hub.verify_token']}`);
     return;
   }
 
@@ -55,9 +67,9 @@ async function handleEvent(req, res) {
 
     console.log(`Received webhook: ${aspect_type} | ${object_type} | ${object_id} | ${owner_id}`);
 
-    if ('athlete' === object_type) {
+    if (object_type === 'athlete') {
       slackSuccess('Received athlete webhook', req.body);
-    } else if ('create' === aspect_type) {
+    } else if (aspect_type === 'create') {
       const shouldUpdateDb = !process.env.DISABLE_REFRESH_FROM_WEBHOOK;
       await refreshAthleteFromActivity(owner_id, object_id, shouldUpdateDb);
     }
