@@ -171,9 +171,15 @@ function getActivityData(activity, verbose = false) {
     console.log(`Activity ${id} has ${segment_efforts.length} segment efforts`);
   }
 
-  const laps = segment_efforts.length
-    ? calculateLapsFromSegmentEfforts(segment_efforts)
-    : 0;
+  if (!segment_efforts.length) {
+    slackError(111, {
+      id,
+      athlete,
+      start_date_local,
+    });
+    return 0;
+  }
+  const laps = calculateLapsFromSegmentEfforts(segment_efforts);
 
   if (verbose) {
     console.log(`Activity ${id} has ${laps} laps`);
