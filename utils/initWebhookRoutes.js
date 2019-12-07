@@ -1,6 +1,7 @@
 const { slackError, slackSuccess } = require('./slackNotification');
 const refreshAthleteFromActivity = require('./refreshAthlete/refreshAthleteFromActivity');
-const { isTestUser } = require('./athleteUtils');
+
+const REFRESH_DELAY = 15 * 60 * 1000; // 15min delay
 
 /**
  * See https://developers.strava.com/docs/webhooks/
@@ -13,28 +14,63 @@ const { isTestUser } = require('./athleteUtils');
  * @param {Response} res
  */
 function validateSubscription(req, res) {
-  const { headers, params, query, url, method } = req;
-  console.log({ headers, params, query, url, method });
+  const {
+    headers,
+    params,
+    query,
+    url,
+    method,
+  } = req;
+
+  console.log({
+    headers,
+    params,
+    query,
+    url,
+    method,
+  });
 
   if (
-    'string' !== typeof query['hub.mode'] ||
-    'subscribe' !== query['hub.mode'] ||
-    'string' !== typeof query['hub.verify_token'] ||
-    'string' !== typeof query['hub.challenge']
+    typeof query['hub.mode'] !== 'string'
+    || query['hub.mode'] !== 'subscribe'
+    || typeof query['hub.verify_token'] !== 'string'
+    || typeof query['hub.challenge'] !== 'string'
   ) {
     res.statusCode = 401;
-    res.send('malformed validation query')
+    res.send('malformed validation query');
     return;
   }
 
-  if ('STRAVA' !== query['hub.verify_token']) {
+  if (query['hub.verify_token'] !== 'STRAVA') {
     res.statusCode = 401;
-    res.send(`incorrect verify_token: ${query['hub.verify_token']}`)
+    res.send(`incorrect verify_token: ${query['hub.verify_token']}`);
     return;
   }
 
   res.json({ 'hub.challenge': query['hub.challenge'] });
   slackSuccess(`Validated callback subscription for ${query['hub.verify_token']}`);
+}
+
+/**
+ * Delay refresh after activity webhook to account for
+ * delay until segment efforts are ready
+ *
+ * @param {Integer} athleteId
+ * @param {Integer} activityId
+ */
+async function scheduleActivityRefresh(athleteId, activityId) {
+  const receivedAtTime = new Date().toISOString();
+  setTimeout(
+    async () => {
+      console.log(`Refreshing: Athlete ${athleteId} | Activity ${activityId} | Received at ${receivedAtTime}`);
+      await refreshAthleteFromActivity(
+        athleteId,
+        activityId,
+        !process.env.DISABLE_REFRESH_FROM_WEBHOOK,
+      );
+    },
+    REFRESH_DELAY,
+  );
 }
 
 /**
@@ -55,11 +91,10 @@ async function handleEvent(req, res) {
 
     console.log(`Received webhook: ${aspect_type} | ${object_type} | ${object_id} | ${owner_id}`);
 
-    if ('athlete' === object_type) {
+    if (object_type === 'athlete') {
       slackSuccess('Received athlete webhook', req.body);
-    } else if ('create' === aspect_type) {
-      const shouldUpdateDb = !process.env.DISABLE_REFRESH_FROM_WEBHOOK;
-      await refreshAthleteFromActivity(owner_id, object_id, shouldUpdateDb);
+    } else if (aspect_type === 'create') {
+      await scheduleActivityRefresh(owner_id, object_id);
     }
   } catch (err) {
     slackError(110, JSON.stringify(req.body, null, 2));
