@@ -105,7 +105,7 @@ async function deauthorizeAthlete(athlete) {
     return;
   }
 
-  await athleteDoc.update({ status: 'deauthorized' });
+  await athleteDoc.updateOne({ status: 'deauthorized' });
 }
 
 module.exports = {
