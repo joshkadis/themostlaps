@@ -137,7 +137,7 @@ async function removeAthlete(athlete, removableStatuses = ['deauthorized']) {
     removableStatuses.indexOf(athleteStatus) === -1
     && removableStatuses.indexOf('any') === -1
   ) {
-    console.log(`removeAthlete() error: ${athleteId} status ${athleteStatus} not in ${JSON.stringify(removableStatuses)}`);
+    console.log(`removeAthlete() error: ${athleteId} status '${athleteStatus}' not in ${JSON.stringify(removableStatuses)}`);
     return;
   }
 
