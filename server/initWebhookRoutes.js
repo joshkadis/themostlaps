@@ -1,5 +1,7 @@
-const { slackError, slackSuccess } = require('./slackNotification');
-const refreshAthleteFromActivity = require('./refreshAthlete/refreshAthleteFromActivity');
+const { slackError, slackSuccess } = require('../utils/slackNotification');
+const refreshAthleteFromActivity = require('../utils/refreshAthlete/refreshAthleteFromActivity');
+const { deauthorizeAthlete } = require('../utils/athleteUtils');
+const refreshAthleteProfile = require('../utils/refreshAthlete/refreshAthleteProfile');
 
 const REFRESH_DELAY = 15 * 60 * 1000; // 15min delay
 
@@ -87,13 +89,24 @@ async function handleEvent(req, res) {
       object_id,
       object_type,
       owner_id,
+      updates = {},
     } = req.body;
 
     console.log(`Received webhook: ${aspect_type} | ${object_type} | ${object_id} | ${owner_id}`);
 
     if (object_type === 'athlete') {
       slackSuccess('Received athlete webhook', req.body);
-    } else if (aspect_type === 'create') {
+      if (aspect_type !== 'update') {
+        // 99.9999999% sure this is impossible
+        return;
+      }
+
+      if (updates.authorized === false) {
+        await deauthorizeAthlete(owner_id);
+      } else {
+        await refreshAthleteProfile(owner_id);
+      }
+    } else if (aspect_type === 'create' && object_type === 'activity') {
       await scheduleActivityRefresh(owner_id, object_id);
     }
   } catch (err) {
