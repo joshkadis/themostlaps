@@ -12,6 +12,7 @@ dist/
 # Lint specific files/dirs as we go
 !server.js
 !server/initApiRoutes.js
+!server/initWebhookRoutes.js
 !schema/**/*.js
 !api/**/*.js
 
@@ -20,7 +21,6 @@ dist/
 !utils/dateTimeUtils.js
 !utils/refreshAthlete/refreshAthleteFromActivity.js
 !utils/refreshAthlete/utils.js
-!utils/initWebhookRoutes.js
 
 # V2 Utils
 !utils/v2/**/*.js

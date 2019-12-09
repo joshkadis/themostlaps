@@ -13,7 +13,7 @@ const { mongooseConnectionOptions } = require('./config/mongodb');
 const handleSignupCallback = require('./server/handleSignupCallback');
 const handleNotification = require('./server/handleNotification');
 const initApiRoutes = require('./server/initApiRoutes');
-const initWebhookRoutes = require('./utils/initWebhookRoutes');
+const initWebhookRoutes = require('./server/initWebhookRoutes');
 const getRankingParams = require('./utils/getRankingParams');
 
 // Next.js setup
