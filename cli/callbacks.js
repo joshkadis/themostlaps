@@ -42,10 +42,10 @@ async function doCommand(prompt, callback) {
 
 const isDryRun = (argv) => argv.dryRun || argv.dryrun || false;
 
-const callbackDeleteUser = async ({ user, deauthorize }) => {
+const callbackDeleteUser = async ({ user, deauthorize, statuses }) => {
   await doCommand(
     `Enter admin code to delete user ${user}.`,
-    () => deleteUser(user, deauthorize)
+    () => deleteUser(user, deauthorize, statuses)
   );
 };
 

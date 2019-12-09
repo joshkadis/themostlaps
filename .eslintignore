@@ -15,6 +15,7 @@ dist/
 !server/initWebhookRoutes.js
 !schema/**/*.js
 !api/**/*.js
+!cli/deleteUser.js
 
 # Utils included in refactoring
 !utils/athleteStatsClient.js

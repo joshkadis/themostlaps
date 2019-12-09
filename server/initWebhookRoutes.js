@@ -1,6 +1,6 @@
 const { slackError, slackSuccess } = require('../utils/slackNotification');
 const refreshAthleteFromActivity = require('../utils/refreshAthlete/refreshAthleteFromActivity');
-const { deauthorizeAthlete } = require('../utils/athleteUtils');
+const { removeAthlete } = require('../utils/athleteUtils');
 const refreshAthleteProfile = require('../utils/refreshAthlete/refreshAthleteProfile');
 
 const REFRESH_DELAY = 15 * 60 * 1000; // 15min delay
@@ -96,14 +96,11 @@ async function handleEvent(req, res) {
 
     if (object_type === 'athlete') {
       slackSuccess('Received athlete webhook', req.body);
-      if (aspect_type !== 'update') {
-        // 99.9999999% sure this is impossible
-        return;
-      }
-
       if (updates.authorized === false) {
-        await deauthorizeAthlete(owner_id);
+        await removeAthlete(owner_id, ['any']);
       } else {
+        // Strava currently sends athlete webhooks only for deauthorization
+        // but you never know...
         await refreshAthleteProfile(owner_id);
       }
     } else if (aspect_type === 'create' && object_type === 'activity') {

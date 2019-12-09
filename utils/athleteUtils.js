@@ -1,6 +1,7 @@
+const Activity = require('../schema/Activity');
 const Athlete = require('../schema/Athlete');
 const { testAthleteIds } = require('../config');
-const { slackError } = require('./slackNotification');
+const { slackError, slackSuccess } = require('./slackNotification');
 
 /**
  * Get epoch timestamp in seconds of athlete's last refresh (or creation)
@@ -108,10 +109,59 @@ async function deauthorizeAthlete(athlete) {
   await athleteDoc.updateOne({ status: 'deauthorized' });
 }
 
+/**
+ * Permanently remove athlete profile and activities
+ *
+ * @param {Integer|Athlete} athlete Athlete ID or document
+ * @param {Array} removableStatuses Statuses eligible for removal. May include 'any'. Defaults to ['deauthorized']
+ */
+async function removeAthlete(athlete, removableStatuses = ['deauthorized']) {
+  let athleteDoc = false;
+  if (athlete instanceof Athlete) {
+    athleteDoc = athlete;
+  } else if (typeof athlete === 'number') {
+    athleteDoc = await Athlete.findById(athlete);
+    if (!athleteDoc) {
+      console.log(`removeAthlete() error: could not find Athlete from ${athlete}`);
+      return;
+    }
+  } else {
+    console.log(`removeAthlete() accepts Athlete or Number, received: ${JSON.stringify(athlete)}`);
+  }
+
+  const athleteId = athleteDoc.id;
+  const athleteStatus = athleteDoc.get('status');
+
+  // removableStatuses must include athlete's current status or 'any'
+  if (
+    removableStatuses.indexOf(athleteStatus) === -1
+    && removableStatuses.indexOf('any') === -1
+  ) {
+    console.log(`removeAthlete() error: ${athleteId} status '${athleteStatus}' not in ${JSON.stringify(removableStatuses)}`);
+    return;
+  }
+
+  try {
+    const { deletedCount } = await Activity.deleteMany({
+      athlete_id: athleteId,
+    });
+    console.log(`Deleted ${deletedCount} activities for athlete ${athleteId}`);
+
+    await Athlete.deleteOne({ _id: athleteId });
+    console.log(`Deleted user ${athleteId} from athletes collection`);
+
+    slackSuccess(`Removed ${athleteId} from activities and athletes collections`);
+  } catch (err) {
+    slackError(1, `removeAthlete(${athleteId})`);
+    console.log(err);
+  }
+}
+
 module.exports = {
   getAthleteModelFormat,
   createAthlete,
   deauthorizeAthlete,
+  removeAthlete,
   getEpochSecondsFromDateObj,
   isTestUser,
 };
