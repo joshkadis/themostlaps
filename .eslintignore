@@ -19,6 +19,7 @@ dist/
 # Utils included in refactoring
 !utils/athleteStatsClient.js
 !utils/dateTimeUtils.js
+!utils/athleteUtils.js
 !utils/refreshAthlete/refreshAthleteFromActivity.js
 !utils/refreshAthlete/utils.js
 
