@@ -7,6 +7,9 @@
  */
 module.exports = (code = 0, data = '') => {
   switch (code) {
+    case 1:
+      return 'Database error';
+
     case 10:
       return `Request error: ${data}`;
 
