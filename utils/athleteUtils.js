@@ -119,7 +119,7 @@ async function removeAthlete(athlete, removableStatuses = ['deauthorized']) {
   let athleteDoc = false;
   if (athlete instanceof Athlete) {
     athleteDoc = athlete;
-  } else if (athlete instanceof Number) {
+  } else if (typeof athlete === 'number') {
     athleteDoc = await Athlete.findById(athlete);
     if (!athleteDoc) {
       console.log(`removeAthlete() error: could not find Athlete from ${athlete}`);
