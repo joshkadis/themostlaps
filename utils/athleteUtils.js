@@ -47,7 +47,7 @@ function getAthleteModelFormat(athleteInfo, shouldSubscribe = true) {
   } catch (err) {
     slackError(0, Object.assign(athleteInfo, { message: err.message || 'unknown' }));
     return false;
-  }  
+  }
 }
 
 /**
@@ -113,9 +113,30 @@ async function getDocFromMaybeToken(tokenOrDoc) {
   }
 }
 
+/**
+ * Set athlete status to 'deauthorized'
+ *
+ * @param {Integer|Athlete} athlete Athlete ID or document
+ */
+async function deauthorizeAthlete(athlete) {
+  let athleteDoc = false;
+  if (athlete instanceof Athlete) {
+    athleteDoc = athlete;
+  } else {
+    await athleteDoc = Athlete.findById(athlete);
+  }
+
+  if (!athleteDoc) {
+    return;
+  }
+
+  await athleteDoc.update({ status: 'deauthorized' });
+}
+
 module.exports = {
   getAthleteModelFormat,
   createAthlete,
+  deauthorizeAthlete,
   getEpochSecondsFromDateObj,
   isTestUser,
   getDocFromMaybeToken,
