@@ -70,6 +70,7 @@ async function updateAthleteLastRefreshed(athleteDoc, startDateString) {
  * @param {Number} athleteId
  * @param {Number} activityId
  * @param {Bool} shouldUpdateDb If false, will validate without saving
+ * @return {Bool} Process completed? (i.e. should it be retried)
  */
 async function refreshAthleteFromActivity(
   athleteId,
@@ -87,18 +88,18 @@ async function refreshAthleteFromActivity(
   let athleteDoc = await Athlete.findById(athleteId);
   if (!athleteDoc) {
     console.log(`Athlete id ${athleteId} not found`);
-    return 0;
+    return true;
   }
 
   if (athleteDoc.get('status') === 'deauthorized') {
     console.log(`Athlete id ${athleteId} deauthorized the app`);
-    return 0;
+    return true;
   }
 
   const activityExists = await Activity.findById(activityId);
   if (activityExists) {
     console.log(`Activity id ${activityId} already exists in database`);
-    return 0;
+    return true;
   }
 
   // Fetch activity details
@@ -109,7 +110,7 @@ async function refreshAthleteFromActivity(
       ? 'response undefined'
       : activity;
     console.log(toLog);
-    return 0;
+    return false; // Should retry
   }
 
   // Update athlete's last_refreshed timestamp
@@ -122,7 +123,7 @@ async function refreshAthleteFromActivity(
 
   // Check eligibility
   if (!activityCouldHaveLaps(activity, true)) {
-    return 0;
+    return true;
   }
 
   // Check for laps
@@ -130,8 +131,10 @@ async function refreshAthleteFromActivity(
   const afterLapsCheckLog = `activityData after checking for laps:
 ${JSON.stringify(activityData, null, 2)}
 `;
-
   console.log(afterLapsCheckLog);
+
+  // @todo true if there were segment efforts and 0 laps,
+  // false if no segment efforts
   if (!activityData) {
     return 0;
   }
@@ -139,7 +142,7 @@ ${JSON.stringify(activityData, null, 2)}
   // Validate and save
   const savedDoc = await validateActivityAndSave(activityData, shouldUpdateDb);
   if (!savedDoc) {
-    return 0;
+    return false; // Should retry
   }
 
   // Update athlete stats
@@ -159,12 +162,12 @@ ${JSON.stringify(activityData, null, 2)}
         athleteId,
         activityId,
       });
+      return false; // Should retry
     }
   }
 
-  // Return laps found
-  // @todo Reconcile with ${stats.allTime - athleteDoc.get('stats.allTime')} above
-  return activityData.laps;
+  // Process succeeded!
+  return true;
 }
 
 module.exports = refreshAthleteFromActivity;

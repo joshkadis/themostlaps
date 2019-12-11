@@ -72,16 +72,14 @@ async function scheduleActivityRefresh(athleteId, activityId) {
     async () => {
       attemptNumber += 1;
       console.log(`Processing: Athlete ${athleteId} | Activity ${activityId} | Received at ${receivedAtTime} | Attempt ${attemptNumber}`);
-      // const processSucceeded = await refreshAthleteFromActivity(
-      //   athleteId,
-      //   activityId,
-      //   !process.env.DISABLE_REFRESH_FROM_WEBHOOK,
-      // );
-      const processSucceeded = false;
-      if (processSucceeded) {
+      const processCompleted = await refreshAthleteFromActivity(
+        athleteId,
+        activityId,
+        !process.env.DISABLE_REFRESH_FROM_WEBHOOK,
+      );
+      if (processCompleted) {
         clearInterval(activityRefresh);
-      }
-      if (attemptNumber === MAX_ACTIVITY_ATTEMPTS) {
+      } else if (attemptNumber === MAX_ACTIVITY_ATTEMPTS) {
         console.log(`Failed to process activity ${activityId} after ${attemptNumber} attempts`);
         // @todo slackError()
         clearInterval(activityRefresh);
