@@ -23,6 +23,7 @@ dist/
 !utils/dateTimeUtils.js
 !utils/athleteUtils.js
 !utils/refreshAthlete/refreshAthleteFromActivity.js
+!utils/refreshAthlete/fetchLapsFromActivities.js
 !utils/refreshAthlete/utils.js
 
 # V2 Utils
