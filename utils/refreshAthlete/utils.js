@@ -157,7 +157,7 @@ function filterSegmentEfforts(efforts) {
  *
  * @param {Object} activity
  * @param {Boolean} verbose Defaults to false
- * @return {Object|false}
+ * @return {Object} Activity JSON object, may have 0 laps
  */
 function getActivityData(activity, verbose = false) {
   const {
@@ -171,22 +171,14 @@ function getActivityData(activity, verbose = false) {
     console.log(`Activity ${id} has ${segment_efforts.length} segment efforts`);
   }
 
-  if (!segment_efforts.length) {
-    slackError(111, {
-      id,
-      athlete,
-      start_date_local,
-    });
-    return 0;
-  }
-  const laps = calculateLapsFromSegmentEfforts(segment_efforts);
+  // Should already have checked segment_efforts.length
+  // but it can't hurt to check again
+  const laps = segment_efforts.length
+    ? calculateLapsFromSegmentEfforts(segment_efforts)
+    : 0;
 
   if (verbose) {
     console.log(`Activity ${id} has ${laps} laps`);
-  }
-
-  if (!laps) {
-    return false;
   }
 
   const added = new Date();

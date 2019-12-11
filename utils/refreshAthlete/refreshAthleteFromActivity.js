@@ -113,6 +113,15 @@ async function refreshAthleteFromActivity(
     return false; // Should retry
   }
 
+  if (!activity.segment_efforts || !activity.segment_efforts.length) {
+    slackError(111, {
+      id: activity.id,
+      athlete: activity.athlete,
+      start_date_local: activity.start_date_local,
+    });
+    return false; // Strava still processing segment efforts, should retry
+  }
+
   // Update athlete's last_refreshed timestamp
   if (shouldUpdateDb) {
     athleteDoc = await updateAthleteLastRefreshed(
@@ -128,21 +137,14 @@ async function refreshAthleteFromActivity(
 
   // Check for laps
   const activityData = getActivityData(activity, true);
-  const afterLapsCheckLog = `activityData after checking for laps:
-${JSON.stringify(activityData, null, 2)}
-`;
-  console.log(afterLapsCheckLog);
-
-  // @todo true if there were segment efforts and 0 laps,
-  // false if no segment efforts
-  if (!activityData) {
-    return 0;
+  if (!activityData.laps) {
+    return true; // Activity was processed but has no laps
   }
 
   // Validate and save
   const savedDoc = await validateActivityAndSave(activityData, shouldUpdateDb);
   if (!savedDoc) {
-    return false; // Should retry
+    return false; // Might as well retry
   }
 
   // Update athlete stats
