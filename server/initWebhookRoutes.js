@@ -8,7 +8,7 @@ const ACTIVITY_WEBHOOK_DELAY = isLocalEnv()
   ? 10000 // 10s for local dev
   : 15 * 60 * 1000; // 15min delay everywhere else
 
-const MAX_ACTIVITY_ATTEMPTS = 3;
+const MAX_ACTIVITY_ATTEMPTS = 4;
 
 /**
  * See https://developers.strava.com/docs/webhooks/
@@ -64,8 +64,9 @@ function validateSubscription(req, res) {
  *
  * @param {Integer} athleteId
  * @param {Integer} activityId
+ * @param {Integer} eventTimestamp
  */
-async function scheduleActivityRefresh(athleteId, activityId) {
+async function scheduleActivityRefresh(athleteId, activityId, eventTimestamp) {
   const receivedAtTime = new Date().toISOString();
   let attemptNumber = 0;
   const activityRefresh = setInterval(
@@ -81,7 +82,12 @@ async function scheduleActivityRefresh(athleteId, activityId) {
         clearInterval(activityRefresh);
       } else if (attemptNumber === MAX_ACTIVITY_ATTEMPTS) {
         console.log(`Failed to process activity ${activityId} after ${attemptNumber} attempts`);
-        // @todo slackError()
+        const eventDate = new Date(eventTimestamp);
+        slackError(111, {
+          athleteId,
+          activityId,
+          starTime: eventDate.toISOString(),
+        });
         clearInterval(activityRefresh);
       }
     },
@@ -103,6 +109,7 @@ async function handleEvent(req, res) {
       object_id,
       object_type,
       owner_id,
+      event_time,
       updates = {},
     } = req.body;
 
@@ -118,7 +125,7 @@ async function handleEvent(req, res) {
         await refreshAthleteProfile(owner_id);
       }
     } else if (aspect_type === 'create' && object_type === 'activity') {
-      await scheduleActivityRefresh(owner_id, object_id);
+      await scheduleActivityRefresh(owner_id, object_id, event_time);
     }
   } catch (err) {
     slackError(110, JSON.stringify(req.body, null, 2));
