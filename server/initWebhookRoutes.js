@@ -2,8 +2,13 @@ const { slackError, slackSuccess } = require('../utils/slackNotification');
 const refreshAthleteFromActivity = require('../utils/refreshAthlete/refreshAthleteFromActivity');
 const { removeAthlete } = require('../utils/athleteUtils');
 const refreshAthleteProfile = require('../utils/refreshAthlete/refreshAthleteProfile');
+const { isLocalEnv } = require('../utils/envUtils');
 
-const REFRESH_DELAY = 15 * 60 * 1000; // 15min delay
+const ACTIVITY_WEBHOOK_DELAY = isLocalEnv()
+  ? 10000 // 10s for local dev
+  : 15 * 60 * 1000; // 15min delay everywhere else
+
+const MAX_ACTIVITY_ATTEMPTS = 3;
 
 /**
  * See https://developers.strava.com/docs/webhooks/
@@ -62,16 +67,25 @@ function validateSubscription(req, res) {
  */
 async function scheduleActivityRefresh(athleteId, activityId) {
   const receivedAtTime = new Date().toISOString();
-  setTimeout(
+  let attemptNumber = 0;
+  const activityRefresh = setInterval(
     async () => {
-      console.log(`Refreshing: Athlete ${athleteId} | Activity ${activityId} | Received at ${receivedAtTime}`);
-      await refreshAthleteFromActivity(
+      attemptNumber += 1;
+      console.log(`Processing: Athlete ${athleteId} | Activity ${activityId} | Received at ${receivedAtTime} | Attempt ${attemptNumber}`);
+      const processCompleted = await refreshAthleteFromActivity(
         athleteId,
         activityId,
         !process.env.DISABLE_REFRESH_FROM_WEBHOOK,
       );
+      if (processCompleted) {
+        clearInterval(activityRefresh);
+      } else if (attemptNumber === MAX_ACTIVITY_ATTEMPTS) {
+        console.log(`Failed to process activity ${activityId} after ${attemptNumber} attempts`);
+        // @todo slackError()
+        clearInterval(activityRefresh);
+      }
     },
-    REFRESH_DELAY,
+    ACTIVITY_WEBHOOK_DELAY,
   );
 }
 

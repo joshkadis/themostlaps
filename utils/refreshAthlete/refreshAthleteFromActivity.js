@@ -70,6 +70,7 @@ async function updateAthleteLastRefreshed(athleteDoc, startDateString) {
  * @param {Number} athleteId
  * @param {Number} activityId
  * @param {Bool} shouldUpdateDb If false, will validate without saving
+ * @return {Bool} Process completed? (i.e. should it be retried)
  */
 async function refreshAthleteFromActivity(
   athleteId,
@@ -87,18 +88,18 @@ async function refreshAthleteFromActivity(
   let athleteDoc = await Athlete.findById(athleteId);
   if (!athleteDoc) {
     console.log(`Athlete id ${athleteId} not found`);
-    return 0;
+    return true;
   }
 
   if (athleteDoc.get('status') === 'deauthorized') {
     console.log(`Athlete id ${athleteId} deauthorized the app`);
-    return 0;
+    return true;
   }
 
   const activityExists = await Activity.findById(activityId);
   if (activityExists) {
     console.log(`Activity id ${activityId} already exists in database`);
-    return 0;
+    return true;
   }
 
   // Fetch activity details
@@ -109,7 +110,16 @@ async function refreshAthleteFromActivity(
       ? 'response undefined'
       : activity;
     console.log(toLog);
-    return 0;
+    return false; // Should retry
+  }
+
+  if (!activity.segment_efforts || !activity.segment_efforts.length) {
+    slackError(111, {
+      id: activity.id,
+      athlete: activity.athlete,
+      start_date_local: activity.start_date_local,
+    });
+    return false; // Strava still processing segment efforts, should retry
   }
 
   // Update athlete's last_refreshed timestamp
@@ -122,24 +132,19 @@ async function refreshAthleteFromActivity(
 
   // Check eligibility
   if (!activityCouldHaveLaps(activity, true)) {
-    return 0;
+    return true;
   }
 
   // Check for laps
   const activityData = getActivityData(activity, true);
-  const afterLapsCheckLog = `activityData after checking for laps:
-${JSON.stringify(activityData, null, 2)}
-`;
-
-  console.log(afterLapsCheckLog);
-  if (!activityData) {
-    return 0;
+  if (!activityData.laps) {
+    return true; // Activity was processed but has no laps
   }
 
   // Validate and save
   const savedDoc = await validateActivityAndSave(activityData, shouldUpdateDb);
   if (!savedDoc) {
-    return 0;
+    return false; // Might as well retry
   }
 
   // Update athlete stats
@@ -159,12 +164,12 @@ ${JSON.stringify(activityData, null, 2)}
         athleteId,
         activityId,
       });
+      return false; // Should retry
     }
   }
 
-  // Return laps found
-  // @todo Reconcile with ${stats.allTime - athleteDoc.get('stats.allTime')} above
-  return activityData.laps;
+  // Process succeeded!
+  return true;
 }
 
 module.exports = refreshAthleteFromActivity;
