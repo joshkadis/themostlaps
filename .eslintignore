@@ -12,12 +12,21 @@ dist/
 # Lint specific files/dirs as we go
 !server.js
 !server/initApiRoutes.js
+!server/initWebhookRoutes.js
 !schema/**/*.js
 !api/**/*.js
+!cli/deleteUser.js
+!cli/getActivityInfo.js
 
-# Utils
+# Utils included in refactoring
 !utils/athleteStatsClient.js
 !utils/dateTimeUtils.js
+!utils/athleteUtils.js
+!utils/refreshAthlete/refreshAthleteFromActivity.js
+!utils/refreshAthlete/fetchLapsFromActivities.js
+!utils/refreshAthlete/utils.js
+
+# V2 Utils
 !utils/v2/**/*.js
 !utils/server/**/*.js
 

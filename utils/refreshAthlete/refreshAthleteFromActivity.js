@@ -12,7 +12,7 @@ const {
 const {
   getEpochSecondsFromDateObj,
 } = require('../athleteUtils');
-
+const { slackError } = require('../slackNotification');
 /**
  * Validate activity model and save to database
  *
@@ -23,8 +23,8 @@ const {
 async function validateActivityAndSave(activity, shouldUpdateDb = true) {
   const activityDoc = new Activity(activity);
   // Mongoose returns error here instead of throwing
-  const err = activityDoc.validateSync();
-  if (err) {
+  const invalid = activityDoc.validateSync();
+  if (invalid) {
     console.warn(`Failed to validate activity ${activity.get('_id')}`);
     return false;
   }
@@ -70,73 +70,106 @@ async function updateAthleteLastRefreshed(athleteDoc, startDateString) {
  * @param {Number} athleteId
  * @param {Number} activityId
  * @param {Bool} shouldUpdateDb If false, will validate without saving
+ * @return {Bool} Process completed? (i.e. should it be retried)
  */
-async function refreshAthleteFromActivity(athleteId, activityId, shouldUpdateDb = true) {
+async function refreshAthleteFromActivity(
+  athleteId,
+  activityId,
+  shouldUpdateDb = true,
+) {
   // Handle int32 overflow
   // https://groups.google.com/forum/#!topic/strava-api/eVCHNjaTOSA
   if (activityId < 0) {
-    activityId += 2 * (2147483647 + 1)
+    // eslint-disable-next-line no-param-reassign
+    activityId += 2 * (2147483647 + 1);
   }
 
   // Check that athlete exists and activity is new
   let athleteDoc = await Athlete.findById(athleteId);
   if (!athleteDoc) {
     console.log(`Athlete id ${athleteId} not found`);
-    return 0;
+    return true;
   }
 
   if (athleteDoc.get('status') === 'deauthorized') {
     console.log(`Athlete id ${athleteId} deauthorized the app`);
-    return 0;
+    return true;
   }
 
   const activityExists = await Activity.findById(activityId);
   if (activityExists) {
     console.log(`Activity id ${activityId} already exists in database`);
-    return 0;
+    return true;
   }
 
   // Fetch activity details
   const activity = await fetchActivity(activityId, athleteDoc);
 
   if (typeof activity === 'undefined' || !activity) {
-    return 0;
+    const toLog = typeof activity === 'undefined'
+      ? 'response undefined'
+      : activity;
+    console.log(toLog);
+    return false; // Should retry
+  }
+
+  if (!activity.segment_efforts || !activity.segment_efforts.length) {
+    slackError(111, {
+      id: activity.id,
+      athlete: activity.athlete,
+      start_date_local: activity.start_date_local,
+    });
+    return false; // Strava still processing segment efforts, should retry
   }
 
   // Update athlete's last_refreshed timestamp
   if (shouldUpdateDb) {
-    athleteDoc = await updateAthleteLastRefreshed(athleteDoc, activity.start_date);
+    athleteDoc = await updateAthleteLastRefreshed(
+      athleteDoc,
+      activity.start_date,
+    );
   }
 
   // Check eligibility
   if (!activityCouldHaveLaps(activity, true)) {
-    return 0;
+    return true;
   }
 
   // Check for laps
   const activityData = getActivityData(activity, true);
-  if (!activityData) {
-    return 0;
+  if (!activityData.laps) {
+    return true; // Activity was processed but has no laps
   }
 
   // Validate and save
   const savedDoc = await validateActivityAndSave(activityData, shouldUpdateDb);
   if (!savedDoc) {
-    return 0;
+    return false; // Might as well retry
   }
 
   // Update athlete stats
-  const stats = await compileStatsForActivities([savedDoc], athleteDoc.toJSON().stats);
+  const stats = await compileStatsForActivities(
+    [savedDoc],
+    athleteDoc.toJSON().stats,
+  );
   console.log(`Added ${stats.allTime - athleteDoc.get('stats.allTime')} to stats.allTime`);
 
   // Update user stats and last_updated
   if (shouldUpdateDb) {
-    const updatedAthleteDoc = await updateAthleteStats(athleteDoc, stats);
+    try {
+      await updateAthleteStats(athleteDoc, stats);
+    } catch (err) {
+      console.log(`Error with updateAthleteStats() for ${athleteId} after activity ${activityId}`);
+      slackError(90, {
+        athleteId,
+        activityId,
+      });
+      return false; // Should retry
+    }
   }
 
-  // Return laps found
-  // @todo Reconcile with ${stats.allTime - athleteDoc.get('stats.allTime')} above
-  return activityData.laps;
+  // Process succeeded!
+  return true;
 }
 
 module.exports = refreshAthleteFromActivity;

@@ -1,4 +1,3 @@
-const fetch = require('isomorphic-unfetch');
 const { getDistance } = require('geolib');
 const {
   minDistance,
@@ -6,7 +5,6 @@ const {
   parkCenter,
   lapSegmentId,
 } = require('../../config');
-const { getDocFromMaybeToken } = require('../athleteUtils');
 const fetchStravaAPI = require('../fetchStravaAPI');
 const { formatSegmentEffort } = require('../athleteHistory');
 const calculateLapsFromSegmentEfforts = require('./calculateLapsFromSegmentEfforts');
@@ -19,7 +17,7 @@ const Athlete = require('../../schema/Athlete');
  * @return {Number}
  */
 function distFromParkCenter(latlng = null) {
-  if (!latlng || 2 !== latlng.length) {
+  if (!latlng || latlng.length !== 2) {
     return null;
   }
 
@@ -30,8 +28,18 @@ function distFromParkCenter(latlng = null) {
       longitude: latlng[1],
     },
     100,
-    1
+    1,
   );
+}
+
+/**
+ * Is lat/long pair within allowedRadius?
+ *
+ * @param {Array} latlng
+ * @return {Boolean}
+ */
+function isWithinAllowedRadius(latlng) {
+  return latlng && distFromParkCenter(latlng) < allowedRadius;
 }
 
 /**
@@ -58,11 +66,11 @@ async function fetchActivity(activityId, tokenOrDoc, includeAllEfforts = true) {
   const response = await fetchStravaAPI(
     `/activities/${activityId}`,
     athleteDoc,
-    params
+    params,
   );
 
-  if (response.status && 200 !== response.status) {
-    console.log(`Error fetching activity ${activityId}`)
+  if (response.status && response.status !== 200) {
+    console.log(`Error fetching activity ${activityId}`);
     slackError(45, {
       activityId,
       status: response.status,
@@ -81,7 +89,7 @@ async function fetchActivity(activityId, tokenOrDoc, includeAllEfforts = true) {
  * @return {Bool}
  */
 function activityCouldHaveLaps(activity, verbose = false) {
-   const {
+  const {
     id = 0,
     type = 'unknown',
     trainer = false,
@@ -91,7 +99,7 @@ function activityCouldHaveLaps(activity, verbose = false) {
     distance = 0,
   } = activity;
 
-  if ('string' === typeof type && type.toLowerCase() !== 'ride') {
+  if (typeof type === 'string' && type.toLowerCase() !== 'ride') {
     if (verbose) {
       console.log(`Activity ${id} is not a Ride.`);
     }
@@ -122,12 +130,11 @@ function activityCouldHaveLaps(activity, verbose = false) {
     return false;
   }
 
-  const nearParkCenter =
-    (start_latlng && distFromParkCenter(start_latlng) < allowedRadius) ||
-    (end_latlng && distFromParkCenter(end_latlng) < allowedRadius);
+  const nearParkCenter = isWithinAllowedRadius(start_latlng)
+    || isWithinAllowedRadius(end_latlng);
 
   if (verbose && !nearParkCenter) {
-      console.log(`Activity ${id} is not near the park center.`);
+    console.log(`Activity ${id} is not near the park center.`);
   }
 
   return nearParkCenter;
@@ -150,7 +157,7 @@ function filterSegmentEfforts(efforts) {
  *
  * @param {Object} activity
  * @param {Boolean} verbose Defaults to false
- * @return {Object|false}
+ * @return {Object} Activity JSON object, may have 0 laps
  */
 function getActivityData(activity, verbose = false) {
   const {
@@ -160,15 +167,18 @@ function getActivityData(activity, verbose = false) {
     start_date_local,
   } = activity;
 
-  const laps = segment_efforts.length ?
-    calculateLapsFromSegmentEfforts(segment_efforts) : 0;
+  if (verbose) {
+    console.log(`Activity ${id} has ${segment_efforts.length} segment efforts`);
+  }
+
+  // Should already have checked segment_efforts.length
+  // but it can't hurt to check again
+  const laps = segment_efforts.length
+    ? calculateLapsFromSegmentEfforts(segment_efforts)
+    : 0;
 
   if (verbose) {
     console.log(`Activity ${id} has ${laps} laps`);
-  }
-
-  if (!laps) {
-    return false;
   }
 
   const added = new Date();

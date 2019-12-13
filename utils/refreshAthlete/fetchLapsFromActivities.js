@@ -1,5 +1,5 @@
 const config = require('../../config');
-const { fetchActivity , getActivityData } = require('./utils');
+const { fetchActivity, getActivityData } = require('./utils');
 
 /**
  * Iterate over activity ids list and get laps.
@@ -12,20 +12,28 @@ const { fetchActivity , getActivityData } = require('./utils');
  * @param {Boolean} verbose Defaults to false
  * @return {Object}
  */
-async function fetchActivityDetails(activityIds, token, idx = 0, allActivities, verbose = false) {
-  const fetchNum = 'development' === process.env.NODE_ENV ? config.devFetchActivities : activityIds.length;
+async function fetchActivityDetails(
+  activityIds,
+  token,
+  idx = 0,
+  allActivities,
+  verbose = false,
+) {
+  const fetchNum = process.env.NODE_ENV === 'development'
+    ? config.devFetchActivities
+    : activityIds.length;
 
   if (verbose) {
-    console.log(`Fetching ${(idx + 1)} of ${fetchNum}: ${activityIds[idx]}`)
+    console.log(`Fetching ${(idx + 1)} of ${fetchNum}: ${activityIds[idx]}`);
   }
 
   try {
     const activity = await fetchActivity(activityIds[idx], token);
     if (typeof activity !== 'undefined' && activity) {
       const activityData = getActivityData(activity, verbose);
-      if(activityData) {
+      if (activityData && activityData.laps) {
         allActivities.push(activityData);
-      }      
+      }
     }
   } catch (err) {
     console.log(`Error processing activity ${activityIds[idx]}`);
@@ -35,7 +43,13 @@ async function fetchActivityDetails(activityIds, token, idx = 0, allActivities, 
   if ((idx + 1) === fetchNum) {
     return allActivities;
   }
-  return await fetchActivityDetails(activityIds, token, (idx + 1), allActivities, verbose);
+  return fetchActivityDetails(
+    activityIds,
+    token,
+    (idx + 1),
+    allActivities,
+    verbose,
+  );
 }
 
 /**
@@ -46,6 +60,12 @@ async function fetchActivityDetails(activityIds, token, idx = 0, allActivities, 
  * @param {Boolean} verbose Defaults to false
  * @return {Array}
  */
-module.exports = async (activityIds, token, verbose = false) => {
-  return await fetchActivityDetails(activityIds, token, 0, [], verbose);
-};
+async function fetchLapsFromActivities(
+  activityIds,
+  token,
+  verbose = false,
+) {
+  return fetchActivityDetails(activityIds, token, 0, [], verbose);
+}
+
+module.exports = fetchLapsFromActivities;

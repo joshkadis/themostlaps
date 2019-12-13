@@ -7,6 +7,9 @@
  */
 module.exports = (code = 0, data = '') => {
   switch (code) {
+    case 1:
+      return 'Database error';
+
     case 10:
       return `Request error: ${data}`;
 
@@ -50,6 +53,9 @@ module.exports = (code = 0, data = '') => {
 
     case 110:
       return 'Webhook payload error';
+
+    case 111:
+      return 'Activity has no segment efforts';
 
     case 114:
       return 'Failed to calculate Cold Laps';

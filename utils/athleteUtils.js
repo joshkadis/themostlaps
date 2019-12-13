@@ -1,7 +1,19 @@
+const Activity = require('../schema/Activity');
 const Athlete = require('../schema/Athlete');
-const mongoose = require('mongoose');
 const { testAthleteIds } = require('../config');
-const { slackError } = require('./slackNotification');
+const { slackError, slackSuccess } = require('./slackNotification');
+
+/**
+ * Get epoch timestamp in seconds of athlete's last refresh (or creation)
+ *
+ * @param {Date} refreshDate Optional Date object, otherwise will use current date
+ * @return {Number}
+ */
+function getEpochSecondsFromDateObj(refreshDate = false) {
+  const useDate = refreshDate || new Date();
+
+  return Math.floor(useDate.valueOf() / 1000);
+}
 
 /**
  * Convert API response for athlete to our model's format
@@ -14,13 +26,17 @@ const { slackError } = require('./slackNotification');
  */
 function getAthleteModelFormat(athleteInfo, shouldSubscribe = true) {
   try {
-
     const { access_token, token_type } = athleteInfo; // @note Removed email after Strava API change, Jan 15
     const refresh_token = athleteInfo.refresh_token || '';
     const expires_at = athleteInfo.expires_at || 0;
 
     // @note Removed email from model format due to Strava API change
-    const { firstname, lastname, profile, id } = athleteInfo.athlete;
+    const {
+      firstname,
+      lastname,
+      profile,
+      id,
+    } = athleteInfo.athlete;
 
     const currentDate = new Date();
     return {
@@ -47,26 +63,12 @@ function getAthleteModelFormat(athleteInfo, shouldSubscribe = true) {
   } catch (err) {
     slackError(0, Object.assign(athleteInfo, { message: err.message || 'unknown' }));
     return false;
-  }  
-}
-
-/**
- * Get epoch timestamp in seconds of athlete's last refresh (or creation)
- *
- * @param {Date} refreshDate Optional Date object, otherwise will use current date
- * @return {Number}
- */
-function getEpochSecondsFromDateObj(refreshDate = false) {
-  if (!refreshDate) {
-    refreshDate = new Date();
   }
-
-  return Math.floor(refreshDate.valueOf() / 1000);
 }
 
 async function createAthlete(athlete) {
-  return await Athlete.create(getAthleteModelFormat(athlete));
-};
+  return Athlete.create(getAthleteModelFormat(athlete));
+}
 
 
 /**
@@ -77,46 +79,89 @@ async function createAthlete(athlete) {
  */
 function isTestUser(athlete) {
   if (athlete instanceof Athlete) {
-    return -1 !== testAthleteIds.indexOf(athlete.get('_id'));
+    return testAthleteIds.indexOf(athlete.get('_id')) !== -1;
   }
 
-  if ('number' === typeof athlete) {
-    return -1 !== testAthleteIds.indexOf(athlete);
+  if (typeof athlete === 'number') {
+    return testAthleteIds.indexOf(athlete) !== -1;
   }
 
   return false;
 }
 
 /**
-  Get Athlete document from token string or just return a Document
+ * Set athlete status to 'deauthorized'
+ *
+ * @param {Integer|Athlete} athlete Athlete ID or document
+ */
+async function deauthorizeAthlete(athlete) {
+  let athleteDoc = false;
+  if (athlete instanceof Athlete) {
+    athleteDoc = athlete;
+  } else {
+    athleteDoc = await Athlete.findById(athlete);
+  }
 
-  @param {String|Document} tokenOrDoc
-  @returns {Document|null} Will return document or null if received nonexistent token string
-**/
-async function getDocFromMaybeToken(tokenOrDoc) {
-  try {
-    if (typeof tokenOrDoc !== 'string') {
-      // not a string
-      if (tokenOrDoc instanceof mongoose.Document) {
-        // is a mongoose document
-        return tokenOrDoc;
-      }
-      // neither a string nor a mongoose document
-      return null;
-    } else {
-      // is a string
-      athleteDoc = await Athlete.findOne({ access_token: tokenOrDoc });
-      return athleteDoc || null;
+  if (!athleteDoc) {
+    return;
+  }
+
+  await athleteDoc.updateOne({ status: 'deauthorized' });
+}
+
+/**
+ * Permanently remove athlete profile and activities
+ *
+ * @param {Integer|Athlete} athlete Athlete ID or document
+ * @param {Array} removableStatuses Statuses eligible for removal. May include 'any'. Defaults to ['deauthorized']
+ */
+async function removeAthlete(athlete, removableStatuses = ['deauthorized']) {
+  let athleteDoc = false;
+  if (athlete instanceof Athlete) {
+    athleteDoc = athlete;
+  } else if (typeof athlete === 'number') {
+    athleteDoc = await Athlete.findById(athlete);
+    if (!athleteDoc) {
+      console.log(`removeAthlete() error: could not find Athlete from ${athlete}`);
+      return;
     }
+  } else {
+    console.log(`removeAthlete() accepts Athlete or Number, received: ${JSON.stringify(athlete)}`);
+  }
+
+  const athleteId = athleteDoc.id;
+  const athleteStatus = athleteDoc.get('status');
+
+  // removableStatuses must include athlete's current status or 'any'
+  if (
+    removableStatuses.indexOf(athleteStatus) === -1
+    && removableStatuses.indexOf('any') === -1
+  ) {
+    console.log(`removeAthlete() error: ${athleteId} status '${athleteStatus}' not in ${JSON.stringify(removableStatuses)}`);
+    return;
+  }
+
+  try {
+    const { deletedCount } = await Activity.deleteMany({
+      athlete_id: athleteId,
+    });
+    console.log(`Deleted ${deletedCount} activities for athlete ${athleteId}`);
+
+    await Athlete.deleteOne({ _id: athleteId });
+    console.log(`Deleted user ${athleteId} from athletes collection`);
+
+    slackSuccess(`Removed ${athleteId} from activities and athletes collections`);
   } catch (err) {
-    return null;
+    slackError(1, `removeAthlete(${athleteId})`);
+    console.log(err);
   }
 }
 
 module.exports = {
   getAthleteModelFormat,
   createAthlete,
+  deauthorizeAthlete,
+  removeAthlete,
   getEpochSecondsFromDateObj,
   isTestUser,
-  getDocFromMaybeToken,
 };
