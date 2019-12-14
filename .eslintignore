@@ -25,7 +25,6 @@ dist/
 !utils/refreshAthlete/refreshAthleteFromActivity.js
 !utils/refreshAthlete/fetchLapsFromActivities.js
 !utils/refreshAthlete/utils.js
-!utils/scheduleNightlyRefresh.js
 
 # V2 Utils
 !utils/v2/**/*.js
