@@ -38,13 +38,6 @@ async function refreshAthletes(
       console.log(`refreshAthleteActivities failed | ${identifier}`);
     }
     /* /TEMP CODE */
-    // if (updatedAthlete && shouldRefreshActivities) {
-    //   await refreshAthleteActivities(
-    //     updatedAthlete,
-    //     false,
-    //     process.env.SHOULD_REFRESH_VERBOSE
-    //   );
-    // }
   }
   console.log(`Updated ${athletes.length} athletes`);
 }
