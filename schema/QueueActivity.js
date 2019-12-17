@@ -21,6 +21,9 @@ const queueActivitySchema = new Schema({
     required: true,
     default: Date.now,
   },
+  lastAttemptedAt: {
+    type: Date,
+  },
   ingestAttempts: {
     type: Number,
     required: true,
@@ -33,11 +36,11 @@ const queueActivitySchema = new Schema({
   },
   status: {
     type: String,
-    default: 'ready',
-    enum: ['ready', 'confirming', 'error', 'dequeued'],
+    default: 'pending',
+    enum: ['pending', 'error', 'dequeued', 'success'],
   },
-  errorCode: {
-    type: Number,
+  errorMsg: {
+    type: String,
   },
 });
 

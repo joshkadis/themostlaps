@@ -1,7 +1,8 @@
 const QueueActivity = require('../../../schema/QueueActivity');
-const { slackError } = require('../../slackNotification');
+const Athlete = require('../../../schema/Athlete');
+const { fetchActivity } = require('../../refreshAthlete/utils');
 
-// const MAX_INGEST_ATTEMPTS = 8;
+const MAX_INGEST_ATTEMPTS = 8;
 
 /**
  * Add a newly created activity to the ingestion queue
@@ -28,7 +29,6 @@ async function enqueueActivity({
     await QueueActivity.create(doc);
     return true;
   } catch (err) {
-    slackError(112, doc);
     return false;
   }
 }
@@ -36,11 +36,18 @@ async function enqueueActivity({
 /**
  * Keep an activity in the DB but stop ingestion attempts
  *
- * @param {Integer} activityId
+ * @param {QueueActivity|Integer} activity QueueActivity document or ID
  */
-async function dequeueActivity(activityId) {
+async function dequeueActivity(activity) {
+  if (activity instanceof QueueActivity) {
+    await activity.update({
+      status: 'dequeued',
+    });
+    return;
+  }
+
   await QueueActivity.findOneAndUpdate(
-    { activityId },
+    { activity },
     { status: 'dequeued' },
   );
 }
@@ -56,8 +63,94 @@ async function deleteActivity(activityId) {
   });
 }
 
+/**
+ * Process an activity in the queue and return updated document
+ *
+ * @param {QueueActivity} queueDoc QueueActivity document
+ * @param {Bool} isDryRun Default to false
+ * @return {QueueActivity}
+ */
+async function processQueueActivity(queueDoc, isDryRun = false) {
+  const activityId = queueDoc.get('activityId');
+  const athleteDoc = await Athlete.findById(queueDoc.get('athleteId'));
+  if (!athleteDoc) {
+    queueDoc.set({
+      status: 'error',
+      errorMsg: 'No athleteDoc',
+    });
+    return queueDoc;
+  }
+
+  const data = await fetchActivity(activityId, athleteDoc);
+  if (!data) {
+    queueDoc.set({
+      status: 'error',
+      errorMsg: 'No fetchActivity response',
+    });
+    return queueDoc;
+  }
+
+  const numSegmentEfforts = data.segment_efforts
+    ? data.segment_efforts.length
+    : 0;
+
+  // Same number of segment efforts twice in a row
+  // Use as proxy for Strava processing completion
+  if (numSegmentEfforts === queueDoc.get('numSegmentEfforts')) {
+    if (!isDryRun) {
+      // refactor refreshAthleteFromActivity to start at this point with data, athleteDoc
+      // set status to 'error' or 'success'
+    } else {
+      // Mostly for testing
+      queueDoc.set({ status: 'success' });
+    }
+  }
+
+  queueDoc.set({
+    numSegmentEfforts,
+    lastAttemptedAt: Date.now(),
+    ingestAttempts: queueDoc.get('ingestAttempts') + 1,
+  });
+
+  return queueDoc;
+}
+
+/**
+ * Process the ingestion queue
+ *
+ * @param {Bool} isDryRun Default to false
+ */
+async function processQueue(isDryRun) {
+  const activities = await QueueActivity.find({
+    status: 'pending',
+  });
+
+  // eslint-disable-next-line no-restricted-syntax
+  for await (const activity of activities) {
+    try {
+      if (activity.get('ingestAttempts') === MAX_INGEST_ATTEMPTS) {
+        dequeueActivity(activity);
+        return;
+      }
+
+      const processed = await processQueueActivity(activity, isDryRun);
+      if (!isDryRun) {
+        if (processed) {
+          await processed.update({});
+        } else {
+          dequeueActivity(activity);
+        }
+      }
+    } catch (err) {
+      // Error will get sent to Sentry
+    }
+  }
+}
+
 module.exports = {
   enqueueActivity,
   dequeueActivity,
   deleteActivity,
+  processQueue,
+  processQueueActivity,
 };
