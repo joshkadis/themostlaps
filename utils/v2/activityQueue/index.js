@@ -71,6 +71,10 @@ async function deleteActivity(activityId) {
  * @return {QueueActivity}
  */
 async function processQueueActivity(queueDoc, isDryRun = false) {
+  if (queueDoc.get('status') !== 'pending') {
+    return queueDoc;
+  }
+
   const activityId = queueDoc.get('activityId');
   const athleteDoc = await Athlete.findById(queueDoc.get('athleteId'));
   if (!athleteDoc) {
@@ -96,7 +100,10 @@ async function processQueueActivity(queueDoc, isDryRun = false) {
 
   // Same number of segment efforts twice in a row
   // Use as proxy for Strava processing completion
-  if (numSegmentEfforts === queueDoc.get('numSegmentEfforts')) {
+  if (
+    numSegmentEfforts > 0
+    && numSegmentEfforts === queueDoc.get('numSegmentEfforts')
+  ) {
     if (!isDryRun) {
       // refactor refreshAthleteFromActivity to start at this point with data, athleteDoc
       // set status to 'error' or 'success'
@@ -106,10 +113,14 @@ async function processQueueActivity(queueDoc, isDryRun = false) {
     }
   }
 
+  const ingestAttempts = queueDoc.get('ingestAttempts')
+    ? queueDoc.get('ingestAttempts') + 1
+    : 1;
+
   queueDoc.set({
     numSegmentEfforts,
     lastAttemptedAt: Date.now(),
-    ingestAttempts: queueDoc.get('ingestAttempts') + 1,
+    ingestAttempts,
   });
 
   return queueDoc;
