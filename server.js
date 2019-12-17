@@ -8,6 +8,7 @@ const Athlete = require('./schema/Athlete');
 const { scheduleNightlyRefresh } = require('./utils/scheduleNightlyRefresh');
 const { defaultLocation } = require('./config');
 const { mongooseConnectionOptions } = require('./config/mongodb');
+const { initSentry } = require('./utils/v2/services/sentry');
 
 // Route handlers
 const handleSignupCallback = require('./server/handleSignupCallback');
@@ -15,6 +16,9 @@ const handleNotification = require('./server/handleNotification');
 const initApiRoutes = require('./server/initApiRoutes');
 const initWebhookRoutes = require('./server/initWebhookRoutes');
 const getRankingParams = require('./utils/getRankingParams');
+
+// Services
+initSentry();
 
 // Next.js setup
 const app = next({ dev: process.env.NODE_ENV !== 'production' });
