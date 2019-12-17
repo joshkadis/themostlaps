@@ -4,7 +4,7 @@ const queueActivitySchema = new Schema({
   activityId: {
     type: Number,
     required: true,
-    index: true,
+    unique: true,
   },
   athleteId: {
     type: Number,
@@ -13,10 +13,12 @@ const queueActivitySchema = new Schema({
   },
   createdAt: {
     type: Date,
+    required: true,
     default: Date.now,
   },
   enqueuedAt: {
     type: Date,
+    required: true,
     default: Date.now,
   },
   ingestAttempts: {
@@ -32,7 +34,7 @@ const queueActivitySchema = new Schema({
   status: {
     type: String,
     default: 'ready',
-    enum: ['ready', 'error', 'dequeued'],
+    enum: ['ready', 'confirming', 'error', 'dequeued'],
   },
   errorCode: {
     type: Number,
