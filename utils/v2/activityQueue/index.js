@@ -5,6 +5,33 @@ const { fetchActivity } = require('../../refreshAthlete/utils');
 const MAX_INGEST_ATTEMPTS = 8;
 
 /**
+ * Keep an activity in the DB but change its status property
+ *
+ * @param {QueueActivity|Integer} activity QueueActivity document or ID
+ * @param {String} status Status to apply
+ * @returns {Bool} Success or failure
+ */
+async function updateActivityStatus(activity, status) {
+  let success = false;
+  try {
+    if (activity instanceof QueueActivity) {
+      success = await activity.update({
+        status,
+      });
+    } else {
+      success = await QueueActivity.findOneAndUpdate(
+        { activityId: activity },
+        { status },
+        { runValidators: true },
+      );
+    }
+    return !!success;
+  } catch (err) {
+    return false;
+  }
+}
+
+/**
  * Add a newly created activity to the ingestion queue
  *
  * @param {Object} webhookData
@@ -26,8 +53,12 @@ async function enqueueActivity({
   };
 
   try {
-    await QueueActivity.create(doc);
-    return true;
+    const updated = await updateActivityStatus(activityId, 'pending');
+    if (updated) {
+      return true;
+    }
+    const success = await QueueActivity.create(doc);
+    return !!success;
   } catch (err) {
     return false;
   }
@@ -37,19 +68,15 @@ async function enqueueActivity({
  * Keep an activity in the DB but stop ingestion attempts
  *
  * @param {QueueActivity|Integer} activity QueueActivity document or ID
+ * @returns {Bool} Success or failure
  */
 async function dequeueActivity(activity) {
-  if (activity instanceof QueueActivity) {
-    await activity.update({
-      status: 'dequeued',
-    });
-    return;
+  try {
+    const success = await updateActivityStatus(activity, 'dequeued');
+    return !!success;
+  } catch (err) {
+    return false;
   }
-
-  await QueueActivity.findOneAndUpdate(
-    { activity },
-    { status: 'dequeued' },
-  );
 }
 
 /**
@@ -58,7 +85,7 @@ async function dequeueActivity(activity) {
  * @param {Integer} activityId
  */
 async function deleteActivity(activityId) {
-  await QueueActivity.findOneandDelete({
+  return QueueActivity.findOneAndRemove({
     activityId,
   });
 }
@@ -162,6 +189,7 @@ module.exports = {
   enqueueActivity,
   dequeueActivity,
   deleteActivity,
+  updateActivityStatus,
   processQueue,
   processQueueActivity,
 };
