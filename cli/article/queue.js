@@ -3,11 +3,14 @@
  * to be backwards-compatible
  */
 
+const QueueActivity = require('../../schema/QueueActivity');
+const Activity = require('../../schema/Activity');
 const {
   enqueueActivity,
   dequeueActivity,
   deleteActivity,
   updateActivityStatus,
+  processQueueActivity,
 } = require('../../utils/v2/activityQueue');
 
 async function enqueue({
@@ -76,6 +79,47 @@ async function update({
   }
 }
 
+async function ingestOne({
+  subargs,
+  dryRun: isDryRun = false,
+}) {
+  if (subargs.length !== 2) {
+    console.warn('Use format: $ article queue ingest <activityId> <[--dry-run]>');
+    return;
+  }
+  const activityId = subargs[1];
+
+  // Check that activity doesn't exist in activities collection
+  const exists = await Activity.exists({ _id: activityId });
+  if (exists) {
+    console.warn(`Activity ${activityId} has already been ingested.`);
+    return;
+  }
+
+  // Get doc from queue
+  let queueDoc = await QueueActivity.findOne({ activityId });
+  if (!queueDoc) {
+    console.warn(`Activity ${activityId} is not in the ingestion queue.`);
+    return;
+  }
+
+  // Check doc from queue
+  if (queueDoc.status !== 'pending') {
+    console.warn(`Activity ${activityId} has status ${queueDoc.status}. Must be 'pending'`);
+    return;
+  }
+
+  queueDoc = await processQueueActivity(queueDoc, true); // @todo isDryRun
+  if (!queueDoc || !queueDoc.status || !queueDoc.status === 'error') {
+    console.warn(`Failed to ingest activity ${activityId}`);
+  } else {
+    console.log(`activity ${activityId} status after ingest: ${queueDoc.status})`);
+  }
+  console.log(queueDoc.toJSON());
+
+  // Handle status as in processQueue() depending on isDryRun
+}
+
 async function doCommand(args) {
   if (!args.queue) {
     console.warn("You didn't call `$ article queue ...`");
@@ -97,6 +141,10 @@ async function doCommand(args) {
 
     case 'update':
       await update(args);
+      break;
+
+    case 'ingest':
+      await ingestOne(args)
       break;
 
     default:

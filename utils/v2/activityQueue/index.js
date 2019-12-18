@@ -112,7 +112,13 @@ async function processQueueActivity(queueDoc, isDryRun = false) {
     return queueDoc;
   }
 
-  const data = await fetchActivity(activityId, athleteDoc);
+  let data = false;
+  try {
+    data = await fetchActivity(activityId, athleteDoc);
+  } catch (err) {
+    // i think we're ok here
+  }
+
   if (!data) {
     queueDoc.set({
       status: 'error',
@@ -132,6 +138,7 @@ async function processQueueActivity(queueDoc, isDryRun = false) {
     && numSegmentEfforts === queueDoc.get('numSegmentEfforts')
   ) {
     if (!isDryRun) {
+      console.log(`NOT A DRY RUN!`);
       // refactor refreshAthleteFromActivity to start at this point with data, athleteDoc
       // set status to 'error' or 'success'
     } else {
@@ -164,17 +171,18 @@ async function processQueue(isDryRun) {
   });
 
   // eslint-disable-next-line no-restricted-syntax
-  for await (const activity of activities) {
+  for await (let activity of activities) {
     try {
       if (activity.get('ingestAttempts') === MAX_INGEST_ATTEMPTS) {
         dequeueActivity(activity);
         return;
       }
 
-      const processed = await processQueueActivity(activity, isDryRun);
+      activity = await processQueueActivity(activity, isDryRun);
       if (!isDryRun) {
-        if (processed) {
-          await processed.update({});
+        // @todo Handle status and save, delete if succes, etc.
+        if (activity) {
+          await activity.save();
         } else {
           dequeueActivity(activity);
         }
