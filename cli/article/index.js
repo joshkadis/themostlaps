@@ -1,5 +1,5 @@
 /**
- * `$ article queue ...` commands. We can't use `.commandDir()` because it needs
+ * `$ activity queue ...` commands. We can't use `.commandDir()` because it needs
  * to be backwards-compatible
  */
 
@@ -18,10 +18,10 @@ async function doCommand(args) {
 
 module.exports = {
   command: [
-    'article queue <subargs...>',
+    'activity queue <subargs...>',
   ],
 
-  describe: 'Manage the asynchronous article ingestion queue',
+  describe: 'Manage the asynchronous activity ingestion queue',
   handler: async (args) => {
     mongoose.connect(process.env.MONGODB_URI, mongooseConnectionOptions);
     const db = mongoose.connection;

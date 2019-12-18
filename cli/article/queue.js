@@ -1,5 +1,5 @@
 /**
- * `$ article queue ...` commands. We can't use `.commandDir()` because it needs
+ * `$ activity queue ...` commands. We can't use `.commandDir()` because it needs
  * to be backwards-compatible
  */
 
@@ -33,7 +33,7 @@ async function enqueue({
   time = false,
 }) {
   if (subargs.length !== 3) {
-    console.warn('Use format: $ article queue enqueue <activityId> <athleteId> [--time]');
+    console.warn('Use format: $ activity queue enqueue <activityId> <athleteId> [--time]');
     return;
   }
 
@@ -56,7 +56,7 @@ async function enqueue({
 
 async function dequeueOrDelete({ subargs }, shouldDequeue = true) {
   if (subargs.length !== 2) {
-    console.warn(`Use format: $ article queue ${subargs[0]} <activityId>`);
+    console.warn(`Use format: $ activity queue ${subargs[0]} <activityId>`);
     return;
   }
   const success = shouldDequeue
@@ -64,9 +64,9 @@ async function dequeueOrDelete({ subargs }, shouldDequeue = true) {
     : await deleteActivity(subargs[1]);
 
   if (!success) {
-    console.warn(`Failed to ${subargs[0]} activity ${subargs[1]}, see error logs`);
+    console.warn(`Failed to ${subargs[0]} queue activity ${subargs[1]}, see error logs`);
   } else {
-    console.log(`Success: ${subargs[0]}d activity ${subargs[1]}`);
+    console.log(`Success: ${subargs[0]}d queue activity ${subargs[1]}`);
   }
 }
 
@@ -76,7 +76,7 @@ async function update({
   status = false,
 }) {
   if (subargs.length !== 2) {
-    console.warn('Use format: $ article queue update <activityId> <[--status]>');
+    console.warn('Use format: $ activity queue update <activityId> <[--status]>');
     return;
   }
   const newStatus = s || status;
@@ -87,9 +87,9 @@ async function update({
 
   const success = await updateActivityStatus(subargs[1], newStatus);
   if (!success) {
-    console.warn(`Failed to update activity ${subargs[1]} status to ${newStatus}, see error logs`);
+    console.warn(`Failed to update queue activity ${subargs[1]} status to ${newStatus}, see error logs`);
   } else {
-    console.log(`Success: updated activity ${subargs[1]} status to ${newStatus}`);
+    console.log(`Success: Updated queue activity ${subargs[1]} status to ${newStatus}`);
   }
 }
 
@@ -98,7 +98,7 @@ async function ingestOne({
   dryRun: isDryRun = false,
 }) {
   if (subargs.length !== 2) {
-    console.warn('Use format: $ article queue ingest <activityId> <[--dry-run]>');
+    console.warn('Use format: $ activity queue ingest <activityId> <[--dry-run]>');
     return;
   }
   const activityId = subargs[1];
@@ -106,28 +106,28 @@ async function ingestOne({
   // Check that activity doesn't exist in activities collection
   const exists = await Activity.exists({ _id: activityId });
   if (exists) {
-    console.warn(`Activity ${activityId} has already been ingested.`);
+    console.warn(`Queue activity ${activityId} has already been ingested.`);
     return;
   }
 
   // Get doc from queue
   let queueDoc = await QueueActivity.findOne({ activityId });
   if (!queueDoc) {
-    console.warn(`Activity ${activityId} is not in the ingestion queue.`);
+    console.warn(`Queue activity ${activityId} was not found.`);
     return;
   }
 
   // Check doc from queue
   if (queueDoc.status !== 'pending') {
-    console.warn(`Activity ${activityId} has status ${queueDoc.status}. Must be 'pending'`);
+    console.warn(`Queue activity ${activityId} has status ${queueDoc.status}. Must be 'pending'`);
     return;
   }
 
   queueDoc = await processQueueActivity(queueDoc, true); // @todo isDryRun
   if (!queueDoc || !queueDoc.status || !queueDoc.status === 'error') {
-    console.warn(`Failed to ingest activity ${activityId}`);
+    console.warn(`Failed to ingest queue activity ${activityId}`);
   } else {
-    console.log(`activity ${activityId} status after ingest: ${queueDoc.status})`);
+    console.log(`Queue activity ${activityId} status after ingest command: ${queueDoc.status})`);
   }
   console.log(queueDoc.toJSON());
 
@@ -136,7 +136,7 @@ async function ingestOne({
 
 async function doCommand(args) {
   if (!args.queue) {
-    console.warn("You didn't call `$ article queue ...`");
+    console.warn("You didn't call `$ activity queue ...`");
     return;
   }
 

@@ -166,6 +166,6 @@ const argv = require('yargs')
       // await callbackMigrateStats(argv)
     },
   )
-  .command(require('./cli/article'))
+  .command(require('./cli/activity'))
   .help()
   .argv;
