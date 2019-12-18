@@ -13,6 +13,20 @@ const {
   processQueueActivity,
 } = require('../../utils/v2/activityQueue');
 
+async function get({ subargs }) {
+  if (subargs.length !== 2) {
+    console.warn('Use format: $ activity queue get <activityId>');
+    return;
+  }
+
+  const doc = await QueueActivity.findOne({ activityId: subargs[1] });
+  if (doc) {
+    console.log(doc.toJSON());
+  } else {
+    console.warn(`Could not find activity ${subargs[1]} in queue`);
+  }
+}
+
 async function enqueue({
   subargs = [],
   t = false,
@@ -127,6 +141,10 @@ async function doCommand(args) {
   }
 
   switch (args.subargs[0]) {
+    case 'get':
+      await get(args);
+      break;
+
     case 'enqueue':
       await enqueue(args);
       break;
@@ -144,7 +162,7 @@ async function doCommand(args) {
       break;
 
     case 'ingest':
-      await ingestOne(args)
+      await ingestOne(args);
       break;
 
     default:
@@ -156,5 +174,7 @@ module.exports = {
   doCommand,
   enqueue,
   dequeueOrDelete,
+  get,
+  ingestOne,
   update,
 };
