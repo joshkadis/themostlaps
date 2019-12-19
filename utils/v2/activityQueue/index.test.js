@@ -184,7 +184,7 @@ describe('processQueueActivity()', () => {
 
     const final = await processQueueActivity(second);
 
-    expect(final.status).toEqual('success');
+    expect(final.status).toEqual('shouldIngest');
     expect(final.numSegmentEfforts).toEqual(2);
     expect(final.ingestAttempts).toEqual(3);
   });

@@ -185,13 +185,17 @@ async function doIngestOne({
     return;
   }
 
-  queueDoc = await processQueueActivity(queueDoc, true); // @todo isDryRun
+  const { processedQueueDoc } = await processQueueActivity(queueDoc, isDryRun);
+  queueDoc = processedQueueDoc;
   if (!queueDoc || !queueDoc.status || !queueDoc.status === 'error') {
     console.warn(`Failed to ingest queue activity ${activityId}`);
   } else {
-    console.log(`Queue activity ${activityId} status after ingest command: ${queueDoc.status})`);
+    console.log(`Queue activity ${activityId} status after ingest command: ${queueDoc.status}`);
   }
   console.log(queueDoc.toJSON());
+  if (isDryRun && queueDoc.status === 'shouldIngest') {
+    console.log('✅ "shouldIngest" is the status we want for a dry run');
+  }
 
   // Handle status as in processQueue() depending on isDryRun
 }

@@ -35,6 +35,7 @@ async function processQueueActivity(queueDoc, isDryRun = false) {
 
   const athleteDoc = await Athlete.findById(athleteId);
   if (!athleteDoc) {
+    console.warn(`Could not find athlete ${athleteId} to ingest queue activity ${activityId}`);
     queueDoc.set({
       status: 'error',
       errorMsg: 'No athleteDoc',
@@ -54,6 +55,7 @@ async function processQueueActivity(queueDoc, isDryRun = false) {
   }
 
   if (!dataForIngest) {
+    console.warn(`No fetchActivity response for activity ${activityId}`);
     queueDoc.set({
       status: 'error',
       errorMsg: 'No fetchActivity response',
@@ -72,13 +74,11 @@ async function processQueueActivity(queueDoc, isDryRun = false) {
   // Look for same number of segment efforts twice in a row
   // Use this as proxy for Strava processing having completed
   if (
-    nextNumSegmentEfforts > 0
-    && nextNumSegmentEfforts === prevNumSegmentEfforts
+    (nextNumSegmentEfforts > 0
+    && nextNumSegmentEfforts === prevNumSegmentEfforts)
+    || isDryRun
   ) {
-    if (isDryRun) {
-      // Dry run, for testing
-      queueDoc.set({ status: 'success' });
-    }
+    queueDoc.set({ status: 'shouldIngest' });
   }
 
   queueDoc.set({
@@ -115,20 +115,21 @@ async function processQueue(isDryRun) {
         processedQueueDoc,
         dataForIngest,
         athleteDoc,
-      } = await processQueueActivity(
-        activityDoc,
-        isDryRun,
-      );
+      } = await processQueueActivity(activityDoc, isDryRun);
 
       if (!isDryRun) {
         let result;
-        if (dataForIngest && athleteDoc) {
+        if (
+          dataForIngest
+          && athleteDoc instanceof Athlete
+          && processedQueueDoc.status === 'shouldIngest'
+        ) {
           result = await ingestActivityFromQueue(dataForIngest, athleteDoc);
         } else {
           result = false;
         }
         const forUpdate = result
-          ? { status: 'success ' }
+          ? { status: 'ingested' }
           : { status: 'error', errorMsg: 'ingestActivity failed' };
         processedQueueDoc.set(forUpdate);
         await processedQueueDoc.save();
