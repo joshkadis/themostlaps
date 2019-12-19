@@ -196,7 +196,7 @@ async function doIngestOne({
 
   // Check that activity doesn't exist in activities collection
   const activityExists = await Activity.exists({ _id: activityId });
-  const queueActivityExists = await Activity.exists({ activityId });
+  const queueActivityExists = await QueueActivity.exists({ activityId });
   if (activityExists || queueActivityExists) {
     if (activityExists) {
       console.warn(`Activity ${activityId} has already been ingested to Activity collection.`);
