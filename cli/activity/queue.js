@@ -234,7 +234,7 @@ async function doCommand(args) {
       break;
 
     default:
-      console.log('You must provide a valid subcommand.');
+      console.error('You must provide a valid subcommand.');
   }
 }
 
