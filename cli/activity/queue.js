@@ -12,7 +12,10 @@ const {
   deleteActivity,
   updateActivityStatus,
 } = require('../../utils/v2/activityQueue/utils');
-const { processQueueActivity } = require('../../utils/v2/activityQueue');
+const {
+  processQueueActivity,
+  cancelActivityQueue,
+} = require('../../utils/v2/activityQueue');
 const { ingestActivityFromQueue } = require('../../utils/v2/activityQueue/ingestActivityFromQueue');
 /**
  * Check for expected number of args
@@ -282,6 +285,10 @@ async function doCommand(args) {
 
     case 'ingest':
       await doIngestOne(args);
+      break;
+
+    case 'cancel':
+      cancelActivityQueue();
       break;
 
     default:

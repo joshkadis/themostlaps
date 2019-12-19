@@ -8,6 +8,8 @@ const {
 const { ingestActivityFromQueue } = require('./ingestActivityFromQueue');
 
 const MAX_INGEST_ATTEMPTS = 8;
+const INGEST_QUEUE_INTERVAL = 30 * 60 * 1000; // 30mins
+const PROCESS_QUEUE_AS_DRY_RUN = true;
 
 /**
  * Process an activity in the queue and return updated document
@@ -175,8 +177,34 @@ function handleActivityWebhook(webhookData) {
   }
 }
 
+/**
+ * Fire up the ingestion queue
+ */
+function initializeActivityQueue() {
+  if (!process.env.INITIALIZE_ACTIVITY_QUEUE) {
+    console.log('Requires env var to intialize activity ingest queue');
+    return;
+  }
+
+  console.log('Initializing activity ingest queue');
+  setInterval(() => {
+    console.log('Beginning activity queue processing run');
+    processQueue(PROCESS_QUEUE_AS_DRY_RUN);
+  }, INGEST_QUEUE_INTERVAL);
+}
+
+/**
+ * Cancel running activity queue
+ */
+function cancelActivityQueue() {
+  console.log(`Canceling a running activity queue is coming soon.
+In the meantime, clear process.env.INITIALIZE_ACTIVITY_QUEUE and restart the Node process.`);
+}
+
 module.exports = {
+  cancelActivityQueue,
   handleActivityWebhook,
+  initializeActivityQueue,
   processQueue,
   processQueueActivity,
 };
