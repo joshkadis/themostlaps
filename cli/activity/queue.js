@@ -195,22 +195,28 @@ async function doIngestOne({
   const activityId = subargs[1];
 
   // Check that activity doesn't exist in activities collection
-  const exists = await Activity.exists({ _id: activityId });
-  if (exists) {
-    console.warn(`Queue activity ${activityId} has already been ingested.`);
+  const activityExists = await Activity.exists({ _id: activityId });
+  const queueActivityExists = await Activity.exists({ activityId });
+  if (activityExists || queueActivityExists) {
+    if (activityExists) {
+      console.warn(`Activity ${activityId} has already been ingested to Activity collection.`);
+    }
+    if (queueActivityExists) {
+      console.warn(`Activity ${activityId} has already been ingested to QueueActivity collection.`);
+    }
     return;
   }
 
   // Get doc from queue
   let queueDoc = await QueueActivity.findOne({ activityId });
   if (!queueDoc) {
-    console.warn(`Queue activity ${activityId} was not found.`);
+    console.warn(`QueueActivity ${activityId} was not found in the QueueActivity collection.`);
     return;
   }
 
   // Check doc from queue
   if (queueDoc.status !== 'pending') {
-    console.warn(`Queue activity ${queueDoc.activityId} has status '${queueDoc.status}'. Must be 'pending'`);
+    console.warn(`QueueActivity ${queueDoc.activityId} has status '${queueDoc.status}'. Must be 'pending'`);
     return;
   }
 
@@ -221,7 +227,7 @@ async function doIngestOne({
   } = await processQueueActivity(queueDoc, isDryRun);
   queueDoc = processedQueueDoc;
 
-  console.log(`Queue activity ${queueDoc.activityId} status after processing: ${queueDoc.status}`);
+  console.log(`QueueActivity ${queueDoc.activityId} status after processing: ${queueDoc.status}`);
 
   // Show result for dry run
   if (isDryRun) {
@@ -238,9 +244,9 @@ async function doIngestOne({
     // eslint-disable-next-line max-len
     queueDoc = await scopedIngestActivityFromQueue(dataForIngest, athleteDoc, queueDoc);
     if (queueDoc.status === 'ingested') {
-      console.log(`✅ Ingested activity ${queueDoc.activityId}`);
+      console.log(`✅ Ingested QueueActivity ${queueDoc.activityId}`);
     } else {
-      console.warn(`🚫 Failed to ingest queue activity ${queueDoc.activityId}`);
+      console.warn(`🚫 Failed to ingest QueueActivity ${queueDoc.activityId}`);
     }
   }
 
