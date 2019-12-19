@@ -199,7 +199,8 @@ describe('processQueueActivity()', () => {
     });
 
     const actual = await processQueueActivity(doc);
-    expect(actual.status).toEqual('dequeued');
+    expect(actual.status).toEqual('error');
+    expect(actual.errorMsg).toEqual("Attempted ingest with status 'dequeued'");
     expect(actual.numSegmentEfforts).toEqual(2);
     expect(actual.ingestAttempts).toEqual(3);
   });
