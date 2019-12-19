@@ -4,6 +4,7 @@ const { fetchActivity } = require('../../refreshAthlete/utils');
 const {
   dequeueActivity,
 } = require('./utils');
+const { ingestActivity } = require('./ingestActivity');
 
 const MAX_INGEST_ATTEMPTS = 8;
 
@@ -16,6 +17,7 @@ const MAX_INGEST_ATTEMPTS = 8;
  */
 async function processQueueActivity(queueDoc, isDryRun = false) {
   if (queueDoc.get('status') !== 'pending') {
+    console.warn(`Attempted to ingest queue activity ${queueDoc.id} with status ${queueDoc.status}`);
     return queueDoc;
   }
 
@@ -33,7 +35,7 @@ async function processQueueActivity(queueDoc, isDryRun = false) {
   try {
     data = await fetchActivity(activityId, athleteDoc);
   } catch (err) {
-    // i think we're ok here
+    // i think we're ok here without doing anything
   }
 
   if (!data) {
@@ -48,16 +50,18 @@ async function processQueueActivity(queueDoc, isDryRun = false) {
     ? data.segment_efforts.length
     : 0;
 
-  // Same number of segment efforts twice in a row
-  // Use as proxy for Strava processing completion
+  // Look for same number of segment efforts twice in a row
+  // Use this as proxy for Strava processing having completed
   if (
     numSegmentEfforts > 0
     && numSegmentEfforts === queueDoc.get('numSegmentEfforts')
   ) {
     if (!isDryRun) {
-      console.log('NOT A DRY RUN!');
-      // refactor refreshAthleteFromActivity to start at this point with data, athleteDoc
-      // set status to 'error' or 'success'
+      const result = ingestActivity(data, athleteDoc);
+      const forUpdate = result
+        ? { status: 'success ' }
+        : { status: 'error', errorMsg: 'ingestActivity failed' };
+      queueDoc.set(forUpdate);
     } else {
       // Mostly for testing
       queueDoc.set({ status: 'success' });
@@ -97,7 +101,7 @@ async function processQueue(isDryRun) {
 
       activity = await processQueueActivity(activity, isDryRun);
       if (!isDryRun) {
-        // @todo Handle status and save, delete if succes, etc.
+        // @todo Handle status and save, delete if success, etc.
         if (activity) {
           await activity.save();
         } else {
