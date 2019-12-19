@@ -102,15 +102,15 @@ async function processQueueActivity(queueDoc) {
  * @param {Bool} isDryRun Default to false
  */
 async function processQueue(isDryRun) {
-  const activities = await QueueActivity.find({
+  const queueActivities = await QueueActivity.find({
     status: 'pending',
   });
 
   // eslint-disable-next-line no-restricted-syntax
-  for await (const activityDoc of activities) {
+  for await (const queueActivityDoc of queueActivities) {
     try {
-      if (activityDoc.ingestAttempts === MAX_INGEST_ATTEMPTS) {
-        await dequeueActivity(activityDoc.id);
+      if (queueActivityDoc.ingestAttempts === MAX_INGEST_ATTEMPTS) {
+        await dequeueActivity(queueActivityDoc.id);
         return;
       }
 
@@ -138,12 +138,13 @@ async function processQueue(isDryRun) {
         processedQueueDoc.set(forUpdate);
         await processedQueueDoc.save();
       }
+
       console.log(`processedQueueActivity() status for ${processedQueueDoc.id}: ${processedQueueDoc.status}`);
     } catch (err) {
       // Error will get sent to Sentry
-      await activityDoc.updateOne({
+      await queueActivityDoc.updateOne({
         status: 'error',
-        errorMsg: `processQueueActivity() failed for activity ${activityDoc.id}`,
+        errorMsg: `processQueueActivity() failed for activity ${queueActivityDoc.id}`,
       });
     }
   }
