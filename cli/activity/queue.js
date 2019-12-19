@@ -5,6 +5,7 @@
 
 const QueueActivity = require('../../schema/QueueActivity');
 const Activity = require('../../schema/Activity');
+const Athlete = require('../../schema/Athlete');
 const {
   enqueueActivity,
   dequeueActivity,
@@ -12,6 +13,7 @@ const {
   updateActivityStatus,
 } = require('../../utils/v2/activityQueue/utils');
 const { processQueueActivity } = require('../../utils/v2/activityQueue');
+const { ingestActivityFromQueue } = require('../../utils/v2/activityQueue/ingestActivityFromQueue');
 /**
  * Check for expected number of args
  * Note that args[0] will be name of subcommand
@@ -28,6 +30,33 @@ function checkNumArgs(args, num, warning) {
     return false;
   }
   return true;
+}
+
+/**
+ * Call ingestActivityFromQueue and update QueueActivity document
+ *
+ * @param {Object} dataForIngest Formatted JSON data to create Activity document
+ * @param {Athlete} athleteDoc
+ * @param {QueueActivity} queueDoc
+ */
+async function scopedIngestActivityFromQueue(
+  dataForIngest,
+  athleteDoc,
+  queueDoc,
+) {
+  let result = false;
+  if (
+    dataForIngest
+    && athleteDoc instanceof Athlete
+    && queueDoc.status === 'shouldIngest'
+  ) {
+    result = await ingestActivityFromQueue(dataForIngest, athleteDoc);
+  }
+  const forUpdate = result
+    ? { status: 'ingested' }
+    : { status: 'error', errorMsg: 'ingestActivity failed' };
+  queueDoc.set(forUpdate);
+  return queueDoc;
 }
 
 /**
@@ -181,23 +210,43 @@ async function doIngestOne({
 
   // Check doc from queue
   if (queueDoc.status !== 'pending') {
-    console.warn(`Queue activity ${activityId} has status ${queueDoc.status}. Must be 'pending'`);
+    console.warn(`Queue activity ${queueDoc.activityId} has status '${queueDoc.status}'. Must be 'pending'`);
     return;
   }
 
-  const { processedQueueDoc } = await processQueueActivity(queueDoc, isDryRun);
+  const {
+    processedQueueDoc,
+    dataForIngest,
+    athleteDoc,
+  } = await processQueueActivity(queueDoc, isDryRun);
   queueDoc = processedQueueDoc;
-  if (!queueDoc || !queueDoc.status || !queueDoc.status === 'error') {
-    console.warn(`Failed to ingest queue activity ${activityId}`);
-  } else {
-    console.log(`Queue activity ${activityId} status after ingest command: ${queueDoc.status}`);
-  }
-  console.log(queueDoc.toJSON());
-  if (isDryRun && queueDoc.status === 'shouldIngest') {
-    console.log('✅ "shouldIngest" is the status we want for a dry run');
+
+  console.log(`Queue activity ${queueDoc.activityId} status after processing: ${queueDoc.status}`);
+
+  // Show result for dry run
+  if (isDryRun) {
+    console.log(processedQueueDoc.toJSON());
+    const indicator = processedQueueDoc.status === 'shouldIngest'
+      ? '✅'
+      : '🚫';
+    console.log(`${indicator} "shouldIngest" is the status we want for a dry run`);
+    return;
   }
 
-  // Handle status as in processQueue() depending on isDryRun
+  // Show result from ingesting to database
+  if (queueDoc.status === 'shouldIngest') {
+    // eslint-disable-next-line max-len
+    queueDoc = await scopedIngestActivityFromQueue(dataForIngest, athleteDoc, queueDoc);
+    if (queueDoc.status === 'ingested') {
+      console.log(`✅ Ingested activity ${queueDoc.activityId}`);
+    } else {
+      console.warn(`🚫 Failed to ingest queue activity ${queueDoc.activityId}`);
+    }
+  }
+
+  // Save and log the final state of QueueActivity document
+  await queueDoc.save();
+  console.log(queueDoc.toJSON());
 }
 
 /**

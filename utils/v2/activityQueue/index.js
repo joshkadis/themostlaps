@@ -26,6 +26,10 @@ async function processQueueActivity(queueDoc, isDryRun = false) {
 
   if (status !== 'pending') {
     console.warn(`Attempted to ingest queue activity ${activityId} with status ${status}`);
+    queueDoc.set({
+      status: 'error',
+      errorMsg: `Attempted ingest with status '${status}'`,
+    });
     return {
       processedQueueDoc: queueDoc,
       dataForIngest: false,
