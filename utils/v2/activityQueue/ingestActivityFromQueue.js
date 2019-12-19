@@ -28,12 +28,12 @@ async function updateAthleteLastRefreshed(athleteDoc, dateTimeStr) {
 /**
  * Validate activity model and save to database
  *
- * @param {Object} activity Formatted data to create Activity
+ * @param {Object} activityData Formatted data to create Activity
  * @param {Bool} isDryRun If true, will validate without saving
- * @return {Document|false}
+ * @return {Document|false} Saved document or false if error
  */
-async function createActivityDocument(activity, isDryRun = false) {
-  const activityDoc = new Activity(activity);
+async function createActivityDocument(activityData, isDryRun = false) {
+  const activityDoc = new Activity(activityData);
   // Mongoose returns error here instead of throwing
   const invalid = activityDoc.validateSync();
   if (invalid) {
@@ -65,7 +65,7 @@ async function createActivityDocument(activity, isDryRun = false) {
  * @param {Bool} isDryRun If true, no DB updates
  * @return {Bool} True if activity was ineligible or ingested. Only false if error.
  */
-async function ingestActivity(
+async function ingestActivityFromQueue(
   rawActivity,
   athleteDoc,
   isDryRun = false,
@@ -76,7 +76,7 @@ async function ingestActivity(
   }
 
   // Check for laps
-  const activityData = getActivityData(rawActivity, true);
+  const activityData = getActivityData(rawActivity);
   if (!activityData.laps) {
     // Activity was processed but has no laps
     return true;
@@ -133,4 +133,4 @@ async function ingestActivity(
   }
 }
 
-module.exports = { ingestActivity };
+module.exports = { ingestActivityFromQueue };

@@ -4,7 +4,7 @@ const { fetchActivity } = require('../../refreshAthlete/utils');
 const {
   dequeueActivity,
 } = require('./utils');
-const { ingestActivity } = require('./ingestActivity');
+const { ingestActivityFromQueue } = require('./ingestActivityFromQueue');
 
 const MAX_INGEST_ATTEMPTS = 8;
 
@@ -13,16 +13,23 @@ const MAX_INGEST_ATTEMPTS = 8;
  *
  * @param {QueueActivity} queueDoc QueueActivity document
  * @param {Bool} isDryRun Default to false
- * @return {QueueActivity}
+ * @return {QueueActivity} queueDoc with updated properties
  */
 async function processQueueActivity(queueDoc, isDryRun = false) {
-  if (queueDoc.get('status') !== 'pending') {
-    console.warn(`Attempted to ingest queue activity ${queueDoc.id} with status ${queueDoc.status}`);
+  const {
+    activityId,
+    athleteId,
+    status,
+    numSegmentEfforts: prevNumSegmentEfforts = 0,
+    ingestAttempts: prevIngestAttempts = 0,
+  } = queueDoc;
+
+  if (status !== 'pending') {
+    console.warn(`Attempted to ingest queue activity ${activityId} with status ${status}`);
     return queueDoc;
   }
 
-  const activityId = queueDoc.get('activityId');
-  const athleteDoc = await Athlete.findById(queueDoc.get('athleteId'));
+  const athleteDoc = await Athlete.findById(athleteId);
   if (!athleteDoc) {
     queueDoc.set({
       status: 'error',
@@ -31,14 +38,14 @@ async function processQueueActivity(queueDoc, isDryRun = false) {
     return queueDoc;
   }
 
-  let data = false;
+  let dataForIngest = false;
   try {
-    data = await fetchActivity(activityId, athleteDoc);
+    dataForIngest = await fetchActivity(activityId, athleteDoc);
   } catch (err) {
     // i think we're ok here without doing anything
   }
 
-  if (!data) {
+  if (!dataForIngest) {
     queueDoc.set({
       status: 'error',
       errorMsg: 'No fetchActivity response',
@@ -46,39 +53,32 @@ async function processQueueActivity(queueDoc, isDryRun = false) {
     return queueDoc;
   }
 
-  const numSegmentEfforts = data.segment_efforts
-    ? data.segment_efforts.length
+  const nextNumSegmentEfforts = dataForIngest.segment_efforts
+    ? dataForIngest.segment_efforts.length
     : 0;
 
   // Look for same number of segment efforts twice in a row
   // Use this as proxy for Strava processing having completed
   if (
-    numSegmentEfforts > 0
-    && numSegmentEfforts === queueDoc.get('numSegmentEfforts')
+    nextNumSegmentEfforts > 0
+    && nextNumSegmentEfforts === prevNumSegmentEfforts
   ) {
-    if (!isDryRun) {
-      const result = ingestActivity(data, athleteDoc);
-      const forUpdate = result
-        ? { status: 'success ' }
-        : { status: 'error', errorMsg: 'ingestActivity failed' };
-      queueDoc.set(forUpdate);
-    } else {
-      // Mostly for testing
+    if (isDryRun) {
+      // Dry run, for testing
       queueDoc.set({ status: 'success' });
     }
   }
 
-  const ingestAttempts = queueDoc.get('ingestAttempts')
-    ? queueDoc.get('ingestAttempts') + 1
-    : 1;
-
   queueDoc.set({
-    numSegmentEfforts,
+    numSegmentEfforts: nextNumSegmentEfforts,
     lastAttemptedAt: Date.now(),
-    ingestAttempts,
+    ingestAttempts: prevIngestAttempts + 1,
   });
-
-  return queueDoc;
+  return {
+    processedQueueDoc: queueDoc,
+    dataForIngest,
+    athleteDoc,
+  };
 }
 
 /**
@@ -92,24 +92,36 @@ async function processQueue(isDryRun) {
   });
 
   // eslint-disable-next-line no-restricted-syntax
-  for await (let activity of activities) {
+  for await (const activityDoc of activities) {
     try {
-      if (activity.get('ingestAttempts') === MAX_INGEST_ATTEMPTS) {
-        dequeueActivity(activity);
+      if (activityDoc.ingestAttempts === MAX_INGEST_ATTEMPTS) {
+        await dequeueActivity(activityDoc.id);
         return;
       }
 
-      activity = await processQueueActivity(activity, isDryRun);
+      const {
+        processedQueueDoc,
+        dataForIngest,
+        athleteDoc,
+      } = await processQueueActivity(
+        activityDoc,
+        isDryRun,
+      );
       if (!isDryRun) {
-        // @todo Handle status and save, delete if success, etc.
-        if (activity) {
-          await activity.save();
-        } else {
-          dequeueActivity(activity);
-        }
+        const result = await ingestActivityFromQueue(dataForIngest, athleteDoc);
+        const forUpdate = result
+          ? { status: 'success ' }
+          : { status: 'error', errorMsg: 'ingestActivity failed' };
+        processedQueueDoc.set(forUpdate);
+        await processedQueueDoc.save();
       }
+      console.log(`processedQueueActivity() status for ${processedQueueDoc.id}: ${processedQueueDoc.status}`);
     } catch (err) {
       // Error will get sent to Sentry
+      await activityDoc.update({
+        status: 'error',
+        errorMsg: `processQueueActivity() failed for activity ${activityDoc.id}`,
+      });
     }
   }
 }
