@@ -14,13 +14,30 @@ const {
 } = require('../../utils/v2/activityQueue');
 
 /**
+ * Check for expected number of args
+ * Note that args[0] will be name of subcommand
+ * args[1]... will be the actual arguments
+ *
+ * @param {Array} args
+ * @param {Integer} num Expected number of args
+ * @param {String} warning Text for warning if wrong number of args
+ * @return {Bool}
+ */
+function checkNumArgs(args, num, warning) {
+  if (args.length !== num) {
+    console.warn(`Use format: $ activity queue ${warning}`);
+    return false;
+  }
+  return true;
+}
+
+/**
  * Display info for a queued activity
  *
  * @param {Integer} args.subargs[1] Activity ID
  */
-async function get({ subargs }) {
-  if (subargs.length !== 2) {
-    console.warn('Use format: $ activity queue get <activityId>');
+async function doGet({ subargs }) {
+  if (!checkNumArgs(subargs, 2, 'get <activityId>')) {
     return;
   }
 
@@ -39,13 +56,12 @@ async function get({ subargs }) {
  * @param {Integer} args.subargs[2] Athlete ID
  * @param {Integer} args.time Option timestamp in MS to set as createdAt
  */
-async function enqueue({
+async function doEnqueue({
   subargs = [],
   t = false,
   time = false,
 }) {
-  if (subargs.length !== 3) {
-    console.warn('Use format: $ activity queue enqueue <activityId> <athleteId> [--time]');
+  if (!checkNumArgs(subargs, 3, 'enqueue <activityId> <athleteId> [--time]')) {
     return;
   }
 
@@ -71,9 +87,8 @@ async function enqueue({
  *
  * @param {Integer} args.subargs[1] Activity ID
  */
-async function dequeue({ subargs }) {
-  if (subargs.length !== 2) {
-    console.warn('Use format: $ activity queue dequeue <activityId>');
+async function doDequeue({ subargs }) {
+  if (!checkNumArgs(subargs, 2, 'dequeue <activityId>')) {
     return;
   }
 
@@ -91,9 +106,8 @@ async function dequeue({ subargs }) {
  *
  * @param {Integer} args.subargs[1] Activity ID
  */
-async function delete({ subargs }) {
-  if (subargs.length !== 2) {
-    console.warn('Use format: $ activity queue dequeue <activityId>');
+async function doDelete({ subargs }) {
+  if (!checkNumArgs(subargs, 2, 'delete <activityId>')) {
     return;
   }
 
@@ -113,15 +127,15 @@ async function delete({ subargs }) {
  * @param {Integer} args.subargs[1] Activity ID
  * @param {String} args.status New status
  */
-async function update({
+async function doUpdate({
   subargs = [],
   s = false,
   status = false,
 }) {
-  if (subargs.length !== 2) {
-    console.warn('Use format: $ activity queue update <activityId> <[--status]>');
+  if (!checkNumArgs(subargs, 2, 'update <activityId> <[--status]>')) {
     return;
   }
+
   const newStatus = s || status;
   if (!newStatus) {
     console.warn('Requires argument -s or --status');
@@ -142,14 +156,14 @@ async function update({
  * @param {Integer} args.subargs[1] Activity ID
  * @param {String} args.dryRun If true, will process without DB updates
  */
-async function ingestOne({
+async function doIngestOne({
   subargs,
   dryRun: isDryRun = false,
 }) {
-  if (subargs.length !== 2) {
-    console.warn('Use format: $ activity queue ingest <activityId> <[--dry-run]>');
+  if (!checkNumArgs(subargs, 2, 'ingest <activityId> <[--dry-run]>')) {
     return;
   }
+
   const activityId = subargs[1];
 
   // Check that activity doesn't exist in activities collection
@@ -196,27 +210,27 @@ async function doCommand(args) {
 
   switch (args.subargs[0]) {
     case 'get':
-      await get(args);
+      await doGet(args);
       break;
 
     case 'enqueue':
-      await enqueue(args);
+      await doEnqueue(args);
       break;
 
     case 'dequeue':
-      await dequeue(args);
+      await doDequeue(args);
       break;
 
     case 'delete':
-      await delete(args);
+      await doDelete(args);
       break;
 
     case 'update':
-      await update(args);
+      await doUpdate(args);
       break;
 
     case 'ingest':
-      await ingestOne(args);
+      await doIngestOne(args);
       break;
 
     default:
@@ -226,9 +240,10 @@ async function doCommand(args) {
 
 module.exports = {
   doCommand,
-  enqueue,
-  dequeueOrDelete,
-  get,
-  ingestOne,
-  update,
+  doEnqueue,
+  doDequeue,
+  doDelete,
+  doGet,
+  doIngestOne,
+  doUpdate,
 };
