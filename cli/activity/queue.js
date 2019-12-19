@@ -12,7 +12,10 @@ const {
   deleteActivity,
   updateActivityStatus,
 } = require('../../utils/v2/activityQueue/utils');
-const { processQueueActivity } = require('../../utils/v2/activityQueue');
+const {
+  processQueueActivity,
+  cancelActivityQueue,
+} = require('../../utils/v2/activityQueue');
 const { ingestActivityFromQueue } = require('../../utils/v2/activityQueue/ingestActivityFromQueue');
 /**
  * Check for expected number of args
@@ -217,12 +220,12 @@ async function doIngestOne({
     processedQueueDoc,
     dataForIngest,
     athleteDoc,
-  } = await processQueueActivity(queueDoc, isDryRun);
+  } = await processQueueActivity(queueDoc);
   queueDoc = processedQueueDoc;
 
   console.log(`QueueActivity ${queueDoc.activityId} status after processing: ${queueDoc.status}`);
 
-  // Show result for dry run
+  // Show result for dry run then exit
   if (isDryRun) {
     console.log(processedQueueDoc.toJSON());
     const indicator = processedQueueDoc.status === 'shouldIngest'
@@ -282,6 +285,10 @@ async function doCommand(args) {
 
     case 'ingest':
       await doIngestOne(args);
+      break;
+
+    case 'cancel':
+      cancelActivityQueue();
       break;
 
     default:

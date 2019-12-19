@@ -3,6 +3,7 @@ const refreshAthleteFromActivity = require('../utils/refreshAthlete/refreshAthle
 const { removeAthlete } = require('../utils/athleteUtils');
 const refreshAthleteProfile = require('../utils/refreshAthlete/refreshAthleteProfile');
 const { isLocalEnv } = require('../utils/envUtils');
+const { handleActivityWebhook } = require('../utils/v2/activityQueue');
 
 const ACTIVITY_WEBHOOK_DELAY = isLocalEnv()
   ? 10000 // 10s for local dev
@@ -114,6 +115,13 @@ async function handleEvent(req, res) {
     } = req.body;
 
     console.log(`Received webhook: ${aspect_type} | ${object_type} | ${object_id} | ${owner_id}`);
+
+    /*
+      Currently testing
+    */
+    if (object_type === 'activity') {
+      handleActivityWebhook(req.body);
+    }
 
     if (object_type === 'athlete') {
       slackSuccess('Received athlete webhook', req.body);

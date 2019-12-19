@@ -9,6 +9,7 @@ const { scheduleNightlyRefresh } = require('./utils/scheduleNightlyRefresh');
 const { defaultLocation } = require('./config');
 const { mongooseConnectionOptions } = require('./config/mongodb');
 const { initSentry } = require('./utils/v2/services/sentry');
+const { initializeActivityQueue } = require('./utils/v2/activityQueue');
 
 // Route handlers
 const handleSignupCallback = require('./server/handleSignupCallback');
@@ -126,6 +127,7 @@ app.prepare()
         if (!process.env.DISABLE_NIGHTLY_REFRESH) {
           scheduleNightlyRefresh();
         }
+        initializeActivityQueue();
       });
     });
   })
