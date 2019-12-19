@@ -200,20 +200,16 @@ async function doIngestOne({
     console.warn(`Activity ${activityId} already exists in the Activity collection.`);
   }
 
-  // Get doc from queue
+  // Get doc from queue and check eligibility
   let queueDoc = await QueueActivity.findOne({ activityId });
   if (!queueDoc) {
     console.warn(`QueueActivity ${activityId} was not found in the QueueActivity collection.`);
+  } else if (queueDoc.status !== 'pending') {
+    console.warn(`QueueActivity ${queueDoc.activityId} has status '${queueDoc.status}'. Must be 'pending'`);
   }
 
   // Goodbye if activity is not enqueued or already in Activity collection
-  if (!queueDoc || activityExists) {
-    return;
-  }
-
-  // Check doc from queue
-  if (queueDoc.status !== 'pending') {
-    console.warn(`QueueActivity ${queueDoc.activityId} has status '${queueDoc.status}'. Must be 'pending'`);
+  if (!queueDoc || activityExists || queueDoc.status !== 'pending') {
     return;
   }
 
