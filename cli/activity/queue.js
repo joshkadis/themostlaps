@@ -196,21 +196,18 @@ async function doIngestOne({
 
   // Check that activity doesn't exist in activities collection
   const activityExists = await Activity.exists({ _id: activityId });
-  const queueActivityExists = await QueueActivity.exists({ activityId });
-  if (activityExists || queueActivityExists) {
-    if (activityExists) {
-      console.warn(`Activity ${activityId} has already been ingested to Activity collection.`);
-    }
-    if (queueActivityExists) {
-      console.warn(`Activity ${activityId} has already been ingested to QueueActivity collection.`);
-    }
-    return;
+  if (activityExists) {
+    console.warn(`Activity ${activityId} already exists in the Activity collection.`);
   }
 
   // Get doc from queue
   let queueDoc = await QueueActivity.findOne({ activityId });
   if (!queueDoc) {
     console.warn(`QueueActivity ${activityId} was not found in the QueueActivity collection.`);
+  }
+
+  // Goodbye if activity is not enqueued or already in Activity collection
+  if (!queueDoc || activityExists) {
     return;
   }
 
