@@ -26,7 +26,11 @@ async function processQueueActivity(queueDoc, isDryRun = false) {
 
   if (status !== 'pending') {
     console.warn(`Attempted to ingest queue activity ${activityId} with status ${status}`);
-    return queueDoc;
+    return {
+      processedQueueDoc: queueDoc,
+      dataForIngest: false,
+      athleteDoc: false,
+    };
   }
 
   const athleteDoc = await Athlete.findById(athleteId);
@@ -35,7 +39,11 @@ async function processQueueActivity(queueDoc, isDryRun = false) {
       status: 'error',
       errorMsg: 'No athleteDoc',
     });
-    return queueDoc;
+    return {
+      processedQueueDoc: queueDoc,
+      dataForIngest: false,
+      athleteDoc: false,
+    };
   }
 
   let dataForIngest = false;
@@ -50,7 +58,11 @@ async function processQueueActivity(queueDoc, isDryRun = false) {
       status: 'error',
       errorMsg: 'No fetchActivity response',
     });
-    return queueDoc;
+    return {
+      processedQueueDoc: queueDoc,
+      dataForIngest: false,
+      athleteDoc: false,
+    };
   }
 
   const nextNumSegmentEfforts = dataForIngest.segment_efforts
@@ -107,8 +119,14 @@ async function processQueue(isDryRun) {
         activityDoc,
         isDryRun,
       );
+
       if (!isDryRun) {
-        const result = await ingestActivityFromQueue(dataForIngest, athleteDoc);
+        let result;
+        if (dataForIngest && athleteDoc) {
+          result = await ingestActivityFromQueue(dataForIngest, athleteDoc);
+        } else {
+          result = false;
+        }
         const forUpdate = result
           ? { status: 'success ' }
           : { status: 'error', errorMsg: 'ingestActivity failed' };

@@ -9,10 +9,13 @@ const { processQueueActivity: __processQueueActivity } = require('./');
 const { fetchActivity } = require('../../refreshAthlete/utils');
 
 // Always call with isDryRun = true
-const processQueueActivity = (queueDoc) => __processQueueActivity(
-  queueDoc,
-  true,
-);
+const processQueueActivity = async (queueDoc) => {
+  const processed = await __processQueueActivity(
+    queueDoc,
+    true,
+  );
+  return processed.processedQueueDoc;
+};
 
 // Mocks
 Athlete.findById.mockImplementation(async () => 'true');
@@ -194,6 +197,7 @@ describe('processQueueActivity()', () => {
       ingestAttempts: 3,
       status: 'dequeued',
     });
+
     const actual = await processQueueActivity(doc);
     expect(actual.status).toEqual('dequeued');
     expect(actual.numSegmentEfforts).toEqual(2);
