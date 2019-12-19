@@ -1,6 +1,6 @@
 /**
- * `$ activity queue ...` commands. Probably can't use `.commandDir()`
- * because our CLI needs to be backwards-compatible
+ * `$ activity queue ...` commands. I don't think we can use
+ * `.commandDir()` because our CLI needs to be backwards-compatible
  */
 
 const QueueActivity = require('../../schema/QueueActivity');
