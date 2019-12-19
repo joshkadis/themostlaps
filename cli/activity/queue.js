@@ -10,9 +10,8 @@ const {
   dequeueActivity,
   deleteActivity,
   updateActivityStatus,
-  processQueueActivity,
-} = require('../../utils/v2/activityQueue');
-
+} = require('../../utils/v2/activityQueue/utils');
+const { processQueueActivity } = require('../../utils/v2/activityQueue');
 /**
  * Check for expected number of args
  * Note that args[0] will be name of subcommand
@@ -92,7 +91,7 @@ async function doDequeue({ subargs }) {
     return;
   }
 
-  const success = dequeueActivity(subargs[1]);
+  const success = await dequeueActivity(subargs[1]);
 
   if (!success) {
     console.warn(`Failed to dequeue queue activity ${subargs[1]}, see error logs`);
@@ -111,7 +110,7 @@ async function doDelete({ subargs }) {
     return;
   }
 
-  const success = deleteActivity(subargs[1]);
+  const success = await deleteActivity(subargs[1]);
 
   if (!success) {
     console.warn(`Failed to delete queue activity ${subargs[1]}, see error logs`);
