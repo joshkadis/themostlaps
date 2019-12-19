@@ -13,10 +13,9 @@ const MAX_INGEST_ATTEMPTS = 8;
  * Process an activity in the queue and return updated document
  *
  * @param {QueueActivity} queueDoc QueueActivity document
- * @param {Bool} isDryRun Default to false
  * @return {QueueActivity} queueDoc with updated properties
  */
-async function processQueueActivity(queueDoc, isDryRun = false) {
+async function processQueueActivity(queueDoc) {
   const {
     activityId,
     athleteId,
@@ -79,9 +78,8 @@ async function processQueueActivity(queueDoc, isDryRun = false) {
   // Look for same number of segment efforts twice in a row
   // Use this as proxy for Strava processing having completed
   if (
-    (nextNumSegmentEfforts > 0
-    && nextNumSegmentEfforts === prevNumSegmentEfforts)
-    || isDryRun
+    nextNumSegmentEfforts > 0
+    && nextNumSegmentEfforts === prevNumSegmentEfforts
   ) {
     queueDoc.set({ status: 'shouldIngest' });
   }
@@ -120,8 +118,9 @@ async function processQueue(isDryRun) {
         processedQueueDoc,
         dataForIngest,
         athleteDoc,
-      } = await processQueueActivity(activityDoc, isDryRun);
+      } = await processQueueActivity(queueActivityDoc);
 
+      // Ingest QueueActivity to Activity
       if (!isDryRun) {
         let result;
         if (

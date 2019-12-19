@@ -217,12 +217,12 @@ async function doIngestOne({
     processedQueueDoc,
     dataForIngest,
     athleteDoc,
-  } = await processQueueActivity(queueDoc, isDryRun);
+  } = await processQueueActivity(queueDoc);
   queueDoc = processedQueueDoc;
 
   console.log(`QueueActivity ${queueDoc.activityId} status after processing: ${queueDoc.status}`);
 
-  // Show result for dry run
+  // Show result for dry run then exit
   if (isDryRun) {
     console.log(processedQueueDoc.toJSON());
     const indicator = processedQueueDoc.status === 'shouldIngest'
