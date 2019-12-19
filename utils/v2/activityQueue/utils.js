@@ -11,7 +11,7 @@ async function updateActivityStatus(activity, status) {
   let success = false;
   try {
     if (activity instanceof QueueActivity) {
-      success = await activity.update({
+      success = await activity.updateOne({
         status,
       });
     } else {

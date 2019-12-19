@@ -141,7 +141,7 @@ async function processQueue(isDryRun) {
       console.log(`processedQueueActivity() status for ${processedQueueDoc.id}: ${processedQueueDoc.status}`);
     } catch (err) {
       // Error will get sent to Sentry
-      await activityDoc.update({
+      await activityDoc.updateOne({
         status: 'error',
         errorMsg: `processQueueActivity() failed for activity ${activityDoc.id}`,
       });
