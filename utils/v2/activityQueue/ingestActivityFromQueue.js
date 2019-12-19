@@ -19,7 +19,7 @@ const { getEpochSecondsFromDateObj } = require('../../athleteUtils');
  */
 async function updateAthleteLastRefreshed(athleteDoc, dateTimeStr) {
   const startDate = new Date(dateTimeStr); // UTC
-  const result = await athleteDoc.update({
+  const result = await athleteDoc.updateOne({
     last_refreshed: getEpochSecondsFromDateObj(startDate),
   });
   return result && result.nModified;
