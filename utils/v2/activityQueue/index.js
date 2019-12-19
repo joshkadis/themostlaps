@@ -2,6 +2,7 @@ const QueueActivity = require('../../../schema/QueueActivity');
 const Athlete = require('../../../schema/Athlete');
 const { fetchActivity } = require('../../refreshAthlete/utils');
 const {
+  enqueueActivity,
   dequeueActivity,
 } = require('./utils');
 const { ingestActivityFromQueue } = require('./ingestActivityFromQueue');
@@ -149,7 +150,33 @@ async function processQueue(isDryRun) {
   }
 }
 
+/**
+ * Handle incoming webhook to enqueue or dequeue activity
+ *
+ * @param {Object} webhookData Ssee https://developers.strava.com/docs/webhooks/
+ */
+function handleActivityWebhook(webhookData) {
+  const {
+    object_type,
+    aspect_type,
+    object_id,
+  } = webhookData;
+
+  // Sanity check
+  if (object_type !== 'activity') {
+    return;
+  }
+
+  if (aspect_type === 'create') {
+    enqueueActivity(webhookData);
+  } else if (aspect_type === 'delete') {
+    // @todo Use deleteActivity() after testing is complete
+    dequeueActivity(object_id);
+  }
+}
+
 module.exports = {
+  handleActivityWebhook,
   processQueue,
   processQueueActivity,
 };
