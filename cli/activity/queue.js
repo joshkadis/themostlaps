@@ -1,6 +1,6 @@
 /**
- * `$ activity queue ...` commands. We can't use `.commandDir()` because it needs
- * to be backwards-compatible
+ * `$ activity queue ...` commands. Probably can't use `.commandDir()`
+ * because our CLI needs to be backwards-compatible
  */
 
 const QueueActivity = require('../../schema/QueueActivity');
@@ -13,6 +13,11 @@ const {
   processQueueActivity,
 } = require('../../utils/v2/activityQueue');
 
+/**
+ * Display info for a queued activity
+ *
+ * @param {Integer} args.subargs[1] Activity ID
+ */
 async function get({ subargs }) {
   if (subargs.length !== 2) {
     console.warn('Use format: $ activity queue get <activityId>');
@@ -27,6 +32,13 @@ async function get({ subargs }) {
   }
 }
 
+/**
+ * Adds an activity to queue with 'pending' status
+ *
+ * @param {Integer} args.subargs[1] Activity ID
+ * @param {Integer} args.subargs[2] Athlete ID
+ * @param {Integer} args.time Option timestamp in MS to set as createdAt
+ */
 async function enqueue({
   subargs = [],
   t = false,
@@ -54,22 +66,53 @@ async function enqueue({
   }
 }
 
-async function dequeueOrDelete({ subargs }, shouldDequeue = true) {
+/**
+ * Set queue activity's status to 'dequeued'
+ *
+ * @param {Integer} args.subargs[1] Activity ID
+ */
+async function dequeue({ subargs }) {
   if (subargs.length !== 2) {
-    console.warn(`Use format: $ activity queue ${subargs[0]} <activityId>`);
+    console.warn('Use format: $ activity queue dequeue <activityId>');
     return;
   }
-  const success = shouldDequeue
-    ? await dequeueActivity(subargs[1])
-    : await deleteActivity(subargs[1]);
+
+  const success = dequeueActivity(subargs[1]);
 
   if (!success) {
-    console.warn(`Failed to ${subargs[0]} queue activity ${subargs[1]}, see error logs`);
+    console.warn(`Failed to dequeue queue activity ${subargs[1]}, see error logs`);
   } else {
-    console.log(`Success: ${subargs[0]}d queue activity ${subargs[1]}`);
+    console.log(`Success: dequeued queue activity ${subargs[1]}`);
   }
 }
 
+/**
+ * Delete activity from ingestion queue
+ *
+ * @param {Integer} args.subargs[1] Activity ID
+ */
+async function delete({ subargs }) {
+  if (subargs.length !== 2) {
+    console.warn('Use format: $ activity queue dequeue <activityId>');
+    return;
+  }
+
+  const success = deleteActivity(subargs[1]);
+
+  if (!success) {
+    console.warn(`Failed to delete queue activity ${subargs[1]}, see error logs`);
+  } else {
+    console.log(`Success: delete queue activity ${subargs[1]}`);
+  }
+}
+
+/**
+ * Change status of activity ingestion queue.
+ * See schema/QueueActivity fo valid statuses
+ *
+ * @param {Integer} args.subargs[1] Activity ID
+ * @param {String} args.status New status
+ */
 async function update({
   subargs = [],
   s = false,
@@ -93,6 +136,12 @@ async function update({
   }
 }
 
+/**
+ * Ingest an enqueued activity to the activities collection
+ *
+ * @param {Integer} args.subargs[1] Activity ID
+ * @param {String} args.dryRun If true, will process without DB updates
+ */
 async function ingestOne({
   subargs,
   dryRun: isDryRun = false,
@@ -134,6 +183,11 @@ async function ingestOne({
   // Handle status as in processQueue() depending on isDryRun
 }
 
+/**
+ * Handle a CLI command like `$ article queue...`
+ *
+ * @param {Object} args From yargs
+ */
 async function doCommand(args) {
   if (!args.queue) {
     console.warn("You didn't call `$ activity queue ...`");
@@ -150,11 +204,11 @@ async function doCommand(args) {
       break;
 
     case 'dequeue':
-      await dequeueOrDelete(args, true);
+      await dequeue(args);
       break;
 
     case 'delete':
-      await dequeueOrDelete(args, false);
+      await delete(args);
       break;
 
     case 'update':

@@ -138,7 +138,7 @@ async function processQueueActivity(queueDoc, isDryRun = false) {
     && numSegmentEfforts === queueDoc.get('numSegmentEfforts')
   ) {
     if (!isDryRun) {
-      console.log(`NOT A DRY RUN!`);
+      console.log('NOT A DRY RUN!');
       // refactor refreshAthleteFromActivity to start at this point with data, athleteDoc
       // set status to 'error' or 'success'
     } else {
