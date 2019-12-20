@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 const Activity = require('../../../schema/Activity');
 const {
   activityCouldHaveLaps,
@@ -27,24 +26,14 @@ async function updateAthleteLastRefreshed(athleteDoc, dateTimeStr) {
 }
 
 /**
- * Validate activity document and save to database
- * Will update existing document if one exists
+ * Create Activity document, validate, and save
  *
  * @param {Object} activityData Formatted data to create Activity
  * @param {Bool} isDryRun If true, will validate without saving
  * @return {Document|false} Saved document or false if error
  */
 async function createActivityDocument(activityData, isDryRun = false) {
-  const { _id: activityId, ...forUpdate } = activityData;
-  let activityDoc = await Activity.findById(activityId);
-  if (activityDoc) {
-    console.log(`Activity ${activityId} already exists, updating.`);
-    activityDoc.set(forUpdate);
-  } else {
-    console.log(`Creating new Activity for ${activityId}.`);
-    activityDoc = new Activity(activityData);
-  }
-
+  const activityDoc = new Activity(activityData);
   // Mongoose returns error here instead of throwing
   const invalid = activityDoc.validateSync();
   if (invalid) {
@@ -81,6 +70,15 @@ async function ingestActivityFromQueue(
   athleteDoc,
   isDryRun = false,
 ) {
+  const exists = await Activity.exists({ _id: rawActivity.id });
+  if (exists) {
+    console.log(`Activity ${rawActivity.id} already exists in activities collection`);
+    /*
+      Hack to return more than two boolean statuses.
+      @todo return 0 instead of true, 1 instead of false
+    */
+    return 2;
+  }
   // Check eligibility
   if (!activityCouldHaveLaps(rawActivity, true)) {
     return true;

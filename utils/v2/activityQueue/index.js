@@ -125,6 +125,11 @@ async function handleProcessingResult({
       dataForIngest,
       athleteDoc,
     );
+    // Hacky response
+    if (ingestResult === 2) {
+      return { status: 'dequeued', errorMsg: 'Already exists in Activity collection' };
+    }
+
     return ingestResult
       ? { status: 'ingested', errorMsg: '' }
       : { status: 'error', errorMsg: 'ingestActivityFromQueue() failed' };
