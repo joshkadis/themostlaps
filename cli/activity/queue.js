@@ -262,6 +262,21 @@ async function doProcessQueue({ dryRun: isDryRun = false }) {
 }
 
 /**
+ * Reset activity to original pending state
+ */
+async function doReset({ subargs }) {
+  const doc = await QueueActivity.findOne({ activityId: subargs[1] });
+  if (!doc) {
+    console.log(`Could not find QueueActivity ${subargs[1]}`);
+  }
+  await deleteActivity(subargs[1]);
+  await enqueueActivity({
+    object_id: doc.activityId,
+    owner_id: doc.athleteId,
+  });
+}
+
+/**
  * Handle a CLI command like `$ article queue...`
  *
  * @param {Object} args From yargs
@@ -283,6 +298,10 @@ async function doCommand(args) {
 
     case 'dequeue':
       await doDequeue(args);
+      break;
+
+    case 'reset':
+      await doReset(args);
       break;
 
     case 'delete':
