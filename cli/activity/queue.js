@@ -115,7 +115,7 @@ async function doEnqueue({
 }
 
 /**
- * Set queue activity's status to 'dequeued'
+ * Set QueueActivity's status to 'dequeued'
  *
  * @param {Integer} args.subargs[1] Activity ID
  */
@@ -127,9 +127,9 @@ async function doDequeue({ subargs }) {
   const success = await dequeueActivity(subargs[1]);
 
   if (!success) {
-    console.warn(`Failed to dequeue queue activity ${subargs[1]}, see error logs`);
+    console.warn(`Failed to dequeue QueueActivity ${subargs[1]}, see error logs`);
   } else {
-    console.log(`Success: dequeued queue activity ${subargs[1]}`);
+    console.log(`Success: dequeued QueueActivity ${subargs[1]}`);
   }
 }
 
@@ -146,9 +146,9 @@ async function doDelete({ subargs }) {
   const success = await deleteActivity(subargs[1]);
 
   if (!success) {
-    console.warn(`Failed to delete queue activity ${subargs[1]}, see error logs`);
+    console.warn(`Failed to delete QueueActivity ${subargs[1]}, see error logs`);
   } else {
-    console.log(`Success: delete queue activity ${subargs[1]}`);
+    console.log(`Success: delete QueueActivity ${subargs[1]}`);
   }
 }
 
@@ -176,9 +176,9 @@ async function doUpdate({
 
   const success = await updateActivityStatus(subargs[1], newStatus);
   if (!success) {
-    console.warn(`Failed to update queue activity ${subargs[1]} status to ${newStatus}, see error logs`);
+    console.warn(`Failed to update QueueActivity ${subargs[1]} status to ${newStatus}, see error logs`);
   } else {
-    console.log(`Success: Updated queue activity ${subargs[1]} status to ${newStatus}`);
+    console.log(`Success: Updated QueueActivity ${subargs[1]} status to ${newStatus}`);
   }
 }
 
@@ -269,11 +269,22 @@ async function doReset({ subargs }) {
   if (!doc) {
     console.log(`Could not find QueueActivity ${subargs[1]}`);
   }
-  await deleteActivity(subargs[1]);
-  await enqueueActivity({
+  const deleted = await deleteActivity(subargs[1]);
+  if (!deleted) {
+    console.warn(`Failed to delete QueueActivity ${subargs[1]}, see error logs`);
+    return;
+  }
+
+
+  const enqueued = await enqueueActivity({
     object_id: doc.activityId,
     owner_id: doc.athleteId,
   });
+  if (!enqueued) {
+    console.warn(`Failed to enqueue QueueActivity ${doc.activityId}, see error logs`);
+  } else {
+    console.log(`Enqueued QueueActivity ${doc.activityId} for athlete ${doc.athleteId}`);
+  }
 }
 
 /**

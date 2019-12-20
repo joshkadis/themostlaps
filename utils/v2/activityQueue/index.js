@@ -160,7 +160,8 @@ async function processQueue(isDryRun) {
   for await (const queueActivityDoc of queueActivities) {
     try {
       if (queueActivityDoc.ingestAttempts === MAX_INGEST_ATTEMPTS) {
-        await dequeueActivity(queueActivityDoc.id);
+        console.log(`Reached MAX_INGEST_ATTEMPTS for QueueActivity ${queueActivityDoc.activityId}`);
+        await dequeueActivity(queueActivityDoc.activityId);
         break;
       }
 
