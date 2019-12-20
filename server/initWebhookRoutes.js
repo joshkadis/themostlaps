@@ -1,15 +1,7 @@
 const { slackError, slackSuccess } = require('../utils/slackNotification');
-const refreshAthleteFromActivity = require('../utils/refreshAthlete/refreshAthleteFromActivity');
 const { removeAthlete } = require('../utils/athleteUtils');
 const refreshAthleteProfile = require('../utils/refreshAthlete/refreshAthleteProfile');
-const { isLocalEnv } = require('../utils/envUtils');
 const { handleActivityWebhook } = require('../utils/v2/activityQueue');
-
-const ACTIVITY_WEBHOOK_DELAY = isLocalEnv()
-  ? 10000 // 10s for local dev
-  : 15 * 60 * 1000; // 15min delay everywhere else
-
-const MAX_ACTIVITY_ATTEMPTS = 4;
 
 /**
  * See https://developers.strava.com/docs/webhooks/
@@ -60,36 +52,6 @@ function validateSubscription(req, res) {
 }
 
 /**
- * Delay refresh after activity webhook to account for
- * delay until segment efforts are ready
- *
- * @param {Integer} athleteId
- * @param {Integer} activityId
- */
-async function scheduleActivityRefresh(athleteId, activityId) {
-  const receivedAtTime = new Date().toISOString();
-  let attemptNumber = 0;
-  const activityRefresh = setInterval(
-    async () => {
-      attemptNumber += 1;
-      console.log(`Processing: Athlete ${athleteId} | Activity ${activityId} | Received at ${receivedAtTime} | Attempt ${attemptNumber}`);
-      const processCompleted = await refreshAthleteFromActivity(
-        athleteId,
-        activityId,
-        !process.env.DISABLE_REFRESH_FROM_WEBHOOK,
-      );
-      if (processCompleted) {
-        clearInterval(activityRefresh);
-      } else if (attemptNumber >= MAX_ACTIVITY_ATTEMPTS) {
-        console.log(`Failed to process activity ${activityId} after ${attemptNumber} attempts`);
-        clearInterval(activityRefresh);
-      }
-    },
-    ACTIVITY_WEBHOOK_DELAY,
-  );
-}
-
-/**
  * Handle webhook event
  *
  * @param {Request} req
@@ -108,9 +70,6 @@ async function handleEvent(req, res) {
 
     console.log(`Received webhook: ${aspect_type} | ${object_type} | ${object_id} | ${owner_id}`);
 
-    /*
-      Currently testing
-    */
     if (object_type === 'activity') {
       handleActivityWebhook(req.body);
     }
@@ -124,8 +83,6 @@ async function handleEvent(req, res) {
         // but you never know...
         await refreshAthleteProfile(owner_id);
       }
-    } else if (aspect_type === 'create' && object_type === 'activity') {
-      await scheduleActivityRefresh(owner_id, object_id);
     }
   } catch (err) {
     slackError(110, JSON.stringify(req.body, null, 2));
