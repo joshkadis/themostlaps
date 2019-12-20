@@ -65,9 +65,8 @@ function validateSubscription(req, res) {
  *
  * @param {Integer} athleteId
  * @param {Integer} activityId
- * @param {Integer} eventTimestamp
  */
-async function scheduleActivityRefresh(athleteId, activityId, eventTimestamp) {
+async function scheduleActivityRefresh(athleteId, activityId) {
   const receivedAtTime = new Date().toISOString();
   let attemptNumber = 0;
   const activityRefresh = setInterval(
@@ -81,14 +80,8 @@ async function scheduleActivityRefresh(athleteId, activityId, eventTimestamp) {
       );
       if (processCompleted) {
         clearInterval(activityRefresh);
-      } else if (attemptNumber === MAX_ACTIVITY_ATTEMPTS) {
+      } else if (attemptNumber >= MAX_ACTIVITY_ATTEMPTS) {
         console.log(`Failed to process activity ${activityId} after ${attemptNumber} attempts`);
-        const eventDate = new Date(eventTimestamp);
-        slackError(111, {
-          athleteId,
-          activityId,
-          starTime: eventDate.toISOString(),
-        });
         clearInterval(activityRefresh);
       }
     },
@@ -110,7 +103,6 @@ async function handleEvent(req, res) {
       object_id,
       object_type,
       owner_id,
-      event_time,
       updates = {},
     } = req.body;
 
@@ -133,7 +125,7 @@ async function handleEvent(req, res) {
         await refreshAthleteProfile(owner_id);
       }
     } else if (aspect_type === 'create' && object_type === 'activity') {
-      await scheduleActivityRefresh(owner_id, object_id, event_time);
+      await scheduleActivityRefresh(owner_id, object_id);
     }
   } catch (err) {
     slackError(110, JSON.stringify(req.body, null, 2));
