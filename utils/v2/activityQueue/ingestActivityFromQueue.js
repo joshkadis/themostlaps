@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 const Activity = require('../../../schema/Activity');
 const {
   activityCouldHaveLaps,
@@ -33,6 +34,12 @@ async function updateAthleteLastRefreshed(athleteDoc, dateTimeStr) {
  * @return {Document|false} Saved document or false if error
  */
 async function createActivityDocument(activityData, isDryRun = false) {
+  const exists = await Activity.exists({ _id: activityData._id });
+  if (exists) {
+    console.log(`Activity ${activityData._id} already exists, updating.`);
+    await Activity.findByIdAndUpdate(activityData._id, activityData);
+  }
+
   const activityDoc = new Activity(activityData);
   // Mongoose returns error here instead of throwing
   const invalid = activityDoc.validateSync();
