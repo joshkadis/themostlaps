@@ -130,9 +130,8 @@ async function processQueue(isDryRun) {
       // Ingest QueueActivity to Activity
       if (!isDryRun) {
         let result;
-        console.log(`dataForIngest: ${JSON.stringify(dataForIngest)}`);
-        console.log(athleteDoc);
-        console.log(processedQueueDoc);
+        const instanceofAthlete = athleteDoc instanceof Athlete;
+        console.log(`athleteDoc is ${instanceofAthlete ? '' : 'NOT '} instance of Athlete`);
         if (
           dataForIngest
           && athleteDoc instanceof Athlete

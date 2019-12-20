@@ -93,6 +93,7 @@ async function ingestActivityFromQueue(
 
   const savedDoc = await createActivityDocument(activityData, isDryRun);
   if (!savedDoc) {
+    console.log('createActivityDocument() failed');
     return false;
   }
 
@@ -121,6 +122,9 @@ async function ingestActivityFromQueue(
       athleteDoc,
       rawActivity.start_date,
     );
+    if (!updated) {
+      console.log('updateAthleteLastRefreshed() failed');
+    }
     return !!updated;
   } catch (err) {
     console.log(`Error with updateAthleteLastRefreshed() for ${athleteDoc.id} after activity ${rawActivity.id}`);
