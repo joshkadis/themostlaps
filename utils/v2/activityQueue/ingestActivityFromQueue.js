@@ -27,7 +27,8 @@ async function updateAthleteLastRefreshed(athleteDoc, dateTimeStr) {
 }
 
 /**
- * Validate activity model and save to database
+ * Validate activity document and save to database
+ * Will update existing document if one exists
  *
  * @param {Object} activityData Formatted data to create Activity
  * @param {Bool} isDryRun If true, will validate without saving
@@ -35,13 +36,13 @@ async function updateAthleteLastRefreshed(athleteDoc, dateTimeStr) {
  */
 async function createActivityDocument(activityData, isDryRun = false) {
   const { _id: activityId, ...forUpdate } = activityData;
-  const exists = await Activity.exists({ _id: activityId });
-  if (exists) {
-    console.log(`Activity ${activityId} already exists, updating.`);
-    await Activity.findByIdAndUpdate(activityId, forUpdate);
+  let activityDoc = Activity.findById(activityId);
+  if (activityDoc) {
+    activityDoc.set(forUpdate);
+  } else {
+    activityDoc = new Activity(activityData);
   }
 
-  const activityDoc = new Activity(activityData);
   // Mongoose returns error here instead of throwing
   const invalid = activityDoc.validateSync();
   if (invalid) {
