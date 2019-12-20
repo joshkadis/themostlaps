@@ -36,10 +36,12 @@ async function updateAthleteLastRefreshed(athleteDoc, dateTimeStr) {
  */
 async function createActivityDocument(activityData, isDryRun = false) {
   const { _id: activityId, ...forUpdate } = activityData;
-  let activityDoc = Activity.findById(activityId);
+  let activityDoc = await Activity.findById(activityId);
   if (activityDoc) {
+    console.log(`Activity ${activityId} already exists, updating.`);
     activityDoc.set(forUpdate);
   } else {
+    console.log(`Creating new Activity for ${activityId}.`);
     activityDoc = new Activity(activityData);
   }
 
