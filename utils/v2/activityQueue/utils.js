@@ -5,19 +5,23 @@ const QueueActivity = require('../../../schema/QueueActivity');
  *
  * @param {QueueActivity|Integer} activity QueueActivity document or ID
  * @param {String} status Status to apply
+ * @param {String} errorMsg Optional error message
  * @returns {Bool} Success or failure
  */
-async function updateActivityStatus(activity, status) {
+async function updateActivityStatus(activity, status, errorMsg = '') {
   let success = false;
+  const forUpdate = { status };
+  if (errorMsg.length) {
+    forUpdate.errorMsg = errorMsg;
+  }
+
   try {
     if (activity instanceof QueueActivity) {
-      success = await activity.updateOne({
-        status,
-      });
+      success = await activity.updateOne(forUpdate);
     } else {
       success = await QueueActivity.findOneAndUpdate(
         { activityId: activity },
-        { status },
+        forUpdate,
         { runValidators: true },
       );
     }
@@ -64,11 +68,12 @@ async function enqueueActivity({
  * Keep an activity in the DB but stop ingestion attempts
  *
  * @param {QueueActivity|Integer} activity QueueActivity document or ID
+ * @param {String} errorMsg Optional error message
  * @returns {Bool} Success or failure
  */
-async function dequeueActivity(activity) {
+async function dequeueActivity(activity, errorMsg = '') {
   try {
-    const success = await updateActivityStatus(activity, 'dequeued');
+    const success = await updateActivityStatus(activity, 'dequeued', errorMsg);
     return !!success;
   } catch (err) {
     return false;
