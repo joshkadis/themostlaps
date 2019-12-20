@@ -108,12 +108,17 @@ async function processQueue(isDryRun) {
     status: 'pending',
   });
 
+  if (!queueActivities || !queueActivities.length) {
+    console.warn('No pending QueueActivity documents');
+    return;
+  }
+
   // eslint-disable-next-line no-restricted-syntax
   for await (const queueActivityDoc of queueActivities) {
     try {
       if (queueActivityDoc.ingestAttempts === MAX_INGEST_ATTEMPTS) {
         await dequeueActivity(queueActivityDoc.id);
-        return;
+        break;
       }
 
       const {
@@ -141,9 +146,9 @@ async function processQueue(isDryRun) {
         await processedQueueDoc.save();
       }
 
-      console.log(`processedQueueActivity() status for ${processedQueueDoc.id}: ${processedQueueDoc.status}`);
+      console.log(`processedQueueActivity() status for ${processedQueueDoc.activityId}: ${processedQueueDoc.status}`);
     } catch (err) {
-      // Error will get sent to Sentry
+      // @todo Make sure error is sent to Sentry
       await queueActivityDoc.updateOne({
         status: 'error',
         errorMsg: `processQueueActivity() failed for activity ${queueActivityDoc.id}`,
