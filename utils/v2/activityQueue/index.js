@@ -187,7 +187,11 @@ function initializeActivityQueue() {
   }
 
   console.log('Initializing activity ingest queue');
-  setInterval(() => {
+  const interval = setInterval(() => {
+    if (!process.env.INITIALIZE_ACTIVITY_QUEUE) {
+      console.log('Canceling scheduled activity queue ingestion');
+      clearInterval(interval);
+    }
     console.log('Beginning activity queue processing run');
     processQueue(PROCESS_QUEUE_AS_DRY_RUN);
   }, INGEST_QUEUE_INTERVAL);
