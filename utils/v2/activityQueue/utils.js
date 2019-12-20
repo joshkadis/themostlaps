@@ -38,14 +38,19 @@ async function updateActivityStatus(activity, status, errorMsg = '') {
  * @param {Integer} webhookData.object_id Strava activity ID
  * @param {Integer} webhookData.owner_id Strava athlete ID
  * @param {Integer} webhookData.event_time Timestamp of activity creation
+ *                                         expected in seconds
  * @returns {Bool} Success or failure
  */
 
 async function enqueueActivity({
   object_id: activityId,
   owner_id: athleteId,
-  event_time: createdAt = Date.now(),
+  event_time = 0,
 }) {
+  const createdAt = event_time > 0
+    ? event_time * 1000 // seconds to milliseconds
+    : Date.now();
+
   const doc = {
     activityId,
     athleteId,
