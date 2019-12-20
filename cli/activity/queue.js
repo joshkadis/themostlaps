@@ -13,6 +13,7 @@ const {
   updateActivityStatus,
 } = require('../../utils/v2/activityQueue/utils');
 const {
+  processQueue,
   processQueueActivity,
   cancelActivityQueue,
 } = require('../../utils/v2/activityQueue');
@@ -252,6 +253,15 @@ async function doIngestOne({
 }
 
 /**
+ * Process the entire ingestion queue
+ *
+ * @param {String} args.dryRun If true, will process without DB updates
+ */
+async function doProcessQueue({ dryRun: isDryRun = false }) {
+  await processQueue(isDryRun);
+}
+
+/**
  * Handle a CLI command like `$ article queue...`
  *
  * @param {Object} args From yargs
@@ -283,8 +293,12 @@ async function doCommand(args) {
       await doUpdate(args);
       break;
 
-    case 'ingest':
+    case 'ingestactivity':
       await doIngestOne(args);
+      break;
+
+    case 'processqueue':
+      await doProcessQueue(args);
       break;
 
     case 'cancel':
@@ -292,7 +306,7 @@ async function doCommand(args) {
       break;
 
     default:
-      console.error('You must provide a valid subcommand.');
+      console.error(`${args.subargs[0]} is not a valid subcommand of $ activity queue`);
   }
 }
 
