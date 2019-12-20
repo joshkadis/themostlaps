@@ -99,11 +99,54 @@ async function processQueueActivity(queueDoc) {
 }
 
 /**
+ * Ingest if needed, get result of processQueueActivity
+ *
+ * @param {QueueActivity} result.processedQueueDoc
+ * @param {Object} result.dataForIngest
+ * @param {Athlete} result.athleteDoc
+ * @return {Object} Properties to update document
+ */
+async function handleProcessingResult({
+  processedQueueDoc,
+  dataForIngest,
+  athleteDoc,
+}) {
+  if (!dataForIngest) {
+    return { status: 'error', errorMsg: 'No dataForIngest' };
+  }
+
+  const isAthleteInstance = athleteDoc instanceof Athlete;
+  if (!isAthleteInstance) {
+    return { status: 'error', errorMsg: 'Invalid Athlete document' };
+  }
+
+  if (processedQueueDoc.status === 'shouldIngest') {
+    const ingestResult = await ingestActivityFromQueue(
+      dataForIngest,
+      athleteDoc,
+    );
+    return ingestResult
+      ? { status: 'ingested', errorMsg: '' }
+      : { status: 'error', errorMsg: 'ingestActivityFromQueue() failed' };
+  }
+
+  if (processedQueueDoc.status === 'pending') {
+    return { errorMsg: '' };
+  }
+
+  return {};
+}
+
+/**
  * Process the ingestion queue
  *
  * @param {Bool} isDryRun Default to false
  */
 async function processQueue(isDryRun) {
+  if (isDryRun) {
+    console.log('This is a dry run of processQueue()');
+  }
+
   const queueActivities = await QueueActivity.find({
     status: 'pending',
   });
@@ -121,29 +164,12 @@ async function processQueue(isDryRun) {
         break;
       }
 
-      const {
-        processedQueueDoc,
-        dataForIngest,
-        athleteDoc,
-      } = await processQueueActivity(queueActivityDoc);
+      const processingResult = await processQueueActivity(queueActivityDoc);
+      const { processedQueueDoc } = processingResult;
 
       // Ingest QueueActivity to Activity
       if (!isDryRun) {
-        let result;
-        const instanceofAthlete = athleteDoc instanceof Athlete;
-        console.log(`athleteDoc is ${instanceofAthlete ? '' : 'NOT '} instance of Athlete`);
-        if (
-          dataForIngest
-          && athleteDoc instanceof Athlete
-          && processedQueueDoc.status === 'shouldIngest'
-        ) {
-          result = await ingestActivityFromQueue(dataForIngest, athleteDoc);
-        } else {
-          result = false;
-        }
-        const forUpdate = result
-          ? { status: 'ingested' }
-          : { status: 'error', errorMsg: 'ingestActivity failed' };
+        const forUpdate = await handleProcessingResult(processingResult);
         processedQueueDoc.set(forUpdate);
         await processedQueueDoc.save();
       }
