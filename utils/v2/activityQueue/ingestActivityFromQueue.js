@@ -34,10 +34,11 @@ async function updateAthleteLastRefreshed(athleteDoc, dateTimeStr) {
  * @return {Document|false} Saved document or false if error
  */
 async function createActivityDocument(activityData, isDryRun = false) {
-  const exists = await Activity.exists({ _id: activityData._id });
+  const { _id: activityId, ...forUpdate } = activityData;
+  const exists = await Activity.exists({ _id: activityId });
   if (exists) {
-    console.log(`Activity ${activityData._id} already exists, updating.`);
-    await Activity.findByIdAndUpdate(activityData._id, activityData);
+    console.log(`Activity ${activityId} already exists, updating.`);
+    await Activity.findByIdAndUpdate(activityId, forUpdate);
   }
 
   const activityDoc = new Activity(activityData);
