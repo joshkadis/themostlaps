@@ -9,7 +9,7 @@ const { ingestActivityFromQueue } = require('./ingestActivityFromQueue');
 
 const MAX_INGEST_ATTEMPTS = 8;
 const INGEST_QUEUE_INTERVAL = 30 * 60 * 1000; // 30mins
-const PROCESS_QUEUE_AS_DRY_RUN = true;
+const PROCESS_QUEUE_AS_DRY_RUN = process.env.PROCESS_QUEUE_AS_DRY_RUN || false;
 
 /**
  * Process an activity in the queue and return updated document
