@@ -91,7 +91,7 @@ async function ingestActivityFromQueue(
     Start doing stuff that updates DB
   */
 
-  const savedDoc = await createActivityDocument(activityData);
+  const savedDoc = await createActivityDocument(activityData, isDryRun);
   if (!savedDoc) {
     return false;
   }
