@@ -104,7 +104,7 @@ async function processQueueActivity(queueDoc) {
  * @param {QueueActivity} result.processedQueueDoc
  * @param {Object} result.dataForIngest
  * @param {Athlete} result.athleteDoc
- * @return {Object} Properties to update QueueActivity document
+ * @return {Object} Status and message to update QueueActivity document
  */
 async function handleProcessingResult({
   processedQueueDoc,
