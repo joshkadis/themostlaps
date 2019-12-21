@@ -70,40 +70,54 @@ async function ingestActivityFromQueue(
   athleteDoc,
   isDryRun = false,
 ) {
+  // Check if already ingested
   const exists = await Activity.exists({ _id: rawActivity.id });
   if (exists) {
     console.log(`Activity ${rawActivity.id} already exists in activities collection`);
-    /*
-      Hack to return more than two boolean statuses.
-      @todo return 0 instead of true, 1 instead of false
-    */
-    return 2;
+    return {
+      status: 'dequeued',
+      detail: 'already exists as Activity document',
+    };
   }
+
   // Check eligibility
   if (!activityCouldHaveLaps(rawActivity, true)) {
-    return true;
+    return {
+      status: 'dequeued',
+      detail: 'activityCouldHaveLaps() returned false',
+    };
   }
 
   // Check for laps
   const activityData = getActivityData(rawActivity);
   if (!activityData.laps) {
     // Activity was processed but has no laps
-    return true;
+    return {
+      status: 'dequeued',
+      detail: 'activity does not contain laps',
+    };
   }
 
   // Bye for now
   if (isDryRun) {
-    return true;
+    return {
+      status: 'pending',
+      detail: 'dry run, no DB updates',
+    };
   }
 
   /*
     Start doing stuff that updates DB
   */
 
+  // Save to activities collection
   const savedDoc = await createActivityDocument(activityData, isDryRun);
   if (!savedDoc) {
     console.log('createActivityDocument() failed');
-    return false;
+    return {
+      status: 'error',
+      errorMsg: 'createActivityDocument() failed',
+    };
   }
 
   // Get updated stats
@@ -113,6 +127,7 @@ async function ingestActivityFromQueue(
   );
   console.log(`Added ${updatedStats.allTime - athleteDoc.get('stats.allTime')} to stats.allTime`);
 
+  // @todo Combine updateAthleteStats and updateAthleteLastRefreshed as single db write operation
   // Update Athlete's stats
   try {
     await updateAthleteStats(athleteDoc, updatedStats);
@@ -123,27 +138,40 @@ async function ingestActivityFromQueue(
       athleteId: athleteDoc.id,
       activityId: rawActivity.id,
     });
-    return false; // Should retry
+    return {
+      status: 'error',
+      errorMsg: 'updateAthleteStats() failed',
+    };
   }
 
+  // Update Athlete's last_refreshed time
+  let success = true;
   try {
     const updated = await updateAthleteLastRefreshed(
       athleteDoc,
       rawActivity.start_date,
     );
-    if (!updated) {
-      console.log('updateAthleteLastRefreshed() failed');
-    }
-    return !!updated;
+    success = !!updated;
   } catch (err) {
-    console.log(`Error with updateAthleteLastRefreshed() for ${athleteDoc.id} after activity ${rawActivity.id}`);
-    slackError(1, {
-      function: 'updateAthleteLastRefreshed',
-      athleteId: athleteDoc.id,
-      activityId: rawActivity.id,
-    });
-    return false;
+    success = false;
   }
+  if (!success) {
+    console.log(`updateAthleteLastRefreshed() failed: athlete ${athleteDoc.id} | activity ${rawActivity.id}`);
+    return {
+      status: 'error',
+      errorMsg: 'updateAthleteLastRefreshed() failed',
+    };
+  }
+
+  /*
+   Created a new Activity with laps
+   Updated Athlete's stats and last_refreshed
+   We made it!
+  */
+  return {
+    status: 'ingested',
+    detail: '',
+  };
 }
 
 module.exports = { ingestActivityFromQueue };

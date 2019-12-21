@@ -104,7 +104,7 @@ async function processQueueActivity(queueDoc) {
  * @param {QueueActivity} result.processedQueueDoc
  * @param {Object} result.dataForIngest
  * @param {Athlete} result.athleteDoc
- * @return {Object} Properties to update document
+ * @return {Object} Properties to update QueueActivity document
  */
 async function handleProcessingResult({
   processedQueueDoc,
@@ -121,25 +121,17 @@ async function handleProcessingResult({
   }
 
   if (processedQueueDoc.status === 'shouldIngest') {
-    const ingestResult = await ingestActivityFromQueue(
-      dataForIngest,
-      athleteDoc,
-    );
-    // Hacky response
-    if (ingestResult === 2) {
-      return { status: 'dequeued', errorMsg: 'Already exists in Activity collection' };
-    }
-
-    return ingestResult
-      ? { status: 'ingested', errorMsg: '' }
-      : { status: 'error', errorMsg: 'ingestActivityFromQueue() failed' };
+    return ingestActivityFromQueue(dataForIngest, athleteDoc);
   }
 
   if (processedQueueDoc.status === 'pending') {
     return { errorMsg: '' };
   }
 
-  return {};
+  return {
+    status: 'dequeued',
+    detail: 'Invalid data passed to handleProcessingResult()',
+  };
 }
 
 /**
@@ -176,6 +168,7 @@ async function processQueue(isDryRun) {
       // Ingest QueueActivity to Activity
       if (!isDryRun) {
         const forUpdate = await handleProcessingResult(processingResult);
+        // @todo Test setting doc.detail when doc.errorMsg already exists
         processedQueueDoc.set(forUpdate);
         await processedQueueDoc.save();
       }
