@@ -71,7 +71,7 @@ async function handleEvent(req, res) {
     console.log(`Received webhook: ${aspect_type} | ${object_type} | ${object_id} | ${owner_id}`);
 
     if (object_type === 'activity') {
-      handleActivityWebhook(req.body);
+      await handleActivityWebhook(req.body);
     }
 
     if (object_type === 'athlete') {

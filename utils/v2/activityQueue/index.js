@@ -80,8 +80,6 @@ async function processQueueActivity(queueActivityDoc, isDryRun = false) {
       return;
     }
 
-    // @todo Can we be more specific about statuses that can be used here?
-    // Should it only allow shouldIngest?
     if (queueActivityDoc.status === 'shouldIngest') {
       // Ingest QueueActivity to Activity
       const forUpdate = await ingestActivityFromQueue(
@@ -145,7 +143,7 @@ async function processQueue(isDryRun) {
  *
  * @param {Object} webhookData Ssee https://developers.strava.com/docs/webhooks/
  */
-function handleActivityWebhook(webhookData) {
+async function handleActivityWebhook(webhookData) {
   const {
     object_type,
     aspect_type,
@@ -157,9 +155,9 @@ function handleActivityWebhook(webhookData) {
     return;
   }
 
-  // @todo Reset QueueActivity if already enqueued as pending
-  // ignore if other status
   if (aspect_type === 'create') {
+    // Reset if already in the queue
+    await QueueActivity.findByIdAndRemove(object_id);
     enqueueActivity(webhookData);
   } else if (aspect_type === 'delete') {
     // @todo Use deleteActivity() after testing is complete
