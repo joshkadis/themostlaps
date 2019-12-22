@@ -112,20 +112,23 @@ async function ingestActivityFromQueue(
     };
   }
 
+  /*
+    This is as far as we go with a dry run!
+  */
+  if (isDryRun) {
+    return {
+      status: 'dryrun',
+      detail: `Dry run succeeded with ${activityData.laps} laps`,
+    };
+  }
+
   // Get updated stats
+  // @todo refactor compileSpecialStats() so it doesn't always save the document
   const updatedStats = await compileStatsForActivities(
     [savedDoc],
     athleteDoc.toJSON().stats,
   );
   console.log(`Added ${updatedStats.allTime - athleteDoc.get('stats.allTime')} to stats.allTime`);
-
-  // Bye for now
-  if (isDryRun) {
-    return {
-      status: 'dryrun',
-      detail: 'Dry run succeeded',
-    };
-  }
 
   // @todo Combine updateAthleteStats and updateAthleteLastRefreshed as single db write operation
   // Update Athlete's stats
