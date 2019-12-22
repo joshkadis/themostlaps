@@ -41,6 +41,7 @@ const queueActivitySchema = new Schema({
   },
   errorMsg: {
     type: String,
+    alias: 'detail',
   },
 });
 

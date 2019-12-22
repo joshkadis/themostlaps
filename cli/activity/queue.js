@@ -4,8 +4,6 @@
  */
 
 const QueueActivity = require('../../schema/QueueActivity');
-const Activity = require('../../schema/Activity');
-const Athlete = require('../../schema/Athlete');
 const {
   enqueueActivity,
   dequeueActivity,
@@ -17,7 +15,27 @@ const {
   processQueueActivity,
   cancelActivityQueue,
 } = require('../../utils/v2/activityQueue');
-const { ingestActivityFromQueue } = require('../../utils/v2/activityQueue/ingestActivityFromQueue');
+
+/**
+ * Get message from CLI args
+ *
+ * @param {String|Bool} args.m
+ * @param {String|Bool} args.message
+ * @return {String|Bool} Message string, or empty string, or false
+ */
+function getMessageValue({ m, message }) {
+  if (m === false && message === false) {
+    return false;
+  }
+  if (m === false) {
+    return message.toString();
+  }
+  if (message === false) {
+    return m.toString();
+  }
+  return false;
+}
+
 /**
  * Check for expected number of args
  * Note that args[0] will be name of subcommand
@@ -34,33 +52,6 @@ function checkNumArgs(args, num, warning) {
     return false;
   }
   return true;
-}
-
-/**
- * Call ingestActivityFromQueue and update QueueActivity document
- *
- * @param {Object} dataForIngest Formatted JSON data to create Activity document
- * @param {Athlete} athleteDoc
- * @param {QueueActivity} queueDoc
- */
-async function scopedIngestActivityFromQueue(
-  dataForIngest,
-  athleteDoc,
-  queueDoc,
-) {
-  let result = false;
-  if (
-    dataForIngest
-    && athleteDoc instanceof Athlete
-    && queueDoc.status === 'shouldIngest'
-  ) {
-    result = await ingestActivityFromQueue(dataForIngest, athleteDoc);
-  }
-  const forUpdate = result
-    ? { status: 'ingested' }
-    : { status: 'error', errorMsg: 'ingestActivity failed' };
-  queueDoc.set(forUpdate);
-  return queueDoc;
 }
 
 /**
@@ -92,8 +83,10 @@ async function doEnqueue({
   subargs = [],
   t = false,
   time = false,
+  m = false,
+  message = false,
 }) {
-  if (!checkNumArgs(subargs, 3, 'enqueue <activityId> <athleteId> [--time]')) {
+  if (!checkNumArgs(subargs, 3, 'enqueue <activityId> <athleteId> [--time=<time>] [--message=<message>]')) {
     return;
   }
 
@@ -106,11 +99,16 @@ async function doEnqueue({
     enqueueArgs.event_time = time || t;
   }
 
-  const success = await enqueueActivity(enqueueArgs);
+  const messageVal = getMessageValue({ m, message });
+  const success = await enqueueActivity(enqueueArgs, messageVal);
+
   if (!success) {
     console.warn('Failed to enqueue activity, see error logs');
   } else {
     console.log(`Enqueued activity ${subargs[1]} for athlete ${subargs[2]}`);
+    if (messageVal !== false) {
+      console.log(`Message: "${messageVal}"`);
+    }
   }
 }
 
@@ -119,17 +117,25 @@ async function doEnqueue({
  *
  * @param {Integer} args.subargs[1] Activity ID
  */
-async function doDequeue({ subargs }) {
-  if (!checkNumArgs(subargs, 2, 'dequeue <activityId>')) {
+async function doDequeue({
+  subargs,
+  m = false,
+  message = false,
+}) {
+  if (!checkNumArgs(subargs, 2, 'dequeue <activityId> [--message=<message>]')) {
     return;
   }
 
-  const success = await dequeueActivity(subargs[1]);
+  const messageVal = getMessageValue({ m, message });
+  const success = await dequeueActivity(subargs[1], messageVal);
 
   if (!success) {
     console.warn(`Failed to dequeue QueueActivity ${subargs[1]}, see error logs`);
   } else {
     console.log(`Success: dequeued QueueActivity ${subargs[1]}`);
+    if (messageVal !== false) {
+      console.log(`Message: "${messageVal}"`);
+    }
   }
 }
 
@@ -163,22 +169,32 @@ async function doUpdate({
   subargs = [],
   s = false,
   status = false,
+  m = false,
+  message = false,
 }) {
-  if (!checkNumArgs(subargs, 2, 'update <activityId> <[--status]>')) {
+  if (!checkNumArgs(subargs, 2, 'update <activityId> [--status=<status>] [--message=<message>]')) {
     return;
   }
 
   const newStatus = s || status;
-  if (!newStatus) {
-    console.warn('Requires argument -s or --status');
+  const messageVal = getMessageValue({ m, message });
+  if (!newStatus && messageVal === false) {
+    console.warn('Requires --status or --message');
     return;
   }
 
-  const success = await updateActivityStatus(subargs[1], newStatus);
+  const success = await updateActivityStatus(subargs[1], newStatus, messageVal);
+
   if (!success) {
-    console.warn(`Failed to update QueueActivity ${subargs[1]} status to ${newStatus}, see error logs`);
+    console.warn(`Failed to update QueueActivity ${subargs[1]}`);
   } else {
-    console.log(`Success: Updated QueueActivity ${subargs[1]} status to ${newStatus}`);
+    console.log(`Success: Updated QueueActivity ${subargs[1]}`);
+    if (newStatus) {
+      console.log(`Status: "${newStatus}"`);
+    }
+    if (messageVal !== false) {
+      console.log(`Message: "${messageVal}"`);
+    }
   }
 }
 
@@ -188,7 +204,7 @@ async function doUpdate({
  * @param {Integer} args.subargs[1] Activity ID
  * @param {String} args.dryRun If true, will process without DB updates
  */
-async function doIngestOne({
+async function doIngestActivity({
   subargs,
   dryRun: isDryRun = false,
 }) {
@@ -198,57 +214,14 @@ async function doIngestOne({
 
   const activityId = subargs[1];
 
-  // Check that activity doesn't exist in activities collection
-  const activityExists = await Activity.exists({ _id: activityId });
-  if (activityExists) {
-    console.warn(`Activity ${activityId} already exists in the Activity collection.`);
-  }
-
   // Get doc from queue and check eligibility
-  let queueDoc = await QueueActivity.findOne({ activityId });
+  const queueDoc = await QueueActivity.findOne({ activityId });
   if (!queueDoc) {
     console.warn(`QueueActivity ${activityId} was not found in the QueueActivity collection.`);
-  } else if (queueDoc.status !== 'pending') {
-    console.warn(`QueueActivity ${queueDoc.activityId} has status '${queueDoc.status}'. Must be 'pending'`);
-  }
-
-  // Goodbye if activity is not enqueued or already in Activity collection
-  if (!queueDoc || activityExists || queueDoc.status !== 'pending') {
     return;
   }
 
-  const {
-    processedQueueDoc,
-    dataForIngest,
-    athleteDoc,
-  } = await processQueueActivity(queueDoc);
-  queueDoc = processedQueueDoc;
-
-  console.log(`QueueActivity ${queueDoc.activityId} status after processing: ${queueDoc.status}`);
-
-  // Show result for dry run then exit
-  if (isDryRun) {
-    console.log(processedQueueDoc.toJSON());
-    const indicator = processedQueueDoc.status === 'shouldIngest'
-      ? '✅'
-      : '🚫';
-    console.log(`${indicator} "shouldIngest" is the status we want for a dry run`);
-    return;
-  }
-
-  // Show result from ingesting to database
-  if (queueDoc.status === 'shouldIngest') {
-    // eslint-disable-next-line max-len
-    queueDoc = await scopedIngestActivityFromQueue(dataForIngest, athleteDoc, queueDoc);
-    if (queueDoc.status === 'ingested') {
-      console.log(`✅ Ingested QueueActivity ${queueDoc.activityId}`);
-    } else {
-      console.warn(`🚫 Failed to ingest QueueActivity ${queueDoc.activityId}`);
-    }
-  }
-
-  // Save and log the final state of QueueActivity document
-  await queueDoc.save();
+  await processQueueActivity(queueDoc, isDryRun);
   console.log(queueDoc.toJSON());
 }
 
@@ -276,14 +249,17 @@ async function doReset({ subargs }) {
   }
 
 
-  const enqueued = await enqueueActivity({
-    object_id: doc.activityId,
-    owner_id: doc.athleteId,
-  });
+  const enqueued = await enqueueActivity(
+    {
+      object_id: doc.activityId,
+      owner_id: doc.athleteId,
+    },
+    '', // clear errMsg/detail field
+  );
   if (!enqueued) {
-    console.warn(`Failed to enqueue QueueActivity ${doc.activityId}, see error logs`);
+    console.warn(`Failed to reset QueueActivity ${doc.activityId}, see error logs`);
   } else {
-    console.log(`Enqueued QueueActivity ${doc.activityId} for athlete ${doc.athleteId}`);
+    console.log(`Reset QueueActivity ${doc.activityId} for athlete ${doc.athleteId}`);
   }
 }
 
@@ -324,7 +300,7 @@ async function doCommand(args) {
       break;
 
     case 'ingestactivity':
-      await doIngestOne(args);
+      await doIngestActivity(args);
       break;
 
     case 'processqueue':
@@ -346,6 +322,6 @@ module.exports = {
   doDequeue,
   doDelete,
   doGet,
-  doIngestOne,
+  doIngestActivity,
   doUpdate,
 };
