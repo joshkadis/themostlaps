@@ -22,12 +22,19 @@ const PROCESS_QUEUE_AS_DRY_RUN = process.env.PROCESS_QUEUE_AS_DRY_RUN || false;
  * @param {Bool} isDryRun
  */
 async function processQueueActivity(queueActivityDoc, isDryRun = false) {
+  const completeProcessing = async () => {
+    if (!isDryRun) {
+      await queueActivityDoc.save();
+    }
+    console.log(`Processed ${queueActivityDoc.activityId} with status ${queueActivityDoc.status}`);
+  };
+
   const {
     activityId,
     athleteId,
     ingestAttempts,
   } = queueActivityDoc;
-  console.log(`Processing QueueActivity ${activityId} | Athlete ${athleteId} ${"\n"}`);
+  console.log(`${"\n"}Processing QueueActivity ${activityId} | Athlete ${athleteId}`);
   try {
     if (ingestAttempts === MAX_INGEST_ATTEMPTS) {
       const detail = `Reached max. ingest attempts: ${ingestAttempts}`;
@@ -36,10 +43,7 @@ async function processQueueActivity(queueActivityDoc, isDryRun = false) {
         status: 'dequeued',
         detail,
       });
-      if (!isDryRun) {
-        await queueActivityDoc.save();
-      }
-      return;
+      return completeProcessing();
     }
 
     const exists = await Activity.exists({ _id: activityId });
@@ -49,10 +53,7 @@ async function processQueueActivity(queueActivityDoc, isDryRun = false) {
         status: 'dequeued',
         detail: 'already exists as Activity document',
       });
-      if (!isDryRun) {
-        await queueActivityDoc.save();
-      }
-      return;
+      return completeProcessing();
     }
 
     const athleteDoc = await Athlete.findById(athleteId);
@@ -63,10 +64,7 @@ async function processQueueActivity(queueActivityDoc, isDryRun = false) {
         status: 'error',
         errorMsg: 'No athleteDoc',
       });
-      if (!isDryRun) {
-        await queueActivityDoc.save();
-      }
-      return;
+      return completeProcessing();
     }
 
     // Get Strava API data and set status of queueActivityDoc
@@ -75,9 +73,7 @@ async function processQueueActivity(queueActivityDoc, isDryRun = false) {
       athleteDoc,
     );
     if (!apiData && !isDryRun) {
-      // error status and message set during getQueueActivityData()
-      await queueActivityDoc.save();
-      return;
+      return completeProcessing();
     }
 
     if (queueActivityDoc.status === 'shouldIngest') {
@@ -90,20 +86,14 @@ async function processQueueActivity(queueActivityDoc, isDryRun = false) {
       queueActivityDoc.set(forUpdate);
     }
 
-    if (!isDryRun) {
-      await queueActivityDoc.save();
-    }
-
-    console.log(`Status for ${queueActivityDoc.activityId}: ${queueActivityDoc.status}`);
+    return completeProcessing();
   } catch (err) {
     // @todo Make sure error is sent to Sentry
     queueActivityDoc.set({
       status: 'error',
       errorMsg: err.message,
     });
-    if (!isDryRun) {
-      await queueActivityDoc.save();
-    }
+    return completeProcessing();
   }
 }
 
