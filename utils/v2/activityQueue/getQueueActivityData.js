@@ -1,6 +1,4 @@
-const Athlete = require('../../../schema/Athlete');
 const { fetchActivity } = require('../../refreshAthlete/utils');
-const { ingestActivityFromQueue } = require('./ingestActivityFromQueue');
 
 /**
  * Get Strava API data for enqueued activity
@@ -66,47 +64,6 @@ async function getQueueActivityData(queueDoc, athleteDoc) {
   return dataForIngest;
 }
 
-/**
- * Ingest if needed, get result of getQueueActivityData
- *
- * @param {QueueActivity} result.processedQueueDoc
- * @param {Object} result.dataForIngest
- * @param {Athlete} result.athleteDoc
- * @param {Bool} isDryRun
- * @return {Object} Status and message to update QueueActivity document
- */
-async function handleQueueActivityData({
-  processedQueueDoc,
-  dataForIngest,
-  athleteDoc,
-}, isDryRun = false) {
-  // @todo shouldn't need this check, function should only accept 'shouldIngest'
-  if (!dataForIngest) {
-    return { status: 'error', errorMsg: 'No dataForIngest' };
-  }
-
-  // @todo same
-  const isAthleteInstance = athleteDoc instanceof Athlete;
-  if (!isAthleteInstance) {
-    return { status: 'error', errorMsg: 'Invalid Athlete document' };
-  }
-
-  // @todo this is the only case that should be allowed here
-  if (processedQueueDoc.status === 'shouldIngest') {
-    return ingestActivityFromQueue(dataForIngest, athleteDoc, isDryRun);
-  }
-
-  if (processedQueueDoc.status === 'pending') {
-    return { errorMsg: '' };
-  }
-
-  return {
-    status: 'dequeued',
-    detail: 'Invalid data passed to handleQueueActivityData()',
-  };
-}
-
 module.exports = {
   getQueueActivityData,
-  handleQueueActivityData,
 };

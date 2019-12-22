@@ -8,8 +8,8 @@ const {
 } = require('./utils');
 const {
   getQueueActivityData,
-  handleQueueActivityData,
-} = require('./processing');
+} = require('./getQueueActivityData');
+const { ingestActivityFromQueue } = require('./ingestActivityFromQueue');
 
 const MAX_INGEST_ATTEMPTS = 8;
 const INGEST_QUEUE_INTERVAL = 60 * 60 * 1000; // 1hr
@@ -82,26 +82,30 @@ async function processQueueActivity(queueActivityDoc, isDryRun = false) {
 
     // @todo Can we be more specific about statuses that can be used here?
     // Should it only allow shouldIngest?
-    if (processedQueueDoc.status !== 'error') {
+    if (queueActivityDoc.status === 'shouldIngest') {
       // Ingest QueueActivity to Activity
-      const forUpdate = await handleQueueActivityData(
-        processingResult,
+      const forUpdate = await ingestActivityFromQueue(
+        apiData,
+        athleteDoc,
         isDryRun,
       );
-      processedQueueDoc.set(forUpdate);
+      queueActivityDoc.set(forUpdate);
     }
 
     if (!isDryRun) {
-      await processedQueueDoc.save();
+      await queueActivityDoc.save();
     }
 
-    console.log(`Status for ${processedQueueDoc.activityId}: ${processedQueueDoc.status}`);
+    console.log(`Status for ${queueActivityDoc.activityId}: ${queueActivityDoc.status}`);
   } catch (err) {
     // @todo Make sure error is sent to Sentry
-    await queueActivityDoc.updateOne({
+    queueActivityDoc.set({
       status: 'error',
       errorMsg: err.message,
     });
+    if (!isDryRun) {
+      await queueActivityDoc.save();
+    }
   }
 }
 
