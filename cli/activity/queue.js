@@ -18,6 +18,27 @@ const {
   cancelActivityQueue,
 } = require('../../utils/v2/activityQueue');
 const { ingestActivityFromQueue } = require('../../utils/v2/activityQueue/ingestActivityFromQueue');
+
+/**
+ * Get message from CLI args
+ *
+ * @param {String|Bool} args.m
+ * @param {String|Bool} args.message
+ * @return {String|Bool} Message string, or empty string, or false
+ */
+function getMessageValue({ m, message }) {
+  if (m === false && message === false) {
+    return false;
+  }
+  if (m === false) {
+    return message.toString();
+  }
+  if (message === false) {
+    return m.toString();
+  }
+  return false;
+}
+
 /**
  * Check for expected number of args
  * Note that args[0] will be name of subcommand
@@ -108,7 +129,10 @@ async function doEnqueue({
     enqueueArgs.event_time = time || t;
   }
 
-  const success = await enqueueActivity(enqueueArgs, message || m);
+  const success = await enqueueActivity(
+    enqueueArgs, getMessageValue({ m, message }),
+  );
+
   if (!success) {
     console.warn('Failed to enqueue activity, see error logs');
   } else {
@@ -130,7 +154,9 @@ async function doDequeue({
     return;
   }
 
-  const success = await dequeueActivity(subargs[1], message || m);
+  const success = await dequeueActivity(
+    subargs[1], getMessageValue({ m, message }),
+  );
 
   if (!success) {
     console.warn(`Failed to dequeue QueueActivity ${subargs[1]}, see error logs`);
@@ -183,7 +209,10 @@ async function doUpdate({
     return;
   }
 
-  const success = await updateActivityStatus(subargs[1], newStatus, newMessage);
+  const success = await updateActivityStatus(
+    subargs[1], newStatus, getMessageValue({ m, message }),
+  );
+
   if (!success) {
     console.warn(`Failed to update QueueActivity ${subargs[1]} status to ${newStatus}, see error logs`);
   } else {
@@ -293,9 +322,9 @@ async function doReset({ subargs }) {
     '', // clear errMsg/detail field
   );
   if (!enqueued) {
-    console.warn(`Failed to enqueue QueueActivity ${doc.activityId}, see error logs`);
+    console.warn(`Failed to reset QueueActivity ${doc.activityId}, see error logs`);
   } else {
-    console.log(`Enqueued QueueActivity ${doc.activityId} for athlete ${doc.athleteId}`);
+    console.log(`Reset QueueActivity ${doc.activityId} for athlete ${doc.athleteId}`);
   }
 }
 
