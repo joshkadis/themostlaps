@@ -129,14 +129,16 @@ async function doEnqueue({
     enqueueArgs.event_time = time || t;
   }
 
-  const success = await enqueueActivity(
-    enqueueArgs, getMessageValue({ m, message }),
-  );
+  const messageVal = getMessageValue({ m, message });
+  const success = await enqueueActivity(enqueueArgs, messageVal);
 
   if (!success) {
     console.warn('Failed to enqueue activity, see error logs');
   } else {
     console.log(`Enqueued activity ${subargs[1]} for athlete ${subargs[2]}`);
+    if (messageVal !== false) {
+      console.log(`Message: "${messageVal}"`);
+    }
   }
 }
 
@@ -154,14 +156,16 @@ async function doDequeue({
     return;
   }
 
-  const success = await dequeueActivity(
-    subargs[1], getMessageValue({ m, message }),
-  );
+  const messageVal = getMessageValue({ m, message });
+  const success = await dequeueActivity(subargs[1], messageVal);
 
   if (!success) {
     console.warn(`Failed to dequeue QueueActivity ${subargs[1]}, see error logs`);
   } else {
     console.log(`Success: dequeued QueueActivity ${subargs[1]}`);
+    if (messageVal !== false) {
+      console.log(`Message: "${messageVal}"`);
+    }
   }
 }
 
@@ -203,20 +207,24 @@ async function doUpdate({
   }
 
   const newStatus = s || status;
-  const newMessage = m || message;
-  if (!newStatus && !newMessage) {
+  const messageVal = getMessageValue({ m, message });
+  if (!newStatus && messageVal === false) {
     console.warn('Requires --status or --message');
     return;
   }
 
-  const success = await updateActivityStatus(
-    subargs[1], newStatus, getMessageValue({ m, message }),
-  );
+  const success = await updateActivityStatus(subargs[1], newStatus, messageVal);
 
   if (!success) {
-    console.warn(`Failed to update QueueActivity ${subargs[1]} status to ${newStatus}, see error logs`);
+    console.warn(`Failed to update QueueActivity ${subargs[1]}`);
   } else {
-    console.log(`Success: Updated QueueActivity ${subargs[1]} status to ${newStatus}`);
+    console.log(`Success: Updated QueueActivity ${subargs[1]}`);
+    if (newStatus) {
+      console.log(`Status: "${newStatus}"`);
+    }
+    if (messageVal !== false) {
+      console.log(`Message: "${messageVal}"`);
+    }
   }
 }
 
