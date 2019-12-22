@@ -20,6 +20,8 @@ const PROCESS_QUEUE_AS_DRY_RUN = process.env.PROCESS_QUEUE_AS_DRY_RUN || false;
  * @param {Bool} isDryRun
  */
 async function processQueueActivity(queueActivityDoc, isDryRun = false) {
+  // @todo log `QueueActivity ID | Athlete ID` then no need to keep
+  // including those IDs in log output
   console.log("\n");
   try {
     if (queueActivityDoc.ingestAttempts === MAX_INGEST_ATTEMPTS) {
@@ -34,9 +36,16 @@ async function processQueueActivity(queueActivityDoc, isDryRun = false) {
       return;
     }
 
+    // @todo check here for Activity.exists
+
+    // @todo Get Athlete doc before getQueueActivityData()
+    // getQueueActivityData() modifies queueActivityDoc
+    // by reference and only returns dataForIngest
     const processingResult = await getQueueActivityData(queueActivityDoc);
     const { processedQueueDoc } = processingResult;
 
+    // @todo Can we be more specific about statuses that can be used here?
+    // Should it only allow shouldIngest?
     if (processedQueueDoc.status !== 'error') {
       // Ingest QueueActivity to Activity
       const forUpdate = await handleQueueActivityData(

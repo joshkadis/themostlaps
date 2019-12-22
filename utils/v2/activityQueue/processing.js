@@ -103,15 +103,18 @@ async function handleQueueActivityData({
   dataForIngest,
   athleteDoc,
 }, isDryRun = false) {
+  // @todo shouldn't need this check, function should only accept 'shouldIngest'
   if (!dataForIngest) {
     return { status: 'error', errorMsg: 'No dataForIngest' };
   }
 
+  // @todo same
   const isAthleteInstance = athleteDoc instanceof Athlete;
   if (!isAthleteInstance) {
     return { status: 'error', errorMsg: 'Invalid Athlete document' };
   }
 
+  // @todo this is the only case that should be allowed here
   if (processedQueueDoc.status === 'shouldIngest') {
     return ingestActivityFromQueue(dataForIngest, athleteDoc, isDryRun);
   }

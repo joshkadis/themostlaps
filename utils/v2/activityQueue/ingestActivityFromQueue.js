@@ -71,6 +71,7 @@ async function ingestActivityFromQueue(
   isDryRun = false,
 ) {
   // Check if already ingested
+  // @todo Should check in processQueueActivity() before doing anything
   const exists = await Activity.exists({ _id: rawActivity.id });
   if (exists) {
     console.log(`Activity ${rawActivity.id} already exists in activities collection`);
