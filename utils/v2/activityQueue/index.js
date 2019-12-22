@@ -49,6 +49,9 @@ async function processQueueActivity(queueActivityDoc, isDryRun = false) {
         status: 'dequeued',
         detail: 'already exists as Activity document',
       });
+      if (!isDryRun) {
+        await queueActivityDoc.save();
+      }
       return;
     }
 
@@ -60,14 +63,22 @@ async function processQueueActivity(queueActivityDoc, isDryRun = false) {
         status: 'error',
         errorMsg: 'No athleteDoc',
       });
+      if (!isDryRun) {
+        await queueActivityDoc.save();
+      }
       return;
     }
 
-    // if ()
-    // @todo getQueueActivityData() modifies queueActivityDoc
-    // by reference and only returns dataForIngest
-    const processingResult = await getQueueActivityData(queueActivityDoc);
-    const { processedQueueDoc } = processingResult;
+    // Get Strava API data and set status of queueActivityDoc
+    const apiData = await getQueueActivityData(
+      queueActivityDoc,
+      athleteDoc,
+    );
+    if (!apiData && !isDryRun) {
+      // error status and message set during getQueueActivityData()
+      await queueActivityDoc.save();
+      return;
+    }
 
     // @todo Can we be more specific about statuses that can be used here?
     // Should it only allow shouldIngest?

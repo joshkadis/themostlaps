@@ -3,31 +3,28 @@ const { fetchActivity } = require('../../refreshAthlete/utils');
 const { ingestActivityFromQueue } = require('./ingestActivityFromQueue');
 
 /**
- * Process an activity in the queue and return updated document
+ * Get Strava API data for enqueued activity
  *
  * @param {QueueActivity} queueDoc QueueActivity document
- * @return {QueueActivity} queueDoc with updated properties
+ * @param {Athlete} athleteDoc Athlete document
+ * @return {Object|Bool} Strava API response for activity or false if error
  */
-async function getQueueActivityData(queueDoc) {
+async function getQueueActivityData(queueDoc, athleteDoc) {
   const {
     activityId,
-    athleteId,
     status,
     numSegmentEfforts: prevNumSegmentEfforts = 0,
     ingestAttempts: prevIngestAttempts = 0,
   } = queueDoc;
 
   if (status !== 'pending') {
-    console.warn(`Attempted to ingest queue activity ${activityId} with status ${status}`);
+    const errorMsg = `Attempted ingest with status '${status}'`;
+    console.warn(errorMsg);
     queueDoc.set({
       status: 'error',
-      errorMsg: `Attempted ingest with status '${status}'`,
+      errorMsg,
     });
-    return {
-      processedQueueDoc: queueDoc,
-      dataForIngest: false,
-      athleteDoc: false,
-    };
+    return false;
   }
 
   let dataForIngest = false;
@@ -38,16 +35,13 @@ async function getQueueActivityData(queueDoc) {
   }
 
   if (!dataForIngest) {
-    console.warn(`No fetchActivity response for activity ${activityId}`);
+    const errorMsg = 'No fetchActivity response';
+    console.warn(errorMsg);
     queueDoc.set({
       status: 'error',
-      errorMsg: 'No fetchActivity response',
+      errorMsg,
     });
-    return {
-      processedQueueDoc: queueDoc,
-      dataForIngest: false,
-      athleteDoc: false,
-    };
+    return false;
   }
 
   const nextNumSegmentEfforts = dataForIngest.segment_efforts
@@ -68,11 +62,8 @@ async function getQueueActivityData(queueDoc) {
     lastAttemptedAt: Date.now(),
     ingestAttempts: prevIngestAttempts + 1,
   });
-  return {
-    processedQueueDoc: queueDoc,
-    dataForIngest,
-    athleteDoc,
-  };
+
+  return dataForIngest;
 }
 
 /**
