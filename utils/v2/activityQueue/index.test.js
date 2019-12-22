@@ -5,12 +5,12 @@ jest.mock('../../refreshAthlete/utils');
 
 const Athlete = require('../../../schema/Athlete');
 const QueueActivity = require('../../../schema/QueueActivity');
-const { processQueueActivity: __processQueueActivity } = require('./');
+const { getQueueActivityData: __getQueueActivityData } = require('./');
 const { fetchActivity } = require('../../refreshAthlete/utils');
 
 // Always call with isDryRun = true
-const processQueueActivity = async (queueDoc) => {
-  const processed = await __processQueueActivity(
+const getQueueActivityData = async (queueDoc) => {
+  const processed = await __getQueueActivityData(
     queueDoc,
     true,
   );
@@ -20,7 +20,7 @@ const processQueueActivity = async (queueDoc) => {
 // Mocks
 Athlete.findById.mockImplementation(async () => 'true');
 
-describe('processQueueActivity()', () => {
+describe('getQueueActivityData()', () => {
   test('mocking is working', async () => {
     // Athlete model mock
     expect(await Athlete.findById(123)).toEqual('true');
@@ -43,7 +43,7 @@ describe('processQueueActivity()', () => {
       athleteId: 456,
     });
     // first with segment_efforts not set
-    const actual = await processQueueActivity(doc);
+    const actual = await getQueueActivityData(doc);
 
     expect(actual.errorMsg).not.toEqual('No athleteDoc');
     expect(actual.errorMsg).not.toEqual('No fetchActivity response');
@@ -61,7 +61,7 @@ describe('processQueueActivity()', () => {
       athleteId: 456,
     });
     // now with segment_efforts as empty array
-    const second = await processQueueActivity(doc);
+    const second = await getQueueActivityData(doc);
 
     expect(second.errorMsg).not.toEqual('No athleteDoc');
     expect(second.errorMsg).not.toEqual('No fetchActivity response');
@@ -81,8 +81,8 @@ describe('processQueueActivity()', () => {
       numSegmentEfforts: 0,
       ingestAttempts: 0,
     });
-    const initial = await processQueueActivity(doc);
-    const actual = await processQueueActivity(initial);
+    const initial = await getQueueActivityData(doc);
+    const actual = await getQueueActivityData(initial);
 
     expect(actual.status).toEqual('pending');
     expect(actual.numSegmentEfforts).toEqual(0);
@@ -100,8 +100,8 @@ describe('processQueueActivity()', () => {
       numSegmentEfforts: 0,
       ingestAttempts: 0,
     });
-    const initial = await processQueueActivity(doc);
-    const actual = await processQueueActivity(initial);
+    const initial = await getQueueActivityData(doc);
+    const actual = await getQueueActivityData(initial);
 
     expect(actual.status).toEqual('pending');
     expect(actual.numSegmentEfforts).toEqual(2);
@@ -120,9 +120,9 @@ describe('processQueueActivity()', () => {
       numSegmentEfforts: 0,
       ingestAttempts: 0,
     });
-    const initial = await processQueueActivity(doc);
-    const second = await processQueueActivity(initial);
-    const actual = await processQueueActivity(second);
+    const initial = await getQueueActivityData(doc);
+    const second = await getQueueActivityData(initial);
+    const actual = await getQueueActivityData(second);
 
     expect(actual.status).toEqual('pending');
     expect(actual.numSegmentEfforts).toEqual(2);
@@ -141,18 +141,18 @@ describe('processQueueActivity()', () => {
       numSegmentEfforts: 0,
       ingestAttempts: 0,
     });
-    const initial = await processQueueActivity(doc);
+    const initial = await getQueueActivityData(doc);
     expect(initial.status).toEqual('pending');
     expect(initial.numSegmentEfforts).toEqual(0);
     expect(initial.ingestAttempts).toEqual(1);
 
-    const second = await processQueueActivity(initial);
+    const second = await getQueueActivityData(initial);
 
     expect(second.status).toEqual('pending');
     expect(second.numSegmentEfforts).toEqual(1);
     expect(second.ingestAttempts).toEqual(2);
 
-    const final = await processQueueActivity(second);
+    const final = await getQueueActivityData(second);
 
     expect(final.status).toEqual('pending');
     expect(final.numSegmentEfforts).toEqual(2);
@@ -171,18 +171,18 @@ describe('processQueueActivity()', () => {
       numSegmentEfforts: 0,
       ingestAttempts: 0,
     });
-    const initial = await processQueueActivity(doc);
+    const initial = await getQueueActivityData(doc);
     expect(initial.status).toEqual('pending');
     expect(initial.numSegmentEfforts).toEqual(1);
     expect(initial.ingestAttempts).toEqual(1);
 
-    const second = await processQueueActivity(initial);
+    const second = await getQueueActivityData(initial);
 
     expect(second.status).toEqual('pending');
     expect(second.numSegmentEfforts).toEqual(2);
     expect(second.ingestAttempts).toEqual(2);
 
-    const final = await processQueueActivity(second);
+    const final = await getQueueActivityData(second);
 
     expect(final.status).toEqual('shouldIngest');
     expect(final.numSegmentEfforts).toEqual(2);
@@ -198,7 +198,7 @@ describe('processQueueActivity()', () => {
       status: 'dequeued',
     });
 
-    const actual = await processQueueActivity(doc);
+    const actual = await getQueueActivityData(doc);
     expect(actual.status).toEqual('error');
     expect(actual.errorMsg).toEqual("Attempted ingest with status 'dequeued'");
     expect(actual.numSegmentEfforts).toEqual(2);
@@ -213,7 +213,7 @@ describe('processQueueActivity()', () => {
       activityId: 123,
       athleteId: 456,
     });
-    const actual = await processQueueActivity(doc);
+    const actual = await getQueueActivityData(doc);
     expect(actual.status).toEqual('error');
     expect(actual.errorMsg).toEqual('No fetchActivity response');
     expect(actual.numSegmentEfforts).toEqual(0);

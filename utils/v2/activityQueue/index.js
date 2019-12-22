@@ -4,8 +4,8 @@ const {
   dequeueActivity,
 } = require('./utils');
 const {
-  processQueueActivity,
-  handleProcessingResult,
+  getQueueActivityData,
+  handleQueueActivityData,
 } = require('./processing');
 
 const MAX_INGEST_ATTEMPTS = 8;
@@ -40,12 +40,12 @@ async function processQueue(isDryRun) {
         break;
       }
 
-      const processingResult = await processQueueActivity(queueActivityDoc);
+      const processingResult = await getQueueActivityData(queueActivityDoc);
       const { processedQueueDoc } = processingResult;
 
       // Ingest QueueActivity to Activity
       if (!isDryRun) {
-        const forUpdate = await handleProcessingResult(processingResult);
+        const forUpdate = await handleQueueActivityData(processingResult);
         // @todo Test setting doc.detail when doc.errorMsg already exists
         processedQueueDoc.set(forUpdate);
         await processedQueueDoc.save();
@@ -56,7 +56,7 @@ async function processQueue(isDryRun) {
       // @todo Make sure error is sent to Sentry
       await queueActivityDoc.updateOne({
         status: 'error',
-        errorMsg: `processQueueActivity() failed for activity ${queueActivityDoc.id}`,
+        errorMsg: `getQueueActivityData() failed for activity ${queueActivityDoc.id}`,
       });
     }
   }
@@ -120,5 +120,5 @@ module.exports = {
   handleActivityWebhook,
   initializeActivityQueue,
   processQueue,
-  processQueueActivity,
+  getQueueActivityData,
 };

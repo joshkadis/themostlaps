@@ -8,7 +8,7 @@ const { ingestActivityFromQueue } = require('./ingestActivityFromQueue');
  * @param {QueueActivity} queueDoc QueueActivity document
  * @return {QueueActivity} queueDoc with updated properties
  */
-async function processQueueActivity(queueDoc) {
+async function getQueueActivityData(queueDoc) {
   const {
     activityId,
     athleteId,
@@ -90,14 +90,14 @@ async function processQueueActivity(queueDoc) {
 }
 
 /**
- * Ingest if needed, get result of processQueueActivity
+ * Ingest if needed, get result of getQueueActivityData
  *
  * @param {QueueActivity} result.processedQueueDoc
  * @param {Object} result.dataForIngest
  * @param {Athlete} result.athleteDoc
  * @return {Object} Status and message to update QueueActivity document
  */
-async function handleProcessingResult({
+async function handleQueueActivityData({
   processedQueueDoc,
   dataForIngest,
   athleteDoc,
@@ -121,11 +121,11 @@ async function handleProcessingResult({
 
   return {
     status: 'dequeued',
-    detail: 'Invalid data passed to handleProcessingResult()',
+    detail: 'Invalid data passed to handleQueueActivityData()',
   };
 }
 
 module.exports = {
-  processQueueActivity,
-  handleProcessingResult,
+  getQueueActivityData,
+  handleQueueActivityData,
 };

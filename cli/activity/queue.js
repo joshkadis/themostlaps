@@ -14,7 +14,7 @@ const {
 } = require('../../utils/v2/activityQueue/utils');
 const {
   processQueue,
-  processQueueActivity,
+  getQueueActivityData,
   cancelActivityQueue,
 } = require('../../utils/v2/activityQueue');
 const { ingestActivityFromQueue } = require('../../utils/v2/activityQueue/ingestActivityFromQueue');
@@ -267,7 +267,7 @@ async function doIngestOne({
     processedQueueDoc,
     dataForIngest,
     athleteDoc,
-  } = await processQueueActivity(queueDoc);
+  } = await getQueueActivityData(queueDoc);
   queueDoc = processedQueueDoc;
 
   console.log(`QueueActivity ${queueDoc.activityId} status after processing: ${queueDoc.status}`);
