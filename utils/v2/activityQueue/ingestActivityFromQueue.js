@@ -173,7 +173,7 @@ async function ingestActivityFromQueue(
   */
   return {
     status: 'ingested',
-    detail: '',
+    detail: `${activityData.laps} laps`,
   };
 }
 

@@ -50,12 +50,12 @@ async function processQueueActivity(queueActivityDoc, isDryRun = false) {
       await processedQueueDoc.save();
     }
 
-    console.log(`processedQueueActivity() status for ${processedQueueDoc.activityId}: ${processedQueueDoc.status}`);
+    console.log(`Status for ${processedQueueDoc.activityId}: ${processedQueueDoc.status}`);
   } catch (err) {
     // @todo Make sure error is sent to Sentry
     await queueActivityDoc.updateOne({
       status: 'error',
-      errorMsg: `getQueueActivityData() failed for activity ${queueActivityDoc.id}`,
+      errorMsg: err.message,
     });
   }
 }
