@@ -1,4 +1,6 @@
 /* eslint-disable quotes */
+const Activity = require('../../../schema/Activity');
+const Athlete = require('../../../schema/Athlete');
 const QueueActivity = require('../../../schema/QueueActivity');
 const {
   enqueueActivity,
@@ -20,15 +22,19 @@ const PROCESS_QUEUE_AS_DRY_RUN = process.env.PROCESS_QUEUE_AS_DRY_RUN || false;
  * @param {Bool} isDryRun
  */
 async function processQueueActivity(queueActivityDoc, isDryRun = false) {
-  // @todo log `QueueActivity ID | Athlete ID` then no need to keep
-  // including those IDs in log output
-  console.log("\n");
+  const {
+    activityId,
+    athleteId,
+    ingestAttempts,
+  } = queueActivityDoc;
+  console.log(`Processing QueueActivity ${activityId} | Athlete ${athleteId} ${"\n"}`);
   try {
-    if (queueActivityDoc.ingestAttempts === MAX_INGEST_ATTEMPTS) {
-      console.log(`Reached MAX_INGEST_ATTEMPTS for QueueActivity ${queueActivityDoc.activityId}`);
+    if (ingestAttempts === MAX_INGEST_ATTEMPTS) {
+      const detail = `Reached max. ingest attempts: ${ingestAttempts}`;
+      console.log(detail);
       queueActivityDoc.set({
         status: 'dequeued',
-        detail: 'Reached max. ingest attempts',
+        detail,
       });
       if (!isDryRun) {
         await queueActivityDoc.save();
@@ -36,10 +42,29 @@ async function processQueueActivity(queueActivityDoc, isDryRun = false) {
       return;
     }
 
-    // @todo check here for Activity.exists
+    const exists = await Activity.exists({ _id: activityId });
+    if (exists) {
+      console.log('already exists as Activity document');
+      queueActivityDoc.set({
+        status: 'dequeued',
+        detail: 'already exists as Activity document',
+      });
+      return;
+    }
 
-    // @todo Get Athlete doc before getQueueActivityData()
-    // getQueueActivityData() modifies queueActivityDoc
+    const athleteDoc = await Athlete.findById(athleteId);
+    if (!athleteDoc) {
+      const errorMsg = `Athlete ${athleteId} not found`;
+      console.warn(errorMsg);
+      queueActivityDoc.set({
+        status: 'error',
+        errorMsg: 'No athleteDoc',
+      });
+      return;
+    }
+
+    // if ()
+    // @todo getQueueActivityData() modifies queueActivityDoc
     // by reference and only returns dataForIngest
     const processingResult = await getQueueActivityData(queueActivityDoc);
     const { processedQueueDoc } = processingResult;
@@ -117,6 +142,8 @@ function handleActivityWebhook(webhookData) {
     return;
   }
 
+  // @todo Reset QueueActivity if already enqueued as pending
+  // ignore if other status
   if (aspect_type === 'create') {
     enqueueActivity(webhookData);
   } else if (aspect_type === 'delete') {

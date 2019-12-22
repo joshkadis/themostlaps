@@ -70,17 +70,6 @@ async function ingestActivityFromQueue(
   athleteDoc,
   isDryRun = false,
 ) {
-  // Check if already ingested
-  // @todo Should check in processQueueActivity() before doing anything
-  const exists = await Activity.exists({ _id: rawActivity.id });
-  if (exists) {
-    console.log(`Activity ${rawActivity.id} already exists in activities collection`);
-    return {
-      status: 'dequeued',
-      detail: 'already exists as Activity document',
-    };
-  }
-
   // Check eligibility
   if (!activityCouldHaveLaps(rawActivity, true)) {
     return {

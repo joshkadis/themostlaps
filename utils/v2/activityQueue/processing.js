@@ -30,20 +30,6 @@ async function getQueueActivityData(queueDoc) {
     };
   }
 
-  const athleteDoc = await Athlete.findById(athleteId);
-  if (!athleteDoc) {
-    console.warn(`Could not find athlete ${athleteId} to ingest queue activity ${activityId}`);
-    queueDoc.set({
-      status: 'error',
-      errorMsg: 'No athleteDoc',
-    });
-    return {
-      processedQueueDoc: queueDoc,
-      dataForIngest: false,
-      athleteDoc: false,
-    };
-  }
-
   let dataForIngest = false;
   try {
     dataForIngest = await fetchActivity(activityId, athleteDoc);
