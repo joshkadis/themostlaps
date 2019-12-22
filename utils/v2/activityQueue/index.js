@@ -156,9 +156,15 @@ async function handleActivityWebhook(webhookData) {
   }
 
   if (aspect_type === 'create') {
-    // Reset if already in the queue
-    await QueueActivity.findByIdAndRemove(object_id);
-    enqueueActivity(webhookData);
+    // Check if already in the queue
+    const updated = await QueueActivity.findOneAndUpdate(
+      { activityId: object_id },
+      { status: 'error', errorMsg: 'Received duplicate webhook' },
+    );
+    if (!updated) {
+      // Enqueue if not already in queue
+      enqueueActivity(webhookData);
+    }
   } else if (aspect_type === 'delete') {
     // @todo Use deleteActivity() after testing is complete
     dequeueActivity(object_id, 'deletion webhook');

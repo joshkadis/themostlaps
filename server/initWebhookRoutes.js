@@ -85,6 +85,7 @@ async function handleEvent(req, res) {
       }
     }
   } catch (err) {
+    console.log(err.message);
     slackError(110, JSON.stringify(req.body, null, 2));
   }
 }
