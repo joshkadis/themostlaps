@@ -4,8 +4,6 @@
  */
 
 const QueueActivity = require('../../schema/QueueActivity');
-const Activity = require('../../schema/Activity');
-const Athlete = require('../../schema/Athlete');
 const {
   enqueueActivity,
   dequeueActivity,
@@ -14,10 +12,9 @@ const {
 } = require('../../utils/v2/activityQueue/utils');
 const {
   processQueue,
-  getQueueActivityData,
+  processQueueActivity,
   cancelActivityQueue,
 } = require('../../utils/v2/activityQueue');
-const { ingestActivityFromQueue } = require('../../utils/v2/activityQueue/ingestActivityFromQueue');
 
 /**
  * Get message from CLI args
@@ -55,33 +52,6 @@ function checkNumArgs(args, num, warning) {
     return false;
   }
   return true;
-}
-
-/**
- * Call ingestActivityFromQueue and update QueueActivity document
- *
- * @param {Object} dataForIngest Formatted JSON data to create Activity document
- * @param {Athlete} athleteDoc
- * @param {QueueActivity} queueDoc
- */
-async function scopedIngestActivityFromQueue(
-  dataForIngest,
-  athleteDoc,
-  queueDoc,
-) {
-  let result = false;
-  if (
-    dataForIngest
-    && athleteDoc instanceof Athlete
-    && queueDoc.status === 'shouldIngest'
-  ) {
-    result = await ingestActivityFromQueue(dataForIngest, athleteDoc);
-  }
-  const forUpdate = result
-    ? { status: 'ingested' }
-    : { status: 'error', errorMsg: 'ingestActivity failed' };
-  queueDoc.set(forUpdate);
-  return queueDoc;
 }
 
 /**
@@ -234,7 +204,7 @@ async function doUpdate({
  * @param {Integer} args.subargs[1] Activity ID
  * @param {String} args.dryRun If true, will process without DB updates
  */
-async function doIngestOne({
+async function doIngestActivity({
   subargs,
   dryRun: isDryRun = false,
 }) {
@@ -244,57 +214,14 @@ async function doIngestOne({
 
   const activityId = subargs[1];
 
-  // Check that activity doesn't exist in activities collection
-  const activityExists = await Activity.exists({ _id: activityId });
-  if (activityExists) {
-    console.warn(`Activity ${activityId} already exists in the Activity collection.`);
-  }
-
   // Get doc from queue and check eligibility
-  let queueDoc = await QueueActivity.findOne({ activityId });
+  const queueDoc = await QueueActivity.findOne({ activityId });
   if (!queueDoc) {
     console.warn(`QueueActivity ${activityId} was not found in the QueueActivity collection.`);
-  } else if (queueDoc.status !== 'pending') {
-    console.warn(`QueueActivity ${queueDoc.activityId} has status '${queueDoc.status}'. Must be 'pending'`);
-  }
-
-  // Goodbye if activity is not enqueued or already in Activity collection
-  if (!queueDoc || activityExists || queueDoc.status !== 'pending') {
     return;
   }
 
-  const {
-    processedQueueDoc,
-    dataForIngest,
-    athleteDoc,
-  } = await getQueueActivityData(queueDoc);
-  queueDoc = processedQueueDoc;
-
-  console.log(`QueueActivity ${queueDoc.activityId} status after processing: ${queueDoc.status}`);
-
-  // Show result for dry run then exit
-  if (isDryRun) {
-    console.log(processedQueueDoc.toJSON());
-    const indicator = processedQueueDoc.status === 'shouldIngest'
-      ? '✅'
-      : '🚫';
-    console.log(`${indicator} "shouldIngest" is the status we want for a dry run`);
-    return;
-  }
-
-  // Show result from ingesting to database
-  if (queueDoc.status === 'shouldIngest') {
-    // eslint-disable-next-line max-len
-    queueDoc = await scopedIngestActivityFromQueue(dataForIngest, athleteDoc, queueDoc);
-    if (queueDoc.status === 'ingested') {
-      console.log(`✅ Ingested QueueActivity ${queueDoc.activityId}`);
-    } else {
-      console.warn(`🚫 Failed to ingest QueueActivity ${queueDoc.activityId}`);
-    }
-  }
-
-  // Save and log the final state of QueueActivity document
-  await queueDoc.save();
+  await processQueueActivity(queueDoc, isDryRun);
   console.log(queueDoc.toJSON());
 }
 
@@ -373,7 +300,7 @@ async function doCommand(args) {
       break;
 
     case 'ingestactivity':
-      await doIngestOne(args);
+      await doIngestActivity(args);
       break;
 
     case 'processqueue':
@@ -395,6 +322,6 @@ module.exports = {
   doDequeue,
   doDelete,
   doGet,
-  doIngestOne,
+  doIngestActivity,
   doUpdate,
 };

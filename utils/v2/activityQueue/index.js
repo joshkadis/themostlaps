@@ -1,3 +1,4 @@
+/* eslint-disable quotes */
 const QueueActivity = require('../../../schema/QueueActivity');
 const {
   enqueueActivity,
@@ -9,8 +10,56 @@ const {
 } = require('./processing');
 
 const MAX_INGEST_ATTEMPTS = 8;
-const INGEST_QUEUE_INTERVAL = 30 * 60 * 1000; // 30mins
+const INGEST_QUEUE_INTERVAL = 60 * 60 * 1000; // 1hr
 const PROCESS_QUEUE_AS_DRY_RUN = process.env.PROCESS_QUEUE_AS_DRY_RUN || false;
+
+/**
+ * Process a single QueueActivity
+ *
+ * @param {QueueActivity} queueActivityDoc
+ * @param {Bool} isDryRun
+ */
+async function processQueueActivity(queueActivityDoc, isDryRun = false) {
+  console.log("\n");
+  try {
+    if (queueActivityDoc.ingestAttempts === MAX_INGEST_ATTEMPTS) {
+      console.log(`Reached MAX_INGEST_ATTEMPTS for QueueActivity ${queueActivityDoc.activityId}`);
+      queueActivityDoc.set({
+        status: 'dequeued',
+        detail: 'Reached max. ingest attempts',
+      });
+      if (!isDryRun) {
+        await queueActivityDoc.save();
+      }
+      return;
+    }
+
+    const processingResult = await getQueueActivityData(queueActivityDoc);
+    const { processedQueueDoc } = processingResult;
+
+    if (processedQueueDoc.status !== 'error') {
+      // Ingest QueueActivity to Activity
+      const forUpdate = await handleQueueActivityData(
+        processingResult,
+        isDryRun,
+      );
+      processedQueueDoc.set(forUpdate);
+    }
+
+    if (!isDryRun) {
+      await processedQueueDoc.save();
+    }
+
+    console.log(`processedQueueActivity() status for ${processedQueueDoc.activityId}: ${processedQueueDoc.status}`);
+  } catch (err) {
+    // @todo Make sure error is sent to Sentry
+    await queueActivityDoc.updateOne({
+      status: 'error',
+      errorMsg: `getQueueActivityData() failed for activity ${queueActivityDoc.id}`,
+    });
+  }
+}
+
 
 /**
  * Process the ingestion queue
@@ -18,48 +67,28 @@ const PROCESS_QUEUE_AS_DRY_RUN = process.env.PROCESS_QUEUE_AS_DRY_RUN || false;
  * @param {Bool} isDryRun Default to false
  */
 async function processQueue(isDryRun) {
-  if (isDryRun) {
-    console.log('This is a dry run of processQueue()');
-  }
-
   const queueActivities = await QueueActivity.find({
     status: 'pending',
   });
 
   if (!queueActivities || !queueActivities.length) {
-    console.warn('No pending QueueActivity documents');
+    console.warn('No QueueActivity documents with "pending" status');
     return;
+  }
+
+  console.log(`Starting processQueue() with ${queueActivities.length} QueueActivity documents`);
+
+  if (isDryRun) {
+    console.log('This is a dry run!');
   }
 
   // eslint-disable-next-line no-restricted-syntax
   for await (const queueActivityDoc of queueActivities) {
-    try {
-      if (queueActivityDoc.ingestAttempts === MAX_INGEST_ATTEMPTS) {
-        console.log(`Reached MAX_INGEST_ATTEMPTS for QueueActivity ${queueActivityDoc.activityId}`);
-        await dequeueActivity(queueActivityDoc.activityId, 'Reached MAX_INGEST_ATTEMPTS');
-        break;
-      }
-
-      const processingResult = await getQueueActivityData(queueActivityDoc);
-      const { processedQueueDoc } = processingResult;
-
-      // Ingest QueueActivity to Activity
-      if (!isDryRun) {
-        const forUpdate = await handleQueueActivityData(processingResult);
-        // @todo Test setting doc.detail when doc.errorMsg already exists
-        processedQueueDoc.set(forUpdate);
-        await processedQueueDoc.save();
-      }
-
-      console.log(`processedQueueActivity() status for ${processedQueueDoc.activityId}: ${processedQueueDoc.status}`);
-    } catch (err) {
-      // @todo Make sure error is sent to Sentry
-      await queueActivityDoc.updateOne({
-        status: 'error',
-        errorMsg: `getQueueActivityData() failed for activity ${queueActivityDoc.id}`,
-      });
-    }
+    await processQueueActivity(queueActivityDoc, isDryRun);
   }
+  console.log(`End of processQueue()
+----------------------
+`);
 }
 
 /**
@@ -102,7 +131,6 @@ function initializeActivityQueue() {
       console.log('Canceling scheduled activity queue ingestion');
       clearInterval(interval);
     }
-    console.log('Beginning activity queue processing run');
     processQueue(PROCESS_QUEUE_AS_DRY_RUN);
   }, INGEST_QUEUE_INTERVAL);
 }
@@ -120,5 +148,5 @@ module.exports = {
   handleActivityWebhook,
   initializeActivityQueue,
   processQueue,
-  getQueueActivityData,
+  processQueueActivity,
 };

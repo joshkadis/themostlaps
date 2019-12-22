@@ -95,13 +95,14 @@ async function getQueueActivityData(queueDoc) {
  * @param {QueueActivity} result.processedQueueDoc
  * @param {Object} result.dataForIngest
  * @param {Athlete} result.athleteDoc
+ * @param {Bool} isDryRun
  * @return {Object} Status and message to update QueueActivity document
  */
 async function handleQueueActivityData({
   processedQueueDoc,
   dataForIngest,
   athleteDoc,
-}) {
+}, isDryRun = false) {
   if (!dataForIngest) {
     return { status: 'error', errorMsg: 'No dataForIngest' };
   }
@@ -112,7 +113,7 @@ async function handleQueueActivityData({
   }
 
   if (processedQueueDoc.status === 'shouldIngest') {
-    return ingestActivityFromQueue(dataForIngest, athleteDoc);
+    return ingestActivityFromQueue(dataForIngest, athleteDoc, isDryRun);
   }
 
   if (processedQueueDoc.status === 'pending') {

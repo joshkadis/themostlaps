@@ -63,7 +63,7 @@ async function createActivityDocument(activityData, isDryRun = false) {
  * @param {Object} activityData JSON object from Strava API
  * @param {Athlete} athleteDoc
  * @param {Bool} isDryRun If true, no DB updates
- * @return {Bool} True if activity was ineligible or ingested. Only false if error.
+ * @return {Object} Status and message to update QueueActivity document
  */
 async function ingestActivityFromQueue(
   rawActivity,
@@ -98,14 +98,6 @@ async function ingestActivityFromQueue(
     };
   }
 
-  // Bye for now
-  if (isDryRun) {
-    return {
-      status: 'pending',
-      detail: 'dry run, no DB updates',
-    };
-  }
-
   /*
     Start doing stuff that updates DB
   */
@@ -126,6 +118,14 @@ async function ingestActivityFromQueue(
     athleteDoc.toJSON().stats,
   );
   console.log(`Added ${updatedStats.allTime - athleteDoc.get('stats.allTime')} to stats.allTime`);
+
+  // Bye for now
+  if (isDryRun) {
+    return {
+      status: 'dryrun',
+      detail: 'Dry run succeeded',
+    };
+  }
 
   // @todo Combine updateAthleteStats and updateAthleteLastRefreshed as single db write operation
   // Update Athlete's stats
