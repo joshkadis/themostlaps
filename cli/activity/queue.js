@@ -92,8 +92,10 @@ async function doEnqueue({
   subargs = [],
   t = false,
   time = false,
+  m = false,
+  message = false,
 }) {
-  if (!checkNumArgs(subargs, 3, 'enqueue <activityId> <athleteId> [--time]')) {
+  if (!checkNumArgs(subargs, 3, 'enqueue <activityId> <athleteId> [--time=<time>] [--message=<message>]')) {
     return;
   }
 
@@ -106,7 +108,7 @@ async function doEnqueue({
     enqueueArgs.event_time = time || t;
   }
 
-  const success = await enqueueActivity(enqueueArgs);
+  const success = await enqueueActivity(enqueueArgs, message || m);
   if (!success) {
     console.warn('Failed to enqueue activity, see error logs');
   } else {
@@ -119,12 +121,16 @@ async function doEnqueue({
  *
  * @param {Integer} args.subargs[1] Activity ID
  */
-async function doDequeue({ subargs }) {
-  if (!checkNumArgs(subargs, 2, 'dequeue <activityId>')) {
+async function doDequeue({
+  subargs,
+  m = false,
+  message = false,
+}) {
+  if (!checkNumArgs(subargs, 2, 'dequeue <activityId> [--message=<message>]')) {
     return;
   }
 
-  const success = await dequeueActivity(subargs[1]);
+  const success = await dequeueActivity(subargs[1], message || m);
 
   if (!success) {
     console.warn(`Failed to dequeue QueueActivity ${subargs[1]}, see error logs`);
@@ -163,18 +169,21 @@ async function doUpdate({
   subargs = [],
   s = false,
   status = false,
+  m = false,
+  message = false,
 }) {
-  if (!checkNumArgs(subargs, 2, 'update <activityId> <[--status]>')) {
+  if (!checkNumArgs(subargs, 2, 'update <activityId> [--status=<status>] [--message=<message>]')) {
     return;
   }
 
   const newStatus = s || status;
-  if (!newStatus) {
-    console.warn('Requires argument -s or --status');
+  const newMessage = m || message;
+  if (!newStatus && !newMessage) {
+    console.warn('Requires --status or --message');
     return;
   }
 
-  const success = await updateActivityStatus(subargs[1], newStatus);
+  const success = await updateActivityStatus(subargs[1], newStatus, newMessage);
   if (!success) {
     console.warn(`Failed to update QueueActivity ${subargs[1]} status to ${newStatus}, see error logs`);
   } else {
@@ -276,10 +285,13 @@ async function doReset({ subargs }) {
   }
 
 
-  const enqueued = await enqueueActivity({
-    object_id: doc.activityId,
-    owner_id: doc.athleteId,
-  });
+  const enqueued = await enqueueActivity(
+    {
+      object_id: doc.activityId,
+      owner_id: doc.athleteId,
+    },
+    '', // clear errMsg/detail field
+  );
   if (!enqueued) {
     console.warn(`Failed to enqueue QueueActivity ${doc.activityId}, see error logs`);
   } else {

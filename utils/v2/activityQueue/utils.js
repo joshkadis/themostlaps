@@ -5,16 +5,25 @@ const QueueActivity = require('../../../schema/QueueActivity');
  *
  * @param {QueueActivity|Integer} activity QueueActivity document or ID
  * @param {String} status Status to apply
- * @param {String} errorMsg Optional error message
+ * @param {String} message Detail or error info
  * @returns {Bool} Success or failure
  */
-async function updateActivityStatus(activity, status, errorMsg = '') {
-  let success = false;
-  const forUpdate = { status };
-  if (errorMsg.length) {
-    forUpdate.errorMsg = errorMsg;
+async function updateActivityStatus(
+  activity,
+  status = false,
+  message = false,
+) {
+  // Strict check because we want to allow 0 or empty string
+  // but don't want to delete existing data
+  const forUpdate = {};
+  if (message !== false) {
+    forUpdate.errorMsg = message;
+  }
+  if (status !== false) {
+    forUpdate.status = status;
   }
 
+  let success = false;
   try {
     if (activity instanceof QueueActivity) {
       success = await activity.updateOne(forUpdate);
@@ -39,6 +48,7 @@ async function updateActivityStatus(activity, status, errorMsg = '') {
  * @param {Integer} webhookData.owner_id Strava athlete ID
  * @param {Integer} webhookData.event_time Timestamp of activity creation
  *                                         expected in seconds
+ * @param {String} message Detail or error info
  * @returns {Bool} Success or failure
  */
 
@@ -46,7 +56,7 @@ async function enqueueActivity({
   object_id: activityId,
   owner_id: athleteId,
   event_time = 0,
-}) {
+}, message = false) {
   const createdAt = event_time > 0
     ? event_time * 1000 // seconds to milliseconds
     : Date.now();
@@ -56,9 +66,17 @@ async function enqueueActivity({
     athleteId,
     createdAt,
   };
+  // Check strictly to allow empty string
+  if (message !== false) {
+    doc.errorMsg = message;
+  }
 
   try {
-    const updated = await updateActivityStatus(activityId, 'pending');
+    const updated = await updateActivityStatus(
+      activityId,
+      'pending',
+      message !== false ? message : false,
+    );
     if (updated) {
       return true;
     }
@@ -73,12 +91,16 @@ async function enqueueActivity({
  * Keep an activity in the DB but stop ingestion attempts
  *
  * @param {QueueActivity|Integer} activity QueueActivity document or ID
- * @param {String} errorMsg Optional error message
+ * @param {String} message Detail or error info
  * @returns {Bool} Success or failure
  */
-async function dequeueActivity(activity, errorMsg = '') {
+async function dequeueActivity(activity, message = false) {
   try {
-    const success = await updateActivityStatus(activity, 'dequeued', errorMsg);
+    const success = await updateActivityStatus(
+      activity,
+      'dequeued',
+      message !== false ? message : false,
+    );
     return !!success;
   } catch (err) {
     return false;
