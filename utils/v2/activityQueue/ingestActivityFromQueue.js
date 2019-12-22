@@ -70,6 +70,12 @@ async function ingestActivityFromQueue(
   athleteDoc,
   isDryRun = false,
 ) {
+  /*
+    Note for dry runs:
+    Processing won't reach this point unless the QueueActivity has
+    passed the "same number of segment efforts twice in a row" test
+  */
+
   // Check eligibility
   if (!activityCouldHaveLaps(rawActivity, true)) {
     return {
