@@ -104,6 +104,7 @@ async function ingestActivityFromQueue(
   */
 
   // Save to activities collection
+  // @todo savedDoc -> activityDoc
   const savedDoc = await createActivityDocument(activityData, isDryRun);
   if (!savedDoc) {
     console.log('createActivityDocument() failed');
@@ -124,7 +125,7 @@ async function ingestActivityFromQueue(
   }
 
   // Get updated stats
-  // @todo refactor compileSpecialStats() so it doesn't always save the document
+  // @todo refactor compileSpecialStats() so it doesn't always save the Activity document
   const updatedStats = await compileStatsForActivities(
     [savedDoc],
     athleteDoc.toJSON().stats,
@@ -151,6 +152,7 @@ async function ingestActivityFromQueue(
   // Update Athlete's last_refreshed time
   let success = true;
   try {
+    // @todo Can this even return something falsy
     const updated = await updateAthleteLastRefreshed(
       athleteDoc,
       rawActivity.start_date,
@@ -159,6 +161,7 @@ async function ingestActivityFromQueue(
   } catch (err) {
     success = false;
   }
+
   if (!success) {
     console.log(`updateAthleteLastRefreshed() failed: athlete ${athleteDoc.id} | activity ${rawActivity.id}`);
     return {
