@@ -119,13 +119,17 @@ async function processQueue(isDryRun) {
     console.log('This is a dry run!');
   }
 
+  const log = {};
   // eslint-disable-next-line no-restricted-syntax
   for await (const queueActivityDoc of queueActivities) {
     await processQueueActivity(queueActivityDoc, isDryRun);
+    const { status } = queueActivityDoc;
+    log[status] = log[status]
+      ? log[status] + 1
+      : 1;
   }
-  console.log(`End of processQueue()
-----------------------
-`);
+  console.log(`${"\n"}End of processQueue() for ${queueActivities.length} activities`);
+  console.table(log);
 }
 
 /**
