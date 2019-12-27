@@ -175,4 +175,6 @@ const argv = require('yargs')
     ),
     async (argv) => await callbackIngestAthleteV2(argv),
   )
+  .command(require('./cli/activity'))
+  .help()
   .argv;

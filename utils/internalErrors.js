@@ -57,6 +57,9 @@ module.exports = (code = 0, data = '') => {
     case 111:
       return 'Activity has no segment efforts';
 
+    case 112:
+      return 'QueueActivity creation failed';
+
     case 114:
       return 'Failed to calculate Cold Laps';
 

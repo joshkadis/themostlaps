@@ -13,6 +13,7 @@ const {
   getEpochSecondsFromDateObj,
 } = require('../athleteUtils');
 const { slackError } = require('../slackNotification');
+
 /**
  * Validate activity model and save to database
  *
@@ -114,11 +115,7 @@ async function refreshAthleteFromActivity(
   }
 
   if (!activity.segment_efforts || !activity.segment_efforts.length) {
-    slackError(111, {
-      id: activity.id,
-      athlete: activity.athlete,
-      start_date_local: activity.start_date_local,
-    });
+    slackError(111, { athleteId, activityId });
     return false; // Strava still processing segment efforts, should retry
   }
 

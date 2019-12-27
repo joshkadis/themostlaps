@@ -3,6 +3,7 @@ const { compileSpecialStats } = require('./stats/compileSpecialStats');
 
 /**
  * Update athlete stats from array of new activity documents
+ * Could be synchronous but don't want to break anything
  *
  * @param {Array} activities Array of Activity documents
  * @param {Object} initial Optional initial stats value
@@ -50,7 +51,7 @@ async function compileStatsForActivities(
     const activity = activities[i];
     updatedSpecialStats = await compileSpecialStats(
       activity,
-      activity.get('start_date_local'), 
+      activity.get('start_date_local'),
       updatedSpecialStats
     );
   }
