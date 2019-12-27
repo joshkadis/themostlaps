@@ -141,14 +141,25 @@ function activityCouldHaveLaps(activity, verbose = false) {
 }
 
 /**
- * Filter segment efforts for activity
+ * Filter, dedupe, and format lap segment efforts from all segment efforts
  *
  * @param {Array} efforts
  * @return {Array}
  */
 function filterSegmentEfforts(efforts) {
   return efforts
+    // Include only efforts for the canonical lap
     .filter(({ segment }) => lapSegmentId === segment.id)
+    // Dedupe by start time
+    .reduce((acc, effort) => {
+      const startTimes = acc.map(({ start_date_local }) => start_date_local);
+      // Check that activity w/ this start time hasn't been included already
+      if (startTimes.indexOf(effort.start_date_local) === -1) {
+        acc.push(effort);
+      }
+      return acc;
+    }, [])
+    // Format for our SegmentEffort model
     .map((effort) => formatSegmentEffort(effort));
 }
 
@@ -194,6 +205,7 @@ function getActivityData(activity, verbose = false) {
 }
 
 module.exports = {
+  filterSegmentEfforts,
   fetchActivity,
   activityCouldHaveLaps,
   getActivityData,
