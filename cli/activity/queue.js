@@ -223,6 +223,9 @@ async function doIngestActivity({
 
   await processQueueActivity(queueDoc, isDryRun);
   console.log(queueDoc.toJSON());
+  if (isDryRun) {
+    console.log('**This was a dry run; no DB write operations.**');
+  }
 }
 
 /**
@@ -232,6 +235,9 @@ async function doIngestActivity({
  */
 async function doProcessQueue({ dryRun: isDryRun = false }) {
   await processQueue(isDryRun);
+  if (isDryRun) {
+    console.log('**This was a dry run; no DB write operations.**');
+  }
 }
 
 /**
