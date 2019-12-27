@@ -19,7 +19,7 @@ const {
   migrateMany,
 } = require('./migrateAuthToken');
 const { getAthleteIdentifier } = require('../utils/v2/models/athlete');
-const ingestAthleteHistory = require('../utils/v2/ingest/ingestAthleteHistory');
+const ingestAthleteHistory = require('../utils/v2/ingestAthlete/ingestAthleteHistory');
 
 /**
  * Prompt for admin code then connect and run command
