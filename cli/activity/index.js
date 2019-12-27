@@ -7,11 +7,16 @@ const mongoose = require('mongoose');
 const yargs = require('yargs');
 const { mongooseConnectionOptions } = require('../../config/mongodb');
 const { doCommand: doQueueCommand } = require('./queue');
+const { doCommand: doDedupeCommand } = require('./dedupe');
 
-
+// @todo Refactor these into separate modules and
+// require them individually
+// https://github.com/yargs/yargs/blob/master/docs/advanced.md#providing-a-command-module
 async function doCommand(args) {
   if (args.queue) {
     await doQueueCommand(args);
+  } else if (args.dedupe) {
+    await doDedupeCommand(args);
   }
   yargs.exit();
 }
