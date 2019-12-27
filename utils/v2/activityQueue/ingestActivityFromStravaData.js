@@ -65,7 +65,7 @@ async function createActivityDocument(activityData, isDryRun = false) {
  * @param {Bool} isDryRun If true, no DB updates
  * @return {Object} Status and message to update QueueActivity document
  */
-async function ingestActivityFromQueue(
+async function ingestActivityFromStravaData(
   rawActivity,
   athleteDoc,
   isDryRun = false,
@@ -175,4 +175,4 @@ async function ingestActivityFromQueue(
   };
 }
 
-module.exports = { ingestActivityFromQueue };
+module.exports = { ingestActivityFromStravaData };

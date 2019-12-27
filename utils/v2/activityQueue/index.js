@@ -9,7 +9,7 @@ const {
 const {
   getQueueActivityData,
 } = require('./getQueueActivityData');
-const { ingestActivityFromQueue } = require('./ingestActivityFromQueue');
+const { ingestActivityFromStravaData } = require('./ingestActivityFromStravaData');
 
 const MAX_INGEST_ATTEMPTS = 8;
 const INGEST_QUEUE_INTERVAL = 60 * 60 * 1000; // 1hr
@@ -78,7 +78,7 @@ async function processQueueActivity(queueActivityDoc, isDryRun = false) {
 
     if (queueActivityDoc.status === 'shouldIngest') {
       // Ingest QueueActivity to Activity
-      const forUpdate = await ingestActivityFromQueue(
+      const forUpdate = await ingestActivityFromStravaData(
         apiData,
         athleteDoc,
         isDryRun,
