@@ -10,26 +10,41 @@ const Activity = require('../../schema/Activity');
  *
  * @param {Object} args From yargs
  */
-async function doCommand(args) {
-  if (!args.dedupe) {
+async function doCommand({
+  a = false,
+  athlete = false,
+  subargs = [],
+  dryRun: isDryRun = false,
+  dedupe = false,
+}) {
+  if (!dedupe) {
     console.warn("You didn't call `$ activity dedupe ...`");
     return;
   }
 
-  const isDryRun = args.dryRun || false;
+  if (isDryRun) {
+    console.log('*This is a dry run!*');
+  }
+
+  if (!a && !athlete && !subargs.length) {
+    console.warn('Must specify an athlete or activity id(s)');
+    return;
+  }
 
   const query = {};
   // query includes athlete
-  if (args.a || args.athlete) {
-    query.athlete_id = args.a || args.athlete;
-  }
-  // query inludes activity ids
-  if (args.subargs.length) {
-    // eslint-disable-next-line no-underscore-dangle
-    query._id = { $in: args.subargs };
+  if (a || athlete) {
+    query.athlete_id = a || athlete;
   }
 
-  console.log(`Running find query for: ${JSON.stringify(query)}`);
+  // query inludes activity ids
+  if (subargs.length) {
+    // eslint-disable-next-line no-underscore-dangle
+    query._id = { $in: subargs };
+  }
+
+  const msg = `Deduping ${subargs.length || '*all*'} activities${query.athlete_id ? ` for Athlete ${query.athlete_id}` : ''}`;
+  console.log(msg);
 
   const activities = Activity.find(query);
   if (!activities || !activities.length) {
