@@ -167,5 +167,6 @@ const argv = require('yargs')
     },
   )
   .command(require('./cli/activity/queue'))
+  .command(require('./cli/activity/dedupe'))
   .help()
   .argv;
