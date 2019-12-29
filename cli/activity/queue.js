@@ -15,6 +15,7 @@ const {
   processQueueActivity,
   cancelActivityQueue,
 } = require('../../utils/v2/activityQueue');
+const { setupConnection } = require('./setupConnection');
 
 /**
  * Get message from CLI args
@@ -323,11 +324,11 @@ async function doCommand(args) {
 }
 
 module.exports = {
-  doCommand,
-  doEnqueue,
-  doDequeue,
-  doDelete,
-  doGet,
-  doIngestActivity,
-  doUpdate,
+  command: [
+    'activity queue <subargs...>',
+  ],
+  describe: 'Manage the asynchronous activity ingestion queue',
+  handler: async (args) => {
+    await setupConnection(args, doCommand);
+  },
 };
