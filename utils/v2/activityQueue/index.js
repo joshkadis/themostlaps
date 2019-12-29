@@ -21,7 +21,11 @@ const PROCESS_QUEUE_AS_DRY_RUN = process.env.PROCESS_QUEUE_AS_DRY_RUN || false;
  * @param {QueueActivity} queueActivityDoc
  * @param {Bool} isDryRun
  */
-async function processQueueActivity(queueActivityDoc, isDryRun = false) {
+async function processQueueActivity(
+  queueActivityDoc,
+  isDryRun = false,
+  shouldForce = false,
+) {
   const completeProcessing = async () => {
     if (!isDryRun) {
       await queueActivityDoc.save();
@@ -35,8 +39,14 @@ async function processQueueActivity(queueActivityDoc, isDryRun = false) {
     ingestAttempts,
   } = queueActivityDoc;
   console.log(`${"\n"}Processing QueueActivity ${activityId} | Athlete ${athleteId}`);
+
+  if (shouldForce && !isDryRun) {
+    console.log('--force option is only available for dry run operations');
+    return false;
+  }
+
   try {
-    if (ingestAttempts === MAX_INGEST_ATTEMPTS) {
+    if (ingestAttempts === MAX_INGEST_ATTEMPTS && !shouldForce) {
       const detail = `Reached max. ingest attempts: ${ingestAttempts}`;
       console.log(detail);
       queueActivityDoc.set({
@@ -46,14 +56,16 @@ async function processQueueActivity(queueActivityDoc, isDryRun = false) {
       return completeProcessing();
     }
 
-    const exists = await Activity.exists({ _id: activityId });
-    if (exists) {
+    const activityDoc = await Activity.findById(activityId);
+    if (activityDoc && !shouldForce) {
       console.log('already exists as Activity document');
       queueActivityDoc.set({
         status: 'dequeued',
         detail: 'already exists as Activity document',
       });
       return completeProcessing();
+    } else if (activityDoc && shouldForce && !isDryRun) {
+      // @todo roll back Athlete stats and remove Activity
     }
 
     const athleteDoc = await Athlete.findById(athleteId);
@@ -65,6 +77,13 @@ async function processQueueActivity(queueActivityDoc, isDryRun = false) {
         errorMsg: 'No athleteDoc',
       });
       return completeProcessing();
+    }
+
+    if (shouldForce && queueActivityDoc.status !== 'pending') {
+      queueActivityDoc.set({
+        status: 'pending',
+        detail: 'Reset to pending by --force option',
+      });
     }
 
     // Get Strava API data and set status of queueActivityDoc

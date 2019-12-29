@@ -1,7 +1,7 @@
 const { fetchActivity } = require('../../refreshAthlete/utils');
 
 /**
- * Get Strava API data for enqueued activity
+ * Get Strava API data for enqueued activity and update QueueActivity document
  *
  * @param {QueueActivity} queueDoc QueueActivity document
  * @param {Athlete} athleteDoc Athlete document

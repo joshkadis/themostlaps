@@ -203,10 +203,12 @@ async function doUpdate({
  *
  * @param {Integer} args.subargs[1] Activity ID
  * @param {String} args.dryRun If true, will process without DB updates
+ * @param {String} args.force If true, ignore previously ingested activity
  */
 async function doIngestActivity({
   subargs,
   dryRun: isDryRun = false,
+  force: shouldForce = false,
 }) {
   if (!checkNumArgs(subargs, 2, 'ingest <activityId> <[--dry-run]>')) {
     return;
@@ -221,7 +223,7 @@ async function doIngestActivity({
     return;
   }
 
-  await processQueueActivity(queueDoc, isDryRun);
+  await processQueueActivity(queueDoc, isDryRun, shouldForce);
   console.log(queueDoc.toJSON());
   if (isDryRun) {
     console.log('**This was a dry run; no DB write operations.**');
