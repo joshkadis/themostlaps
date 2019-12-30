@@ -4,30 +4,91 @@ slackError.mockImplementation(() => {
   throw new Error('mocked slackError');
 });
 
-const { getActivityData } = require('./utils');
+const {
+  lapSegmentId,
+} = require('../../config');
 
-function makeSegmentEffortsInput(segmentIds) {
-  return segmentIds.map((id) => ({
+const {
+  getActivityData,
+  filterSegmentEfforts,
+} = require('./utils');
+
+function makeSegmentEffortsInput(segmentIds, options = {}) {
+  const defaults = {
     id: 123,
     elapsed_time: 234,
     moving_time: 345,
     start_date_local: '2019-12-07T18:56:13.023Z',
+  };
+  return segmentIds.map((id) => ({
+    ...defaults,
+    ...options,
     segment: {
       id,
     },
   }));
 }
 
-function makeSegmentEffortsOutput(num) {
+function makeSegmentEffortsOutput(num, options = {}) {
   const arr = new Array(num);
   arr.fill({
     _id: 123,
     elapsed_time: 234,
     moving_time: 345,
     start_date_local: '2019-12-07T18:56:13.023Z',
+    ...options,
   });
   return arr;
 }
+
+test('uses filterSegmentEfforts() to filter, dedupe, and format', () => {
+  // 2 same inputs => 1 outputs
+  let input = makeSegmentEffortsInput([lapSegmentId, lapSegmentId]);
+  let expected = makeSegmentEffortsOutput(1);
+  expect(input.length).toBe(2);
+  expect(expected.length).toBe(1);
+  expect(filterSegmentEfforts(input)).toStrictEqual(expected);
+
+  // 2 same inputs, 1 new input => 2 outputs
+  input = [
+    ...input,
+    ...makeSegmentEffortsInput(
+      [lapSegmentId],
+      { start_date_local: '2019-12-07T19:06:13.023Z' }
+    ),
+  ];
+
+  expected = [
+    ...expected,
+    ...makeSegmentEffortsOutput(
+      1,
+      { start_date_local: '2019-12-07T19:06:13.023Z' },
+    )
+  ];
+  expect(input.length).toBe(3);
+  expect(expected.length).toBe(2);
+  expect(filterSegmentEfforts(input)).toStrictEqual(expected);
+
+  // 2 same inputs, 1 new input, 2 same inputs => 3 outputs
+  input = [
+    ...input,
+    ...makeSegmentEffortsInput(
+      [lapSegmentId, lapSegmentId],
+      { start_date_local: '2019-12-07T19:16:13.023Z' }
+    ),
+  ];
+
+  expected = [
+    ...expected,
+    ...makeSegmentEffortsOutput(
+      1,
+      { start_date_local: '2019-12-07T19:16:13.023Z' },
+    )
+  ];
+  expect(input.length).toBe(5);
+  expect(expected.length).toBe(3);
+  expect(filterSegmentEfforts(input)).toStrictEqual(expected);
+});
 
 test('calculates laps from API response for activity', () => {
   const stripSecondsRegex = /:\d{2}\.\d{3}Z$/;
@@ -118,7 +179,8 @@ test('calculates laps from API response for activity', () => {
     added_date,
     athlete_id: 234,
     laps: 3,
-    segment_efforts: makeSegmentEffortsOutput(2),
+    // efforts for canonical segment are deduped
+    segment_efforts: makeSegmentEffortsOutput(1),
     source: 'refresh',
     start_date_local: '2019-12-07T18:56:13.023Z',
   });
