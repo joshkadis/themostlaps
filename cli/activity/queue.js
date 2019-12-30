@@ -15,7 +15,7 @@ const {
   processQueueActivity,
   cancelActivityQueue,
 } = require('../../utils/v2/activityQueue');
-const { setupConnection } = require('./setupConnection');
+const { setupConnection } = require('../utils/setupConnection');
 
 /**
  * Get message from CLI args

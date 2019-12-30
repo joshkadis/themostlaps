@@ -6,7 +6,7 @@ const mean = require('lodash/mean');
 const sum = require('lodash/sum');
 const Athlete = require('../../schema/Athlete');
 const Activity = require('../../schema/Activity');
-const { setupConnection } = require('./setupConnection');
+const { setupConnection } = require('../utils/setupConnection');
 const { dedupeSegmentEfforts } = require('../../utils/refreshAthlete/utils');
 const { updateAthleteStatsFromActivity } = require('../../utils/v2/stats/athleteStats');
 
