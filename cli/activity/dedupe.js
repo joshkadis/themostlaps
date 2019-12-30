@@ -46,7 +46,6 @@ async function doCommand({
   subargs = [],
   dryRun: isDryRun = false,
   verbose = false,
-  skipStats = false, // If true, will not recalculate athlete stats
   dedupe = false,
 }) {
   if (!dedupe) {
@@ -132,8 +131,7 @@ async function doCommand({
       }
     }
   }
-
-  if (!skipStats && !isDryRun) {
+  if (!isDryRun) {
     await athleteDoc.save();
   }
 
