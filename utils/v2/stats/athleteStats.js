@@ -103,7 +103,7 @@ function getStatsForLocation(locationsObj, location = defaultLocation) {
  * @param {String} startDate ISO date string
  */
 function updateAthleteStatsFromActivity(athleteDoc, delta, startDate) {
-  const stats = athleteDoc.get('stats');
+  const { stats } = athleteDoc;
   const activityDate = new Date(startDate);
   const yearKey = `_${activityDate.getFullYear()}`;
   const monthKey = getMonthKey(activityDate);
@@ -116,7 +116,8 @@ function updateAthleteStatsFromActivity(athleteDoc, delta, startDate) {
     stats[monthKey] += delta;
   }
 
-  athleteDoc.set({ stats: { ...stats } });
+  athleteDoc.set({ stats });
+  athleteDoc.markModified('stats');
 }
 
 module.exports = {
