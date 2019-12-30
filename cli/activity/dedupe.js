@@ -1,3 +1,5 @@
+/* eslint-disable no-underscore-dangle */
+
 /**
  * `$ activity dedupe ...` commands. I don't think we can use
  * `.commandDir()` because our CLI needs to be backwards-compatible
@@ -36,48 +38,31 @@ function dedupeActivity(activity) {
 }
 
 /**
- * Handle a CLI command like `$ article dedupe...`
+ * Dedupe segment efforts for all activities by an athlete
  *
- * @param {Object} args From yargs
+ * @param {Athlete} athleteDoc Athlete document
+ * @param {Array} activityIds Array of Activity ids
+ * @param {Bool} isDryRun
+ * @param {Bool} verbose
+ * @return {Object} Result of process
  */
-async function doCommand({
-  a = false,
-  athlete = false,
-  subargs = [],
-  dryRun: isDryRun = false,
-  verbose = false,
-  dedupe = false,
-}) {
-  if (!dedupe) {
-    console.warn("You didn't call `$ activity dedupe ...`");
-    return;
+async function dedupeAthleteActivities(
+  athleteDoc,
+  activityIds = [],
+  isDryRun = false,
+  verbose = true,
+) {
+  const query = {
+    athlete_id: athleteDoc.id,
+  };
+
+  if (activityIds.length) {
+    query._id = { $in: activityIds };
   }
 
-  const athleteId = a || athlete;
-  if (!athleteId) {
-    console.warn('Must specify an athlete or activity id(s)');
-    return;
-  }
-  const athleteDoc = await Athlete.findById(athleteId);
-  if (!athleteDoc) {
-    console.warn(`Could not find athlete ${athleteId}`);
-    return;
-  }
-
-  const query = {};
-  // query includes athlete
-  if (a || athlete) {
-    query.athlete_id = a || athlete;
-  }
-
-  // query inludes activity ids
-  if (subargs.length) {
-    // eslint-disable-next-line no-underscore-dangle
-    query._id = { $in: subargs };
-  }
-
-  const msg = `Deduping ${subargs.length || '*all*'} activities${query.athlete_id ? ` for Athlete ${query.athlete_id}` : ''}`;
+  const msg = `Deduping ${activityIds.length || '*all*'} activities${query.athlete_id ? ` for Athlete ${query.athlete_id}` : ''}`;
   console.log(msg);
+
   if (isDryRun) {
     console.log('*This is a dry run!*');
   }
@@ -85,14 +70,15 @@ async function doCommand({
   const activities = await Activity.find(query);
   if (!activities || !activities.length) {
     console.log('No activities were found.');
-    return;
+    return false;
   }
   console.log(`Found ${activities.length} activities`);
 
   const summary = {
     processed: 0,
-    abs: [],
-    rel: [],
+    laps: [], // "true" number of laps
+    abs: [], // size of delta
+    rel: [], // delta as % of total
     earliest: 'n/a',
     latest: 'n/a',
   };
@@ -121,6 +107,7 @@ async function doCommand({
         summary.earliest = activity.start_date_local;
       }
       summary.latest = activity.start_date_local;
+      summary.laps.push(nextLaps);
       summary.abs.push(delta);
       summary.rel.push((delta / prevLaps));
 
@@ -139,6 +126,10 @@ async function doCommand({
     console.table(log);
   }
 
+  const meanLaps = summary.laps.length
+    ? (mean(summary.laps)).toFixed(2)
+    : 'n/a';
+
   const meanChange = summary.abs.length
     ? (mean(summary.abs)).toFixed(2)
     : 'n/a';
@@ -151,11 +142,56 @@ async function doCommand({
     Processed: summary.processed,
     Affected: summary.abs.length,
     'Total change': sum(summary.abs),
+    'Avg laps/activity': meanLaps,
     'Avg change': meanChange,
     'Avg % change': meanPercentChange,
     Earliest: summary.earliest,
     Latest: summary.latest,
   });
+
+  return {
+    ...summary,
+    meanChange,
+    meanPercentChange,
+    meanLaps,
+  };
+}
+
+/**
+ * Handle a CLI command like `$ article dedupe...`
+ *
+ * @param {Object} args From yargs
+ */
+async function doCommand({
+  a = false,
+  athlete = false,
+  subargs = [],
+  dryRun: isDryRun = false,
+  verbose = false,
+  dedupe = false,
+}) {
+  if (!dedupe) {
+    console.warn("You didn't call `$ activity dedupe ...`");
+    return;
+  }
+
+  const athleteId = a || athlete;
+  if (!athleteId) {
+    console.warn('Must specify an athlete or activity id(s)');
+    return;
+  }
+  const athleteDoc = await Athlete.findById(athleteId);
+  if (!athleteDoc) {
+    console.warn(`Could not find athlete ${athleteId}`);
+    return;
+  }
+
+  await dedupeAthleteActivities(
+    athleteDoc,
+    subargs.length ? subargs : [], // activity Ids
+    isDryRun,
+    verbose,
+  );
 }
 
 module.exports = {
@@ -166,4 +202,5 @@ module.exports = {
   handler: async (args) => {
     await setupConnection(args, doCommand);
   },
+  dedupeAthleteActivities,
 };
