@@ -4,12 +4,14 @@
  */
 const mean = require('lodash/mean');
 const sum = require('lodash/sum');
+const Athlete = require('../../schema/Athlete');
 const Activity = require('../../schema/Activity');
 const { setupConnection } = require('./setupConnection');
 const { dedupeSegmentEfforts } = require('../../utils/refreshAthlete/utils');
+const { updateAthleteStatsFromActivity } = require('../../utils/v2/stats/athleteStats');
 
 /**
- * Dedupe segment efforts for an activity
+ * Dedupe segment efforts and update laps for an existing activity
  *
  * @param {Activity} activity Activity document
  */
@@ -42,8 +44,9 @@ async function doCommand({
   a = false,
   athlete = false,
   subargs = [],
-  dryRun: isDryRun = true, // @todo Go back to false by default
-  verbose = true, // @todo Go back to false by default
+  dryRun: isDryRun = false,
+  verbose = false,
+  skipStats = false, // If true, will not recalculate athlete stats
   dedupe = false,
 }) {
   if (!dedupe) {
@@ -51,12 +54,14 @@ async function doCommand({
     return;
   }
 
-  if (isDryRun) {
-    console.log('*This is a dry run!*');
-  }
-
-  if (!a && !athlete && !subargs.length) {
+  const athleteId = a || athlete;
+  if (!athleteId) {
     console.warn('Must specify an athlete or activity id(s)');
+    return;
+  }
+  const athleteDoc = await Athlete.findById(athleteId);
+  if (!athleteDoc) {
+    console.warn(`Could not find athlete ${athleteId}`);
     return;
   }
 
@@ -74,6 +79,9 @@ async function doCommand({
 
   const msg = `Deduping ${subargs.length || '*all*'} activities${query.athlete_id ? ` for Athlete ${query.athlete_id}` : ''}`;
   console.log(msg);
+  if (isDryRun) {
+    console.log('*This is a dry run!*');
+  }
 
   const activities = await Activity.find(query);
   if (!activities || !activities.length) {
@@ -94,7 +102,10 @@ async function doCommand({
 
   // eslint-disable-next-line no-restricted-syntax
   for await (const activity of activities) {
-    const prevLaps = activity.laps;
+    const {
+      laps: prevLaps,
+      start_date_local: startDateStr,
+    } = activity;
     dedupeActivity(activity);
     const nextLaps = activity.laps;
     const delta = nextLaps - prevLaps;
@@ -106,24 +117,25 @@ async function doCommand({
         nextLaps,
         date: activity.start_date_local,
       };
-      // console.log(`Activity ${activity.id} | Delta ${delta} laps | ${prevLaps} -> ${nextLaps} | ${activity.start_date_local}`);
       if (!summary.abs.length) {
-        // assume order of IDs corresponds to order or activity start times
+        // assume order of activity IDs matches order of activity start times
         summary.earliest = activity.start_date_local;
       }
       summary.latest = activity.start_date_local;
       summary.abs.push(delta);
       summary.rel.push((delta / prevLaps));
 
-      // @todo Update local deltaStats object
+      updateAthleteStatsFromActivity(athleteDoc, delta, startDateStr);
 
       if (!isDryRun) {
-        // await activity.save();
+        await activity.save();
       }
     }
   }
 
-  // @todo Update athlete stats from deltaStats
+  if (!skipStats && !isDryRun) {
+    await athleteDoc.save();
+  }
 
   if (verbose) {
     console.table(log);
