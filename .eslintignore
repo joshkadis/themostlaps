@@ -18,6 +18,8 @@ dist/
 !cli/deleteUser.js
 !cli/getActivityInfo.js
 !cli/activity/**/*.js
+!cli/stats/**/*.js
+!cli/utils/**/*.js
 
 # Utils included in refactoring
 !utils/athleteStatsClient.js
