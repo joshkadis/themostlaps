@@ -44,6 +44,7 @@ function dedupeActivity(activity) {
  * @param {Array} activityIds Array of Activity ids
  * @param {Bool} isDryRun
  * @param {Bool} verbose
+ * @param {Bool} supress Kill almost all logging
  * @return {Object} Result of process
  */
 async function dedupeAthleteActivities(
@@ -51,6 +52,7 @@ async function dedupeAthleteActivities(
   activityIds = [],
   isDryRun = false,
   verbose = true,
+  suppress = false,
 ) {
   const query = {
     athlete_id: athleteDoc.id,
@@ -60,19 +62,25 @@ async function dedupeAthleteActivities(
     query._id = { $in: activityIds };
   }
 
-  const msg = `Deduping ${activityIds.length || '*all*'} activities${query.athlete_id ? ` for Athlete ${query.athlete_id}` : ''}`;
-  console.log(msg);
+  if (!suppress) {
+    const msg = `Deduping ${activityIds.length || '*all*'} activities${query.athlete_id ? ` for Athlete ${query.athlete_id}` : ''}`;
+    console.log(msg);
 
-  if (isDryRun) {
-    console.log('*This is a dry run!*');
+    if (isDryRun) {
+      console.log('*This is a dry run!*');
+    }
   }
 
   const activities = await Activity.find(query);
   if (!activities || !activities.length) {
-    console.log('No activities were found.');
+    if (!suppress) {
+      console.log('No activities were found.');
+    }
     return false;
   }
-  console.log(`Found ${activities.length} activities`);
+  if (!suppress) {
+    console.log(`Found ${activities.length} activities`);
+  }
 
   const summary = {
     processed: 0,
@@ -122,7 +130,7 @@ async function dedupeAthleteActivities(
     await athleteDoc.save();
   }
 
-  if (verbose) {
+  if (verbose && !suppress) {
     console.table(log);
   }
 
@@ -138,16 +146,20 @@ async function dedupeAthleteActivities(
     ? (mean(summary.rel)).toFixed(2)
     : 'n/a';
 
-  console.table({
-    Processed: summary.processed,
-    Affected: summary.abs.length,
-    'Total change': sum(summary.abs),
-    'Avg laps/activity': meanLaps,
-    'Avg change': meanChange,
-    'Avg % change': meanPercentChange,
-    Earliest: summary.earliest,
-    Latest: summary.latest,
-  });
+  // If suppressing (e.g. calling from another command)
+  // only show result table if there were affected activities
+  if (!suppress || (verbose && summary.abs.length)) {
+    console.table({
+      Processed: summary.processed,
+      Affected: summary.abs.length,
+      'Total change': sum(summary.abs),
+      'Avg laps/activity': meanLaps,
+      'Avg change': meanChange,
+      'Avg % change': meanPercentChange,
+      Earliest: summary.earliest,
+      Latest: summary.latest,
+    });
+  }
 
   return {
     ...summary,

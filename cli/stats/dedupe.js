@@ -41,18 +41,24 @@ async function dedupeAll({
   for await (const athleteDoc of athletes) {
     console.log(`${numOf} of ${athletes.length} : ${athleteDoc.id}`);
     numOf += 1;
-    const result = await dedupeAthleteActivities(athleteDoc, isDryRun, verbose);
-    if (result) {
+    const result = await dedupeAthleteActivities(
+      athleteDoc,
+      [],
+      isDryRun,
+      verbose,
+      'suppress',
+    );
+    if (result && result.abs.length) {
       log.athletes += 1;
       log.activities += result.abs.length;
-      log.meanLaps += result.meanLaps;
+      log.meanLaps += parseFloat(result.meanLaps);
     }
   }
 
   console.table({
     'Affected athletes': log.athletes,
     'Affected activities': log.activities,
-    'Avg laps per affected activity': log.meanLaps / log.activities
+    'Avg laps per affected activity': log.meanLaps / log.athletes,
   });
 }
 
