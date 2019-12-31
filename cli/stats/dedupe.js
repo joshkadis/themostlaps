@@ -13,8 +13,8 @@ async function dedupeAll({
 }) {
   // Setup
   const query = {};
-  if (athleteIds.length) {
-    const ids = athleteIds.split(',').map(Number);
+  if (athleteIds) {
+    const ids = athleteIds.toString().split(',').map(Number);
     console.log(`Deduping segment efforts for athletes ${ids.join(', ')}`);
     // eslint-disable-next-line no-underscore-dangle
     query._id = { $in: ids };
@@ -24,6 +24,7 @@ async function dedupeAll({
   if (isDryRun) {
     console.log('*This is a dry run!*');
   }
+
   const athletes = await Athlete.find(query);
   if (!athletes || !athletes.length) {
     console.warn('No athletes were found');
@@ -67,17 +68,10 @@ async function dedupeAll({
   });
 }
 
-module.exports = {
-  command: [
-    'stats dedupe',
-  ],
-  describe: 'Dedupe all activities for all athletes',
-  handler: async (args) => {
-    if (!args.dedupe) {
-      console.warn("You didn't call `$ stats dedupe`");
-      return;
-    }
+async function setupThenCommand(args) {
+  await setupConnection(args, dedupeAll);
+}
 
-    await setupConnection(args, dedupeAll);
-  },
+module.exports = {
+  setupThenCommand,
 };
