@@ -52,13 +52,17 @@ async function dedupeAll({
       log.athletes += 1;
       log.activities += result.abs.length;
       log.meanLaps += parseFloat(result.meanLaps);
+      log.meanChange += parseFloat(result.meanChange);
+      console.log(result);
+      console.log(log);
     }
   }
 
   console.table({
     'Affected athletes': log.athletes,
     'Affected activities': log.activities,
-    'Avg laps per affected activity': log.meanLaps / log.athletes,
+    'Avg laps per affected activity': (log.meanLaps / log.athletes).toFixed(2),
+    'Avg change per affected activity': (log.meanChange / log.athletes).toFixed(2),
   });
 }
 
