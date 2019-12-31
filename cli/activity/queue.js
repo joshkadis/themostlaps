@@ -276,7 +276,7 @@ async function doReset({ subargs }) {
  * @param {Object} args From yargs
  */
 async function doCommand(args) {
-  if (!args.queue) {
+  if (args.subcommand !== 'queue') {
     console.warn("You didn't call `$ activity queue ...`");
     return;
   }
@@ -323,12 +323,10 @@ async function doCommand(args) {
   }
 }
 
+async function setupThenCommand(args) {
+  await setupConnection(args, doCommand);
+}
+
 module.exports = {
-  command: [
-    'activity queue <subargs...>',
-  ],
-  describe: 'Manage the asynchronous activity ingestion queue',
-  handler: async (args) => {
-    await setupConnection(args, doCommand);
-  },
+  setupThenCommand,
 };

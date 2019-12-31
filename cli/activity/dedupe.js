@@ -190,9 +190,9 @@ async function doCommand({
   subargs = [],
   dryRun: isDryRun = false,
   verbose = false,
-  dedupe = false,
+  subcommand = '',
 }) {
-  if (!dedupe) {
+  if (subcommand !== 'dedupe') {
     console.warn("You didn't call `$ activity dedupe ...`");
     return;
   }
@@ -216,13 +216,11 @@ async function doCommand({
   );
 }
 
+async function setupThenCommand(args) {
+  await setupConnection(args, doCommand);
+}
+
 module.exports = {
-  command: [
-    'activity dedupe [<subargs...>]',
-  ],
-  describe: 'Dedupe laps by activity or athlete',
-  handler: async (args) => {
-    await setupConnection(args, doCommand);
-  },
+  setupThenCommand,
   dedupeAthleteActivities,
 };
