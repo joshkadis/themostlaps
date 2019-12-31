@@ -1,5 +1,6 @@
 const { setupThenCommand: dedupeCommand } = require('./dedupe');
 const { setupThenCommand: formatEffortsCommand } = require('./formatEfforts');
+const { setupThenCommand: recalculateCommand } = require('./recalculateAthletes');
 
 module.exports = {
   command: [
@@ -14,6 +15,10 @@ module.exports = {
 
       case 'formatefforts':
         formatEffortsCommand(args);
+        break;
+
+      case 'recalculate':
+        recalculateCommand(args);
         break;
 
       default:
