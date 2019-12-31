@@ -169,5 +169,6 @@ const argv = require('yargs')
   .command(require('./cli/activity/queue'))
   .command(require('./cli/activity/dedupe'))
   .command(require('./cli/stats/dedupe'))
+  .command(require('./cli/stats/formatefforts'))
   .help()
   .argv;
