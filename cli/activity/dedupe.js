@@ -35,6 +35,7 @@ function dedupeActivity(activity) {
     segment_efforts: dedupedEfforts,
     laps: nextLaps,
   });
+  activity.markModified('segment_efforts');
 }
 
 /**
@@ -95,17 +96,26 @@ async function dedupeAthleteActivities(
 
   // eslint-disable-next-line no-restricted-syntax
   for await (const activity of activities) {
+    summary.processed += 1;
     const {
       laps: prevLaps,
       start_date_local: startDateStr,
+      segment_efforts: prevSegmentEfforts,
     } = activity;
     dedupeActivity(activity);
-    const nextLaps = activity.laps;
+
+    const {
+      laps: nextLaps,
+      segment_efforts: nextSegmentEfforts,
+    } = activity;
+
     const delta = nextLaps - prevLaps;
-    summary.processed += 1;
-    if (delta < 0) {
+    const deltaEfforts = nextSegmentEfforts.length - prevSegmentEfforts.length;
+
+    if (delta < 0 || deltaEfforts < 0) {
       log[activity.id] = {
         delta,
+        deltaEfforts,
         prevLaps,
         nextLaps,
         date: activity.start_date_local,
