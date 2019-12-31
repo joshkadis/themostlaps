@@ -18,18 +18,14 @@ const { updateAthleteStatsFromActivity } = require('../../utils/v2/stats/athlete
  * @param {Activity} activity Activity document
  */
 function dedupeActivity(activity) {
-  const { segment_efforts, laps } = activity;
+  const { segment_efforts } = activity;
   if (!segment_efforts || !segment_efforts.length) {
     return;
   }
 
   const dedupedEfforts = dedupeSegmentEfforts(segment_efforts);
 
-  if (dedupedEfforts.length === segment_efforts.length) {
-    return;
-  }
-
-  const nextLaps = laps - segment_efforts.length + dedupedEfforts.length;
+  const nextLaps = dedupedEfforts.length + 1;
 
   activity.set({
     segment_efforts: dedupedEfforts,
@@ -103,7 +99,6 @@ async function dedupeAthleteActivities(
       segment_efforts: prevSegmentEfforts,
     } = activity;
     dedupeActivity(activity);
-
     const {
       laps: nextLaps,
       segment_efforts: nextSegmentEfforts,
@@ -112,7 +107,7 @@ async function dedupeAthleteActivities(
     const delta = nextLaps - prevLaps;
     const deltaEfforts = nextSegmentEfforts.length - prevSegmentEfforts.length;
 
-    if (delta < 0 || deltaEfforts < 0) {
+    if (delta !== 0 || deltaEfforts !== 0) {
       log[activity.id] = {
         delta,
         deltaEfforts,
