@@ -1,3 +1,4 @@
+const cliProgress = require('cli-progress');
 const { setupConnection } = require('../utils/setupConnection');
 const { dedupeAthleteActivities } = require('../activity/dedupe');
 const Athlete = require('../../schema/Athlete');
@@ -29,8 +30,10 @@ async function dedupeAll({
     return;
   }
 
+  const progressBar = new cliProgress.SingleBar();
+  progressBar.start(athletes.length, 0);
+
   // Iterate over athletes
-  let numOf = 1;
   const log = {
     athletes: 0,
     activities: 0,
@@ -39,8 +42,7 @@ async function dedupeAll({
 
   // eslint-disable-next-line no-restricted-syntax
   for await (const athleteDoc of athletes) {
-    console.log(`${numOf} of ${athletes.length} : ${athleteDoc.id}`);
-    numOf += 1;
+    progressBar.increment();
     const result = await dedupeAthleteActivities(
       athleteDoc,
       [],
@@ -53,11 +55,10 @@ async function dedupeAll({
       log.activities += result.abs.length;
       log.meanLaps += parseFloat(result.meanLaps);
       log.meanChange += parseFloat(result.meanChange);
-      console.log(result);
-      console.log(log);
     }
   }
 
+  progressBar.stop();
   console.table({
     'Affected athletes': log.athletes,
     'Affected activities': log.activities,
