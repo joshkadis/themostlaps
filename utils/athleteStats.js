@@ -45,18 +45,18 @@ async function compileStatsForActivities(
   }, initial);
 
   // Handle async special stats outside of Array.reduce()
-  let updatedSpecialStats = initial.special ?
-    Object.assign({}, initial.special) : {};
-  for (let i = 0; i < activities.length; i++) {
-    const activity = activities[i];
-    updatedSpecialStats = await compileSpecialStats(
-      activity,
-      activity.get('start_date_local'),
-      updatedSpecialStats
-    );
-  }
+  // let updatedSpecialStats = initial.special ?
+  //   Object.assign({}, initial.special) : {};
+  // for (let i = 0; i < activities.length; i++) {
+  //   const activity = activities[i];
+  //   updatedSpecialStats = await compileSpecialStats(
+  //     activity,
+  //     activity.get('start_date_local'),
+  //     updatedSpecialStats
+  //   );
+  // }
 
-  updatedStats.special = updatedSpecialStats;
+  // updatedStats.special = updatedSpecialStats;
   return updatedStats;
 }
 
