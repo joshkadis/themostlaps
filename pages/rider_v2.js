@@ -6,7 +6,7 @@ import { withRouter } from 'next/router';
 import Layout from '../components/Layout';
 import RiderPageHeader from '../components/RiderPageHeader';
 import RiderPageWelcome from '../components/RiderPageWelcome';
-import RiderPageUpdated from '../components/RiderPageUpdated';
+import RiderPageMessage from '../components/RiderPageMessage';
 
 // Utils
 import { APIRequest } from '../utils';
@@ -35,6 +35,7 @@ class RiderPage extends Component {
     currentLocation: defaultLocation,
     shouldShowWelcome: false,
     shouldShowUpdated: false,
+    isDuplicateSignup: false,
   };
 
   static propTypes = {
@@ -46,6 +47,7 @@ class RiderPage extends Component {
     router: PropTypes.object.isRequired,
     shouldShowWelcome: PropTypes.bool,
     shouldShowUpdated: PropTypes.bool,
+    isDuplicateSignup: PropTypes.bool,
     status: PropTypes.string,
   }
 
