@@ -5,7 +5,7 @@ import Layout from '../components/Layout';
 import { getPathnameFromContext, APIRequest } from '../utils';
 import RiderPageHeader from '../components/RiderPageHeader';
 import RiderPageWelcome from '../components/RiderPageWelcome';
-import RiderPageUpdated from '../components/RiderPageUpdated';
+import RiderPageMessage from '../components/RiderPageMessage';
 import SearchUsers from '../components/lib/SearchUsers';
 import * as styles from '../components/Layout.css';
 import {
@@ -200,6 +200,7 @@ class Rider extends Component {
       status,
       shouldShowWelcome,
       shouldShowUpdated,
+      isDuplicateSignup,
     } = this.props;
 
     // Athlete not found, would have returned a 404 if server-rendered
@@ -248,7 +249,14 @@ class Rider extends Component {
           />
         }
 
-        {shouldShowUpdated && <RiderPageUpdated />}
+        {(shouldShowUpdated || isDuplicateSignup)
+          && (
+            <RiderPageMessage
+              shouldShowUpdated={shouldShowUpdated}
+              isDuplicateSignup={isDuplicateSignup}
+            />
+          )
+        }
 
         <RiderPageHeader
           firstname={athlete.firstname}
@@ -309,6 +317,7 @@ Rider.getInitialProps = async function(context) {
     query,
     shouldShowWelcome: !!('undefined' !== typeof query.welcome && query.welcome),
     shouldShowUpdated: !!('undefined' !== typeof query.updated && query.updated),
+    isDuplicateSignup: !!('undefined' !== typeof query.ds && query.ds),
   };
 
   if (!query.athleteId) {
@@ -336,6 +345,7 @@ Rider.defaultProps = {
   status: 'ready',
   shouldShowWelcome: false,
   shouldShowUpdated: false,
+  isDuplicateSignup: false,
 }
 
 Rider.propTypes = {
@@ -346,6 +356,7 @@ Rider.propTypes = {
   status: PropTypes.string.isRequired,
   shouldShowWelcome: PropTypes.bool,
   shouldShowUpdated: PropTypes.bool,
+  isDuplicateSignup: PropTypes.bool,
 };
 
 export default Rider;
