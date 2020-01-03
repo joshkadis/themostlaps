@@ -28,7 +28,10 @@ class RiderPageMessage extends Component {
       ? (<>
           <p>Looks like you{"'"}re already signed up!</p>
           {/* eslint-disable-next-line */}
-          <p>If something about your profile or stats looks incorrect, email us.</p>
+          <p>
+            If your profile or stats look incorrect,
+            {' '}please <a href="mailto:info@themostlaps.com">let us know</a>.
+          </p>
         </>)
       : (<>
           <p>Thanks for updating your account info.</p>
