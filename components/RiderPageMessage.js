@@ -4,12 +4,12 @@ import * as styles from './Layout.css';
 
 class RiderPageMessage extends Component {
   state = {
-    wasClosed: false,
+    expanded: true,
   };
 
   onClickNoThanks = () => {
     this.setState({
-      wasClosed: true,
+      expanded: false,
     });
   };
 
@@ -40,15 +40,10 @@ class RiderPageMessage extends Component {
   }
 
   render() {
-    const {
-      shouldShowUpdated,
-      isDuplicateSignup,
-    } = this.props;
+    const doNotRender = !this.props.shouldShowUpdated
+      && !this.props.isDuplicateSignup;
 
-    if (
-      this.state.wasClosed
-      || (!shouldShowUpdated && !isDuplicateSignup)
-    ) {
+    if (!this.state.expanded || doNotRender) {
       return null;
     }
 
