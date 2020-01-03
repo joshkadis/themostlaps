@@ -15,6 +15,7 @@ const {
   processQueueActivity,
   cancelActivityQueue,
 } = require('../../utils/v2/activityQueue');
+const { setupConnection } = require('../utils/setupConnection');
 
 /**
  * Get message from CLI args
@@ -275,7 +276,7 @@ async function doReset({ subargs }) {
  * @param {Object} args From yargs
  */
 async function doCommand(args) {
-  if (!args.queue) {
+  if (args.subcommand !== 'queue') {
     console.warn("You didn't call `$ activity queue ...`");
     return;
   }
@@ -322,12 +323,10 @@ async function doCommand(args) {
   }
 }
 
+async function setupThenCommand(args) {
+  await setupConnection(args, doCommand);
+}
+
 module.exports = {
-  doCommand,
-  doEnqueue,
-  doDequeue,
-  doDelete,
-  doGet,
-  doIngestActivity,
-  doUpdate,
+  setupThenCommand,
 };

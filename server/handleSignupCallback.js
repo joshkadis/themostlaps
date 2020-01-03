@@ -175,20 +175,26 @@ async function handleSignupCallback(req, res) {
       return;
     }
 
-    // Clear existing athlete if possible
+    // Check for existing athlete
     try {
       const athlete_id = formattedAthleteData._id;
-      const exists = await Athlete.exists({ _id: athlete_id });
-      if (exists) {
-        console.log(`Clearing Athlete and Activities for ${athlete_id}`);
-        await Athlete.findByIdAndDelete(athlete_id);
-        await Activity.deleteMany({ athlete_id });
+      const existingAthleteDoc = await Athlete.findById(athlete_id);
+      if (existingAthleteDoc) {
+        // Redirect to athlete page w duplicate signup message
+        // @todo Duplicate of success if you go all the way to the end
+        // should refactor
+        const successMessage = getSlackSuccessMessage(existingAthleteDoc);
+        console.log(`Duplicate signup: ${successMessage}`);
+        slackSuccess('Duplicate signup', successMessage);
+        res.redirect(303, `/rider/${athlete_id}?v2&ds=1`);
+        return;
       }
     } catch(err) {
       handleSignupError(43, {
         err,
         athlete_id: formattedAthleteData._id,
       });
+      return;
     }
 
     athleteDoc = await Athlete.create(formattedAthleteData);

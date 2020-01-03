@@ -113,6 +113,7 @@ class Ranking extends Component {
         <RankingSelector current={query} />
         {!!this.state.ranking.length ? (
           <div>
+            <p className="small">Stats might be higher than normal. {"We're"} working on it...</p>
             <table className={styles['ranking-row__table']}>
               <tbody>
                 {this.state.ranking.map(({ _id, athlete, stats = {} }, idx) => (

@@ -9,7 +9,7 @@ function daysAgoTimestamp(daysago = null) {
 
   const days = parseInt(daysago, 10);
 
-  if (!daysago || isNaN(days)) {
+  if (!daysago || Number.isNaN(days)) {
     return current;
   }
 
