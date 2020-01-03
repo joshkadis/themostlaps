@@ -6,7 +6,7 @@ import { withRouter } from 'next/router';
 import Layout from '../components/Layout';
 import RiderPageHeader from '../components/RiderPageHeader';
 import RiderPageWelcome from '../components/RiderPageWelcome';
-import RiderPageUpdated from '../components/RiderPageUpdated';
+import RiderPageMessage from '../components/RiderPageMessage';
 
 // Utils
 import { APIRequest } from '../utils';
@@ -35,6 +35,7 @@ class RiderPage extends Component {
     currentLocation: defaultLocation,
     shouldShowWelcome: false,
     shouldShowUpdated: false,
+    isDuplicateSignup: false,
   };
 
   static propTypes = {
@@ -46,6 +47,7 @@ class RiderPage extends Component {
     router: PropTypes.object.isRequired,
     shouldShowWelcome: PropTypes.bool,
     shouldShowUpdated: PropTypes.bool,
+    isDuplicateSignup: PropTypes.bool,
     status: PropTypes.string,
   }
 
@@ -78,6 +80,7 @@ class RiderPage extends Component {
       query,
       shouldShowWelcome: !!query.welcome,
       shouldShowUpdated: !!query.updated,
+      isDuplicateSignup: !!query.ds,
       status: NOT_FETCHED_STATUS,
     };
 
@@ -233,8 +236,9 @@ class RiderPage extends Component {
       query,
       status,
       athlete,
-      shouldShowUpdated,
       shouldShowWelcome,
+      shouldShowUpdated,
+      isDuplicateSignup,
       locations,
       currentLocation,
       router: routerProp,
@@ -283,7 +287,14 @@ class RiderPage extends Component {
           />
         )}
 
-        {shouldShowUpdated && <RiderPageUpdated />}
+        {(shouldShowUpdated || isDuplicateSignup)
+          && (
+            <RiderPageMessage
+              shouldShowUpdated={shouldShowUpdated}
+              isDuplicateSignup={isDuplicateSignup}
+            />
+          )
+        }
 
         <RiderPageHeader
           firstname={athlete.firstname}
