@@ -286,10 +286,14 @@ class RiderPage extends Component {
           />
         )}
 
-        <RiderPageMessage
-          shouldShowUpdated={shouldShowUpdated}
-          isDuplicateSignup={isDuplicateSignup}
-        />
+        {(shouldShowUpdated || isDuplicateSignup)
+          && (
+            <RiderPageMessage
+              shouldShowUpdated={shouldShowUpdated}
+              isDuplicateSignup={isDuplicateSignup}
+            />
+          )
+        }
 
         <RiderPageHeader
           firstname={athlete.firstname}

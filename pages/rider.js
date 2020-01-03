@@ -5,7 +5,7 @@ import Layout from '../components/Layout';
 import { getPathnameFromContext, APIRequest } from '../utils';
 import RiderPageHeader from '../components/RiderPageHeader';
 import RiderPageWelcome from '../components/RiderPageWelcome';
-import RiderPageUpdated from '../components/RiderPageUpdated';
+import RiderPageMessage from '../components/RiderPageMessage';
 import SearchUsers from '../components/lib/SearchUsers';
 import * as styles from '../components/Layout.css';
 import {
@@ -248,7 +248,14 @@ class Rider extends Component {
           />
         }
 
-        {shouldShowUpdated && <RiderPageUpdated />}
+        {(shouldShowUpdated || isDuplicateSignup)
+          && (
+            <RiderPageMessage
+              shouldShowUpdated={shouldShowUpdated}
+              isDuplicateSignup={isDuplicateSignup}
+            />
+          )
+        }
 
         <RiderPageHeader
           firstname={athlete.firstname}
@@ -336,6 +343,7 @@ Rider.defaultProps = {
   status: 'ready',
   shouldShowWelcome: false,
   shouldShowUpdated: false,
+  isDuplicateSignup: false,
 }
 
 Rider.propTypes = {
@@ -346,6 +354,7 @@ Rider.propTypes = {
   status: PropTypes.string.isRequired,
   shouldShowWelcome: PropTypes.bool,
   shouldShowUpdated: PropTypes.bool,
+  isDuplicateSignup: PropTypes.bool,
 };
 
 export default Rider;
