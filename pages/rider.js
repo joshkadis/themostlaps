@@ -200,6 +200,7 @@ class Rider extends Component {
       status,
       shouldShowWelcome,
       shouldShowUpdated,
+      isDuplicateSignup,
     } = this.props;
 
     // Athlete not found, would have returned a 404 if server-rendered
@@ -316,6 +317,7 @@ Rider.getInitialProps = async function(context) {
     query,
     shouldShowWelcome: !!('undefined' !== typeof query.welcome && query.welcome),
     shouldShowUpdated: !!('undefined' !== typeof query.updated && query.updated),
+    isDuplicateSignup: !!('undefined' !== typeof query.ds && query.ds),
   };
 
   if (!query.athleteId) {

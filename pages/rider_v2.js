@@ -80,6 +80,7 @@ class RiderPage extends Component {
       query,
       shouldShowWelcome: !!query.welcome,
       shouldShowUpdated: !!query.updated,
+      isDuplicateSignup: !!query.ds,
       status: NOT_FETCHED_STATUS,
     };
 
