@@ -5,11 +5,9 @@ const {
 const Activity = require('../../schema/Activity');
 const Athlete = require('../../schema/Athlete');
 
-
 /**
- * Some activities that were ingested very early on have their segment_efforts property
- * as an array of objects in Strava API's schema. We need to convert those
- * to use our own SegmentEffort schema.
+ * Loop through all athletes and recalculate stats
+ * *without* updating any activity documents
  */
 async function doCommand({
   dryRun: isDryRun = false,
