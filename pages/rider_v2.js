@@ -235,8 +235,9 @@ class RiderPage extends Component {
       query,
       status,
       athlete,
-      shouldShowUpdated,
       shouldShowWelcome,
+      shouldShowUpdated,
+      isDuplicateSignup,
       locations,
       currentLocation,
       router: routerProp,
@@ -285,7 +286,10 @@ class RiderPage extends Component {
           />
         )}
 
-        {shouldShowUpdated && <RiderPageUpdated />}
+        <RiderPageMessage
+          shouldShowUpdated={shouldShowUpdated}
+          isDuplicateSignup={isDuplicateSignup}
+        />
 
         <RiderPageHeader
           firstname={athlete.firstname}
