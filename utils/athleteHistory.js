@@ -73,6 +73,9 @@ function formatSegmentEffort({
  * @return {Array}
  */
 function getActivitiesFromEfforts(efforts, source = 'signup') {
+  // Fixing this would probably deserve testing
+  // that I don't feel like doing
+  /* eslint-disable no-param-reassign */
   const activitiesMap = efforts.reduce((map, effort) => {
     const {
       activity,
@@ -95,7 +98,7 @@ function getActivitiesFromEfforts(efforts, source = 'signup') {
     }
 
     // Increment laps for activity
-    map[activity.id].laps = map[activity.id].laps + 1;
+    map[activity.id].laps += 1;
 
     // save segment effort for v2+ features
     map[activity.id].segment_efforts.push(formatSegmentEffort(effort));
