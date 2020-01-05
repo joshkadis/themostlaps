@@ -1,8 +1,6 @@
 require('isomorphic-fetch');
-const querystring = require('querystring');
-const { apiUrl, lapSegmentId, addMakeupLap } = require('../config');
+const { lapSegmentId, addMakeupLap } = require('../config');
 const Activity = require('../schema/Activity');
-const Athlete = require('../schema/Athlete');
 const { slackError } = require('./slackNotification');
 const fetchStravaAPI = require('./fetchStravaAPI');
 const { dedupeSegmentEfforts } = require('./refreshAthlete/utils');
@@ -16,17 +14,17 @@ const { dedupeSegmentEfforts } = require('./refreshAthlete/utils');
 async function getLapEffortsHistory(athleteDoc, page = 1, allEfforts = []) {
   const athleteId = athleteDoc.get('_id');
 
-  const efforts  = await fetchStravaAPI(
+  const efforts = await fetchStravaAPI(
     `/segments/${lapSegmentId}/all_efforts`,
     athleteDoc,
     {
       athlete_id: athleteId,
       per_page: 200,
       page,
-    }
+    },
   );
 
-  if (efforts.status && 200 !== efforts.status) {
+  if (efforts.status && efforts.status !== 200) {
     console.log(`Error getLapEffortsHistory: ${athleteId}`);
     slackError(45, {
       athleteId,
@@ -40,10 +38,10 @@ async function getLapEffortsHistory(athleteDoc, page = 1, allEfforts = []) {
     return allEfforts;
   }
 
-  return await getLapEffortsHistory(
+  return getLapEffortsHistory(
     athleteDoc,
     (page + 1),
-    allEfforts.concat(efforts)
+    allEfforts.concat(efforts),
   );
 }
 
@@ -53,7 +51,12 @@ async function getLapEffortsHistory(athleteDoc, page = 1, allEfforts = []) {
  * @param {Object} effort Segment effort from Strava API
  * @return {Object}
  */
-function formatSegmentEffort({ id, elapsed_time, moving_time, start_date_local }) {
+function formatSegmentEffort({
+  id,
+  elapsed_time,
+  moving_time,
+  start_date_local,
+}) {
   return {
     _id: id,
     elapsed_time,
@@ -154,14 +157,16 @@ async function shouldCreateActivity(activity) {
 async function saveAthleteHistory(activities) {
   // Filter out invalid or already saved activities
   const filteredActivities = [];
-  for (let i = 0; i < activities.length; i++) {
+  for (let i = 0; i < activities.length; i += 1) {
+    // @todo Use async iterator
+    // eslint-disable-next-line
     const shouldCreate = await shouldCreateActivity(activities[i]);
     if (shouldCreate) {
       filteredActivities.push(activities[i]);
     }
   }
 
-  return await Activity.create(filteredActivities);
+  return Activity.create(filteredActivities);
 }
 
 module.exports = {
