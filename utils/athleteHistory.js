@@ -5,7 +5,7 @@ const Activity = require('../schema/Activity');
 const Athlete = require('../schema/Athlete');
 const { slackError } = require('./slackNotification');
 const fetchStravaAPI = require('./fetchStravaAPI');
-
+const { dedupeSegmentEfforts } = require('./refreshAthlete/utils');
 /**
  * Iterate though paginated history of segment efforts and concatenate
  * @param {Document} athleteDoc
@@ -109,11 +109,13 @@ function getActivitiesFromEfforts(efforts, source = 'signup') {
  * @return {Array} List of activities for athlete
  */
 async function fetchAthleteHistory(athlete) {
-  const lapEfforts = await getLapEffortsHistory(athlete);
+  let lapEfforts = await getLapEffortsHistory(athlete);
 
   if (!lapEfforts || !lapEfforts.length) {
     return [];
   }
+
+  lapEfforts = dedupeSegmentEfforts(lapEfforts);
 
   return getActivitiesFromEfforts(lapEfforts);
 }
