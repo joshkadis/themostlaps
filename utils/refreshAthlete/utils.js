@@ -6,7 +6,6 @@ const {
   lapSegmentId,
 } = require('../../config');
 const fetchStravaAPI = require('../fetchStravaAPI');
-const { formatSegmentEffort } = require('../athleteHistory');
 const calculateLapsFromSegmentEfforts = require('./calculateLapsFromSegmentEfforts');
 const { slackError } = require('../slackNotification');
 const Athlete = require('../../schema/Athlete');
@@ -159,6 +158,25 @@ function dedupeSegmentEfforts(efforts) {
   }, []);
 }
 
+/**
+ * Format segment effort into our database model shape
+ *
+ * @param {Object} effort Segment effort from Strava API
+ * @return {Object}
+ */
+function formatSegmentEffort({
+  id,
+  elapsed_time,
+  moving_time,
+  start_date_local,
+}) {
+  return {
+    _id: id,
+    elapsed_time,
+    moving_time,
+    start_date_local,
+  };
+}
 
 /**
  * Filter, dedupe, and format lap segment efforts from all segment efforts
@@ -221,6 +239,7 @@ module.exports = {
   dedupeSegmentEfforts,
   filterSegmentEfforts,
   fetchActivity,
+  formatSegmentEffort,
   activityCouldHaveLaps,
   getActivityData,
 };

@@ -3,7 +3,10 @@ const { lapSegmentId, addMakeupLap } = require('../config');
 const Activity = require('../schema/Activity');
 const { slackError } = require('./slackNotification');
 const fetchStravaAPI = require('./fetchStravaAPI');
-const { dedupeSegmentEfforts } = require('./refreshAthlete/utils');
+const {
+  dedupeSegmentEfforts,
+  formatSegmentEffort,
+} = require('./refreshAthlete/utils');
 /**
  * Iterate though paginated history of segment efforts and concatenate
  * @param {Document} athleteDoc
@@ -43,26 +46,6 @@ async function getLapEffortsHistory(athleteDoc, page = 1, allEfforts = []) {
     (page + 1),
     allEfforts.concat(efforts),
   );
-}
-
-/**
- * Format segment effort into our database model shape
- *
- * @param {Object} effort Segment effort from Strava API
- * @return {Object}
- */
-function formatSegmentEffort({
-  id,
-  elapsed_time,
-  moving_time,
-  start_date_local,
-}) {
-  return {
-    _id: id,
-    elapsed_time,
-    moving_time,
-    start_date_local,
-  };
 }
 
 /**
