@@ -141,13 +141,15 @@ function activityCouldHaveLaps(activity, verbose = false) {
 }
 
 /**
- * Dedupe segment efforts
+ * Dedupe segment efforts from JSON array
+ * @todo: Test with array of SegmentEffort documents
  *
  * @param {Array} efforts
  * @return {Array} Deduped efforts
  */
 function dedupeSegmentEfforts(efforts) {
   return efforts.reduce((acc, effort) => {
+    // Make array of start times that have already been included
     const startTimes = acc.map(({ start_date_local }) => start_date_local);
     // Check that activity w/ this start time hasn't been included already
     if (startTimes.indexOf(effort.start_date_local) === -1) {
