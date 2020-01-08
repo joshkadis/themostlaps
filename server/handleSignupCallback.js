@@ -183,7 +183,8 @@ async function handleSignupCallback(req, res) {
         // Redirect to athlete page w duplicate signup message
         // @todo Duplicate of success if you go all the way to the end
         // should refactor
-        await existingAthleteDoc.updateOne({ status: 'ready' });
+        existingAthleteDoc.set({ status: 'ready' });
+        await existingAthleteDoc.save();
         const successMessage = getSlackSuccessMessage(existingAthleteDoc);
         console.log(`Duplicate signup: ${successMessage}`);
         slackSuccess('Duplicate signup', successMessage);
