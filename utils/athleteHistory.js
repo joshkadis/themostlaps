@@ -121,7 +121,20 @@ async function fetchAthleteHistory(athlete) {
     return [];
   }
 
+  const prevNumEfforts = lapEfforts.length;
   lapEfforts = dedupeSegmentEfforts(lapEfforts);
+
+  // Use try/catch to be safe because this wasn't tested
+  try {
+    if (prevNumEfforts !== lapEfforts.length) {
+      slackError(0, {
+        note: 'dedupeSegmentEfforts during athlete ingestion',
+        delta: `${prevNumEfforts} -> ${lapEfforts.length}`,
+      });
+    }
+  } catch (err) {
+    // hey, we tried...
+  }
 
   return getActivitiesFromEfforts(lapEfforts);
 }
