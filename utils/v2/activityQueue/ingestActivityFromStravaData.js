@@ -15,7 +15,7 @@ const { getTimestampFromString } = require('../../athleteUtils');
  *
  * @param {Document} athleteDoc
  * @param {String} dateTimeStr ISO-8601 string, presumably UTC
- * @return {Document} Updated document
+ * @returns {Boolean} Success of update
  */
 async function updateAthleteLastRefreshed(athleteDoc, dateTimeStr) {
   const lastRefreshed = getTimestampFromString(dateTimeStr, { unit: 'seconds' }); // UTC
@@ -30,7 +30,7 @@ async function updateAthleteLastRefreshed(athleteDoc, dateTimeStr) {
  *
  * @param {Object} activityData Formatted data to create Activity
  * @param {Bool} isDryRun If true, will validate without saving
- * @return {Document|false} Saved document or false if error
+ * @returns {Document|false} Saved document or false if error
  */
 async function createActivityDocument(activityData, isDryRun = false) {
   const activityDoc = new Activity(activityData);
@@ -63,7 +63,9 @@ async function createActivityDocument(activityData, isDryRun = false) {
  * @param {Object} activityData JSON object from Strava API
  * @param {Athlete} athleteDoc
  * @param {Bool} isDryRun If true, no DB updates
- * @return {Object} Status and message to update QueueActivity document
+ * @returns {Object} result
+ * @returns {String} result.status Allowed status for QueueActivity document
+ * @returns {String} result.detail Extra info for QueueActivity document
  */
 async function ingestActivityFromStravaData(
   rawActivity,
