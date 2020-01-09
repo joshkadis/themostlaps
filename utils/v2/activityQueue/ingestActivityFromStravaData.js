@@ -119,14 +119,16 @@ async function ingestActivityFromStravaData(
   }
 
   // Get updated stats
-  // @todo refactor compileSpecialStats() so it doesn't always save the Activity document
+  // @todo refactor compileSpecialStats() so it
+  // can dry run without always saving the Activity document
   const updatedStats = await compileStatsForActivities(
     [activityDoc],
     athleteDoc.toJSON().stats,
   );
   console.log(`Added ${updatedStats.allTime - athleteDoc.get('stats.allTime')} to stats.allTime`);
 
-  // @todo Combine updateAthleteStats and updateAthleteLastRefreshed as single db write operation
+  // @todo Combine updateAthleteStats and updateAthleteLastRefreshed
+  // as single db write operation
   // Update Athlete's stats
   try {
     await updateAthleteStats(athleteDoc, updatedStats);
@@ -165,8 +167,8 @@ async function ingestActivityFromStravaData(
   }
 
   /*
-   Created a new Activity with laps
-   Updated Athlete's stats and last_refreshed
+   First we created a new Activity with laps
+   Then we updated Athlete's stats and last_refreshed
    We made it!
   */
   return {
