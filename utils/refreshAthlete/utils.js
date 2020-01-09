@@ -6,7 +6,6 @@ const {
   lapSegmentId,
 } = require('../../config');
 const fetchStravaAPI = require('../fetchStravaAPI');
-const { formatSegmentEffort } = require('../athleteHistory');
 const calculateLapsFromSegmentEfforts = require('./calculateLapsFromSegmentEfforts');
 const { slackError } = require('../slackNotification');
 const Athlete = require('../../schema/Athlete');
@@ -141,13 +140,15 @@ function activityCouldHaveLaps(activity, verbose = false) {
 }
 
 /**
- * Dedupe segment efforts
+ * Dedupe segment efforts from JSON array
+ * @todo: Test with array of SegmentEffort documents
  *
  * @param {Array} efforts
  * @return {Array} Deduped efforts
  */
 function dedupeSegmentEfforts(efforts) {
   return efforts.reduce((acc, effort) => {
+    // Make array of start times that have already been included
     const startTimes = acc.map(({ start_date_local }) => start_date_local);
     // Check that activity w/ this start time hasn't been included already
     if (startTimes.indexOf(effort.start_date_local) === -1) {
@@ -157,6 +158,25 @@ function dedupeSegmentEfforts(efforts) {
   }, []);
 }
 
+/**
+ * Format segment effort into our database model shape
+ *
+ * @param {Object} effort Segment effort from Strava API
+ * @return {Object}
+ */
+function formatSegmentEffort({
+  id,
+  elapsed_time,
+  moving_time,
+  start_date_local,
+}) {
+  return {
+    _id: id,
+    elapsed_time,
+    moving_time,
+    start_date_local,
+  };
+}
 
 /**
  * Filter, dedupe, and format lap segment efforts from all segment efforts
@@ -219,6 +239,7 @@ module.exports = {
   dedupeSegmentEfforts,
   filterSegmentEfforts,
   fetchActivity,
+  formatSegmentEffort,
   activityCouldHaveLaps,
   getActivityData,
 };
