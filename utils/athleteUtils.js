@@ -16,6 +16,26 @@ function getEpochSecondsFromDateObj(refreshDate = false) {
 }
 
 /**
+ * Get timestamp in seconds or ms from ISO date string
+ * Assume dateStr includes timezone offset if required
+ *
+ * @param {String} dateStr
+ * @param {Object} opts
+ * @param {String} opts.unit 'seconds' or 'ms'. Default to ms.
+ * @return {Number|false} seconds or milliseconds or false if bad input
+ */
+function getTimestampFromString(dateStr, { unit = 'ms' }) {
+  const date = new Date(dateStr);
+  const value = date.valueOf();
+  if (Number.isNaN(value)) {
+    return false;
+  }
+  return unit === 'seconds'
+    ? value / 1000
+    : value;
+}
+
+/**
  * Convert API response for athlete to our model's format
  * @note Use new token refresh logic
  * @param {Object} athlete
@@ -159,6 +179,7 @@ async function removeAthlete(athlete, removableStatuses = ['deauthorized']) {
 
 module.exports = {
   getAthleteModelFormat,
+  getTimestampFromString,
   createAthlete,
   deauthorizeAthlete,
   removeAthlete,

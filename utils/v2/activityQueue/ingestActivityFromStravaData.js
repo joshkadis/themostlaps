@@ -8,7 +8,7 @@ const {
   updateAthleteStats,
 } = require('../../athleteStats');
 const { slackError } = require('../../slackNotification');
-const { getEpochSecondsFromDateObj } = require('../../athleteUtils');
+const { getTimestampFromString } = require('../../athleteUtils');
 
 /**
  * Update athlete's last refreshed to match UTC datetime string
@@ -18,9 +18,9 @@ const { getEpochSecondsFromDateObj } = require('../../athleteUtils');
  * @return {Document} Updated document
  */
 async function updateAthleteLastRefreshed(athleteDoc, dateTimeStr) {
-  const startDate = new Date(dateTimeStr); // UTC
+  const lastRefreshed = getTimestampFromString(dateTimeStr, { unit: 'seconds' }); // UTC
   const result = await athleteDoc.updateOne({
-    last_refreshed: getEpochSecondsFromDateObj(startDate),
+    last_refreshed: lastRefreshed,
   });
   return result && result.nModified;
 }
