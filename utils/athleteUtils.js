@@ -17,14 +17,15 @@ function getEpochSecondsFromDateObj(refreshDate = false) {
 
 /**
  * Get timestamp in seconds or ms from ISO date string
- * Assume dateStr includes timezone offset if required
+ * Assume dateStr specifies timezone offset if applicable
  *
  * @param {String} dateStr
  * @param {Object} opts
  * @param {String} opts.unit 'seconds' or 'ms'. Default to ms.
  * @return {Number|false} seconds or milliseconds or false if bad input
  */
-function getTimestampFromString(dateStr, { unit = 'ms' }) {
+function getTimestampFromString(dateStr, opts = {}) {
+  const { unit = 'ms' } = opts;
   const date = new Date(dateStr);
   const value = date.valueOf();
   if (Number.isNaN(value)) {
