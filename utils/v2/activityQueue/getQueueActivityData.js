@@ -2,6 +2,7 @@ const { fetchActivity } = require('../../refreshAthlete/utils');
 
 /**
  * Get Strava API data for enqueued activity
+ * Assume queue status check was already performed
  *
  * @param {QueueActivity} queueDoc QueueActivity document
  * @param {Athlete} athleteDoc Athlete document
@@ -10,20 +11,9 @@ const { fetchActivity } = require('../../refreshAthlete/utils');
 async function getQueueActivityData(queueDoc, athleteDoc) {
   const {
     activityId,
-    status,
     numSegmentEfforts: prevNumSegmentEfforts = 0,
     ingestAttempts: prevIngestAttempts = 0,
   } = queueDoc;
-
-  if (status !== 'pending') {
-    const errorMsg = `Attempted ingest with status '${status}'`;
-    console.warn(errorMsg);
-    queueDoc.set({
-      status: 'error',
-      errorMsg,
-    });
-    return false;
-  }
 
   let dataForIngest = false;
   try {
@@ -45,6 +35,9 @@ async function getQueueActivityData(queueDoc, athleteDoc) {
   const nextNumSegmentEfforts = dataForIngest.segment_efforts
     ? dataForIngest.segment_efforts.length
     : 0;
+
+  // @todo Disqualify activity here based on other attributes
+  // like start lat/lon, activity type !== 'ride', etc
 
   // Look for same number of segment efforts twice in a row
   // Use this as proxy for Strava processing having completed

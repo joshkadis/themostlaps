@@ -19,9 +19,14 @@ const PROCESS_QUEUE_AS_DRY_RUN = process.env.PROCESS_QUEUE_AS_DRY_RUN || false;
  * Process a single QueueActivity
  *
  * @param {QueueActivity} queueActivityDoc
+ * @param {Object|null} query Object from find query
  * @param {Bool} isDryRun
  */
-async function processQueueActivity(queueActivityDoc, isDryRun = false) {
+async function processQueueActivity(
+  queueActivityDoc,
+  query = {},
+  isDryRun = false,
+) {
   const completeProcessing = async () => {
     if (!isDryRun) {
       await queueActivityDoc.save();
@@ -33,9 +38,17 @@ async function processQueueActivity(queueActivityDoc, isDryRun = false) {
     activityId,
     athleteId,
     ingestAttempts,
+    status: activityStatus,
   } = queueActivityDoc;
   console.log(`${"\n"}Processing QueueActivity ${activityId} | Athlete ${athleteId}`);
   try {
+    // Skip if query specified a status other than the document's status
+    // @todo handle { status: { $in: [...] } } queries, etc.
+    if (query.status && query.status !== activityStatus) {
+      console.log(`Attempted ${activityId} | Status ${activityStatus} | Queried ${query.staus}`);
+      return false;
+    }
+
     if (ingestAttempts === MAX_INGEST_ATTEMPTS) {
       const detail = `Reached max. ingest attempts: ${ingestAttempts}`;
       console.log(detail);
@@ -122,7 +135,7 @@ async function processQueue(query, opts = {}) {
   const log = {};
   // eslint-disable-next-line no-restricted-syntax
   for await (const queueActivityDoc of queueActivities) {
-    await processQueueActivity(queueActivityDoc, isDryRun);
+    await processQueueActivity(queueActivityDoc, query, isDryRun);
     const { status } = queueActivityDoc;
     log[status] = log[status]
       ? log[status] + 1
