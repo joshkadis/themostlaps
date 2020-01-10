@@ -101,15 +101,15 @@ async function processQueueActivity(queueActivityDoc, isDryRun = false) {
 /**
  * Process the ingestion queue
  *
- * @param {Bool} isDryRun Default to false
+ * @param {Object} query Object for find query
+ * @param {Bool} opts.isDryRun Default to false
  */
-async function processQueue(isDryRun) {
-  const queueActivities = await QueueActivity.find({
-    status: 'pending',
-  });
-
+async function processQueue(query, opts = {}) {
+  const { isDryRun = false } = opts;
+  console.log(`Finding QueueActivity documents for query:${"\n"}${JSON.stringify(query, null, 2)}`);
+  const queueActivities = await QueueActivity.find(query);
   if (!queueActivities || !queueActivities.length) {
-    console.warn('No QueueActivity documents with "pending" status');
+    console.warn('No QueueActivity documents were found.');
     return;
   }
 
@@ -168,7 +168,7 @@ async function handleActivityWebhook(webhookData) {
 }
 
 /**
- * Fire up the ingestion queue
+ * Fire up the standard ingestion queue for pending activities
  */
 function initializeActivityQueue() {
   if (!process.env.INITIALIZE_ACTIVITY_QUEUE) {
@@ -182,7 +182,10 @@ function initializeActivityQueue() {
       console.log('Canceling scheduled activity queue ingestion');
       clearInterval(interval);
     }
-    processQueue(PROCESS_QUEUE_AS_DRY_RUN);
+    processQueue(
+      { status: 'pending' },
+      PROCESS_QUEUE_AS_DRY_RUN,
+    );
   }, INGEST_QUEUE_INTERVAL);
 }
 

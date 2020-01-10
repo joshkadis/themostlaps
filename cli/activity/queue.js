@@ -232,10 +232,19 @@ async function doIngestActivity({
 /**
  * Process the entire ingestion queue
  *
+ * @param {String} args.status Status to query for when ingesting
  * @param {String} args.dryRun If true, will process without DB updates
  */
-async function doProcessQueue({ dryRun: isDryRun = false }) {
-  await processQueue(isDryRun);
+async function doProcessQueue({
+  s = false,
+  status = false,
+  dryRun: isDryRun = false,
+}) {
+  const queryStatus = status || s || 'pending';
+  await processQueue(
+    { status: queryStatus },
+    isDryRun,
+  );
   if (isDryRun) {
     console.log('**This was a dry run; no DB write operations.**');
   }
