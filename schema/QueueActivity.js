@@ -37,7 +37,7 @@ const queueActivitySchema = new Schema({
   status: {
     type: String,
     default: 'pending',
-    enum: ['pending', 'shouldIngest', 'error', 'dequeued', 'ingested'],
+    enum: ['pending', 'shouldIngest', 'error', 'dequeued', 'maxed', 'ingested'],
   },
   errorMsg: {
     type: String,

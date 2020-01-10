@@ -26,7 +26,7 @@ async function processQueueActivity(queueActivityDoc, isDryRun = false) {
     if (!isDryRun) {
       await queueActivityDoc.save();
     }
-    console.log(`Processed ${queueActivityDoc.activityId} with status ${queueActivityDoc.status}`);
+    console.log(`Completed ${queueActivityDoc.activityId}: ${queueActivityDoc.status}`);
   };
 
   const {
@@ -40,7 +40,7 @@ async function processQueueActivity(queueActivityDoc, isDryRun = false) {
       const detail = `Reached max. ingest attempts: ${ingestAttempts}`;
       console.log(detail);
       queueActivityDoc.set({
-        status: 'dequeued',
+        status: 'maxed',
         detail,
       });
       return completeProcessing();
