@@ -41,7 +41,7 @@ async function getQueueActivityData(queueDoc, athleteDoc) {
   if (!activityCouldHaveLaps(dataForIngest)) {
     queueDoc.set({
       status: 'dequeued',
-      detail: 'activityCouldHaveLaps() returned false',
+      detail: 'activityCouldHaveLaps() returned false during queue check',
     });
   }
 
