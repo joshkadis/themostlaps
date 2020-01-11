@@ -44,12 +44,16 @@ async function processQueueActivity(
   try {
     // Skip if query specified a status other than the document's status
     // @todo handle { status: { $in: [...] } } queries, etc.
-    if (query.status && query.status !== activityStatus) {
-      console.log(`Attempted ${activityId} | Status ${activityStatus} | Queried ${query.staus}`);
+    const queriedStatus = query.status || false;
+    if (queriedStatus && queriedStatus !== activityStatus) {
+      console.log(`Invalid status | Activity ${activityId} | Status ${activityStatus} | Queried ${queriedStatus}`);
       return false;
     }
 
-    if (ingestAttempts === MAX_INGEST_ATTEMPTS) {
+    if (
+      ingestAttempts === MAX_INGEST_ATTEMPTS
+      && activityStatus !== 'maxed' // Previous check ensure this is allowed
+    ) {
       const detail = `Reached max. ingest attempts: ${ingestAttempts}`;
       console.log(detail);
       queueActivityDoc.set({
