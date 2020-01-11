@@ -13,6 +13,7 @@ async function getQueueActivityData(queueDoc, athleteDoc) {
     activityId,
     numSegmentEfforts: prevNumSegmentEfforts = 0,
     ingestAttempts: prevIngestAttempts = 0,
+    status: queuedStatus,
   } = queueDoc;
 
   let dataForIngest = false;
@@ -46,6 +47,17 @@ async function getQueueActivityData(queueDoc, athleteDoc) {
     && nextNumSegmentEfforts === prevNumSegmentEfforts
   ) {
     queueDoc.set({ status: 'shouldIngest' });
+  } else if (queuedStatus === 'maxed') {
+    if (nextNumSegmentEfforts > 0) {
+      queueDoc.set({ status: 'shouldIngest' });
+    } else {
+      const finalMsg = `${activityId} | Final attempt had no segment efforts`;
+      console.log(finalMsg);
+      queueDoc.set({
+        status: 'dequeued',
+        detail: finalMsg,
+      });
+    }
   }
 
   queueDoc.set({
