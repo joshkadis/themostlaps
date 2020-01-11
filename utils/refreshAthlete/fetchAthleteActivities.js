@@ -65,12 +65,12 @@ async function fetchAllAthleteActivities(
  * Should activity be checked for laps? Must be longer than min distance and
  * starting or ending within allowed radius of park center
  *
- * @param {Int} id
- * @param {Bool} trainer
- * @param {Bool} manual
- * @param {Array} start_latlng
- * @param {Array} end_latlng
- * @param {Float} distance
+ * @param {Int} activity.id
+ * @param {Bool} activity.trainer
+ * @param {Bool} activity.manual
+ * @param {Array} activity.start_latlng
+ * @param {Array} activity.end_latlng
+ * @param {Float} activity.distance
  * @param {Bool} verbose Defaults to false
  * @return {Bool}
  */
