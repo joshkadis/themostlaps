@@ -48,7 +48,7 @@ describe('activityCouldHaveLaps edge cases', () => {
   });
 
   test('has distance and not less than min distance', () => {
-    activity.distance = 1;
+    activity.distance = 0;
     expect(activityCouldHaveLaps(activity)).toBe(false);
     delete activity.distance;
     expect(activityCouldHaveLaps(activity)).toBe(true);
