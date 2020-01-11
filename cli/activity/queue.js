@@ -244,7 +244,7 @@ async function doProcessQueue({
   const queryStatus = status || s || 'pending';
   await processQueue(
     { status: queryStatus },
-    isDryRun,
+    { isDryRun },
   );
   if (isDryRun) {
     console.log('**This was a dry run; no DB write operations.**');

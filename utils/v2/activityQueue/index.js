@@ -197,7 +197,7 @@ function initializeActivityQueue() {
     }
     processQueue(
       { status: 'pending' },
-      PROCESS_QUEUE_AS_DRY_RUN,
+      { isDryRun: PROCESS_QUEUE_AS_DRY_RUN },
     );
   }, INGEST_QUEUE_INTERVAL);
 }
