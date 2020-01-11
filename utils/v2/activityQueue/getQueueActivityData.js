@@ -23,7 +23,9 @@ async function getQueueActivityData(queueDoc, athleteDoc) {
     // i think we're ok here without doing anything
   }
 
-  if (!dataForIngest) {
+  // There are some edge cases where fetchActivity could return an empty object
+  // so check for activity id
+  if (!dataForIngest || !dataForIngest.id) {
     const errorMsg = 'No fetchActivity response';
     console.warn(errorMsg);
     queueDoc.set({
