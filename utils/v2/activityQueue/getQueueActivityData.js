@@ -1,4 +1,7 @@
-const { fetchActivity } = require('../../refreshAthlete/utils');
+const {
+  fetchActivity,
+  activityCouldHaveLaps,
+} = require('../../refreshAthlete/utils');
 
 /**
  * Get Strava API data for enqueued activity
@@ -35,17 +38,22 @@ async function getQueueActivityData(queueDoc, athleteDoc) {
     return false;
   }
 
+  if (!activityCouldHaveLaps(dataForIngest)) {
+    queueDoc.set({
+      status: 'dequeued',
+      detail: 'activityCouldHaveLaps() returned false',
+    });
+  }
+
   const nextNumSegmentEfforts = dataForIngest.segment_efforts
     ? dataForIngest.segment_efforts.length
     : 0;
 
-  // @todo Disqualify activity here based on other attributes
-  // like start lat/lon, activity type !== 'ride', etc
-
   // Look for same number of segment efforts twice in a row
   // Use this as proxy for Strava processing having completed
   if (
-    nextNumSegmentEfforts > 0
+    queueDoc.status !== 'dequeued'
+    && nextNumSegmentEfforts > 0
     && nextNumSegmentEfforts === prevNumSegmentEfforts
   ) {
     queueDoc.set({ status: 'shouldIngest' });
