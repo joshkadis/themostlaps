@@ -119,7 +119,7 @@ function activityCouldHaveLaps(activity, verbose = false) {
   if (activityHas('manual') && manual) {
     reason = 'a manual activity';
   } else if (activityHas('trainer') && trainer) {
-    reason = 'a manual activity';
+    reason = 'a trainer activity';
   } else if (activityHas('distance') && distance < minDistance) {
     reason = 'less than the min distance';
   }
