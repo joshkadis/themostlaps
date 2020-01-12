@@ -18,6 +18,14 @@ Find out at https://themostlaps.com
 
 ## Dev tools
 
+### Dev server scripts
+
+`npm run dev` starts a Next.js **development environment** with page reloading, etc. Only watches files relevant to Next. Changes to non-Next files require restarting the server.
+
+`npm run dev-server` starts a Next.js **development** using Nodemon but only watches directories related to server development. Does not rebuild the Next bundle, so changes in Next's files are require restarting the server.
+
+**Note:** `nodemon` must be installed globally in order to use `dev-server`.
+
 ### ESLint
 `.eslintignore` ignores everything because the legacy codebase is messy. We un-ignore files and directories as we go, e.g. `!server.js`.
 ```
