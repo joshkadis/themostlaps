@@ -1,8 +1,6 @@
 const {
-  lapSegmentId,
   sectionSegmentIds,
 } = require('../../config');
-const { dedupeSegmentEfforts } = require('./utils');
 
 /**
  * Get number of canonical sections *not* found in an array of ridden segments
@@ -18,30 +16,28 @@ function getUnriddenSections(riddenSections) {
 
 /**
  * Logic to calculate number of laps from array of segment efforts
+ * Assembles partial laps and combines with received number of
+ * canonical (full-lap) segment efforts, assumes these have
+ * ALREADY been deduped
  *
- * @param {Array} segmentEfforts
+ * @param {Array} segmentEfforts All segment efforts
+ * @param {Array} numFullLaps Number of deduped full-lap efforts
  * @reutrn {Number}
  */
-function calculateLapsFromSegmentEfforts(segmentEfforts) {
+function calculateLapsFromSegmentEfforts(segmentEfforts, numFullLaps = 0) {
   // Get number of lap segments and an array of section segments
-  let laps = 0;
-  const canonicalLaps = [];
+  const laps = numFullLaps;
   const sectionsRidden = [];
   segmentEfforts.forEach((effort) => {
     const {
       id: segmentId,
     } = effort.segment;
 
-    if (lapSegmentId === segmentId) {
-      // Count canonical full lap segments
-      canonicalLaps.push(effort);
-    } else if (sectionSegmentIds.indexOf(segmentId) !== -1) {
+    if (sectionSegmentIds.indexOf(segmentId) !== -1) {
       // Array of canonical lap section segments
       sectionsRidden.push(segmentId);
     }
   });
-
-  laps = dedupeSegmentEfforts(canonicalLaps).length;
 
   // Remove complete laps from sections ridden
   // OK to stringify since arrays contain only numeric values

@@ -214,10 +214,15 @@ function getActivityData(activity, verbose = false) {
     console.log(`Activity ${id} has ${segment_efforts.length} segment efforts`);
   }
 
+  const canonicalSegmentEfforts = filterSegmentEfforts(segment_efforts);
+
   // Should already have checked segment_efforts.length
   // but it can't hurt to check again
   const laps = segment_efforts.length
-    ? calculateLapsFromSegmentEfforts(segment_efforts)
+    ? calculateLapsFromSegmentEfforts(
+      segment_efforts,
+      canonicalSegmentEfforts.length,
+    )
     : 0;
 
   if (verbose) {
@@ -230,7 +235,7 @@ function getActivityData(activity, verbose = false) {
     added_date: added.toISOString(),
     athlete_id: athlete.id,
     laps,
-    segment_efforts: filterSegmentEfforts(segment_efforts),
+    segment_efforts: canonicalSegmentEfforts,
     source: 'refresh',
     start_date_local,
   };
