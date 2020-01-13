@@ -1,5 +1,6 @@
 const { stringify } = require('querystring');
 const  exchangeCodeForAthleteInfo = require('../utils/ingest/exchangeCodeForAthleteInfo');
+const  { getSlackSuccessMessage } = require('../utils/ingest/utils');
 const Athlete = require('../schema/Athlete');
 const Activity = require('../schema/Activity');
 const { getAthleteModelFormat } = require('../utils/athleteUtils');
@@ -90,53 +91,8 @@ async function handleActivitiesIngestError(
 }
 
 /**
- * Get text for Slack success message from document
- *
- * @param {Document} athleteDoc
- * @return {String}
- */
-function getSlackSuccessMessage(athleteDoc) {
-  return [
-    athleteDoc.get('athlete.firstname'),
-    athleteDoc.get('athlete.lastname'),
-    `(${athleteDoc.get('_id')})`,
-    `${athleteDoc.get('stats.allTime') || 0} laps`,
-  ].join(' ');
-}
-
-/**
-  If an existing athlete is found with this access code, update it
-
-  @param {Object} tokenExchangeResponse Response from token exchange process
-  @return {Boolean}
-**/
-async function didUpdateAthleteAccessToken(tokenExchangeResponse) {
-  const {
-    athlete,
-    access_token
-  } = tokenExchangeResponse;
-
-  // If existing athlete with this ID and access_token is unchanged
-  const athleteDoc = await Athlete.find({ access_token });
-  if (athleteDoc) {
-    return false;
-  }
-
-  // Update access_token and refresh athlete activities + stats
-  console.log(`Updating access token for ${getSlackSuccessMessage(athleteDoc)}`);
-  athleteDoc.set('access_token', access_token)
-  const updatedAthleteDoc = await athleteDoc.save();
-
-  res.redirect(303, `/rider/${athlete.id}?updated=1`);
-  await refreshAthlete(updatedAthleteDoc);
-  console.log(`Updated access token for ${getSlackSuccessMessage(updatedAthleteDoc)}`);
-  slackSuccess('Updated access token', getSlackSuccessMessage(updatedAthleteDoc));
-
-  return true;
-}
-
-/**
- * Handle OAuth callback from signup
+ * Handle OAuth callback from signup by creating new Athlete
+ * or updating existing athlete
  *
  * @param {Next} app Next.js application
  * @param {Request} req
@@ -161,41 +117,23 @@ async function handleSignupCallback(req, res) {
     return;
   }
 
-  // Create athlete record in database or update access_token
-  let athleteDoc;
   try {
-    const updatedAthleteToken = await didUpdateAthleteAccessToken(tokenExchangeResponse);
-    if (updatedAthleteToken) {
+    // Handle if athlete exists in DB
+    const { athlete_id } = tokenExchangeResponse.athlete;
+    const existingAthleteDoc = await Athlete.findById(athlete_id);
+    if (existingAthleteDoc instanceof Athlete) {
+      const didHandleSignup = await handleDuplicateSignup(
+        existingAthleteDoc,
+        tokenExchangeResponse,
+        res,
+        handleSignupError,
+      );
       return;
     }
 
     const formattedAthleteData =
       getAthleteModelFormat(tokenExchangeResponse, shouldSubscribe(req.query));
     if (!formattedAthleteData) {
-      return;
-    }
-
-    // Check for existing athlete
-    try {
-      const athlete_id = formattedAthleteData._id;
-      const existingAthleteDoc = await Athlete.findById(athlete_id);
-      if (existingAthleteDoc) {
-        // Redirect to athlete page w duplicate signup message
-        // @todo Duplicate of success if you go all the way to the end
-        // should refactor
-        existingAthleteDoc.set({ status: 'ready' });
-        await existingAthleteDoc.save();
-        const successMessage = getSlackSuccessMessage(existingAthleteDoc);
-        console.log(`Duplicate signup: ${successMessage}`);
-        slackSuccess('Duplicate signup', successMessage);
-        res.redirect(303, `/rider/${athlete_id}?v2&ds=1`);
-        return;
-      }
-    } catch(err) {
-      handleSignupError(43, {
-        err,
-        athlete_id: formattedAthleteData._id,
-      });
       return;
     }
 

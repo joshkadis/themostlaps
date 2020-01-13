@@ -1,0 +1,58 @@
+const _unset = require('lodash/unset');
+const { getSlackSuccessMessage } = require('./utils');
+const { slackSuccess } = require('../slackNotification');
+
+/**
+ * Update Athlete tokens and document in case of duplicate signup
+ * See example exchange response: https://developers.strava.com/docs/authentication/
+ *
+ * @param {Athlete} athleteDoc
+ * @param {Object} tokenExchangeResponse
+ * @param {Response} res Express response
+ * @param {Function} handleSignupError Error notification
+ */
+async function handleDuplicateSignup(
+  athleteDoc,
+  tokenExchangeResponse,
+  res,
+  handleSignupError,
+) {
+  const {
+    id,
+    firstname,
+    lastname,
+    profile,
+  } = tokenExchangeResponse.athlete;
+
+  try {
+    // Update document and save it.
+    const updateData = {
+      ...tokenExchangeResponse,
+      athlete: {
+        id,
+        firstname,
+        lastname,
+        profile,
+      },
+      status: 'ready',
+    };
+    _unset(updateData, 'expires_in');
+    athleteDoc.set(updateData);
+    await athleteDoc.save();
+
+    // Notify success
+    const successMessage = getSlackSuccessMessage(athleteDoc);
+    console.log(`Duplicate signup: ${successMessage}`);
+    slackSuccess('Duplicate signup', successMessage);
+    res.redirect(303, `/rider/${id}?v2&ds=1`);
+  } catch (err) {
+    handleSignupError(43, {
+      err,
+      athlete_id: id,
+    });
+  }
+}
+
+module.exports = {
+  handleDuplicateSignup,
+};
