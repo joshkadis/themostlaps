@@ -41,6 +41,7 @@ async function handleDuplicateSignup(
     };
     _unset(updateData, 'expires_in');
     athleteDoc.set(updateData);
+    athleteDoc.markModified('athlete');
     await athleteDoc.save();
 
     // Check new activities
@@ -61,6 +62,8 @@ async function handleDuplicateSignup(
     }
 
     // Notify success
+    // @note The success message will have the allTime laps from
+    // *before* the refreshAthlete() call above
     const successMessage = getSlackSuccessMessage(athleteDoc);
     console.log(`Duplicate signup: ${successMessage}`);
     slackSuccess('Duplicate signup', successMessage);
