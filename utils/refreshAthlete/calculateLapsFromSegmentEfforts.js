@@ -2,7 +2,7 @@ const {
   lapSegmentId,
   sectionSegmentIds,
 } = require('../../config');
- const { dedupeSegmentEfforts } = require('./utils');
+const { dedupeSegmentEfforts } = require('./utils');
 
 /**
  * Get number of canonical sections *not* found in an array of ridden segments
@@ -12,7 +12,7 @@ const {
  */
 function getUnriddenSections(riddenSections) {
   return [...sectionSegmentIds]
-    .filter((id) => -1 === riddenSections.indexOf(id))
+    .filter((id) => riddenSections.indexOf(id) === -1)
     .length;
 }
 
@@ -35,7 +35,7 @@ module.exports = (segmentEfforts) => {
     if (lapSegmentId === segmentId) {
       // Count canonical full lap segments
       canonicalLaps.push(effort);
-    } else if (-1 !== sectionSegmentIds.indexOf(segmentId)) {
+    } else if (sectionSegmentIds.indexOf(segmentId) !== -1) {
       // Array of canonical lap section segments
       sectionsRidden.push(segmentId);
     }
@@ -51,8 +51,13 @@ module.exports = (segmentEfforts) => {
     .replace(sectionsCanonicalRegex, '')
     .replace(/,{2,}/g, ',')
     .split(',')
-    .map((section) =>
-      (section.length && !isNaN(section)) ? parseInt(section, 10) : 0);
+    .map((section) => {
+      if (section.length && !Number.isNaN(section)) {
+        return parseInt(section, 10);
+      }
+      return 0;
+    });
+
 
   // Check that laps removed from sections === the number of lap segments
   const removedSections = sectionsRidden.length - leftoverSections.length;
