@@ -28,7 +28,23 @@ function getStravaAuthRequestUrl(pathname = '/', shouldSubscribe = false) {
   return `${stravaOauthUrl}/authorize?${stringify(params)}`;
 }
 
+/**
+ * Get text for Slack success message from document
+ *
+ * @param {Document} athleteDoc
+ * @return {String}
+ */
+function getSlackSuccessMessage(athleteDoc) {
+  return [
+    athleteDoc.get('athlete.firstname'),
+    athleteDoc.get('athlete.lastname'),
+    `(${athleteDoc.get('_id')})`,
+    `${athleteDoc.get('stats.allTime') || 0} laps`,
+  ].join(' ');
+}
+
 module.exports = {
   getErrorResponseObject,
   getStravaAuthRequestUrl,
+  getSlackSuccessMessage,
 };

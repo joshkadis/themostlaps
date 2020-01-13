@@ -1,7 +1,8 @@
 const { stringify } = require('querystring');
-const  exchangeCodeForAthleteInfo = require('../utils/ingest/exchangeCodeForAthleteInfo');
+const exchangeCodeForAthleteInfo = require('../utils/ingest/exchangeCodeForAthleteInfo');
+const { getSlackSuccessMessage } = require('../utils/ingest/utils');
+const { handleDuplicateSignup } = require('../utils/ingest/handleDuplicateSignup');
 const Athlete = require('../schema/Athlete');
-const Activity = require('../schema/Activity');
 const { getAthleteModelFormat } = require('../utils/athleteUtils');
 const {
   fetchAthleteHistory,
@@ -11,10 +12,8 @@ const {
   compileStatsForActivities,
   updateAthleteStats,
 } = require('../utils/athleteStats');
-const { sendIngestEmail } = require('../utils/emails');
 const { slackSuccess, slackError } = require('../utils/slackNotification');
 const shouldSubscribe = require('../utils/emails/shouldSubscribe');
-const refreshAthlete = require('../utils/refreshAthlete');
 
 /**
  * Factory for handling error while creating athlete in db
@@ -23,7 +22,6 @@ const refreshAthlete = require('../utils/refreshAthlete');
  * @return {Function}
  */
 function createHandleSignupError(res) {
-
   /**
    * Log error to Slack and redirect to error page
    *
@@ -47,7 +45,7 @@ function createHandleSignupError(res) {
     }
 
     res.redirect(303, `/error?${stringify(errorQuery)}`);
-  }
+  };
 }
 
 /**
@@ -60,7 +58,7 @@ function createHandleSignupError(res) {
 async function handleActivitiesIngestError(
   athleteDoc,
   errorCode = 0,
-  errorAddtlInfo = false
+  errorAddtlInfo = false,
 ) {
   // Yay someone signed up!
   slackSuccess(
@@ -73,11 +71,10 @@ async function handleActivitiesIngestError(
   // Boo something broke...
   slackError(
     errorCode,
-    Object.assign(
-      {},
-      athleteDoc.toJSON().athlete,
-      errorAddtlInfo ? { errorAddtlInfo } : {},
-    ),
+    {
+      ...athleteDoc.toJSON().athlete,
+      errorAddtlInfo,
+    },
   );
 
   // Update status
@@ -90,53 +87,8 @@ async function handleActivitiesIngestError(
 }
 
 /**
- * Get text for Slack success message from document
- *
- * @param {Document} athleteDoc
- * @return {String}
- */
-function getSlackSuccessMessage(athleteDoc) {
-  return [
-    athleteDoc.get('athlete.firstname'),
-    athleteDoc.get('athlete.lastname'),
-    `(${athleteDoc.get('_id')})`,
-    `${athleteDoc.get('stats.allTime') || 0} laps`,
-  ].join(' ');
-}
-
-/**
-  If an existing athlete is found with this access code, update it
-
-  @param {Object} tokenExchangeResponse Response from token exchange process
-  @return {Boolean}
-**/
-async function didUpdateAthleteAccessToken(tokenExchangeResponse) {
-  const {
-    athlete,
-    access_token
-  } = tokenExchangeResponse;
-
-  // If existing athlete with this ID and access_token is unchanged
-  const athleteDoc = await Athlete.find({ access_token });
-  if (athleteDoc) {
-    return false;
-  }
-
-  // Update access_token and refresh athlete activities + stats
-  console.log(`Updating access token for ${getSlackSuccessMessage(athleteDoc)}`);
-  athleteDoc.set('access_token', access_token)
-  const updatedAthleteDoc = await athleteDoc.save();
-
-  res.redirect(303, `/rider/${athlete.id}?updated=1`);
-  await refreshAthlete(updatedAthleteDoc);
-  console.log(`Updated access token for ${getSlackSuccessMessage(updatedAthleteDoc)}`);
-  slackSuccess('Updated access token', getSlackSuccessMessage(updatedAthleteDoc));
-
-  return true;
-}
-
-/**
- * Handle OAuth callback from signup
+ * Handle OAuth callback from signup by creating new Athlete
+ * or updating existing athlete
  *
  * @param {Next} app Next.js application
  * @param {Request} req
@@ -147,62 +99,51 @@ async function handleSignupCallback(req, res) {
 
   // Handle request error, most likely error=access_denied
   if (req.query.error) {
-    handleSignupError(10, req.query)
+    handleSignupError(10, req.query);
     return;
   }
 
   // Get athlete profile info
-  const tokenExchangeResponse = await exchangeCodeForAthleteInfo(req.query.code);
+  const tokenExchangeResponse = await exchangeCodeForAthleteInfo(
+    req.query.code,
+  );
 
   // For some reason had 'errorCode' before and it never caused a problem
-  const error_code = tokenExchangeResponse.error_code || tokenExchangeResponse.errorCode;
+  const error_code = tokenExchangeResponse.error_code
+    || tokenExchangeResponse.errorCode;
+
   if (error_code) {
     handleSignupError(error_code, tokenExchangeResponse.athlete || false);
     return;
   }
 
-  // Create athlete record in database or update access_token
   let athleteDoc;
   try {
-    const updatedAthleteToken = await didUpdateAthleteAccessToken(tokenExchangeResponse);
-    if (updatedAthleteToken) {
+    // Handle if athlete exists in DB
+    const { id: athleteId } = tokenExchangeResponse.athlete;
+    const existingAthleteDoc = await Athlete.findById(athleteId);
+    if (existingAthleteDoc instanceof Athlete) {
+      await handleDuplicateSignup(
+        existingAthleteDoc,
+        tokenExchangeResponse,
+        res,
+        handleSignupError,
+      );
       return;
     }
 
-    const formattedAthleteData =
-      getAthleteModelFormat(tokenExchangeResponse, shouldSubscribe(req.query));
+    const formattedAthleteData = getAthleteModelFormat(
+      tokenExchangeResponse,
+      shouldSubscribe(req.query),
+    );
     if (!formattedAthleteData) {
-      return;
-    }
-
-    // Check for existing athlete
-    try {
-      const athlete_id = formattedAthleteData._id;
-      const existingAthleteDoc = await Athlete.findById(athlete_id);
-      if (existingAthleteDoc) {
-        // Redirect to athlete page w duplicate signup message
-        // @todo Duplicate of success if you go all the way to the end
-        // should refactor
-        existingAthleteDoc.set({ status: 'ready' });
-        await existingAthleteDoc.save();
-        const successMessage = getSlackSuccessMessage(existingAthleteDoc);
-        console.log(`Duplicate signup: ${successMessage}`);
-        slackSuccess('Duplicate signup', successMessage);
-        res.redirect(303, `/rider/${athlete_id}?v2&ds=1`);
-        return;
-      }
-    } catch(err) {
-      handleSignupError(43, {
-        err,
-        athlete_id: formattedAthleteData._id,
-      });
       return;
     }
 
     athleteDoc = await Athlete.create(formattedAthleteData);
     console.log(`Saved ${athleteDoc.get('_id')} to database`);
   } catch (err) {
-    const errCode = -1 !== err.message.indexOf('duplicate key') ? 50 : 55;
+    const errCode = err.message.indexOf('duplicate key') !== -1 ? 50 : 55;
     console.log(err, tokenExchangeResponse);
     handleSignupError(errCode, tokenExchangeResponse.athlete || false);
     return;
@@ -243,10 +184,8 @@ async function handleSignupCallback(req, res) {
     const successMessage = getSlackSuccessMessage(updated);
     console.log(`New signup: ${successMessage}`);
     slackSuccess('New signup!', successMessage);
-
   } catch (err) {
     await handleActivitiesIngestError(athleteDoc, 90);
-    return;
   }
 }
 

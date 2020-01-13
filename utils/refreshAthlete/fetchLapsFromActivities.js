@@ -1,4 +1,4 @@
-const config = require('../../config');
+const { devFetchActivities } = require('../../config');
 const { fetchActivity, getActivityData } = require('./utils');
 
 /**
@@ -19,9 +19,11 @@ async function fetchActivityDetails(
   allActivities,
   verbose = false,
 ) {
-  const fetchNum = process.env.NODE_ENV === 'development'
-    ? config.devFetchActivities
-    : activityIds.length;
+  let fetchNum = activityIds.length;
+  if (process.env.NODE_ENV === 'development' && fetchNum > devFetchActivities) {
+    console.log(`Limiting number of fetchted activities to ${devFetchActivities} for development use`);
+    fetchNum = devFetchActivities;
+  }
 
   if (verbose) {
     console.log(`Fetching ${(idx + 1)} of ${fetchNum}: ${activityIds[idx]}`);

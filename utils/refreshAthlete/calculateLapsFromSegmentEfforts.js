@@ -1,5 +1,4 @@
 const {
-  lapSegmentId,
   sectionSegmentIds,
 } = require('../../config');
 
@@ -11,27 +10,32 @@ const {
  */
 function getUnriddenSections(riddenSections) {
   return [...sectionSegmentIds]
-    .filter((id) => -1 === riddenSections.indexOf(id))
+    .filter((id) => riddenSections.indexOf(id) === -1)
     .length;
 }
 
 /**
  * Logic to calculate number of laps from array of segment efforts
+ * Assembles partial laps and combines with received number of
+ * canonical (full-lap) segment efforts, assumes these have
+ * ALREADY been deduped
  *
- * @param {Array} segmentEfforts
+ * @param {Array} segmentEfforts All segment efforts
+ * @param {Array} numFullLaps Number of deduped full-lap efforts
  * @reutrn {Number}
  */
-module.exports = (segmentEfforts) => {
+function calculateLapsFromSegmentEfforts(segmentEfforts, numFullLaps = 0) {
   // Get number of lap segments and an array of section segments
-  let laps = 0;
+  const laps = numFullLaps;
   const sectionsRidden = [];
-  segmentEfforts.forEach(({ segment }) => {
-    if (lapSegmentId === segment.id) {
-      // Count canonical full lap segments
-      laps++;
-    } else if (-1 !== sectionSegmentIds.indexOf(segment.id)) {
+  segmentEfforts.forEach((effort) => {
+    const {
+      id: segmentId,
+    } = effort.segment;
+
+    if (sectionSegmentIds.indexOf(segmentId) !== -1) {
       // Array of canonical lap section segments
-      sectionsRidden.push(segment.id);
+      sectionsRidden.push(segmentId);
     }
   });
 
@@ -43,8 +47,13 @@ module.exports = (segmentEfforts) => {
     .replace(sectionsCanonicalRegex, '')
     .replace(/,{2,}/g, ',')
     .split(',')
-    .map((section) =>
-      (section.length && !isNaN(section)) ? parseInt(section, 10) : 0);
+    .map((section) => {
+      if (section.length && !Number.isNaN(section)) {
+        return parseInt(section, 10);
+      }
+      return 0;
+    });
+
 
   // Check that laps removed from sections === the number of lap segments
   const removedSections = sectionsRidden.length - leftoverSections.length;
@@ -59,4 +68,6 @@ module.exports = (segmentEfforts) => {
   }
 
   return laps;
-};
+}
+
+module.exports = calculateLapsFromSegmentEfforts;

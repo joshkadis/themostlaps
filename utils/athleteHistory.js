@@ -111,7 +111,7 @@ async function fetchAthleteHistory(athlete) {
   try {
     if (prevNumEfforts !== lapEfforts.length) {
       slackError(0, {
-        note: 'dedupeSegmentEfforts during athlete ingestion',
+        note: 'Found duplicate segment efforts during athlete ingestion',
         delta: `${prevNumEfforts} -> ${lapEfforts.length}`,
       });
     }
