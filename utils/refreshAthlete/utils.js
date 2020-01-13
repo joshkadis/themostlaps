@@ -141,6 +141,7 @@ function activityCouldHaveLaps(activity, verbose = false) {
 
 /**
  * Dedupe segment efforts from JSON array
+ * NOTE: Assumes all segment efforts refer to the same segment!
  * @todo: Test with array of SegmentEffort documents
  *
  * @param {Array} efforts
