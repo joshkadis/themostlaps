@@ -22,7 +22,7 @@ function getUnriddenSections(riddenSections) {
  * @param {Array} segmentEfforts
  * @reutrn {Number}
  */
-module.exports = (segmentEfforts) => {
+function calculateLapsFromSegmentEfforts(segmentEfforts) {
   // Get number of lap segments and an array of section segments
   let laps = 0;
   const canonicalLaps = [];
@@ -72,4 +72,6 @@ module.exports = (segmentEfforts) => {
   }
 
   return laps;
-};
+}
+
+module.exports = calculateLapsFromSegmentEfforts;
