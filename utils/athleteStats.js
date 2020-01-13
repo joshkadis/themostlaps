@@ -69,15 +69,14 @@ async function compileStatsForActivities(
  */
 async function updateAthleteStats(athleteDoc, stats, status = 'ready') {
   const currentDate = new Date();
-  return await Athlete.findByIdAndUpdate(
-    athleteDoc.get('_id'),
-    {
-      last_updated: currentDate.toISOString(),
-      stats,
-      status,
-    },
-    { new: true }
-  );
+  athleteDoc.set({
+    last_updated: currentDate.toISOString(),
+    stats,
+    status,
+  });
+  athleteDoc.markModified('stats');
+  await athleteDoc.save();
+  return athleteDoc;
 };
 
 module.exports = {
