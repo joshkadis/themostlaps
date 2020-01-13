@@ -1,8 +1,8 @@
 const { stringify } = require('querystring');
-const  exchangeCodeForAthleteInfo = require('../utils/ingest/exchangeCodeForAthleteInfo');
-const  { getSlackSuccessMessage } = require('../utils/ingest/utils');
+const exchangeCodeForAthleteInfo = require('../utils/ingest/exchangeCodeForAthleteInfo');
+const { getSlackSuccessMessage } = require('../utils/ingest/utils');
+const { handleDuplicateSignup } = require('../utils/ingest/handleDuplicateSignup');
 const Athlete = require('../schema/Athlete');
-const Activity = require('../schema/Activity');
 const { getAthleteModelFormat } = require('../utils/athleteUtils');
 const {
   fetchAthleteHistory,
@@ -12,10 +12,8 @@ const {
   compileStatsForActivities,
   updateAthleteStats,
 } = require('../utils/athleteStats');
-const { sendIngestEmail } = require('../utils/emails');
 const { slackSuccess, slackError } = require('../utils/slackNotification');
 const shouldSubscribe = require('../utils/emails/shouldSubscribe');
-const refreshAthlete = require('../utils/refreshAthlete');
 
 /**
  * Factory for handling error while creating athlete in db
@@ -24,7 +22,6 @@ const refreshAthlete = require('../utils/refreshAthlete');
  * @return {Function}
  */
 function createHandleSignupError(res) {
-
   /**
    * Log error to Slack and redirect to error page
    *
@@ -48,7 +45,7 @@ function createHandleSignupError(res) {
     }
 
     res.redirect(303, `/error?${stringify(errorQuery)}`);
-  }
+  };
 }
 
 /**
@@ -61,7 +58,7 @@ function createHandleSignupError(res) {
 async function handleActivitiesIngestError(
   athleteDoc,
   errorCode = 0,
-  errorAddtlInfo = false
+  errorAddtlInfo = false,
 ) {
   // Yay someone signed up!
   slackSuccess(
@@ -74,11 +71,10 @@ async function handleActivitiesIngestError(
   // Boo something broke...
   slackError(
     errorCode,
-    Object.assign(
-      {},
-      athleteDoc.toJSON().athlete,
-      errorAddtlInfo ? { errorAddtlInfo } : {},
-    ),
+    {
+      ...athleteDoc.toJSON().athlete,
+      errorAddtlInfo,
+    },
   );
 
   // Update status
@@ -103,26 +99,31 @@ async function handleSignupCallback(req, res) {
 
   // Handle request error, most likely error=access_denied
   if (req.query.error) {
-    handleSignupError(10, req.query)
+    handleSignupError(10, req.query);
     return;
   }
 
   // Get athlete profile info
-  const tokenExchangeResponse = await exchangeCodeForAthleteInfo(req.query.code);
+  const tokenExchangeResponse = await exchangeCodeForAthleteInfo(
+    req.query.code,
+  );
 
   // For some reason had 'errorCode' before and it never caused a problem
-  const error_code = tokenExchangeResponse.error_code || tokenExchangeResponse.errorCode;
+  const error_code = tokenExchangeResponse.error_code
+    || tokenExchangeResponse.errorCode;
+
   if (error_code) {
     handleSignupError(error_code, tokenExchangeResponse.athlete || false);
     return;
   }
 
+  let athleteDoc;
   try {
     // Handle if athlete exists in DB
     const { athlete_id } = tokenExchangeResponse.athlete;
     const existingAthleteDoc = await Athlete.findById(athlete_id);
     if (existingAthleteDoc instanceof Athlete) {
-      const didHandleSignup = await handleDuplicateSignup(
+      await handleDuplicateSignup(
         existingAthleteDoc,
         tokenExchangeResponse,
         res,
@@ -131,8 +132,10 @@ async function handleSignupCallback(req, res) {
       return;
     }
 
-    const formattedAthleteData =
-      getAthleteModelFormat(tokenExchangeResponse, shouldSubscribe(req.query));
+    const formattedAthleteData = getAthleteModelFormat(
+      tokenExchangeResponse,
+      shouldSubscribe(req.query),
+    );
     if (!formattedAthleteData) {
       return;
     }
@@ -140,7 +143,7 @@ async function handleSignupCallback(req, res) {
     athleteDoc = await Athlete.create(formattedAthleteData);
     console.log(`Saved ${athleteDoc.get('_id')} to database`);
   } catch (err) {
-    const errCode = -1 !== err.message.indexOf('duplicate key') ? 50 : 55;
+    const errCode = err.message.indexOf('duplicate key') !== -1 ? 50 : 55;
     console.log(err, tokenExchangeResponse);
     handleSignupError(errCode, tokenExchangeResponse.athlete || false);
     return;
@@ -181,10 +184,8 @@ async function handleSignupCallback(req, res) {
     const successMessage = getSlackSuccessMessage(updated);
     console.log(`New signup: ${successMessage}`);
     slackSuccess('New signup!', successMessage);
-
   } catch (err) {
     await handleActivitiesIngestError(athleteDoc, 90);
-    return;
   }
 }
 
