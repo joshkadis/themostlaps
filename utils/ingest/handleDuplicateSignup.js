@@ -1,6 +1,9 @@
 const _unset = require('lodash/unset');
+const Activity = require('../../schema/Activity');
+const { getTimestampFromLocalISO } = require('../../utils');
 const { getSlackSuccessMessage } = require('./utils');
 const { slackSuccess } = require('../slackNotification');
+const refreshAthlete = require('../refreshAthlete');
 
 /**
  * Update Athlete tokens and document in case of duplicate signup
@@ -39,6 +42,23 @@ async function handleDuplicateSignup(
     _unset(updateData, 'expires_in');
     athleteDoc.set(updateData);
     await athleteDoc.save();
+
+    // Check new activities
+    const lastActivity = await Activity.find(
+      { athlete_id: athleteDoc.id },
+      'start_date_local',
+      {
+        lean: true,
+        limit: 1,
+        sort: { _id: -1 },
+      },
+    );
+    if (lastActivity.length) {
+      const timestampOfLastActivity = getTimestampFromLocalISO(
+        lastActivity[0].start_date_local,
+      );
+      await refreshAthlete(athleteDoc, timestampOfLastActivity);
+    }
 
     // Notify success
     const successMessage = getSlackSuccessMessage(athleteDoc);
