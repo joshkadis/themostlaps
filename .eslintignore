@@ -26,6 +26,7 @@ dist/
 !utils/athleteStatsClient.js
 !utils/dateTimeUtils.js
 !utils/athleteUtils.js
+!utils/refreshAthlete/index.js
 !utils/refreshAthlete/refreshAthleteFromActivity.js
 !utils/refreshAthlete/fetchLapsFromActivities.js
 !utils/refreshAthlete/utils.js
