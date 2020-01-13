@@ -120,8 +120,8 @@ async function handleSignupCallback(req, res) {
   let athleteDoc;
   try {
     // Handle if athlete exists in DB
-    const { athlete_id } = tokenExchangeResponse.athlete;
-    const existingAthleteDoc = await Athlete.findById(athlete_id);
+    const { id: athleteId } = tokenExchangeResponse.athlete;
+    const existingAthleteDoc = await Athlete.findById(athleteId);
     if (existingAthleteDoc instanceof Athlete) {
       await handleDuplicateSignup(
         existingAthleteDoc,
