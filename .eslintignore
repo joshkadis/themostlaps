@@ -13,6 +13,7 @@ dist/
 !server.js
 !server/initApiRoutes.js
 !server/initWebhookRoutes.js
+!server/handleSignupCallback.js
 !schema/**/*.js
 !api/**/*.js
 !cli/deleteUser.js
@@ -25,10 +26,14 @@ dist/
 !utils/athleteStatsClient.js
 !utils/dateTimeUtils.js
 !utils/athleteUtils.js
+!utils/refreshAthlete/index.js
 !utils/refreshAthlete/refreshAthleteFromActivity.js
 !utils/refreshAthlete/fetchLapsFromActivities.js
 !utils/refreshAthlete/utils.js
+!utils/refreshAthlete/utils.activityCouldHaveLaps.test.js
+!utils/refreshAthlete/calculateLapsFromSegmentEfforts.js
 !utils/athleteHistory.js
+!utils/ingest/handleDuplicateSignup.js
 
 # V2 Utils
 !utils/v2/**/*.js

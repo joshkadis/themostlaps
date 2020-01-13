@@ -82,7 +82,7 @@ async function ingestActivityFromStravaData(
   if (!activityCouldHaveLaps(rawActivity, true)) {
     return {
       status: 'dequeued',
-      detail: 'activityCouldHaveLaps() returned false',
+      detail: 'activityCouldHaveLaps() returned false during ingest',
     };
   }
 

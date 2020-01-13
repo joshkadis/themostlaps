@@ -19,28 +19,45 @@ const PROCESS_QUEUE_AS_DRY_RUN = process.env.PROCESS_QUEUE_AS_DRY_RUN || false;
  * Process a single QueueActivity
  *
  * @param {QueueActivity} queueActivityDoc
+ * @param {Object|null} query Object from find query
  * @param {Bool} isDryRun
  */
-async function processQueueActivity(queueActivityDoc, isDryRun = false) {
+async function processQueueActivity(
+  queueActivityDoc,
+  query = {},
+  isDryRun = false,
+) {
   const completeProcessing = async () => {
     if (!isDryRun) {
       await queueActivityDoc.save();
     }
-    console.log(`Processed ${queueActivityDoc.activityId} with status ${queueActivityDoc.status}`);
+    console.log(`Completed ${queueActivityDoc.activityId}: ${queueActivityDoc.status}`);
   };
 
   const {
     activityId,
     athleteId,
     ingestAttempts,
+    status: activityStatus,
   } = queueActivityDoc;
   console.log(`${"\n"}Processing QueueActivity ${activityId} | Athlete ${athleteId}`);
   try {
-    if (ingestAttempts === MAX_INGEST_ATTEMPTS) {
+    // Skip if query specified a status other than the document's status
+    // @todo handle { status: { $in: [...] } } queries, etc.
+    const queriedStatus = query.status || false;
+    if (queriedStatus && queriedStatus !== activityStatus) {
+      console.log(`Invalid status | Activity ${activityId} | Status ${activityStatus} | Queried ${queriedStatus}`);
+      return false;
+    }
+
+    if (
+      ingestAttempts === MAX_INGEST_ATTEMPTS
+      && activityStatus !== 'maxed' // Previous check ensure this is allowed
+    ) {
       const detail = `Reached max. ingest attempts: ${ingestAttempts}`;
       console.log(detail);
       queueActivityDoc.set({
-        status: 'dequeued',
+        status: 'maxed',
         detail,
       });
       return completeProcessing();
@@ -101,15 +118,15 @@ async function processQueueActivity(queueActivityDoc, isDryRun = false) {
 /**
  * Process the ingestion queue
  *
- * @param {Bool} isDryRun Default to false
+ * @param {Object} query Object for find query
+ * @param {Bool} opts.isDryRun Default to false
  */
-async function processQueue(isDryRun) {
-  const queueActivities = await QueueActivity.find({
-    status: 'pending',
-  });
-
+async function processQueue(query, opts = {}) {
+  const { isDryRun = false } = opts;
+  console.log(`Finding QueueActivity documents for query:${"\n"}${JSON.stringify(query, null, 2)}`);
+  const queueActivities = await QueueActivity.find(query);
   if (!queueActivities || !queueActivities.length) {
-    console.warn('No QueueActivity documents with "pending" status');
+    console.warn('No QueueActivity documents were found.');
     return;
   }
 
@@ -122,7 +139,7 @@ async function processQueue(isDryRun) {
   const log = {};
   // eslint-disable-next-line no-restricted-syntax
   for await (const queueActivityDoc of queueActivities) {
-    await processQueueActivity(queueActivityDoc, isDryRun);
+    await processQueueActivity(queueActivityDoc, query, isDryRun);
     const { status } = queueActivityDoc;
     log[status] = log[status]
       ? log[status] + 1
@@ -168,7 +185,7 @@ async function handleActivityWebhook(webhookData) {
 }
 
 /**
- * Fire up the ingestion queue
+ * Fire up the standard ingestion queue for pending activities
  */
 function initializeActivityQueue() {
   if (!process.env.INITIALIZE_ACTIVITY_QUEUE) {
@@ -182,7 +199,10 @@ function initializeActivityQueue() {
       console.log('Canceling scheduled activity queue ingestion');
       clearInterval(interval);
     }
-    processQueue(PROCESS_QUEUE_AS_DRY_RUN);
+    processQueue(
+      { status: 'pending' },
+      { isDryRun: PROCESS_QUEUE_AS_DRY_RUN },
+    );
   }, INGEST_QUEUE_INTERVAL);
 }
 

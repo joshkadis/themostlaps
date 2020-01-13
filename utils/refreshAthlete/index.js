@@ -13,10 +13,9 @@ const { getEpochSecondsFromDateObj } = require('../athleteUtils');
  * or fall back to athlete document's created date
  *
  * @param {Document} athleteDoc
- * @param {Boolean} verbose Defaults to false
  * @return {Number} UTC *seconds*
  */
-async function getFetchTimestampFromAthlete(athleteDoc, verbose = false) {
+async function getFetchTimestampFromAthlete(athleteDoc) {
   let lastRefreshed = athleteDoc.get('last_refreshed');
 
   // Set athlete's last_refreshed to created time if needed
@@ -27,7 +26,7 @@ async function getFetchTimestampFromAthlete(athleteDoc, verbose = false) {
 
     athleteDoc.set('last_refreshed', lastRefreshed);
     try {
-      const updatedAthleteDoc = await athleteDoc.save();
+      await athleteDoc.save();
       console.log('Set last_refreshed timestamp from created');
     } catch (err) {
       console.log('Error setting last_refreshed timestamp from created');
@@ -55,13 +54,15 @@ function timestampToISOString(timestamp) {
  * @param {Number} after Optional UTC *seconds* to override last_updated
  * @param {Boolean} verbose Defaults to false
  */
-module.exports = async (athlete, after = false, verbose = false) => {
+async function refreshAthlete(athlete, after = false, verbose = false) {
   // Get user document
-  const athleteDoc = 'number' === typeof athlete ?
-    await Athlete.findById(athlete) : athlete;
+  const athleteDoc = typeof athlete === 'number'
+    ? await Athlete.findById(athlete)
+    : athlete;
 
   // Fetch activities
-  const fetchTimestamp = after || await getFetchTimestampFromAthlete(athleteDoc, verbose);
+  const fetchTimestamp = after
+    || await getFetchTimestampFromAthlete(athleteDoc, verbose);
 
   console.log(`\n----\nFetching new activities for ${athleteDoc.get('athlete.firstname')} ${athleteDoc.get('athlete.lastname')} (${athleteDoc.get('_id')}) since ${timestampToISOString(fetchTimestamp)}`);
 
@@ -69,7 +70,7 @@ module.exports = async (athlete, after = false, verbose = false) => {
   const eligibleActivities = await fetchAthleteActivities(
     athleteDoc,
     fetchTimestamp,
-    verbose
+    verbose,
   );
 
   if (!eligibleActivities.length) {
@@ -82,7 +83,7 @@ module.exports = async (athlete, after = false, verbose = false) => {
   const activitiesWithLaps = await fetchLapsFromActivities(
     eligibleActivities,
     athleteDoc.get('access_token'),
-    verbose
+    verbose,
   );
 
   if (!activitiesWithLaps.length) {
@@ -105,17 +106,20 @@ module.exports = async (athlete, after = false, verbose = false) => {
 
   try {
     await Activity.create(filtered);
-    console.log(`Created ${filtered.length} new activities`)
+    console.log(`Created ${filtered.length} new activities`);
   } catch (err) {
     console.log(err);
   }
 
   // Merge into user document's stats
-  const stats = await compileStatsForActivities(filtered, athleteDoc.toJSON().stats);
+  const stats = await compileStatsForActivities(
+    filtered,
+    athleteDoc.toJSON().stats,
+  );
   console.log(`Found ${stats.allTime - athleteDoc.get('stats.allTime')} new laps`);
 
   // Update user stats and last_updated
-  const updatedAthleteDoc = await updateAthleteStats(athleteDoc, stats);
+  await updateAthleteStats(athleteDoc, stats);
+}
 
-  return true;
-};
+module.exports = refreshAthlete;

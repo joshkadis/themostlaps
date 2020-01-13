@@ -1,3 +1,4 @@
+const _has = require('lodash/has');
 const { getDistance } = require('geolib');
 const {
   minDistance,
@@ -81,56 +82,55 @@ async function fetchActivity(activityId, tokenOrDoc, includeAllEfforts = true) {
 }
 
 /**
- * Check if activity is eligible to maybe have laps
+ * Check if activity is eligible to maybe have laps.
+ * Keep it eligible unless we know for sure that it can't have laps
+ * e.g. can't disqualify unless a property is *set* to a value we don't want
  *
  * @param {Object} activity
  * @param {Bool} verbose
  * @return {Bool}
  */
 function activityCouldHaveLaps(activity, verbose = false) {
+  const activityHas = (key) => _has(activity, key);
+
   const {
-    id = 0,
-    type = 'unknown',
-    trainer = false,
-    manual = false,
-    start_latlng = null,
-    end_latlng = null,
-    distance = 0,
+    id,
+    type,
+    trainer,
+    manual,
+    start_latlng,
+    end_latlng,
+    distance,
   } = activity;
 
-  if (typeof type === 'string' && type.toLowerCase() !== 'ride') {
+  // Just make sure it has an id
+  if (!activityHas('id')) {
+    return false;
+  }
+
+  if (activityHas('type') && type.toLowerCase() !== 'ride') {
     if (verbose) {
       console.log(`Activity ${id} is not a Ride.`);
     }
     return false;
   }
 
-  if (manual || trainer || distance < minDistance) {
-    if (verbose) {
-      let reason;
-      switch (true) {
-        case !!manual:
-          reason = 'a manual activity';
-          break;
-
-        case !!trainer:
-          reason = 'a trainer activity';
-          break;
-
-        case !!(distance < minDistance):
-          reason = 'less than the min distance';
-          break;
-
-        default:
-          reason = 'invalid';
-      }
-      console.log(`Activity ${id} is ${reason}.`);
-    }
+  let reason = '';
+  if (activityHas('manual') && manual) {
+    reason = 'a manual activity';
+  } else if (activityHas('trainer') && trainer) {
+    reason = 'a trainer activity';
+  } else if (activityHas('distance') && distance < minDistance) {
+    reason = 'less than the min distance';
+  }
+  if (reason) {
+    console.log(`Activity ${id} is ${reason}.`);
     return false;
   }
 
-  const nearParkCenter = isWithinAllowedRadius(start_latlng)
-    || isWithinAllowedRadius(end_latlng);
+  const startIsOk = activityHas('start_latlng') && isWithinAllowedRadius(start_latlng);
+  const endIsOk = activityHas('end_latlng') && isWithinAllowedRadius(end_latlng);
+  const nearParkCenter = startIsOk || endIsOk;
 
   if (verbose && !nearParkCenter) {
     console.log(`Activity ${id} is not near the park center.`);
@@ -141,6 +141,7 @@ function activityCouldHaveLaps(activity, verbose = false) {
 
 /**
  * Dedupe segment efforts from JSON array
+ * NOTE: Assumes all segment efforts refer to the same segment!
  * @todo: Test with array of SegmentEffort documents
  *
  * @param {Array} efforts
@@ -213,10 +214,15 @@ function getActivityData(activity, verbose = false) {
     console.log(`Activity ${id} has ${segment_efforts.length} segment efforts`);
   }
 
+  const canonicalSegmentEfforts = filterSegmentEfforts(segment_efforts);
+
   // Should already have checked segment_efforts.length
   // but it can't hurt to check again
   const laps = segment_efforts.length
-    ? calculateLapsFromSegmentEfforts(segment_efforts)
+    ? calculateLapsFromSegmentEfforts(
+      segment_efforts,
+      canonicalSegmentEfforts.length,
+    )
     : 0;
 
   if (verbose) {
@@ -229,7 +235,7 @@ function getActivityData(activity, verbose = false) {
     added_date: added.toISOString(),
     athlete_id: athlete.id,
     laps,
-    segment_efforts: filterSegmentEfforts(segment_efforts),
+    segment_efforts: canonicalSegmentEfforts,
     source: 'refresh',
     start_date_local,
   };

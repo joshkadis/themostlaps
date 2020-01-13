@@ -1,7 +1,11 @@
-const { fetchActivity } = require('../../refreshAthlete/utils');
+const {
+  fetchActivity,
+  activityCouldHaveLaps,
+} = require('../../refreshAthlete/utils');
 
 /**
  * Get Strava API data for enqueued activity
+ * Assume queue status check was already performed
  *
  * @param {QueueActivity} queueDoc QueueActivity document
  * @param {Athlete} athleteDoc Athlete document
@@ -10,20 +14,10 @@ const { fetchActivity } = require('../../refreshAthlete/utils');
 async function getQueueActivityData(queueDoc, athleteDoc) {
   const {
     activityId,
-    status,
     numSegmentEfforts: prevNumSegmentEfforts = 0,
     ingestAttempts: prevIngestAttempts = 0,
+    status: queuedStatus,
   } = queueDoc;
-
-  if (status !== 'pending') {
-    const errorMsg = `Attempted ingest with status '${status}'`;
-    console.warn(errorMsg);
-    queueDoc.set({
-      status: 'error',
-      errorMsg,
-    });
-    return false;
-  }
 
   let dataForIngest = false;
   try {
@@ -32,7 +26,9 @@ async function getQueueActivityData(queueDoc, athleteDoc) {
     // i think we're ok here without doing anything
   }
 
-  if (!dataForIngest) {
+  // There are some edge cases where fetchActivity could return an empty object
+  // so check for activity id
+  if (!dataForIngest || !dataForIngest.id) {
     const errorMsg = 'No fetchActivity response';
     console.warn(errorMsg);
     queueDoc.set({
@@ -42,6 +38,13 @@ async function getQueueActivityData(queueDoc, athleteDoc) {
     return false;
   }
 
+  if (!activityCouldHaveLaps(dataForIngest)) {
+    queueDoc.set({
+      status: 'dequeued',
+      detail: 'activityCouldHaveLaps() returned false during queue check',
+    });
+  }
+
   const nextNumSegmentEfforts = dataForIngest.segment_efforts
     ? dataForIngest.segment_efforts.length
     : 0;
@@ -49,10 +52,22 @@ async function getQueueActivityData(queueDoc, athleteDoc) {
   // Look for same number of segment efforts twice in a row
   // Use this as proxy for Strava processing having completed
   if (
-    nextNumSegmentEfforts > 0
+    queueDoc.status !== 'dequeued'
+    && nextNumSegmentEfforts > 0
     && nextNumSegmentEfforts === prevNumSegmentEfforts
   ) {
     queueDoc.set({ status: 'shouldIngest' });
+  } else if (queuedStatus === 'maxed') {
+    if (nextNumSegmentEfforts > 0) {
+      queueDoc.set({ status: 'shouldIngest' });
+    } else {
+      const finalMsg = `${activityId} | Final attempt had no segment efforts`;
+      console.log(finalMsg);
+      queueDoc.set({
+        status: 'dequeued',
+        detail: finalMsg,
+      });
+    }
   }
 
   queueDoc.set({
