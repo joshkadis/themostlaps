@@ -1,7 +1,6 @@
 // Mocks required prior to fetching activity data from Strava API
 jest.mock('../../refreshAthlete/utils');
 jest.mock('../../../schema/Athlete');
-jest.mock('../../refreshAthlete/utils');
 
 const Athlete = require('../../../schema/Athlete');
 const QueueActivity = require('../../../schema/QueueActivity');
