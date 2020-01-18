@@ -12,6 +12,7 @@ const {
   getActivityData,
   filterSegmentEfforts,
 } = require('./utils');
+const calculateLapsFromSegmentEfforts = require('./calculateLapsFromSegmentEfforts');
 
 function makeSegmentEffortsInput(segmentIds, options = {}) {
   const defaults = {
@@ -166,6 +167,16 @@ test('calculates laps from API response for activity', () => {
     9699985,
     740668,
   ];
+  const rawEfforts = makeSegmentEffortsInput(segmentIds);
+  // The two full laps shouldn't be duplicates w same start time
+  rawEfforts[3].start_date_local = '2019-12-07T18:46:13.023Z';
+
+  expect(filterSegmentEfforts(rawEfforts).length)
+    .toEqual(2);
+
+  expect(calculateLapsFromSegmentEfforts(rawEfforts, 2))
+    .toEqual(3);
+
   expect(replaceAddedDate(getActivityData({
     id: 123,
     athlete: {
@@ -173,14 +184,17 @@ test('calculates laps from API response for activity', () => {
     },
     start_date_local: '2019-12-07T18:56:13.023Z',
     // Includes partial lap at beginning and end
-    segment_efforts: makeSegmentEffortsInput(segmentIds),
+    segment_efforts: rawEfforts,
   }))).toEqual({
     _id: 123,
     added_date,
     athlete_id: 234,
     laps: 3,
     // efforts for canonical segment are deduped
-    segment_efforts: makeSegmentEffortsOutput(1),
+    segment_efforts: [
+      ...makeSegmentEffortsOutput(1, { start_date_local: '2019-12-07T18:46:13.023Z' }),
+      ...makeSegmentEffortsOutput(1),
+    ],
     source: 'refresh',
     start_date_local: '2019-12-07T18:56:13.023Z',
   });

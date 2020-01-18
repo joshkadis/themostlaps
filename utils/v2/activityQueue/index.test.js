@@ -1,12 +1,15 @@
 // Mocks required prior to fetching activity data from Strava API
 jest.mock('../../refreshAthlete/utils');
 jest.mock('../../../schema/Athlete');
-jest.mock('../../refreshAthlete/utils');
 
 const Athlete = require('../../../schema/Athlete');
 const QueueActivity = require('../../../schema/QueueActivity');
 const { getQueueActivityData: __getQueueActivityData } = require('./getQueueActivityData');
-const { fetchActivity } = require('../../refreshAthlete/utils');
+const {
+  fetchActivity,
+  activityCouldHaveLaps,
+} = require('../../refreshAthlete/utils');
+const { minDistance } = require('../../../config');
 
 // Always call with isDryRun = true
 const getQueueActivityData = async (queueDoc) => {
@@ -19,6 +22,26 @@ const getQueueActivityData = async (queueDoc) => {
 
 // Mocks
 Athlete.findById.mockImplementation(async () => 'true');
+// mock this as basic checks since fetchActivity is
+// what we care about from the refreshAthlete/utils module
+activityCouldHaveLaps.mockImplementation((data) => data.id
+  && data.type === 'ride'
+  && !data.trainer
+  && !data.manual
+  && data.start_latlng.length === 2
+  && data.end_latlng.length === 2
+  && data.distance >= minDistance);
+
+// Basic info to pass activityCouldHaveLaps()
+const BASE_COULD_HAVE_LAPS = {
+  id: 123,
+  type: 'ride',
+  trainer: false,
+  manual: false,
+  start_latlng: [40.661990, -73.969681], // Just use park center
+  end_latlng: [40.661990, -73.969681],
+  distance: 10000,
+};
 
 describe('getQueueActivityData()', () => {
   test('mocking is working', async () => {
@@ -36,7 +59,10 @@ describe('getQueueActivityData()', () => {
 
   test('no segment efforts on first attempt', async () => {
     fetchActivity
-      .mockImplementationOnce(async () => ({ hello: 'world' }));
+      .mockImplementationOnce(async () => ({
+        ...BASE_COULD_HAVE_LAPS,
+        hello: 'world',
+      }));
 
     const doc = new QueueActivity({
       activityId: 123,
@@ -44,7 +70,6 @@ describe('getQueueActivityData()', () => {
     });
     // first with segment_efforts not set
     await getQueueActivityData(doc);
-
     expect(doc.errorMsg).not.toEqual('No athleteDoc');
     expect(doc.errorMsg).not.toEqual('No fetchActivity response');
     expect(doc.numSegmentEfforts).toEqual(0);
@@ -54,7 +79,10 @@ describe('getQueueActivityData()', () => {
 
   test('empty efforts on first attempt', async () => {
     fetchActivity
-      .mockImplementationOnce(async () => ({ segment_efforts: [] }));
+      .mockImplementationOnce(async () => ({
+        ...BASE_COULD_HAVE_LAPS,
+        segment_efforts: [],
+      }));
 
     const doc = new QueueActivity({
       activityId: 123,
@@ -72,8 +100,14 @@ describe('getQueueActivityData()', () => {
 
   test('no segment efforts on second attempt', async () => {
     fetchActivity
-      .mockImplementationOnce(async () => ({ segment_efforts: [] }))
-      .mockImplementationOnce(async () => ({ segment_efforts: [] }));
+      .mockImplementationOnce(async () => ({
+        ...BASE_COULD_HAVE_LAPS,
+        segment_efforts: [],
+      }))
+      .mockImplementationOnce(async () => ({
+        ...BASE_COULD_HAVE_LAPS,
+        segment_efforts: [],
+      }));
 
     const doc = new QueueActivity({
       activityId: 123,
@@ -91,8 +125,14 @@ describe('getQueueActivityData()', () => {
 
   test('has segment efforts on second attempt', async () => {
     fetchActivity
-      .mockImplementationOnce(async () => ({ segment_efforts: [] }))
-      .mockImplementationOnce(async () => ({ segment_efforts: [1, 4] }));
+      .mockImplementationOnce(async () => ({
+        ...BASE_COULD_HAVE_LAPS,
+        segment_efforts: [],
+      }))
+      .mockImplementationOnce(async () => ({
+        ...BASE_COULD_HAVE_LAPS,
+        segment_efforts: [1, 4],
+      }));
 
     const doc = new QueueActivity({
       activityId: 123,
@@ -110,9 +150,18 @@ describe('getQueueActivityData()', () => {
 
   test('has segment efforts on third attempt', async () => {
     fetchActivity
-      .mockImplementationOnce(async () => ({ segment_efforts: [] }))
-      .mockImplementationOnce(async () => ({ segment_efforts: [] }))
-      .mockImplementationOnce(async () => ({ segment_efforts: [1, 4] }));
+      .mockImplementationOnce(async () => ({
+        ...BASE_COULD_HAVE_LAPS,
+        segment_efforts: [],
+      }))
+      .mockImplementationOnce(async () => ({
+        ...BASE_COULD_HAVE_LAPS,
+        segment_efforts: [],
+      }))
+      .mockImplementationOnce(async () => ({
+        ...BASE_COULD_HAVE_LAPS,
+        segment_efforts: [1, 4],
+      }));
 
     const doc = new QueueActivity({
       activityId: 123,
@@ -131,9 +180,18 @@ describe('getQueueActivityData()', () => {
 
   test('received partial segment efforts', async () => {
     fetchActivity
-      .mockImplementationOnce(async () => ({ segment_efforts: [] }))
-      .mockImplementationOnce(async () => ({ segment_efforts: [1] }))
-      .mockImplementationOnce(async () => ({ segment_efforts: [1, 4] }));
+      .mockImplementationOnce(async () => ({
+        ...BASE_COULD_HAVE_LAPS,
+        segment_efforts: [],
+      }))
+      .mockImplementationOnce(async () => ({
+        ...BASE_COULD_HAVE_LAPS,
+        segment_efforts: [1],
+      }))
+      .mockImplementationOnce(async () => ({
+        ...BASE_COULD_HAVE_LAPS,
+        segment_efforts: [1, 4],
+      }));
 
     const doc = new QueueActivity({
       activityId: 123,
@@ -161,9 +219,18 @@ describe('getQueueActivityData()', () => {
 
   test('received partial then complete segment efforts', async () => {
     fetchActivity
-      .mockImplementationOnce(async () => ({ segment_efforts: [1] }))
-      .mockImplementationOnce(async () => ({ segment_efforts: [1, 4] }))
-      .mockImplementationOnce(async () => ({ segment_efforts: [1, 4] }));
+      .mockImplementationOnce(async () => ({
+        ...BASE_COULD_HAVE_LAPS,
+        segment_efforts: [1],
+      }))
+      .mockImplementationOnce(async () => ({
+        ...BASE_COULD_HAVE_LAPS,
+        segment_efforts: [1, 4],
+      }))
+      .mockImplementationOnce(async () => ({
+        ...BASE_COULD_HAVE_LAPS,
+        segment_efforts: [1, 4],
+      }));
 
     const doc = new QueueActivity({
       activityId: 123,
@@ -189,21 +256,9 @@ describe('getQueueActivityData()', () => {
     expect(doc.ingestAttempts).toEqual(3);
   });
 
-  test('bad status', async () => {
-    const doc = new QueueActivity({
-      activityId: 123,
-      athleteId: 456,
-      numSegmentEfforts: 2,
-      ingestAttempts: 3,
-      status: 'dequeued',
-    });
-
-    await getQueueActivityData(doc);
-    expect(doc.status).toEqual('error');
-    expect(doc.errorMsg).toEqual("Attempted ingest with status 'dequeued'");
-    expect(doc.numSegmentEfforts).toEqual(2);
-    expect(doc.ingestAttempts).toEqual(3);
-  });
+  // @note Removed "bad status" check because
+  // getQueueActivityData() was changed to allow any status.
+  // The check is now performed earlier in processQueueActivity()
 
   test('missing response for fetchActivity', async () => {
     fetchActivity

@@ -218,12 +218,15 @@ function getActivityData(activity, verbose = false) {
 
   // Should already have checked segment_efforts.length
   // but it can't hurt to check again
-  const laps = segment_efforts.length
-    ? calculateLapsFromSegmentEfforts(
+  let canonicalSegmentEfforts = [];
+  let laps = 0;
+  if (segment_efforts.length) {
+    canonicalSegmentEfforts = filterSegmentEfforts(segment_efforts);
+    laps = calculateLapsFromSegmentEfforts(
       segment_efforts,
       canonicalSegmentEfforts.length,
-    )
-    : 0;
+    );
+  }
 
   if (verbose) {
     console.log(`Activity ${id} has ${laps} laps`);

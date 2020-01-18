@@ -44,6 +44,8 @@ async function handleDuplicateSignup(
     athleteDoc.markModified('athlete');
     await athleteDoc.save();
 
+    res.redirect(303, `/rider/${id}?v2&ds=1`);
+
     // Check new activities
     const lastActivity = await Activity.find(
       { athlete_id: athleteDoc.id },
@@ -67,7 +69,6 @@ async function handleDuplicateSignup(
     const successMessage = getSlackSuccessMessage(athleteDoc);
     console.log(`Duplicate signup: ${successMessage}`);
     slackSuccess('Duplicate signup', successMessage);
-    res.redirect(303, `/rider/${id}?v2&ds=1`);
   } catch (err) {
     handleSignupError(43, {
       err,
