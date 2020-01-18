@@ -214,8 +214,6 @@ function getActivityData(activity, verbose = false) {
     console.log(`Activity ${id} has ${segment_efforts.length} segment efforts`);
   }
 
-  const canonicalSegmentEfforts = filterSegmentEfforts(segment_efforts);
-
   // Should already have checked segment_efforts.length
   // but it can't hurt to check again
   let canonicalSegmentEfforts = [];
