@@ -39,3 +39,22 @@ Eventually we'll get around to separating client and server applications.
 
 ### Webpack
 Same as Babel: Next for frontend, nothing for server-side.
+
+## Import/Export
+
+_This assumes 3 shards on the remote host._
+
+To export from production, do this _for each collection_:
+```
+mongoexport --host <CLUSTERNAME>-shard-0/<CLUSTERNAME>-shard-00-00-<HOSTNAME>:27017,<CLUSTERNAME>-shard-00-01-<HOSTNAME>:27017,<CLUSTERNAME>-shard-00-02-<HOSTNAME>:27017 --ssl --username <USERNAME> --password <PASSWORD> --authenticationDatabase admin --db <PRODUCTION DB> --collection <COLLECTION> --out <SOMETHING>.json
+```
+
+To import to a remote DB – e.g. when pulling production down to a lower tier – do this _for each collection_:
+```
+mongoimport --host <CLUSTERNAME>-shard-0/<CLUSTERNAME>-shard-00-00-<HOSTNAME>:27017,<CLUSTERNAME>-shard-00-01-<HOSTNAME>:27017,<CLUSTERNAME>-shard-00-02-<HOSTNAME>:27017 --ssl --username <USERNAME> --password <PASSWORD> --authenticationDatabase admin --db <DB NAME> --collection <COLLECTION> --drop --file <SAME AS mongoexport>.json
+```
+
+To import to `localhost`, again for each collection...
+```
+mongoimport --host localhost:27017 --db <DB NAME> --collection <COLLECTION> --drop --file <SAME AS mongoexport>.json
+```
