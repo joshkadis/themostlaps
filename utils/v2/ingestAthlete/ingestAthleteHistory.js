@@ -8,26 +8,28 @@ const { getLocationNames } = require('../locations');
 const { makeArrayAsyncIterable } = require('../asyncUtils');
 const { clearAthleteHistoryV2 } = require('../models/athlete');
 
-// @todo Get rid of this bullshit
-let scopedAthleteDoc = false;
-
 /**
  * Create LocationIngest object for a given location
  * Save activities and stats depending on value of isDryRun
  *
  * @param {String} locationName
+ * @param {Athlete} athleteDoc
  * @param {Boolean} opts.isDryRun
  * @returns {Object} Stats object for location
  */
-async function asyncIngestSingleLocation(locationName, { isDryRun = false }) {
-  if (!(scopedAthleteDoc instanceof Athlete)) {
+async function asyncIngestSingleLocation(
+  locationName,
+  athleteDoc,
+  { isDryRun = false },
+) {
+  if (!(athleteDoc instanceof Athlete)) {
     // @todo Report error
-    console.log(`scopedAthleteDoc was not an instance of Athlete`);
+    console.log(`athleteDoc was not an instance of Athlete`);
     return false;
   }
 
-  // Make sure scopedAthleteDoc is set up correctly
-  console.log(`Ingesting ${getAthleteIdentifier(scopedAthleteDoc)} from scopedAthleteDoc`);
+  // Make sure athleteDoc is set up correctly
+  console.log(`Ingesting ${getAthleteIdentifier(athleteDoc)} from athleteDoc`);
 
   if (!configLocations[locationName]) {
     // @todo Report error
@@ -40,7 +42,7 @@ async function asyncIngestSingleLocation(locationName, { isDryRun = false }) {
   } = configLocations[locationName];
 
   try {
-    const ingestor = new LocationIngest(scopedAthleteDoc, canonicalSegmentId);
+    const ingestor = new LocationIngest(athleteDoc, canonicalSegmentId);
     console.log(`${"\n"}LocationIngest created for segment ${ingestor.segmentId} (${locationName})`);
 
     await ingestor.fetchActivities();
@@ -51,8 +53,8 @@ async function asyncIngestSingleLocation(locationName, { isDryRun = false }) {
 
     const locationStats = ingestor.getStatsV2();
     if (!isDryRun) {
-      scopedAthleteDoc.update({ stats_version: 'v2' });
-      await scopedAthleteDoc.save();
+      athleteDoc.update({ stats_version: 'v2' });
+      await athleteDoc.save();
       await ingestor.saveStats();
     }
 
@@ -76,14 +78,12 @@ async function asyncIngestSingleLocation(locationName, { isDryRun = false }) {
 async function ingestAthleteHistory(athleteDoc, isDryRun) {
   const asyncIngestAllLocations = makeArrayAsyncIterable(
     getLocationNames(),
-    (loc) => asyncIngestSingleLocation(loc, { isDryRun }),
+    (loc) => asyncIngestSingleLocation(loc, athleteDoc, { isDryRun }),
   );
 
   if (!isDryRun) {
     await clearAthleteHistoryV2(athleteDoc);
   }
-
-  scopedAthleteDoc = athleteDoc;
 
   // @todo revert back to existing athlete stats propery
   const athleteStats = {};
