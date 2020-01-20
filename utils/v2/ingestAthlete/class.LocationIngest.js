@@ -155,6 +155,8 @@ class LocationIngest {
 
   /**
    * Update location's stats after handling new segment effort
+   * Creates stats in v1 format, use getStatsV2 to transform
+   * @todo Generate stats in v2 format, deprecate v1
    *
    * @param {String} start_date
    * @param {Integer} incrementStatsBy
@@ -277,7 +279,7 @@ class LocationIngest {
    * @return {Array}
    */
   async fetchSegmentEfforts(page = 1, allEfforts = [], opts = {}) {
-    const athleteId = this.athleteDoc.get('_id');
+    const athleteId = this.athleteDoc.id;
     const {
       limitPages = DEFAULT_FETCH_OPTS.limitPages,
       limitPerPage = DEFAULT_FETCH_OPTS.limitPerPage,
@@ -354,7 +356,7 @@ class LocationIngest {
   }) => ({
     _id: activity.id,
     added_date: new Date().toISOString(),
-    athlete_id: this.athleteDoc.get('_id'),
+    athlete_id: this.athleteDoc.id,
     laps: this.shouldAddExtraLap ? 1 : 0,
     segmentEfforts: [],
     source: INGEST_SOURCE,
