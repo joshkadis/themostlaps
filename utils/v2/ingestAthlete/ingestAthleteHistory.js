@@ -22,12 +22,6 @@ async function asyncIngestSingleLocation(
   athleteDoc,
   { isDryRun = false },
 ) {
-  if (!(athleteDoc instanceof Athlete)) {
-    // @todo Report error
-    console.log(`athleteDoc was not an instance of Athlete`);
-    return false;
-  }
-
   // Make sure athleteDoc is set up correctly
   console.log(`Ingesting ${getAthleteIdentifier(athleteDoc)} from athleteDoc`);
 
