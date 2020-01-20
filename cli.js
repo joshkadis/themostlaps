@@ -167,14 +167,6 @@ const argv = require('yargs')
       // await callbackMigrateStats(argv)
     },
   )
-  .command(
-    'ingestAthleteV2 athleteId',
-    false,
-    createPositionals(
-      ['athleteId', { type: 'number' }],
-    ),
-    async (argv) => await callbackIngestAthleteV2(argv),
-  )
   .command(require('./cli/activity'))
   .command(require('./cli/athlete'))
   .command(require('./cli/stats'))

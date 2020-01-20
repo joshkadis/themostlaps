@@ -19,7 +19,6 @@ const {
   migrateMany,
 } = require('./migrateAuthToken');
 const { getAthleteIdentifier } = require('../utils/v2/models/athlete');
-const ingestAthleteHistory = require('../utils/v2/ingestAthlete/ingestAthleteHistory');
 
 /**
  * Prompt for admin code then connect and run command
@@ -333,21 +332,6 @@ const callbackMigrateStats = async ({ location }) => {
   );
 };
 
-const callbackIngestAthleteV2 = async ({ athleteId }) => {
-  await doCommand(
-    `Enter admin code to ingest activities for athlete ${athleteId}`,
-    async() => {
-      athleteDoc = await Athlete.findById(athleteId);
-      if (!athleteDoc) {
-        console.error(`Athlete ${athleteId} not found`);
-        process.exit();
-      }
-      await ingestAthleteHistory(athleteDoc);
-      process.exit();
-    },
-  )
-};
-
 module.exports = {
   callbackDeleteUser,
   callbackDeleteUserActivities,
@@ -363,5 +347,4 @@ module.exports = {
   callbackMigrateToken,
   callbackMigrateLocation,
   callbackMigrateStats,
-  callbackIngestAthleteV2,
 };

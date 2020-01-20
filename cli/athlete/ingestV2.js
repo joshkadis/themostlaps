@@ -1,5 +1,7 @@
 const { setupConnection } = require('../utils/setupConnection');
 const { makeCheckNumArgs } = require('../utils');
+const Athlete = require('../../schema/Athlete');
+const ingestAthleteHistory = require('../../utils/v2/ingestAthlete/ingestAthleteHistory');
 
 const checkNumArgs = makeCheckNumArgs('Use format: $ athlete ingestv2');
 
@@ -8,12 +10,23 @@ const checkNumArgs = makeCheckNumArgs('Use format: $ athlete ingestv2');
  */
 async function doCommand({
   subargs,
-  dryRun: isDryRun = false,
+  // dryRun: isDryRun = false,
 }) {
   if (!checkNumArgs(subargs, 1, '<athleteId>')) {
     return;
   }
-  // Do stuff
+  const athleteId = Math.floor(Number(subargs[0]));
+  if (Number.isNaN(athleteId) || athleteId < 0) {
+    console.warn(`Invalid athlete ID: ${subargs[0]}`);
+    return;
+  }
+
+  const athleteDoc = await Athlete.findById(athleteId);
+  if (!athleteDoc) {
+    console.warn(`Athlete ${athleteId} not found`);
+    return;
+  }
+  await ingestAthleteHistory(athleteDoc);
 }
 
 async function setupThenCommand(args) {
