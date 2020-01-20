@@ -5,12 +5,13 @@ const ingestAthleteHistory = require('../../utils/v2/ingestAthlete/ingestAthlete
 
 const checkNumArgs = makeCheckNumArgs('Use format: $ athlete ingestv2');
 
+const DRY_RUN_MSG = '** THIS IS A DRY RUN **';
 /**
  * Redo activities ingestion for a given athlete
  */
 async function doCommand({
   subargs,
-  // dryRun: isDryRun = false,
+  dryRun: isDryRun = false, // Currently forcing true in index.js
 }) {
   if (!checkNumArgs(subargs, 1, '<athleteId>')) {
     return;
@@ -26,7 +27,16 @@ async function doCommand({
     console.warn(`Athlete ${athleteId} not found`);
     return;
   }
-  await ingestAthleteHistory(athleteDoc);
+
+  if (isDryRun) {
+    console.log(DRY_RUN_MSG);
+  }
+
+  await ingestAthleteHistory(athleteDoc, isDryRun);
+
+  if (isDryRun) {
+    console.log(DRY_RUN_MSG);
+  }
 }
 
 async function setupThenCommand(args) {
