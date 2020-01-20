@@ -209,17 +209,15 @@ class LocationIngest {
     );
 
     // eslint-disable-next-line
-    for await (const invalidActivity of iterable) {
-      // Will return empty object if no errors
+    for await (const validation of iterable) {
+      // validateAndSaveActivity will return false object if it was succ
       const {
-        activity = false,
-        error = false,
-      } = invalidActivity;
-      if (activity) {
-        this.invalidActivities = [...this.invalidActivities, activity];
-      }
+        activity,
+        error,
+      } = validation;
       if (error) {
         console.log(error);
+        this.invalidActivities = [...this.invalidActivities, activity];
       }
     }
   }
@@ -228,8 +226,11 @@ class LocationIngest {
    * Validates an activity and saves it to the database
    *
    * @param {Integer} id
+   * @returns {Activity} returns.activity Activity document or maybe an id
+   * @returns {Boolean|String} returns.error false if all good, string if error
    */
   validateAndSaveActivity = async (id) => {
+    // Gets raw activity data from this class, not from DB
     const data = this.getActivityById(id);
     if (!data) {
       return {
@@ -243,9 +244,10 @@ class LocationIngest {
     // Validate activity against Activity model
     const validated = activityDoc.validateSync();
     if (!validated) {
-      // @todo Add to invalidActivities
-      console.log(`Invalid activity ${activityDoc.id}`);
-      return {};
+      return {
+        activity: activityDoc,
+        error: `Invalid activity ${activityDoc.id}`,
+      };
     }
 
     // Insert Activity
@@ -263,7 +265,10 @@ class LocationIngest {
       setDefaultsOnInsert: true,
     });
 
-    return {};
+    return {
+      activity: activityDoc,
+      error: false,
+    };
   }
 
   /**
