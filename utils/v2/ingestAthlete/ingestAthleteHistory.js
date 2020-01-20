@@ -7,9 +7,18 @@ const { getAthleteIdentifier } = require('../models/athlete');
 const { getLocationNames } = require('../locations');
 const { makeArrayAsyncIterable } = require('../asyncUtils');
 
+// @todo Get rid of this bullshit
 let scopedAthleteDoc = false;
 
-async function asyncIngestSingleLocation(locationName) {
+/**
+ * Create LocationIngest object for a given location
+ * Save activities and stats depending on value of isDryRun
+ *
+ * @param {String} locationName
+ * @param {Boolean} opts.isDryRun
+ * @returns {Object} Stats object for location
+ */
+async function asyncIngestSingleLocation(locationName, { isDryRun = false }) {
   if (!(scopedAthleteDoc instanceof Athlete)) {
     // @todo Report error
     console.log(`scopedAthleteDoc was not an instance of Athlete`);
@@ -32,11 +41,20 @@ async function asyncIngestSingleLocation(locationName) {
   try {
     const ingestor = new LocationIngest(scopedAthleteDoc, canonicalSegmentId);
     console.log(`${"\n"}LocationIngest created for segment ${ingestor.segmentId} (${locationName})`);
+
     await ingestor.fetchActivities();
-    // await ingestor.saveActivities();
+    console.log(`Found ${ingestor.getNumActivities()} activities`);
+    if (!isDryRun) {
+      await ingestor.saveActivities();
+    }
+
+    const locationStats = ingestor.getStats();
+    if (!isDryRun) {
+      await ingestor.saveStats();
+    }
 
     return {
-      [locationName]: ingestor.getStats(),
+      [locationName]: locationStats,
     };
   } catch (err) {
     console.warn(`${"\n"}Error ingesting ${locationName} | ${canonicalSegmentId}`);
@@ -46,17 +64,18 @@ async function asyncIngestSingleLocation(locationName) {
   return false;
 }
 
-const asyncIngestAllLocations = makeArrayAsyncIterable(
-  getLocationNames(),
-  asyncIngestSingleLocation,
-);
-
 /**
  * Handle historical activities for new athlete
  *
  * @param Athlete athleteDoc
+ * @param Boolean isDryRun
  */
-async function ingestAthleteHistory(athleteDoc) {
+async function ingestAthleteHistory(athleteDoc, isDryRun) {
+  const asyncIngestAllLocations = makeArrayAsyncIterable(
+    getLocationNames(),
+    (loc) => asyncIngestSingleLocation(loc, { isDryRun }),
+  );
+
   scopedAthleteDoc = athleteDoc;
 
   // @todo revert back to existing athlete stats propery
@@ -77,25 +96,6 @@ async function ingestAthleteHistory(athleteDoc) {
   console.log(`${"\n"}--------RESULTS---------`);
   console.log(athleteStats);
   console.log(athleteLocations);
-  // await updateAthleteDoc(athleteDoc, athleteStats, athleteLocations);
 }
-
-// async function updateAthleteDoc(athleteDoc, athleteStats, athleteLocations) {
-//   // Set stats and locations to athlete document
-//   athleteDoc.set('stats', athleteStats);
-//   athleteLocations = uniq(athleteLocations);
-//   athleteDoc.set('locations', athleteLocations);
-//   const athleteIdentifier = getAthleteIdentifier(athleteDoc);
-//   try {
-//     await athleteDoc.save();
-//     console.log(`Processed stats and locations for ${athleteIdentifier}`);
-//     console.log(athleteStats);
-//     console.log(athleteLocations);
-//   } catch (err) {
-//     // @todo Handle error
-//     console.warn(`Error saving ${athleteIdentifier}`);
-//     console.log(err);
-//   }
-// }
 
 module.exports = ingestAthleteHistory;

@@ -383,6 +383,11 @@ class LocationIngest {
   getActivityById = (id) => this.activities[id] || false;
 
   /**
+   * Get number of activities, for logging
+   */
+  getNumActivities = () => Object.keys(this.activities).length;
+
+  /**
    * Get array of activity ids for this segment
    *
    * @return {[Integer]}
