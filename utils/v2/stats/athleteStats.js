@@ -9,6 +9,8 @@ const DEFAULT_OUTPUT_V2 = {
   availableYears: [],
 };
 
+const getDefaultV2Stats = () => DEFAULT_OUTPUT_V2;
+
 /**
  * Create array of month-value objects to receive monthly stats
  *
@@ -121,6 +123,7 @@ function updateAthleteStatsFromActivity(athleteDoc, delta, startDate) {
 }
 
 module.exports = {
+  getDefaultV2Stats,
   updateAthleteStatsFromActivity,
   getStatsForLocation,
   transformAthleteStats,

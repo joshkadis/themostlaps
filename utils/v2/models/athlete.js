@@ -1,3 +1,6 @@
+const Activity = require('../../../schema/Activity');
+const { getDefaultV2Stats } = require('../stats/athleteStats');
+
 /**
  * Get athlete name and id as string for logging
  *
@@ -14,6 +17,28 @@ function getAthleteIdentifier(athleteDoc) {
   return `${firstname} ${lastname} | ${_id}`;
 }
 
+/**
+ * Clear activities and stats for athlete document
+ *
+ * @param {Athlete} athleteDoc
+ */
+async function clearAthleteHistoryV2(athleteDoc) {
+  console.log('Clearing activities and stats');
+  const {
+    deletedCount,
+  } = await Activity.remove({ athlete_id: athleteDoc.id });
+  console.log(`Removed ${deletedCount} activities`);
+
+  athleteDoc.update({
+    stats: getDefaultV2Stats(),
+    stats_version: 'v2',
+  });
+  athleteDoc.markModified('stats');
+  await athleteDoc.save();
+  console.log('Reset athlete stats');
+}
+
 module.exports = {
+  clearAthleteHistoryV2,
   getAthleteIdentifier,
 };

@@ -6,6 +6,7 @@ const { locations: configLocations } = require('../../../config');
 const { getAthleteIdentifier } = require('../models/athlete');
 const { getLocationNames } = require('../locations');
 const { makeArrayAsyncIterable } = require('../asyncUtils');
+const { clearAthleteHistoryV2 } = require('../models/athlete');
 
 // @todo Get rid of this bullshit
 let scopedAthleteDoc = false;
@@ -75,6 +76,10 @@ async function ingestAthleteHistory(athleteDoc, isDryRun) {
     getLocationNames(),
     (loc) => asyncIngestSingleLocation(loc, { isDryRun }),
   );
+
+  if (!isDryRun) {
+    await clearAthleteHistoryV2(athleteDoc);
+  }
 
   scopedAthleteDoc = athleteDoc;
 
