@@ -1,6 +1,5 @@
 /* eslint-disable quotes */
 // const { uniq } = require('lodash');
-const Athlete = require('../../../schema/Athlete');
 const LocationIngest = require('./class.LocationIngest');
 const { locations: configLocations } = require('../../../config');
 const { getAthleteIdentifier } = require('../models/athlete');
