@@ -19,6 +19,7 @@ dist/
 !cli/deleteUser.js
 !cli/getActivityInfo.js
 !cli/activity/**/*.js
+!cli/athlete/**/*.js
 !cli/stats/**/*.js
 !cli/utils/**/*.js
 
