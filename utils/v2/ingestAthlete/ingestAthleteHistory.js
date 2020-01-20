@@ -49,8 +49,10 @@ async function asyncIngestSingleLocation(locationName, { isDryRun = false }) {
       await ingestor.saveActivities();
     }
 
-    const locationStats = ingestor.getStats();
+    const locationStats = ingestor.getStatsV2();
     if (!isDryRun) {
+      scopedAthleteDoc.update({ stats_version: 'v2' });
+      await scopedAthleteDoc.save();
       await ingestor.saveStats();
     }
 

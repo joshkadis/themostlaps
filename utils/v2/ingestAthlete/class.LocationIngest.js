@@ -10,6 +10,7 @@ const {
 } = require('../locations');
 const fetchStravaAPI = require('../../fetchStravaAPI');
 const { makeArrayAsyncIterable } = require('../asyncUtils');
+const { transformAthleteStats } = require('../stats/athleteStats');
 
 const INGEST_SOURCE = 'signup';
 const MIN_ACTIVITY_ID = 1000;
@@ -396,11 +397,18 @@ class LocationIngest {
     .map((id) => this.activities[id]._id);
 
   /**
-   * Get stats object for this segment
+   * Get stats object for this segment in v1 format
    *
    * @return {Object}
    */
-  getStats = () => this.stats;
+  getStatsV1 = () => this.stats;
+
+  /**
+   * Get stats object for this segment in v2 format
+   *
+   * @return {Object}
+   */
+  getStatsV2 = () => transformAthleteStats(this.stats);
 }
 
 module.exports = LocationIngest;
