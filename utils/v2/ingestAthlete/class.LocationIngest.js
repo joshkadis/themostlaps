@@ -34,6 +34,11 @@ class LocationIngest {
   segmentId = 0;
 
   /**
+   * @type {String} Name of location being ingested
+   */
+  locationName = '';
+
+  /**
    * @type {Athlete} Document for athlete to ingest
    */
   athleteDoc = false;
@@ -82,6 +87,7 @@ class LocationIngest {
 
     if (isValidCanonicalSegmentId(segmentId)) {
       this.segmentId = segmentId;
+      this.locationName = getLocationNameFromSegmentId(segmentId);
     } else {
       slackError(131, athleteDoc);
       throw new Error('LocationIngest with invalid canonical segment ID');
@@ -379,8 +385,28 @@ class LocationIngest {
     source: INGEST_SOURCE,
     start_date_local,
     startDateUtc: start_date,
-    location: getLocationNameFromSegmentId(this.segmentId),
+    location: this.locationName,
   });
+
+  /**
+   * Save stats for athleteDoc using v2 format
+   */
+  async saveStatsV2() {
+    const locationStats = {
+      [this.locationName]: this.getStatsV2(),
+    };
+
+    const updatedStats = {
+      ...this.athleteDoc.stats,
+      locationStats,
+    };
+    this.athleteDoc.update({
+      stats_version: 'v2',
+      stats: updatedStats,
+    });
+    this.athleteDoc.markModified('stats');
+    await this.athleteDoc.save();
+  }
 
   /**
    * Does the athlete have activities for this location?
