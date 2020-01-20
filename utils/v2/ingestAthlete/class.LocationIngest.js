@@ -11,6 +11,7 @@ const {
 const fetchStravaAPI = require('../../fetchStravaAPI');
 const { makeArrayAsyncIterable } = require('../asyncUtils');
 const { transformAthleteStats } = require('../stats/athleteStats');
+const { compareActivityLocations } = require('../models/activity');
 
 const INGEST_SOURCE = 'signup';
 const MIN_ACTIVITY_ID = 1000;
@@ -237,35 +238,31 @@ class LocationIngest {
       };
     }
 
+    const activityDoc = new Activity(data);
+
     // Validate activity against Activity model
+    const validated = activityDoc.validateSync();
+    if (!validated) {
+      // @todo Add to invalidActivities
+      console.log(`Invalid activity ${activityDoc.id}`);
+      return {};
+    }
 
-    // Upsert Activity
+    // Insert Activity
     // If an activity has laps in 2 locations,
-    // the previously saved document will be overwritten
-    // Stats will be accurate for both locations though.
-    // Model.update(upsert, omitUndefined, setDefaultsOnInsert)
+    // only one Activity will be saved, for the one with more laps.
+    // Athlete.stats will be accurate for both locations though.
+    // Will fall back to default location
+    // @todo Handle activity with multiple locations
+    const existing = await Activity.findById(id);
+    activityDoc.update(compareActivityLocations(activityDoc, existing));
+    await existing.remove();
+    await activityDoc.save({
+      upsert: true,
+      omitUndefined: true,
+      setDefaultsOnInsert: true,
+    });
 
-    //
-    //   try {
-    //     // Will remove if exists AND LOCATION MATCHES
-    //     await Activity.remove({ _id: activity._id }, { single: true });
-    //   } catch (err) {
-    //     // Let's move on, shall we?
-    //   }
-    //
-    //   const model = new Activity(activity);
-    //   const err = model.validateSync();
-    //   if (err) {
-    //     this.invalidActivities = [...this.invalidActivities, activity];
-    //   } else if (!this.isUnitTest) {
-    //     try {
-    //       await model.save();
-    //     } catch (saveErr) {
-    //       this.invalidActivities = [...this.invalidActivities, activity];
-    //       console.log(saveErr);
-    //     }
-    //   }
-    // });
     return {};
   }
 
@@ -405,6 +402,7 @@ class LocationIngest {
 
   /**
    * Get stats object for this segment in v2 format
+   * @todo Make this default behavior, deprecate v1
    *
    * @return {Object}
    */
