@@ -16,8 +16,9 @@ const {
   cancelActivityQueue,
 } = require('../../utils/v2/activityQueue');
 const { setupConnection } = require('../utils/setupConnection');
-const { checkNumArgs } = require('../utils');
+const { makeCheckNumArgs } = require('../utils');
 
+const checkNumArgs = makeCheckNumArgs('Use format: $ activity queue');
 /**
  * Get message from CLI args
  *

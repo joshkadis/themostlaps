@@ -21,21 +21,28 @@ function daysAgoTimestamp(daysago = null) {
  * Note that args[0] will be name of subcommand
  * args[1]... will be the actual arguments
  *
- * @param {Array} args
+ * @param {Array} args.length Number of args received
  * @param {Integer} num Expected number of args
  * @param {String} warning Text for warning if wrong number of args
  * @return {Bool}
  */
-function checkNumArgs(args, num, warning) {
-  if (args.length !== num) {
-    console.warn(`Use format: $ activity queue ${warning}`);
+function makeCheckNumArgs(baseWarning) {
+  return ({ length }, num, warning) => {
+    if (length === num) {
+      return true;
+    }
+    if (length > num) {
+      console.warn('Too many arguments');
+    } else if (length < num) {
+      console.warn('Missing arguments');
+    }
+    console.warn(`${baseWarning} ${warning}`);
     return false;
-  }
-  return true;
+  };
 }
 
 
 module.exports = {
   daysAgoTimestamp,
-  checkNumArgs,
+  makeCheckNumArgs,
 };
