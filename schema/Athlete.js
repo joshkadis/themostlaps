@@ -27,7 +27,7 @@ const athleteSchema = new Schema(
       required: true,
       default: ['prospectpark'],
     },
-    stats_version: { type: String, required: true, default: 'v1' },
+    stats_version: { type: String, required: true, default: 'v2' },
     preferences: {
       notifications: {
         monthly: { type: Boolean, default: true },
