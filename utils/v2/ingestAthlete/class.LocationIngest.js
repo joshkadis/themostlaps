@@ -12,6 +12,7 @@ const fetchStravaAPI = require('../../fetchStravaAPI');
 const { makeArrayAsyncIterable } = require('../asyncUtils');
 const { transformAthleteStats } = require('../stats/athleteStats');
 const { compareActivityLocations } = require('../models/activity');
+const { dedupeSegmentEfforts } = require('../../refreshAthlete/utils');
 
 const INGEST_SOURCE = 'signup';
 const MIN_ACTIVITY_ID = 1000;
@@ -120,7 +121,7 @@ class LocationIngest {
     }
 
     const { id = null } = activity;
-    const activityId = parseInt(id, 10);
+    const activityId = Number(id);
     if (
       !activityId
       || Number.isNaN(activityId)
@@ -141,14 +142,26 @@ class LocationIngest {
       }
     }
     // Create and add SegmentEffort to activity
+    const prevNumSegmentEfforts = this.activities[activityId]
+      .segmentEfforts
+      .length;
     this.addSegmentEffortToActivity(activityId, effortRaw);
+    const newNumSegmentEfforts = this.activities[activityId]
+      .segmentEfforts
+      .length;
 
-    // Increment activity's laps
-    this.activities[activityId].laps += 1;
+    // Dedupe and hopefully increment activity's laps
+    if (newNumSegmentEfforts > prevNumSegmentEfforts) {
+      // This should always be 1
+      const delta = newNumSegmentEfforts - prevNumSegmentEfforts;
+      this.activities[activityId].laps += delta;
+      lapsFromCreatedActivity += delta;
+    }
+
 
     this.updateStatsFromSegmentEffort(
       start_date,
-      (lapsFromCreatedActivity + 1),
+      lapsFromCreatedActivity,
       this.activities[activityId].laps,
     );
   }
@@ -195,7 +208,11 @@ class LocationIngest {
         ? [...this.activities[activityId].segmentEfforts, newSegmentEffort]
         : [newSegmentEffort];
 
-      this.activities[activityId].segmentEfforts = segmentEfforts;
+      // Would be preferable to dedupe after all segment efforts have been added
+      // but that would require changing a bunch of logic in this class
+      this.activities[activityId].segmentEfforts = dedupeSegmentEfforts(
+        segmentEfforts,
+      );
     }
   }
 
