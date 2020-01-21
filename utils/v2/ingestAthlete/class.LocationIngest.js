@@ -256,7 +256,7 @@ class LocationIngest {
    */
   validateAndSaveActivity = async (id) => {
     // Gets raw activity data from this class, not from DB
-    const data = this.getActivityById(id);
+    const data = this.getRawActivityById(id);
     if (!data) {
       return {
         activity: { id },
@@ -416,19 +416,19 @@ class LocationIngest {
   hasActivities = () => Object.keys(this.activities).length > 0;
 
   /**
-   * Get array of activities for this segment as JS objects
+   * Get array of activities stored in this class JS objects
    *
    * @return {[Activity]}
    */
-  getActivities = () => Object.values(this.activities);
+  getRawActivities = () => Object.values(this.activities);
 
   /**
-   * Get an activity data object by ID
+   * Get activity data object by ID, stored in this class as JS object
    *
    * @param {Integer} id
    * @return {Object|false}
    */
-  getActivityById = (id) => this.activities[id] || false;
+  getRawActivityById = (id) => this.activities[id] || false;
 
   /**
    * Get number of activities, for logging
