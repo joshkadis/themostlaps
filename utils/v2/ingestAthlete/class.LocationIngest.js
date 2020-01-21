@@ -149,11 +149,11 @@ class LocationIngest {
     }
     // Create and add SegmentEffort to activity
     const prevNumSegmentEfforts = this.activities[activityId]
-      .segmentEfforts
+      .segment_efforts
       .length;
     this.addSegmentEffortToActivity(activityId, effortRaw);
     const newNumSegmentEfforts = this.activities[activityId]
-      .segmentEfforts
+      .segment_efforts
       .length;
 
     // Dedupe and hopefully increment activity's laps
@@ -210,14 +210,14 @@ class LocationIngest {
     }
     const newSegmentEffort = this.formatSegmentEffort(effortRaw);
     if (newSegmentEffort) {
-      const segmentEfforts = this.activities[activityId].segmentEfforts
-        ? [...this.activities[activityId].segmentEfforts, newSegmentEffort]
+      const segment_efforts = this.activities[activityId].segment_efforts
+        ? [...this.activities[activityId].segment_efforts, newSegmentEffort]
         : [newSegmentEffort];
 
       // Would be preferable to dedupe after all segment efforts have been added
       // but that would require changing a bunch of logic in this class
-      this.activities[activityId].segmentEfforts = dedupeSegmentEfforts(
-        segmentEfforts,
+      this.activities[activityId].segment_efforts = dedupeSegmentEfforts(
+        segment_efforts,
       );
     }
   }
@@ -267,11 +267,11 @@ class LocationIngest {
     const activityDoc = new Activity(data);
 
     // Validate activity against Activity model
-    const validated = activityDoc.validateSync();
-    if (!validated) {
+    const validationError = activityDoc.validateSync();
+    if (validationError) {
       return {
         activity: activityDoc,
-        error: `Invalid activity ${activityDoc.id}`,
+        error: `Activity ${activityDoc.id} validation errors: ${JSON.stringify(validationError.errors)}`,
       };
     }
 
@@ -363,7 +363,7 @@ class LocationIngest {
     elapsed_time,
     moving_time,
     start_date_local,
-    startDateUtc: start_date,
+    startDateUtc: new Date(start_date),
   });
 
   /**
@@ -381,10 +381,10 @@ class LocationIngest {
     added_date: new Date().toISOString(),
     athlete_id: this.athleteDoc.id,
     laps: this.shouldAddExtraLap ? 1 : 0,
-    segmentEfforts: [],
+    segment_efforts: [],
     source: INGEST_SOURCE,
     start_date_local,
-    startDateUtc: start_date,
+    startDateUtc: new Date(start_date),
     location: this.locationName,
   });
 
