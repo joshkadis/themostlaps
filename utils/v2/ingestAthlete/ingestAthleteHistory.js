@@ -6,6 +6,7 @@ const { getAthleteIdentifier } = require('../models/athlete');
 const { getLocationNames } = require('../locations');
 const { makeArrayAsyncIterable } = require('../asyncUtils');
 const { clearAthleteHistoryV2 } = require('../models/athlete');
+const { slackError, slackSuccess } = require('../../slackNotification');
 
 // Max. allowable portion of invalid activities
 const MAX_INVALID_ACTIVITIES = 0.05;
@@ -24,9 +25,6 @@ async function asyncIngestSingleLocation(
   athleteDoc,
   { isDryRun = false },
 ) {
-  // Make sure athleteDoc is set up correctly
-  console.log(`Ingesting ${getAthleteIdentifier(athleteDoc)} from athleteDoc`);
-
   if (!configLocations[locationName]) {
     // @todo Report error
     console.log(`Couldn't find location: ${JSON.stringify(locationName)}`);
@@ -64,13 +62,12 @@ async function asyncIngestSingleLocation(
       await ingestor.saveActivities();
     }
 
-    const locationStats = ingestor.getStatsV2();
     if (!isDryRun) {
       await ingestor.saveStatsV2();
     }
 
     return {
-      [locationName]: locationStats,
+      [locationName]: ingestor.getStatsV2(),
     };
   } catch (err) {
     console.warn(`${"\n"}Error ingesting ${locationName} | ${canonicalSegmentId}`);
@@ -87,6 +84,9 @@ async function asyncIngestSingleLocation(
  * @param Boolean isDryRun
  */
 async function ingestAthleteHistory(athleteDoc, isDryRun) {
+  console.log(`Ingesting ${getAthleteIdentifier(athleteDoc)} from athleteDoc`);
+
+  // Will check all known locations
   const asyncIngestAllLocations = makeArrayAsyncIterable(
     getLocationNames(),
     (loc) => asyncIngestSingleLocation(loc, athleteDoc, { isDryRun }),
@@ -111,9 +111,18 @@ async function ingestAthleteHistory(athleteDoc, isDryRun) {
     }
   }
 
-  console.log(`${"\n"}--------RESULTS---------`);
-  console.log(athleteStats);
-  console.log(athleteLocations);
+  if (!isDryRun) {
+    const summary = Object.keys(athleteStats).reduce((acc, key) => ({
+      ...acc,
+      [key]: athleteStats[key].allTime,
+    }), {});
+
+    slackSuccess(`Ingested athlete history for ${athleteDoc.id}`, summary);
+  }
+
+  // console.log(`${"\n"}--------RESULTS---------`);
+  // console.log(athleteStats);
+  // console.log(athleteLocations);
 }
 
 module.exports = ingestAthleteHistory;

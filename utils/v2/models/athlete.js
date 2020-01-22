@@ -29,7 +29,7 @@ async function clearAthleteHistoryV2(athleteDoc) {
   } = await Activity.remove({ athlete_id: athleteDoc.id });
   console.log(`Removed ${deletedCount} activities`);
 
-  athleteDoc.update({
+  athleteDoc.set({
     stats: getDefaultV2Stats(),
     stats_version: 'v2',
   });
