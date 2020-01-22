@@ -1,6 +1,6 @@
 const { setupThenCommand: ingestV2Command } = require('./ingestV2');
 
-const SHOULD_FORCE_DRY_RUN = true;
+const SHOULD_FORCE_DRY_RUN = false;
 
 module.exports = {
   command: [
