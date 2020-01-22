@@ -405,13 +405,12 @@ class LocationIngest {
    * Save stats for athleteDoc using v2 format
    */
   async saveStatsV2() {
-    const locationStats = {
-      [this.locationName]: this.getStatsV2(),
-    };
-
     const updatedStats = {
       ...this.athleteDoc.stats,
-      locationStats,
+      locations: {
+        ...this.athleteDoc.stats.locations,
+        [this.locationName]: this.getStatsV2(),
+      },
     };
 
     const locations = [...this.athleteDoc.locations];

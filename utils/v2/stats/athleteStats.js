@@ -7,6 +7,7 @@ const DEFAULT_OUTPUT_V2 = {
   byYear: [],
   byMonth: {},
   availableYears: [],
+  locations: {},
 };
 
 const getDefaultV2Stats = () => DEFAULT_OUTPUT_V2;
