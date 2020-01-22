@@ -7,9 +7,36 @@ const { getLocationNames } = require('../locations');
 const { makeArrayAsyncIterable } = require('../asyncUtils');
 const { clearAthleteHistoryV2 } = require('../models/athlete');
 const { slackError, slackSuccess } = require('../../slackNotification');
+const { sortUniq } = require('../utils');
 
 // Max. allowable portion of invalid activities
 const MAX_INVALID_ACTIVITIES = 0.05;
+
+/**
+ * Set stats array of all years in which
+ * athlete has any stats for any location
+ *
+ * @param {Athlete} athleteDoc
+ * @param {Object} athleteStats
+ */
+async function setAthleteAvailableYears(athleteDoc, athleteStats) {
+  // Set array of all years in which athlete has any stats for any location
+  const availableYears = sortUniq(
+    Object.keys(athleteStats).reduce((acc, loc) => [
+      ...acc,
+      ...athleteStats[loc].availableYears,
+    ], []),
+  );
+
+  athleteDoc.set({
+    stats: {
+      ...athleteDoc.stats,
+      availableYears,
+    },
+  });
+  athleteDoc.markModified('stats');
+  await athleteDoc.save();
+}
 
 /**
  * Create LocationIngest object for a given location
@@ -67,6 +94,8 @@ async function asyncIngestSingleLocation(
       await ingestor.saveActivities();
     }
 
+    // @todo Refactor to only save the athlete at the end
+    // instead of after each iteratee location
     if (!isDryRun) {
       await ingestor.saveStatsV2();
     }
@@ -110,6 +139,10 @@ async function ingestAthleteHistory(athleteDoc, isDryRun) {
       const locationName = Object.keys(locationStats)[0];
       athleteStats[locationName] = locationStats[locationName];
     }
+  }
+
+  if (!isDryRun) {
+    await setAthleteAvailableYears(athleteDoc, athleteStats);
   }
 
   const summary = Object.keys(athleteStats).reduce((acc, loc) => ({
