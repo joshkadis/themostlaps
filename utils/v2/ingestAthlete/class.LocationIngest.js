@@ -413,10 +413,18 @@ class LocationIngest {
       ...this.athleteDoc.stats,
       locationStats,
     };
+
+    const locations = [...this.athleteDoc.locations];
+    if (locations.indexOf(this.locationName) === -1) {
+      locations.push(this.locationName);
+    }
+
     this.athleteDoc.set({
+      locations,
       stats_version: 'v2',
       stats: updatedStats,
     });
+    this.athleteDoc.markModified('locations');
     this.athleteDoc.markModified('stats');
     await this.athleteDoc.save();
   }
