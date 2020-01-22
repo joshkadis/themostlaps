@@ -78,6 +78,9 @@ module.exports = (code = 0, data = '') => {
     case 131:
       return 'LocationIngest with invalid canonical segment ID';
 
+    case 132:
+      return 'LocationIngest exceeded max allowed invalid activities';
+
     default:
       return 'An error occurred.';
   }

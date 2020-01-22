@@ -7,6 +7,9 @@ const { getLocationNames } = require('../locations');
 const { makeArrayAsyncIterable } = require('../asyncUtils');
 const { clearAthleteHistoryV2 } = require('../models/athlete');
 
+// Max. allowable portion of invalid activities
+const MAX_INVALID_ACTIVITIES = 0.05;
+
 /**
  * Create LocationIngest object for a given location
  * Save activities and stats depending on value of isDryRun
@@ -40,6 +43,23 @@ async function asyncIngestSingleLocation(
 
     await ingestor.fetchActivities();
     console.log(`Found ${ingestor.getNumActivities()} activities`);
+    ingestor.prepareActivities();
+    const numInvalid = ingestor.invalidActivities.length;
+
+    if (numInvalid) {
+      console.log(JSON.stringify(ingestor.invalidActivities[0], null, 2));
+    } else {
+      console.log('All activites were validated successfully');
+    }
+
+    if (numInvalid / ingestor.getNumActivities > MAX_INVALID_ACTIVITIES) {
+      if (isDryRun) {
+        throw new Error(`Athlete ${athleteDoc.id} exceeded max invalid activities`);
+      }
+      slackError(132, ingestor.invalidActivities);
+      return {};
+    }
+
     if (!isDryRun) {
       await ingestor.saveActivities();
     }
