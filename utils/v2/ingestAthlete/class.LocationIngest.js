@@ -59,6 +59,11 @@ class LocationIngest {
   activities = {};
 
   /**
+   * @type {Array} Validated Activity documents to save
+   */
+  activityDocs = [];
+
+  /**
    * @type {Array} Activities that were not validated
    */
   invalidActivities = [];
@@ -223,77 +228,85 @@ class LocationIngest {
   }
 
   /**
+   * Create Activity documents from formatted data
+   * and validate so they can be saved
+   */
+  prepareActivities() {
+    Object.values(this.getRawActivities()).forEach((rawActivity) => {
+      const activityDoc = new Activity(rawActivity);
+
+      // Validate activity against Activity model
+      const validationError = activityDoc.validateSync();
+      if (validationError) {
+        this.invalidActivities.push({
+          activity: activityDoc,
+          error: `Activity ${activityDoc.id} validation errors: ${JSON.stringify(validationError.errors)}`,
+        });
+      } else {
+        this.activityDocs.push(activityDoc);
+      }
+    });
+  }
+
+  /**
    * Save documents for validated activities sequentially,
    * which is how Model.create() does it anyway. But we want to
    * catch validation errors one at a time.
    */
   async saveActivities() {
     const iterable = makeArrayAsyncIterable(
-      this.getActivityIds(),
-      this.validateAndSaveActivity,
+      this.getActivityDocs(),
+      this.saveActivity,
     );
 
+    let numSaved = 0;
+    let totalLaps = 0;
     // eslint-disable-next-line
-    for await (const validation of iterable) {
-      // validateAndSaveActivity will return false object if it was succ
-      const {
-        activity,
-        error,
-      } = validation;
-      if (error) {
-        console.log(error);
-        this.invalidActivities = [...this.invalidActivities, activity];
-      }
+    for await (const lapsSaved of iterable) {
+      numSaved += 1;
+      totalLaps += lapsSaved;
     }
+    console.log(`${numSaved} activities | ${totalLaps} total laps`);
   }
 
   /**
    * Validates an activity and saves it to the database
    *
-   * @param {Integer} id
-   * @returns {Activity} returns.activity Activity document or maybe an id
-   * @returns {Boolean|String} returns.error false if all good, string if error
+   * @param {Activity} activityDoc
+   * @returns {Number} Number of laps for activity, for logging
    */
-  validateAndSaveActivity = async (id) => {
-    // Gets raw activity data from this class, not from DB
-    const data = this.getRawActivityById(id);
-    if (!data) {
-      return {
-        activity: { id },
-        error: new Error(`Unknown activity id: ${JSON.stringify(id)}`),
-      };
-    }
-
-    const activityDoc = new Activity(data);
-
-    // Validate activity against Activity model
-    const validationError = activityDoc.validateSync();
-    if (validationError) {
-      return {
-        activity: activityDoc,
-        error: `Activity ${activityDoc.id} validation errors: ${JSON.stringify(validationError.errors)}`,
-      };
-    }
-
+  saveActivity = async (activityDoc) => {
     // Insert Activity
     // If an activity has laps in 2 locations,
     // only one Activity will be saved, for the one with more laps.
     // Athlete.stats will be accurate for both locations though.
     // Will fall back to default location
     // @todo Handle activity with multiple locations
-    const existing = await Activity.findById(id);
-    activityDoc.update(compareActivityLocations(activityDoc, existing));
-    await existing.remove();
+    const existing = await Activity.findById(activityDoc.id);
+    if (existing) {
+      const {
+        id: newId,
+        location: newLocation,
+        laps: newLaps,
+      } = activityDoc;
+      const {
+        location: prevLocation = false,
+        laps: prevLaps,
+      } = existing;
+      if (prevLocation && prevLocation !== newLocation) {
+        console.log(`Multi-location activity ${newId} | New: ${newLocation} ${newLaps} | Prev: ${prevLocation} ${prevLaps}`);
+      }
+      activityDoc.set(compareActivityLocations(activityDoc, existing));
+      await existing.remove();
+    }
     await activityDoc.save({
       upsert: true,
       omitUndefined: true,
       setDefaultsOnInsert: true,
     });
 
-    return {
-      activity: activityDoc,
-      error: false,
-    };
+    // For logging
+    return activityDoc.laps;
   }
 
   /**
@@ -400,7 +413,7 @@ class LocationIngest {
       ...this.athleteDoc.stats,
       locationStats,
     };
-    this.athleteDoc.update({
+    this.athleteDoc.set({
       stats_version: 'v2',
       stats: updatedStats,
     });
@@ -457,6 +470,13 @@ class LocationIngest {
    * @return {Object}
    */
   getStatsV2 = () => transformAthleteStats(this.stats);
+
+  /**
+   * Get Activity documents
+   *
+   * @return {Object}
+   */
+  getActivityDocs = () => this.activityDocs;
 }
 
 module.exports = LocationIngest;
