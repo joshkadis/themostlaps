@@ -108,7 +108,7 @@ async function ingestAthleteHistory(athleteDoc, isDryRun) {
   for await (const locationStats of asyncIngestAllLocations) {
     if (locationStats) {
       const locationName = Object.keys(locationStats)[0];
-      athleteStats[locationName] = locationStats;
+      athleteStats[locationName] = locationStats[locationName];
     }
   }
 
@@ -127,7 +127,8 @@ async function ingestAthleteHistory(athleteDoc, isDryRun) {
   console.log(`
 --------RESULTS---------
 Ingested athlete history for ${athleteDoc.id}:
-${JSON.stringify(summary, null, 2)}`);
+${JSON.stringify(summary, null, 2)}
+${isDryRun ? '**THIS WAS A DRY RUN**' : ''}`);
 }
 
 module.exports = ingestAthleteHistory;
