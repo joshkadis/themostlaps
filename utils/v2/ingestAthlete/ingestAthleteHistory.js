@@ -112,19 +112,22 @@ async function ingestAthleteHistory(athleteDoc, isDryRun) {
     }
   }
 
-  const summary = Object.keys(athleteStats).reduce((acc, key) => ({
+  const summary = Object.keys(athleteStats).reduce((acc, loc) => ({
     ...acc,
-    [key]: athleteStats[key].allTime,
+    [loc]: {
+      total: athleteStats[loc].allTime,
+      activites: athleteStats[loc].numActivities,
+    },
   }), {});
 
   if (!isDryRun) {
     slackSuccess(`Ingested athlete history for ${athleteDoc.id}`, summary);
-  } else {
-    console.log(`
+  }
+
+  console.log(`
 --------RESULTS---------
 Ingested athlete history for ${athleteDoc.id}:
 ${JSON.stringify(summary, null, 2)}`);
-  }
 }
 
 module.exports = ingestAthleteHistory;

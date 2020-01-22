@@ -30,9 +30,10 @@ function setUpYearByMonths() {
  * Transform stats from format in database to format for rider page
  *
  * @param {Object} rawStats
+ * @param {Object} overrides Optional info applied just before returning
  * @return {Object}
  */
-function transformAthleteStats(rawStats = {}) {
+function transformAthleteStats(rawStats = {}, overrides = {}) {
   // If either of these is undefined or 0, we can exit
   if (!rawStats.allTime || !rawStats.single) {
     return DEFAULT_OUTPUT_V2;
@@ -81,6 +82,7 @@ function transformAthleteStats(rawStats = {}) {
     availableYears,
     byMonth,
     byYear,
+    ...overrides,
   };
 }
 

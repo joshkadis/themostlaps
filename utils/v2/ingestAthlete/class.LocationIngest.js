@@ -299,6 +299,7 @@ class LocationIngest {
       activityDoc.set(compareActivityLocations(activityDoc, existing));
       await existing.remove();
     }
+
     await activityDoc.save({
       upsert: true,
       omitUndefined: true,
@@ -405,6 +406,7 @@ class LocationIngest {
    * Save stats for athleteDoc using v2 format
    */
   async saveStatsV2() {
+    console.log(`${this.getActivityDocs().length} validated activities`);
     const updatedStats = {
       ...this.athleteDoc.stats,
       locations: {
@@ -449,6 +451,13 @@ class LocationIngest {
   getNumActivities = () => Object.keys(this.activities).length;
 
   /**
+   * Get number of Activity documents that passed validation for this location.
+   * Note that this MAY BE GREATER than the number of documents in the database
+   * if there were multi-location activities. See saveActivity()
+   */
+  getNumValidActivities = () => this.activityDocs.length;
+
+  /**
    * Get array of activity ids for this segment
    *
    * @return {[Integer]}
@@ -469,7 +478,9 @@ class LocationIngest {
    *
    * @return {Object}
    */
-  getStatsV2 = () => transformAthleteStats(this.stats);
+  getStatsV2 = () => transformAthleteStats(this.stats, {
+    numActivities: this.activityDocs.length,
+  });
 
   /**
    * Get Activity documents
