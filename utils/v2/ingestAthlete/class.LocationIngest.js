@@ -430,13 +430,6 @@ class LocationIngest {
   }
 
   /**
-   * Does the athlete have activities for this location?
-   *
-   * @return {Boolean}
-   */
-  hasActivities = () => Object.keys(this.activities).length > 0;
-
-  /**
    * Get array of activities stored in this class JS objects
    *
    * @return {[Activity]}

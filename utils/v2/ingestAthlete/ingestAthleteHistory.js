@@ -41,6 +41,11 @@ async function asyncIngestSingleLocation(
 
     await ingestor.fetchActivities();
     console.log(`Found ${ingestor.getNumActivities()} activities`);
+
+    if (!ingestor.getNumActivities()) {
+      return false;
+    }
+
     ingestor.prepareActivities();
     const numInvalid = ingestor.invalidActivities.length;
 
@@ -98,31 +103,28 @@ async function ingestAthleteHistory(athleteDoc, isDryRun) {
 
   // @todo revert back to existing athlete stats propery
   const athleteStats = {};
-  let athleteLocations = [];
 
   // eslint-disable-next-line
   for await (const locationStats of asyncIngestAllLocations) {
-    if (!locationStats) {
-      console.warn(`asyncIngestSingleLocation returned ${JSON.stringify(locationStats)}`);
-    } else {
+    if (locationStats) {
       const locationName = Object.keys(locationStats)[0];
-      Object.assign(athleteStats, locationStats);
-      athleteLocations = [...athleteLocations, locationName];
+      athleteStats[locationName] = locationStats;
     }
   }
 
+  const summary = Object.keys(athleteStats).reduce((acc, key) => ({
+    ...acc,
+    [key]: athleteStats[key].allTime,
+  }), {});
+
   if (!isDryRun) {
-    const summary = Object.keys(athleteStats).reduce((acc, key) => ({
-      ...acc,
-      [key]: athleteStats[key].allTime,
-    }), {});
-
     slackSuccess(`Ingested athlete history for ${athleteDoc.id}`, summary);
+  } else {
+    console.log(`
+--------RESULTS---------
+Ingested athlete history for ${athleteDoc.id}:
+${JSON.stringify(summary, null, 2)}`);
   }
-
-  // console.log(`${"\n"}--------RESULTS---------`);
-  // console.log(athleteStats);
-  // console.log(athleteLocations);
 }
 
 module.exports = ingestAthleteHistory;
