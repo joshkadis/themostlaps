@@ -83,10 +83,5 @@
     "setupFiles": [
       "./setupJest.js"
     ]
-  },
-  "husky": {
-    "hooks": {
-      "pre-push": "npm run toc && git add README.md && git commit -m 'Update README'"
-    }
   }
 }
