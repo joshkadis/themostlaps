@@ -4,7 +4,7 @@ Find out at https://themostlaps.com
 
 <!-- toc -->
 
-- [Branches and deployment pipeline](#branches-and-deployment-pipeline)
+- [Branches and deployment pipelines](#branches-and-deployment-pipelines)
 - [Dev tools](#dev-tools)
   * [Dev server scripts](#dev-server-scripts)
   * [ESLint](#eslint)
@@ -15,7 +15,7 @@ Find out at https://themostlaps.com
 
 <!-- tocstop -->
 
-## Branches and deployment pipeline
+## Branches and deployment pipelines
 
 **development**
 * For feature testing
