@@ -2,7 +2,6 @@ const { setupConnection } = require('../utils/setupConnection');
 const { makeCheckNumArgs } = require('../utils');
 const Athlete = require('../../schema/Athlete');
 const ingestAthleteHistory = require('../../utils/v2/ingestAthlete/ingestAthleteHistory');
-const { clearAthleteHistoryV2 } = require('../../utils/v2/models/athlete');
 
 const checkNumArgs = makeCheckNumArgs('Use format: $ athlete ingestv2');
 
@@ -27,10 +26,6 @@ async function doCommand({
   if (!athleteDoc) {
     console.warn(`Athlete ${athleteId} not found`);
     return;
-  }
-
-  if (!isDryRun) {
-    await clearAthleteHistoryV2(athleteDoc);
   }
 
   if (isDryRun) {
