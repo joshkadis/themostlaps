@@ -44,11 +44,6 @@ class LocationIngest {
   athleteDoc = false;
 
   /**
-   * @type {Boolean} Does not save to database if true
-   */
-  isUnitTest = false;
-
-  /**
    * @type {Array} Segment effort history for location
    */
   segmentEfforts = [];
