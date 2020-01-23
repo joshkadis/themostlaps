@@ -2,6 +2,19 @@
 Who rides the most laps of Prospect Park?
 Find out at https://themostlaps.com
 
+<!-- toc -->
+
+- [Branches and deployment pipeline](#branches-and-deployment-pipeline)
+- [Dev tools](#dev-tools)
+  * [Dev server scripts](#dev-server-scripts)
+  * [ESLint](#eslint)
+  * [Babel](#babel)
+  * [Webpack](#webpack)
+- [Other stuff](#other-stuff)
+  * [V2 stats data structure](#v2-stats-data-structure)
+
+<!-- tocstop -->
+
 ## Branches and deployment pipeline
 
 **development**
@@ -53,7 +66,7 @@ Same as Babel: Next for frontend, nothing for server-side.
 ## Other stuff
 In no particular order...
 
-## V2 stats data structure
+### V2 stats data structure
 
 API output should look like this for _the initial release_ of v2:
 

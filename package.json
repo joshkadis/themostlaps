@@ -10,7 +10,8 @@
     "build": "next build",
     "heroku-postbuild": "npm run build",
     "test": "jest",
-    "lint": "./node_modules/eslint/bin/eslint.js -f table ."
+    "lint": "./node_modules/eslint/bin/eslint.js -f table .",
+    "toc": "./node_modules/markdown-toc/cli.js ./README.md  -i"
   },
   "repository": {
     "type": "git",
@@ -72,6 +73,7 @@
     "eslint-plugin-react": "^7.14.3",
     "jest": "^24.9.0",
     "jest-fetch-mock": "^2.1.2",
+    "markdown-toc": "^1.2.0",
     "mockgoose": "^8.0.2"
   },
   "jest": {
@@ -81,5 +83,10 @@
     "setupFiles": [
       "./setupJest.js"
     ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-push": "npm run toc && git add README.md && git commit -m 'Update README'"
+    }
   }
 }
