@@ -20,14 +20,22 @@ Find out at https://themostlaps.com
 
 ### Dev server scripts
 
-`npm run dev` starts a Next.js **development environment** with page reloading, etc. Only watches files relevant to Next. Changes to non-Next files require restarting the server.
+`npm run dev`
+* Starts a Next.js development environment with hot reloading, etc.
+* Only watches files relevant to Next
+* Edits to non-Next files don't take effect until the server is restarted.
 
-`npm run dev-server` starts a Next.js **development** using Nodemon but only watches directories related to server development. Does not rebuild the Next bundle, so changes in Next's files are require restarting the server.
+`npm run dev-server`
+* Starts a Next.js development environment using Nodemon
+* Only watches directories related to _server_ development; restarts on changes
+* Does not rebuild the Next bundle, so changes in Next's files require restarting the server.
 
 **Note:** `nodemon` must be installed globally in order to use `dev-server`.
 
 ### ESLint
-`.eslintignore` ignores everything because the legacy codebase is messy. We un-ignore files and directories as we go, e.g. `!server.js`.
+`.eslintignore` defaults to ignoring everything because the legacy codebase is messy. To lint new work, we un-ignore files and directories as we go, e.g. `!server.js`.
+
+Then:
 ```
 $ npm run lint
 ```
@@ -42,21 +50,48 @@ Eventually we'll get around to separating client and server applications.
 ### Webpack
 Same as Babel: Next for frontend, nothing for server-side.
 
-## Import/Export
+## Other stuff
+In no particular order...
 
-_This assumes 3 shards on the remote host._
+## V2 stats data structure
 
-To export from production, do this _for each collection_:
-```
-mongoexport --host <CLUSTERNAME>-shard-0/<CLUSTERNAME>-shard-00-00-<HOSTNAME>:27017,<CLUSTERNAME>-shard-00-01-<HOSTNAME>:27017,<CLUSTERNAME>-shard-00-02-<HOSTNAME>:27017 --ssl --username <USERNAME> --password <PASSWORD> --authenticationDatabase admin --db <PRODUCTION DB> --collection <COLLECTION> --out <SOMETHING>.json
-```
+API output should look like this for _the initial release_ of v2:
 
-To import to a remote DB – e.g. when pulling production down to a lower tier – do this _for each collection_:
 ```
-mongoimport --host <CLUSTERNAME>-shard-0/<CLUSTERNAME>-shard-00-00-<HOSTNAME>:27017,<CLUSTERNAME>-shard-00-01-<HOSTNAME>:27017,<CLUSTERNAME>-shard-00-02-<HOSTNAME>:27017 --ssl --username <USERNAME> --password <PASSWORD> --authenticationDatabase admin --db <DB NAME> --collection <COLLECTION> --drop --file <SAME AS mongoexport>.json
-```
-
-To import to `localhost`, again for each collection...
-```
-mongoimport --host localhost:27017 --db <DB NAME> --collection <COLLECTION> --drop --file <SAME AS mongoexport>.json
+{
+  <Other properties from athlete document>,
+  locations: ['prospectpark', 'centralpark'],
+  stats_version: 'v2',
+  stats: {
+    <Top-level athlete stats TBD>,
+    locations: {
+      prospectpark: {
+        allTime: xx,
+        single: xx,
+        numActivities: xx,
+        availableYears: [2014],
+        byYear: {
+          { year: 2014, value: xx },
+        },
+        byMonth: {
+          2014: [
+            { month: 'Jan', value: xx },
+            { month: 'Feb', value: xx },
+            { month: 'Mar', value: xx },
+            { month: 'Apr', value: xx },
+            { month: 'May', value: xx },
+            { month: 'Jun', value: xx },
+            { month: 'Jul', value: xx },
+            { month: 'Aug', value: xx },
+            { month: 'Sep', value: xx },
+            { month: 'Oct', value: xx },
+            { month: 'Nov', value: xx },
+            { month: 'Dec', value: xx }
+          ],
+        }
+      },
+      centralpark: <Same thing as prospectpark>
+    }
+  }
+}
 ```
