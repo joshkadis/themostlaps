@@ -13,6 +13,7 @@ const { makeArrayAsyncIterable } = require('../asyncUtils');
 const { transformAthleteStats } = require('../stats/athleteStats');
 const { compareActivityLocations } = require('../models/activity');
 const { dedupeSegmentEfforts } = require('../../refreshAthlete/utils');
+const { buildLocationsStatsFromActivities } = require('../stats/generateStatsV2');
 
 const INGEST_SOURCE = 'signup';
 const MIN_ACTIVITY_ID = 1000;
@@ -398,25 +399,28 @@ class LocationIngest {
   });
 
   /**
+   * Generate stats for this location from prepared documents
+   */
+  generateStats() {
+    // buildLocationsStatsFromActivities() can handle activites
+    // with multiple locations.
+    // In this case, all will have the same location.
+    const globalStats = buildLocationsStatsFromActivities(this.activityDocs);
+    this.locationStats = globalStats[this.locationName];
+  }
+
+  /**
    * Save stats for athleteDoc using v2 format
    */
-  async saveStatsV2() {
-    console.log(`${this.getActivityDocs().length} validated activities`);
-    const updatedStats = {
-      ...this.athleteDoc.stats,
-      locations: {
-        ...this.athleteDoc.stats.locations,
-        [this.locationName]: this.getStatsV2(),
-      },
+  async saveStats() {
+    const updatedStats = { ...this.athleteDoc.stats };
+    updatedStats.locations = {
+      ...updatedStats.locations,
+      [this.locationName]: this.locationStats,
     };
 
-    const locations = [...this.athleteDoc.locations];
-    if (locations.indexOf(this.locationName) === -1) {
-      locations.push(this.locationName);
-    }
-
     this.athleteDoc.set({
-      locations,
+      locations: Object.keys(updatedStats.locations),
       stats_version: 'v2',
       stats: updatedStats,
       last_updated: new Date().toISOString(),
@@ -462,21 +466,11 @@ class LocationIngest {
     .map((id) => this.activities[id]._id);
 
   /**
-   * Get stats object for this segment in v1 format
+   * Get stats object for this segment, will be v2 format
    *
    * @return {Object}
    */
-  getStatsV1 = () => this.stats;
-
-  /**
-   * Get stats object for this segment in v2 format
-   * @todo Make this default behavior, deprecate v1
-   *
-   * @return {Object}
-   */
-  getStatsV2 = () => transformAthleteStats(this.stats, {
-    numActivities: this.activityDocs.length,
-  });
+  getStats = () => this.locationStats;
 
   /**
    * Get Activity documents

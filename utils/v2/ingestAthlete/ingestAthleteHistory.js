@@ -94,14 +94,15 @@ async function asyncIngestSingleLocation(
       await ingestor.saveActivities();
     }
 
+    ingestor.generateStats();
     // @todo Refactor to only save the athlete at the end
     // instead of after each iteratee location
     if (!isDryRun) {
-      await ingestor.saveStatsV2();
+      await ingestor.saveStats();
     }
 
     return {
-      [locationName]: ingestor.getStatsV2(),
+      [locationName]: ingestor.getStats(),
     };
   } catch (err) {
     console.warn(`${"\n"}Error ingesting ${locationName} | ${canonicalSegmentId}`);
