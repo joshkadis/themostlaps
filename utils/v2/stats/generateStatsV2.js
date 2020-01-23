@@ -84,7 +84,7 @@ function buildLocationsStatsFromActivities(activities) {
       activity,
       allLocations[location]
         ? { ...allLocations[location] }
-        : DEFAULT_LOCATION_STATS,
+        : { ...DEFAULT_LOCATION_STATS },
     );
 
     return {

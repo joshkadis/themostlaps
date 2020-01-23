@@ -10,7 +10,6 @@ const {
 } = require('../locations');
 const fetchStravaAPI = require('../../fetchStravaAPI');
 const { makeArrayAsyncIterable } = require('../asyncUtils');
-const { transformAthleteStats } = require('../stats/athleteStats');
 const { compareActivityLocations } = require('../models/activity');
 const { dedupeSegmentEfforts } = require('../../refreshAthlete/utils');
 const { buildLocationsStatsFromActivities } = require('../stats/generateStatsV2');
@@ -70,6 +69,10 @@ class LocationIngest {
   stats = {
     allTime: 0,
     single: 0,
+    numActivities: 0,
+    availableYears: [],
+    byYear: {},
+    byMonth: {},
   };
 
   /**
@@ -138,12 +141,12 @@ class LocationIngest {
     }
 
     // Create activity if not exists
-    let lapsFromCreatedActivity = 0;
+    // let lapsFromCreatedActivity = 0;
     if (!this.activities[activityId]) {
       const activityData = this.formatActivity(effortRaw);
       if (activityData) {
         this.activities[activityId] = activityData;
-        lapsFromCreatedActivity = activityData.laps;
+        // lapsFromCreatedActivity = activityData.laps;
       } else {
         return;
       }
@@ -162,15 +165,15 @@ class LocationIngest {
       // This should always be 1
       const delta = newNumSegmentEfforts - prevNumSegmentEfforts;
       this.activities[activityId].laps += delta;
-      lapsFromCreatedActivity += delta;
+      // lapsFromCreatedActivity += delta;
     }
 
 
-    this.updateStatsFromSegmentEffort(
-      start_date,
-      lapsFromCreatedActivity,
-      this.activities[activityId].laps,
-    );
+    // this.updateStatsFromSegmentEffort(
+    //   start_date,
+    //   lapsFromCreatedActivity,
+    //   this.activities[activityId].laps,
+    // );
   }
 
   /**
@@ -404,25 +407,39 @@ class LocationIngest {
   generateStats() {
     // buildLocationsStatsFromActivities() can handle activites
     // with multiple locations.
-    // In this case, all will have the same location.
-    const globalStats = buildLocationsStatsFromActivities(this.activityDocs);
-    this.locationStats = globalStats[this.locationName];
+    // In this case, all will have the same location EXCEPT
+    // if we found a multi-location activity. Hence the filtering.
+    const globalStats = buildLocationsStatsFromActivities(
+      this.activityDocs.filter(
+        ({ location }) => location === this.locationName,
+      ),
+    );
+    this.stats = globalStats[this.locationName];
   }
 
   /**
    * Save stats for athleteDoc using v2 format
    */
   async saveStats() {
-    const updatedStats = { ...this.athleteDoc.stats };
-    updatedStats.locations = {
-      ...updatedStats.locations,
-      [this.locationName]: this.locationStats,
+    const allLocationsStats = this.athleteDoc.stats.locations
+      ? {
+        ...this.athleteDoc.stats.locations,
+      }
+      : {};
+
+    allLocationsStats[this.locationName] = this.stats;
+
+    const updatedStats = {
+      ...this.athleteDoc.stats,
+      locations: allLocationsStats,
     };
 
     this.athleteDoc.set({
       locations: Object.keys(updatedStats.locations),
       stats_version: 'v2',
-      stats: updatedStats,
+      stats: {
+        locations: allLocationsStats,
+      },
       last_updated: new Date().toISOString(),
     });
     this.athleteDoc.markModified('locations');
@@ -470,7 +487,7 @@ class LocationIngest {
    *
    * @return {Object}
    */
-  getStats = () => this.locationStats;
+  getStats = () => this.stats;
 
   /**
    * Get Activity documents
