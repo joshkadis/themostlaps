@@ -316,7 +316,7 @@ class LocationIngest {
    * @return {Array}
    */
   async fetchSegmentEfforts(page = 1, allEfforts = [], opts = {}) {
-    const athleteId = this.athleteDoc.id;
+    const athleteId = this.athleteDoc._id;
     const {
       limitPages = DEFAULT_FETCH_OPTS.limitPages,
       limitPerPage = DEFAULT_FETCH_OPTS.limitPerPage,
@@ -393,7 +393,7 @@ class LocationIngest {
   }) => ({
     _id: activity.id,
     added_date: new Date().toISOString(),
-    athlete_id: this.athleteDoc.id,
+    athlete_id: this.athleteDoc._id,
     laps: this.shouldAddExtraLap ? 1 : 0,
     segment_efforts: [],
     source: INGEST_SOURCE,

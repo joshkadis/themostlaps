@@ -150,7 +150,7 @@ async function removeAthlete(athlete, removableStatuses = ['deauthorized']) {
     console.log(`removeAthlete() accepts Athlete or Number, received: ${JSON.stringify(athlete)}`);
   }
 
-  const athleteId = athleteDoc.id;
+  const athleteId = athleteDoc._id;
   const athleteStatus = athleteDoc.get('status');
 
   // removableStatuses must include athlete's current status or 'any'

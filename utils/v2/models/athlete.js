@@ -26,7 +26,7 @@ async function clearAthleteHistoryV2(athleteDoc) {
   console.log('Clearing activities and stats');
   const {
     deletedCount,
-  } = await Activity.remove({ athlete_id: athleteDoc.id });
+  } = await Activity.remove({ athlete_id: athleteDoc._id });
   console.log(`Removed ${deletedCount} activities`);
 
   athleteDoc.set({

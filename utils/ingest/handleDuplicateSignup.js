@@ -48,7 +48,7 @@ async function handleDuplicateSignup(
 
     // Check new activities
     const lastActivity = await Activity.find(
-      { athlete_id: athleteDoc.id },
+      { athlete_id: athleteDoc._id },
       'start_date_local',
       {
         lean: true,

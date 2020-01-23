@@ -52,7 +52,7 @@ async function dedupeAthleteActivities(
   suppress = false,
 ) {
   const query = {
-    athlete_id: athleteDoc.id,
+    athlete_id: athleteDoc._id,
   };
 
   if (activityIds.length) {
@@ -108,7 +108,7 @@ async function dedupeAthleteActivities(
     const deltaEfforts = nextSegmentEfforts.length - prevSegmentEfforts.length;
 
     if (delta !== 0 || deltaEfforts !== 0) {
-      log[activity.id] = {
+      log[activity._id] = {
         delta,
         deltaEfforts,
         prevLaps,
