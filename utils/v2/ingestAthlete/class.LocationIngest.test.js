@@ -3,13 +3,15 @@ const Athlete = require('../../../schema/Athlete');
 const LocationIngest = require('./class.LocationIngest');
 const cpSegmentEffort = require('./segmentEffort.testData');
 
+
 let athleteDoc;
 let locationIngest;
+const getActivityIds = () => Object.keys(locationIngest.activities)
+  .map((id) => Number(id));
 
 beforeEach(() => {
   athleteDoc = new Athlete({ _id: 541773 });
   locationIngest = new LocationIngest(athleteDoc, 1532085);
-  locationIngest.isUnitTest = true;
 });
 
 test('setup class instance', () => {
@@ -64,7 +66,7 @@ test('converts segment efforts to Activity model shapes', () => {
 
   // Segment effort processing should succeed
   locationIngest.processEffort(cpSegmentEffort);
-  expect(locationIngest.getActivityIds()).toEqual([692349426]);
+  expect(getActivityIds()).toEqual([692349426]);
 
   const activities = locationIngest.getRawActivities();
   expect(activities.length).toEqual(1);
@@ -76,7 +78,7 @@ test('converts segment efforts to Activity model shapes', () => {
 // @todo rewrite tests with new methods that separate validation and saving
 // test('validates activities data during saveActivities', async () => {
 //   locationIngest.processEffort(cpSegmentEffort);
-//   expect(locationIngest.getActivityIds().sort()).toEqual([692349426]);
+//   expect(getActivityIds().sort()).toEqual([692349426]);
 //
 //   // Should be valid at first
 //   let activityModel = new Activity(locationIngest.getRawActivities()[0]);

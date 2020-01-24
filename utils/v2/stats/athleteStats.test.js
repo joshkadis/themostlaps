@@ -54,6 +54,7 @@ test('transformAthleteStats', () => {
     byYear: [],
     byMonth: {},
     availableYears: [],
+    locations: {},
   });
 
   expect(transformAthleteStats({

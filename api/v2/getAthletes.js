@@ -1,11 +1,9 @@
-const { omit } = require('lodash');
 const Athlete = require('../../schema/Athlete');
 const {
-  defaultLocation,
   defaultAthleteFields,
 } = require('../../config');
-const { getStatsForLocation } = require('../../utils/v2/stats/athleteStats');
-
+const { transformStats } = require('../../utils/v2/stats/transformStats');
+const { makeArrayAsyncIterable } = require('../../utils/v2/asyncUtils');
 /**
  * Parse CSV string of athlete IDs from URL
  *
@@ -24,50 +22,6 @@ function parseIdsString(idsString) {
     }, []);
 }
 
-function getV2AthleteStats(athlete, includeLocations = []) {
-  const { stats } = athlete;
-  if (!stats) {
-    return athlete;
-  }
-
-  // Handle legacy stats not within stats.locations[location]
-  let locations = {};
-  if (!stats.locations) {
-    // Consider entire stats object as the default location
-    locations = {
-      [defaultLocation]: stats,
-    };
-  } else if (!stats.locations[defaultLocation]) {
-    // Consider entire stats object
-    // except stats.locations as the default location
-    const defaultLocationStats = omit(stats, 'locations');
-    locations = {
-      ...stats.locations,
-      [defaultLocation]: defaultLocationStats,
-    };
-  } else {
-    locations = stats.locations;
-  }
-
-
-  const transformedLocations = Object.keys(locations)
-    .reduce((acc, location) => {
-      if (!includeLocations.length // Include all locations if empty array
-        || includeLocations.indexOf(location) !== -1 // Include specified locations
-      ) {
-        acc[location] = getStatsForLocation(locations, location);
-      }
-      return acc;
-    }, {});
-
-  return {
-    ...athlete,
-    stats: {
-      locations: transformedLocations,
-    },
-  };
-}
-
 /**
  * Get data for athletes API request
  *
@@ -75,7 +29,7 @@ function getV2AthleteStats(athlete, includeLocations = []) {
  * @param {String} locations CSV string locations to return in Query results
  * @return {Array}
  */
-async function getAthletes(idsString = '', locationsCsv = 'all') {
+async function getAthletes(idsString = '') {
   const athleteIds = parseIdsString(idsString);
   if (!athleteIds.length) {
     return { error: 'Requires at least one numeric id' };
@@ -86,17 +40,29 @@ async function getAthletes(idsString = '', locationsCsv = 'all') {
       _id: { $in: athleteIds },
       status: { $ne: 'deauthorized' },
     },
-    defaultAthleteFields.join(' '),
+    `${defaultAthleteFields.join(' ')} stats_version`,
+    { lean: true },
   );
 
-  const locations = locationsCsv === 'all'
-    ? []
-    : locationsCsv.split(',');
+  const mappedAthletes = [];
+  const athleteIterator = makeArrayAsyncIterable(
+    athletes,
+    async (athlete) => {
+      if (athlete.stats_version === 'v2') {
+        return athlete;
+      }
+      const transformedStats = await transformStats(athlete.stats, athlete._id);
+      return {
+        ...athlete,
+        stats: transformedStats,
+      };
+    },
+  );
 
-  const mappedAthletes = athletes.map((athleteDoc) => {
-    const athlete = athleteDoc.toJSON();
-    return getV2AthleteStats(athlete, locations);
-  });
+  // eslint-disable-next-line
+  for await (const athlete of athleteIterator) {
+    mappedAthletes.push(athlete);
+  }
 
   return {
     error: false,
@@ -105,6 +71,5 @@ async function getAthletes(idsString = '', locationsCsv = 'all') {
 }
 
 module.exports = {
-  getV2AthleteStats,
   getAthletes,
 };

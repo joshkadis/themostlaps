@@ -1,13 +1,11 @@
+const _cloneDeep = require('lodash/cloneDeep');
 const { defaultLocation } = require('../../../config');
 const Activity = require('../../../schema/Activity');
+const { defaultLocationStats } = require('../../../config/stats');
 
-const getDefaultLocationStats = () => ({
-  allTime: 0,
-  single: 0,
-  numActivities: 0,
-  availableYears: [],
-  byYear: {},
-  byMonth: {},
+const getDefaultLocationStats = (overrides) => _cloneDeep({
+  ...defaultLocationStats,
+  ...overrides,
 });
 
 /**
@@ -69,7 +67,8 @@ function addActivityToLocationStats(activity, locationStats) {
 }
 
 /**
- * Build stats object from an array of activities data
+ * Build stats.locations object from an array of activities data
+ *
  * @param {Array} activities
  * @returns {Object}
  */
@@ -93,7 +92,7 @@ function buildLocationsStatsFromActivities(activities) {
 }
 
 /**
- * Generate v2 stats from scratch
+ * Generate v2 stats from scratch with just an Athlete document
  *
  * @param {Athlete} athleteDoc
  * @param {Object} additionalStats Anything to merge into top-level stats at the end
@@ -123,6 +122,7 @@ async function generateLocationsStatsV2(athleteDoc, additionalStats = {}) {
 const getLocationsFromStats = ({ locations }) => Object.keys(locations);
 
 module.exports = {
+  getDefaultLocationStats,
   addActivityToLocationStats,
   buildLocationsStatsFromActivities,
   getLocationsFromStats,

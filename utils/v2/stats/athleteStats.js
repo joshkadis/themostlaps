@@ -1,16 +1,13 @@
+const _cloneDeep = require('lodash/cloneDeep');
 const { defaultLocation } = require('../../../config');
+const { defaultV2Stats } = require('../../../config/stats');
+
 const { getMonthName, getMonthKey } = require('../../../utils/dateTimeUtils');
 
-const DEFAULT_OUTPUT_V2 = {
-  allTime: 0,
-  single: 0,
-  byYear: [],
-  byMonth: {},
-  availableYears: [],
-  locations: {},
-};
-
-const getDefaultV2Stats = () => DEFAULT_OUTPUT_V2;
+const getDefaultV2Stats = (overrides) => _cloneDeep({
+  ...defaultV2Stats,
+  ...overrides,
+});
 
 /**
  * Create array of month-value objects to receive monthly stats
@@ -36,11 +33,11 @@ function setUpYearByMonths() {
 function transformAthleteStats(rawStats = {}, overrides = {}) {
   // If either of these is undefined or 0, we can exit
   if (!rawStats.allTime || !rawStats.single) {
-    return DEFAULT_OUTPUT_V2;
+    return getDefaultV2Stats();
   }
 
   // Ready to override default properties
-  const namedStats = { ...DEFAULT_OUTPUT_V2 };
+  const namedStats = getDefaultV2Stats();
   let byYear = [];
   const byMonth = {};
   let availableYears = [];
