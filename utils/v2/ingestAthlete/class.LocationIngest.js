@@ -134,12 +134,10 @@ class LocationIngest {
     }
 
     // Create activity if not exists
-    // let lapsFromCreatedActivity = 0;
     if (!this.activities[activityId]) {
       const activityData = this.formatActivity(effortRaw);
       if (activityData) {
         this.activities[activityId] = activityData;
-        // lapsFromCreatedActivity = activityData.laps;
       } else {
         return;
       }
@@ -158,43 +156,6 @@ class LocationIngest {
       // This should always be 1
       const delta = newNumSegmentEfforts - prevNumSegmentEfforts;
       this.activities[activityId].laps += delta;
-      // lapsFromCreatedActivity += delta;
-    }
-
-
-    // this.updateStatsFromSegmentEffort(
-    //   start_date,
-    //   lapsFromCreatedActivity,
-    //   this.activities[activityId].laps,
-    // );
-  }
-
-  /**
-   * Update location's stats after handling new segment effort
-   * Creates stats in v1 format, use getStatsV2 to transform
-   * @todo Generate stats in v2 format, deprecate v1
-   *
-   * @param {String} start_date
-   * @param {Integer} incrementStatsBy
-   * @param {Integer} activityLaps
-   */
-  updateStatsFromSegmentEffort(start_date, incrementStatsBy, activityLaps) {
-    // Process for stats, assume start date in ISO format
-    const yearKey = `_${start_date.slice(0, 4)}`;
-    const monthKey = `${yearKey}_${start_date.slice(5, 7)}`;
-
-    // Increment allTime, yearly, monthly
-    this.stats.allTime += incrementStatsBy;
-    this.stats[yearKey] = this.stats[yearKey]
-      ? (this.stats[yearKey] + incrementStatsBy)
-      : incrementStatsBy;
-    this.stats[monthKey] = this.stats[monthKey]
-      ? (this.stats[monthKey] + incrementStatsBy)
-      : incrementStatsBy;
-
-    // Check for single ride max
-    if (activityLaps > this.stats.single) {
-      this.stats.single = activityLaps;
     }
   }
 
@@ -442,32 +403,9 @@ class LocationIngest {
   getRawActivities = () => Object.values(this.activities);
 
   /**
-   * Get activity data object by ID, stored in this class as JS object
-   *
-   * @param {Integer} id
-   * @return {Object|false}
-   */
-  getRawActivityById = (id) => this.activities[id] || false;
-
-  /**
    * Get number of activities, for logging
    */
   getNumActivities = () => Object.keys(this.activities).length;
-
-  /**
-   * Get number of Activity documents that passed validation for this location.
-   * Note that this MAY BE GREATER than the number of documents in the database
-   * if there were multi-location activities. See saveActivity()
-   */
-  getNumValidActivities = () => this.activityDocs.length;
-
-  /**
-   * Get array of activity ids for this segment
-   *
-   * @return {[Integer]}
-   */
-  getActivityIds = () => Object.keys(this.activities)
-    .map((id) => this.activities[id]._id);
 
   /**
    * Get stats object for this segment, will be v2 format
