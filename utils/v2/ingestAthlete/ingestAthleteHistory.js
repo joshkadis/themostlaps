@@ -45,7 +45,8 @@ async function setAthleteAvailableYears(athleteDoc, athleteStats) {
  * @param {String} locationName
  * @param {Athlete} athleteDoc
  * @param {Boolean} opts.isDryRun
- * @returns {Object} Stats object for location
+ * @returns {Object} obj.locationName
+ * @returns {Object} obj.stats
  */
 async function asyncIngestSingleLocation(
   locationName,
@@ -102,7 +103,8 @@ async function asyncIngestSingleLocation(
     }
 
     return {
-      [locationName]: ingestor.getStats(),
+      locationName,
+      stats: ingestor.getStats(),
     };
   } catch (err) {
     console.warn(`${"\n"}Error ingesting ${locationName} | ${canonicalSegmentId}`);
@@ -132,25 +134,29 @@ async function ingestAthleteHistory(athleteDoc, isDryRun) {
   }
 
   // @todo revert back to existing athlete stats propery
-  const athleteStats = {};
+  const allLocationsStats = {};
 
   // eslint-disable-next-line
-  for await (const locationStats of asyncIngestAllLocations) {
-    if (locationStats) {
-      const locationName = Object.keys(locationStats)[0];
-      athleteStats[locationName] = locationStats[locationName];
+  for await (const ingestResult of asyncIngestAllLocations) {
+    if (ingestResult) {
+      const {
+        locationName,
+        stats,
+      } = ingestResult;
+      allLocationsStats[locationName] = stats;
     }
   }
 
   if (!isDryRun) {
-    await setAthleteAvailableYears(athleteDoc, athleteStats);
+    await setAthleteAvailableYears(athleteDoc, allLocationsStats);
+    // @todo
   }
 
-  const summary = Object.keys(athleteStats).reduce((acc, loc) => ({
+  const summary = Object.keys(allLocationsStats).reduce((acc, loc) => ({
     ...acc,
     [loc]: {
-      total: athleteStats[loc].allTime,
-      activites: athleteStats[loc].numActivities,
+      total: allLocationsStats[loc].allTime,
+      activites: allLocationsStats[loc].numActivities,
     },
   }), {});
 

@@ -414,23 +414,17 @@ class LocationIngest {
    * Save stats for athleteDoc using v2 format
    */
   async saveStats() {
-    const allLocationsStats = this.athleteDoc.stats.locations
-      ? {
-        ...this.athleteDoc.stats.locations,
-      }
-      : {};
+    const allLocationsStats = this.athleteDoc.get(
+      'stats.locations',
+    );
 
     allLocationsStats[this.locationName] = this.stats;
 
-    const updatedStats = {
-      ...this.athleteDoc.stats,
-      locations: allLocationsStats,
-    };
-
     this.athleteDoc.set({
-      locations: Object.keys(updatedStats.locations),
+      locations: Object.keys(allLocationsStats),
       stats_version: 'v2',
       stats: {
+        ...this.athleteDoc.get('stats'),
         locations: allLocationsStats,
       },
       last_updated: new Date().toISOString(),
