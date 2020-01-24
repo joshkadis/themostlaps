@@ -10,7 +10,7 @@ const Athlete = require('../../schema/Athlete');
 const Activity = require('../../schema/Activity');
 const { setupConnection } = require('../utils/setupConnection');
 const { dedupeSegmentEfforts } = require('../../utils/refreshAthlete/utils');
-const { updateAthleteStatsFromActivity } = require('../../utils/v2/stats/athleteStats');
+const { updateAthletStatsFromActivityV1 } = require('../../utils/v2/stats/athleteStatsV1');
 
 /**
  * Dedupe segment efforts and update laps for an existing activity
@@ -129,7 +129,7 @@ async function dedupeAthleteActivities(
       summary.abs.push(delta);
       summary.rel.push((delta / prevLaps));
 
-      updateAthleteStatsFromActivity(athleteDoc, delta, startDateStr);
+      updateAthletStatsFromActivityV1(athleteDoc, delta, startDateStr);
 
       if (!isDryRun) {
         await activity.save();

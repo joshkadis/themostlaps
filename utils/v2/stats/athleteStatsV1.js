@@ -1,11 +1,4 @@
-const _cloneDeep = require('lodash/cloneDeep');
-const { defaultV2Stats } = require('../../../config/stats');
 const { getMonthKey } = require('../../../utils/dateTimeUtils');
-
-const getDefaultV2Stats = (overrides) => _cloneDeep({
-  ...defaultV2Stats,
-  ...overrides,
-});
 
 /**
  * Set updated athlete v1 stats object from single activity
@@ -15,7 +8,7 @@ const getDefaultV2Stats = (overrides) => _cloneDeep({
  * @param {Number} delta May be positive or negative
  * @param {String} startDate ISO date string
  */
-function updateAthleteStatsFromActivity(athleteDoc, delta, startDate) {
+function updateAthletStatsFromActivityV1(athleteDoc, delta, startDate) {
   const { stats } = athleteDoc;
   const activityDate = new Date(startDate);
   const yearKey = `_${activityDate.getFullYear()}`;
@@ -34,6 +27,5 @@ function updateAthleteStatsFromActivity(athleteDoc, delta, startDate) {
 }
 
 module.exports = {
-  getDefaultV2Stats,
-  updateAthleteStatsFromActivity,
+  updateAthletStatsFromActivityV1,
 };

@@ -1,7 +1,9 @@
 const Activity = require('../../../schema/Activity');
 const { defaultLocation } = require('../../../config');
-const { getDefaultV2Stats } = require('./athleteStats');
-const { getDefaultLocationStats } = require('./generateStatsV2');
+const {
+  getDefaultV2Stats,
+  getDefaultLocationStats,
+} = require('./utils');
 
 /**
  * Count number of activities in database for an athlete

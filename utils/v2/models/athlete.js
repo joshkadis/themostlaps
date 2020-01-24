@@ -1,5 +1,5 @@
 const Activity = require('../../../schema/Activity');
-const { getDefaultV2Stats } = require('../stats/athleteStats');
+const { getDefaultV2Stats } = require('../stats/utils');
 
 /**
  * Get athlete name and id as string for logging

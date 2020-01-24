@@ -1,12 +1,6 @@
-const _cloneDeep = require('lodash/cloneDeep');
 const { defaultLocation } = require('../../../config');
+const { getDefaultLocationStats } = require('./utils');
 const Activity = require('../../../schema/Activity');
-const { defaultLocationStats } = require('../../../config/stats');
-
-const getDefaultLocationStats = (overrides) => _cloneDeep({
-  ...defaultLocationStats,
-  ...overrides,
-});
 
 /**
  * Adds single activity to stats for a given location
@@ -122,7 +116,6 @@ async function generateLocationsStatsV2(athleteDoc, additionalStats = {}) {
 const getLocationsFromStats = ({ locations }) => Object.keys(locations);
 
 module.exports = {
-  getDefaultLocationStats,
   addActivityToLocationStats,
   buildLocationsStatsFromActivities,
   getLocationsFromStats,

@@ -1,9 +1,9 @@
 const Athlete = require('../../../schema/Athlete');
 const {
-  updateAthleteStatsFromActivity,
-} = require('./athleteStats');
+  updateAthletStatsFromActivityV1,
+} = require('./athleteStatsV1');
 
-test('updateAthleteStatsFromActivity()', () => {
+test('updateAthletStatsFromActivityV1()', () => {
   const defaultStats = {
     allTime: 10,
     _2018: 10,
@@ -14,7 +14,7 @@ test('updateAthleteStatsFromActivity()', () => {
     stats: { ...defaultStats },
   });
 
-  updateAthleteStatsFromActivity(athlete, 5, '2018-01-08T12:59:14Z');
+  updateAthletStatsFromActivityV1(athlete, 5, '2018-01-08T12:59:14Z');
   expect(athlete.stats).toStrictEqual({
     allTime: 15,
     _2018: 15,
@@ -22,7 +22,7 @@ test('updateAthleteStatsFromActivity()', () => {
   });
   athlete.set({ stats: { ...defaultStats } });
 
-  updateAthleteStatsFromActivity(athlete, 5, '2018-03-08T12:59:14Z');
+  updateAthletStatsFromActivityV1(athlete, 5, '2018-03-08T12:59:14Z');
   expect(athlete.stats).toStrictEqual({
     allTime: 15,
     _2018: 15,
@@ -30,14 +30,14 @@ test('updateAthleteStatsFromActivity()', () => {
   });
   athlete.set({ stats: { ...defaultStats } });
 
-  updateAthleteStatsFromActivity(athlete, -5, '2018-01-08T12:59:14Z');
+  updateAthletStatsFromActivityV1(athlete, -5, '2018-01-08T12:59:14Z');
   expect(athlete.stats).toStrictEqual({
     allTime: 5,
     _2018: 5,
     _2018_01: 5,
   });
 
-  updateAthleteStatsFromActivity(athlete, 2, '2018-01-08T12:59:14Z');
+  updateAthletStatsFromActivityV1(athlete, 2, '2018-01-08T12:59:14Z');
   expect(athlete.stats).toStrictEqual({
     allTime: 7,
     _2018: 7,
@@ -45,7 +45,7 @@ test('updateAthleteStatsFromActivity()', () => {
   });
 
   athlete.set({ stats: { ...defaultStats } });
-  updateAthleteStatsFromActivity(athlete, -5, '2018-03-08T12:59:14Z');
+  updateAthletStatsFromActivityV1(athlete, -5, '2018-03-08T12:59:14Z');
   expect(athlete.stats).toStrictEqual({
     allTime: 5,
     _2018: 5,
