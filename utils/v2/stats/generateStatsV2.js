@@ -1,14 +1,14 @@
 const { defaultLocation } = require('../../../config');
 const Activity = require('../../../schema/Activity');
 
-const DEFAULT_LOCATION_STATS = {
+const getDefaultLocationStats = () => ({
   allTime: 0,
   single: 0,
   numActivities: 0,
   availableYears: [],
   byYear: {},
   byMonth: {},
-};
+});
 
 /**
  * Adds single activity to stats for a given location
@@ -82,9 +82,7 @@ function buildLocationsStatsFromActivities(activities) {
     // Initialize stats for this activity's location
     const thisLocation = addActivityToLocationStats(
       activity,
-      allLocations[location]
-        ? { ...allLocations[location] }
-        : { ...DEFAULT_LOCATION_STATS },
+      allLocations[location] || getDefaultLocationStats(),
     );
 
     return {

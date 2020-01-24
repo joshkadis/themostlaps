@@ -66,14 +66,7 @@ class LocationIngest {
   /**
    * @type {Object} Stats calculated for this location
    */
-  stats = {
-    allTime: 0,
-    single: 0,
-    numActivities: 0,
-    availableYears: [],
-    byYear: {},
-    byMonth: {},
-  };
+  stats = {};
 
   /**
    * Set up class
