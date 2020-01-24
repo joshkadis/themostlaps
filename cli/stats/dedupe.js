@@ -43,6 +43,11 @@ async function dedupeAll({
 
   // eslint-disable-next-line no-restricted-syntax
   for await (const athleteDoc of athletes) {
+    if (athleteDoc.stats_version === 'v2') {
+      console.log(`Skiping ${athleteDoc.id}, already v2 stats`);
+      return;
+    }
+
     progressBar.increment();
     const result = await dedupeAthleteActivities(
       athleteDoc,
