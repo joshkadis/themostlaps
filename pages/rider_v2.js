@@ -12,6 +12,7 @@ import RiderPageMessage from '../components/RiderPageMessage';
 import { APIRequest } from '../utils';
 import { defaultLocation } from '../config';
 import { routeIsV2 } from '../utils/v2/router';
+import { transformLocationsForRender } from '../utils/v2/stats/transformForRender';
 
 // Error Layouts
 import RiderMessage from '../components/layouts/rider/RiderMessage';
@@ -103,7 +104,7 @@ class RiderPage extends Component {
         return {
           ...defaultInitialProps,
           athlete,
-          locations,
+          locations: transformLocationsForRender(locations),
           status,
         };
       });
@@ -165,6 +166,7 @@ class RiderPage extends Component {
           hasCompareAthlete: true,
           compareAthlete: {
             athlete: apiResponse[0].athlete,
+            // @todo Set to response.stats vs response.stats.locations
             stats: apiResponse[0].stats,
           },
         });

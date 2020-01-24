@@ -51,7 +51,7 @@ function getMonthKey(dateObj = false, delimiter = '_') {
  * @param {Int} chars Options chars to return, if undefined will return full string
  * @return {String}
  */
-function getMonthName(idx, chars) {
+function getMonthName(idx, chars = 3) {
   switch (idx) {
     case 1: return 'January'.slice(0, chars);
     case 2: return 'February'.slice(0, chars);
