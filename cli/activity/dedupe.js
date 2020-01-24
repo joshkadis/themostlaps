@@ -51,6 +51,11 @@ async function dedupeAthleteActivities(
   verbose = true,
   suppress = false,
 ) {
+  if (athleteDoc.stats_version === 'v2') {
+    console.log('****** ONLY APPLIES TO V1 STATS *******');
+    return false;
+  }
+
   const query = {
     athlete_id: athleteDoc._id,
   };
