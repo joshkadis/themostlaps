@@ -47,6 +47,7 @@ module.exports = {
     'athlete.profile',
     'stats',
     'status',
+    'stats_version',
   ],
   modalTitles: {
     signup: '🚴 Here we go! 🚴',
