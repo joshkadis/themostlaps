@@ -40,7 +40,28 @@ async function clearAthleteHistoryV2(athleteDoc) {
   console.log('Reset athlete stats');
 }
 
+/**
+ * Check stats for all locations to see if rider
+ * has ever ridden anywhere
+ *
+ * @param {Object} locations
+ * @returns {Boolean}
+ */
+function riderHasLapsAnywhere(locations) {
+  const locationNames = Object.keys(locations);
+  let idx = 0;
+  while (idx < locationNames.length) {
+    const locationStats = locations[locationNames[idx]];
+    if (locationStats.allTime) {
+      return true;
+    }
+    idx += 1;
+  }
+  return false;
+}
+
 module.exports = {
   clearAthleteHistoryV2,
   getAthleteIdentifier,
+  riderHasLapsAnywhere,
 };

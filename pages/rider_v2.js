@@ -13,6 +13,7 @@ import { APIRequest } from '../utils';
 import { defaultLocation } from '../config';
 import { routeIsV2 } from '../utils/v2/router';
 import { transformLocationsForRender } from '../utils/v2/stats/transformForRender';
+import { riderHasLapsAnywhere } from '../utils/v2/models/athlete';
 
 // Error Layouts
 import RiderMessage from '../components/layouts/rider/RiderMessage';
@@ -73,10 +74,10 @@ class RiderPage extends Component {
 
   static async getInitialProps({ query, req = {} }) {
     // Basic props from context
-    const { athleteId = false, location = defaultLocation } = query;
+    const { athleteId = false, currentLocation = defaultLocation } = query;
 
     const defaultInitialProps = {
-      currentLocation: location,
+      currentLocation,
       pathname: req.path || `/rider/${athleteId}`,
       query,
       shouldShowWelcome: !!query.welcome,
@@ -253,6 +254,10 @@ class RiderPage extends Component {
       router: routerProp,
     } = this.props;
 
+    if (!riderHasLapsAnywhere(locations)) {
+      return this.renderMessage('noLaps');
+    }
+
     const {
       showStatsBy,
       showStatsYear,
@@ -260,6 +265,10 @@ class RiderPage extends Component {
       compareAthlete,
       chartRendered,
     } = this.state;
+
+    if (!locations[currentLocation]) {
+      return this.renderMessage('noLapsLocation');
+    }
 
     const {
       allTime,
@@ -279,9 +288,6 @@ class RiderPage extends Component {
     }
     if (status === 'ingesting') {
       return this.renderMessage('ingesting');
-    }
-    if (!allTime) {
-      return this.renderMessage('noLaps');
     }
 
     return (

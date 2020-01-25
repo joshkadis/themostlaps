@@ -61,7 +61,7 @@ app.prepare()
       }
     });
 
-    server.get('/rider/:athleteId(\\d+)/:location?', async (req, res) => {
+    server.get('/rider/:athleteId(\\d+)/:currentLocation?', async (req, res) => {
       const athleteId = parseInt(req.params.athleteId, 10);
       const athleteDoc = await Athlete.findById(athleteId);
       if (!athleteDoc) {
@@ -70,18 +70,14 @@ app.prepare()
         return;
       }
 
-      const queryIsV2 = typeof req.query.v2 !== 'undefined';
-      const pagePath = queryIsV2 || athleteDoc.stats_version === 'v2'
+      const pagePath = athleteDoc.stats_version === 'v2'
         ? '/rider_v2'
         : '/rider';
       const context = {
         ...req.query,
         athleteId,
+        currentLocation: req.params.currentLocation || defaultLocation,
       };
-
-      if (queryIsV2) {
-        context.location = req.params.location || defaultLocation;
-      }
 
       app.render(req, res, pagePath, context);
     });
