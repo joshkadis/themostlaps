@@ -95,6 +95,13 @@ class RiderPage extends Component {
           return defaultInitialProps;
         }
 
+        if (apiResponse[0].stats_version === 'v1') {
+          this.props.router.push(
+            `/rider?athleteId=${athleteId}`,
+            `/rider/${athleteId}`,
+          );
+        }
+
         const {
           athlete,
           status,

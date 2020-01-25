@@ -327,6 +327,15 @@ Rider.getInitialProps = async function(context) {
   return APIRequest(`/athletes/${query.athleteId}`, {}, {})
     .then((apiResponse) => {
       if (apiResponse.length) {
+
+        if (apiResponse[0].stats_version === 'v2') {
+          Router.push(
+            `/rider_v2?athleteId=${query.athleteId}`,
+            `/rider/${query.athleteId}`,
+          );
+          return;
+        }
+
         return Object.assign({}, defaultInitialProps, {
           athlete: apiResponse[0].athlete,
           stats: statsForAthletePage(apiResponse[0].stats),
