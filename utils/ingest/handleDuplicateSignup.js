@@ -44,7 +44,7 @@ async function handleDuplicateSignup(
     athleteDoc.markModified('athlete');
     await athleteDoc.save();
 
-    res.redirect(303, `/rider/${id}?v2&ds=1`);
+    res.redirect(303, `/rider/${id}?ds=1`);
 
     // Check new activities
     const lastActivity = await Activity.find(
