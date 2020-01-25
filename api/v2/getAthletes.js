@@ -40,7 +40,7 @@ async function getAthletes(idsString = '') {
       _id: { $in: athleteIds },
       status: { $ne: 'deauthorized' },
     },
-    `${defaultAthleteFields.join(' ')} stats_version`,
+    defaultAthleteFields.join(' '),
     { lean: true },
   );
 
