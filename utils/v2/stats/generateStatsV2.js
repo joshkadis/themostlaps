@@ -45,7 +45,8 @@ function addActivityToLocationStats(activity, locationStats) {
   byYear[year] = byYear[year] || 0;
   byYear[year] += laps;
 
-  const availableYears = Object.keys(byYear);
+  const availableYears = Object.keys(byYear)
+    .map((yearKey) => Number.parseInt(yearKey, 10));
 
   byMonth[year] = byMonth[year] || Array(12).fill(0);
   byMonth[year][monthIdx] += laps;

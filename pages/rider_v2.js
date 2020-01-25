@@ -145,10 +145,14 @@ class RiderPage extends Component {
     this.setState({ chartRendered: true });
   }
 
-  onSelectYear = ({ value }) => {
+  onSelectYear = (selected) => {
+    const showStatsYear = selected.value
+      ? selected.value.toString()
+      : selected.toString();
+
     this.setState({
       showStatsBy: 'byMonth',
-      showStatsYear: value,
+      showStatsYear,
     });
   }
 
@@ -223,11 +227,13 @@ class RiderPage extends Component {
     if (this.state.showStatsBy !== 'byMonth') {
       return;
     }
-    const availableYears = [
-      ...this.props.locations[this.state.currentLocation].availableYears,
-    ];
-    // Cast current year as int
+
+    // Make sure type of current and available years match
     const showStatsYear = parseInt(this.state.showStatsYear, 10);
+    const availableYears = this.props.locations[this.state.currentLocation]
+      .availableYears
+      .map((yr) => Number.parseInt(yr, 10));
+
     const showIdx = availableYears.indexOf(showStatsYear);
 
     const firstYear = [...availableYears].shift();

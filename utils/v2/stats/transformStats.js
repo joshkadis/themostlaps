@@ -54,8 +54,8 @@ async function transformStats(v1Stats, athleteId = false) {
     if (!parsed) {
       return;
     }
-    const year = parsed[1];
-    const month = parsed[2];
+    const year = Number.parseInt(parsed[1], 10);
+    const month = Number.parseInt(parsed[2], 10);
 
     if (availableYears.indexOf(year) === -1) {
       availableYears.push(year);
