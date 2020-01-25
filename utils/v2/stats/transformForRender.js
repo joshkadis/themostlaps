@@ -5,14 +5,25 @@ const { getMonthName } = require('../../dateTimeUtils');
  * @param {Object} map
  * @param {Array} Array of year:value pairs
  */
-function transformByYear(map) {
-  return Object.keys(map).reduce((acc, year) => {
-    acc.push({
-      year: Number(year),
-      value: map[year],
-    });
-    return acc;
-  }, []);
+function transformByYear(map = {}) {
+  const years = Object.keys(map);
+  if (!years.length) {
+    return [];
+  }
+
+  const firstYear = Number.parseInt(years[0], 10);
+  const lastYear = Number.parseInt(years[years.length - 1], 10);
+  const yearsSpread = lastYear - firstYear + 1;
+
+  const arr = Array(yearsSpread).fill({});
+
+  return arr.map((val, idx) => {
+    const year = firstYear + idx;
+    return {
+      year,
+      value: map[year] || 0,
+    };
+  });
 }
 
 /**
