@@ -179,7 +179,7 @@ class RiderPage extends Component {
           compareAthlete: {
             athlete: apiResponse[0].athlete,
             // @todo Set to response.stats vs response.stats.locations
-            stats: apiResponse[0].stats,
+            stats: transformLocationsForRender(apiResponse[0].stats.locations),
           },
         });
       });
@@ -211,7 +211,7 @@ class RiderPage extends Component {
       byMonth = {
         [showStatsYear]: [],
       },
-    } = compareAthlete.stats.locations[currentLocation];
+    } = compareAthlete.stats[currentLocation];
     return {
       compareAthleteByYear: byYear,
       compareAthleteByMonth: byMonth[showStatsYear] || [],
