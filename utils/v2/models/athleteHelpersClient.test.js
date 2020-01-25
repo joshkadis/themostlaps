@@ -1,4 +1,7 @@
-const { riderHasLapsAnywhere } = require('./athleteHelpersClient');
+const {
+  riderHasLapsAnywhere,
+  riderHasStatsForLocation,
+} = require('./athleteHelpersClient');
 
 test('riderHasLapsAnywhere', () => {
   expect(riderHasLapsAnywhere({})).toEqual(false);
@@ -35,4 +38,20 @@ test('riderHasLapsAnywhere', () => {
       allTime: 9,
     },
   })).toEqual(true);
+});
+
+test('riderHasStatsForLocation', () => {
+  expect(riderHasStatsForLocation()).toEqual(false);
+  // expect(riderHasStatsForLocation({}, '')).toEqual(false);
+
+  expect(riderHasStatsForLocation('what', 'isThis')).toEqual(false);
+
+  expect(riderHasStatsForLocation(
+    { prospectpark: true },
+    'centralpark',
+  )).toEqual(false);
+  expect(riderHasStatsForLocation(
+    { prospectpark: true },
+    'prospectpark',
+  )).toEqual(true);
 });

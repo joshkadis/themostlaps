@@ -13,7 +13,10 @@ import { APIRequest } from '../utils';
 import { defaultLocation } from '../config';
 import { routeIsV2 } from '../utils/v2/router';
 import { transformLocationsForRender } from '../utils/v2/stats/transformForRender';
-import { riderHasLapsAnywhere } from '../utils/v2/models/athleteHelpersClient';
+import {
+  riderHasLapsAnywhere,
+  riderHasStatsForLocation,
+} from '../utils/v2/models/athleteHelpersClient';
 
 // Error Layouts
 import RiderMessage from '../components/layouts/rider/RiderMessage';
@@ -174,6 +177,16 @@ class RiderPage extends Component {
         if (!Array.isArray(apiResponse) || !apiResponse.length) {
           this.setState(DEFAULT_COMPARE_ATHLETE_STATE);
         }
+
+        if (!riderHasStatsForLocation(
+          apiResponse[0].stats,
+          this.state.currentLocation,
+        )) {
+          // @todo Add some message here!
+          this.setState(DEFAULT_COMPARE_ATHLETE_STATE);
+          return;
+        }
+
         this.setState({
           hasCompareAthlete: true,
           compareAthlete: {
@@ -198,7 +211,11 @@ class RiderPage extends Component {
       showStatsYear,
     } = this.state;
 
-    if (!hasCompareAthlete) {
+    // @todo Message if we're trying to compare an athlete
+    // but they don't have stats for this location
+    if (!hasCompareAthlete
+      || !compareAthlete.stats
+      || compareAthlete.stats[currentLocation]) {
       return {
         compareAthleteByYear: [],
         compareAthleteByMonth: [],

@@ -7,11 +7,23 @@
  */
 function riderHasLapsAnywhere(locations = {}) {
   return Object.keys(locations).reduce(
-    (hasLaps, locName) => hasLaps || locations[locName].allTime,
+    (hasLaps, locName) => hasLaps || locations[locName].allTime > 0,
     false,
   );
 }
 
+/**
+ * Does athlete.stats include data for location?
+ *
+ * @param {Object} stats
+ * @param {String} location
+ * @returns {Boolean}
+ */
+function riderHasStatsForLocation(stats = false, location = false) {
+  return stats && location && typeof stats[location] !== 'undefined';
+}
+
 module.exports = {
   riderHasLapsAnywhere,
+  riderHasStatsForLocation,
 };
