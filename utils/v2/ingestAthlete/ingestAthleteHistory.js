@@ -2,10 +2,10 @@
 // const { uniq } = require('lodash');
 const LocationIngest = require('./class.LocationIngest');
 const { locations: configLocations } = require('../../../config');
-const { getAthleteIdentifier } = require('../models/athlete');
+const { getAthleteIdentifier } = require('../models/athleteHelpers');
 const { getLocationNames } = require('../locations');
 const { makeArrayAsyncIterable } = require('../asyncUtils');
-const { clearAthleteHistoryV2 } = require('../models/athlete');
+const { clearAthleteHistoryV2 } = require('../models/athleteHelpers');
 const { slackError, slackSuccess } = require('../../slackNotification');
 const { sortUniq } = require('../utils');
 

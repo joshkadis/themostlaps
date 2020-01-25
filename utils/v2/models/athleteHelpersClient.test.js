@@ -1,4 +1,4 @@
-const { riderHasLapsAnywhere } = require('./athlete');
+const { riderHasLapsAnywhere } = require('./athleteHelpersClient');
 
 test('riderHasLapsAnywhere', () => {
   expect(riderHasLapsAnywhere({})).toEqual(false);

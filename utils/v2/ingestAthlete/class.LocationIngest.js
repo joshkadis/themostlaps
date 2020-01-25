@@ -10,7 +10,7 @@ const {
 } = require('../locations');
 const fetchStravaAPI = require('../../fetchStravaAPI');
 const { makeArrayAsyncIterable } = require('../asyncUtils');
-const { compareActivityLocations } = require('../models/activity');
+const { compareActivityLocations } = require('../models/activityHelpers');
 const { dedupeSegmentEfforts } = require('../../refreshAthlete/utils');
 const { buildLocationsStatsFromActivities } = require('../stats/generateStatsV2');
 

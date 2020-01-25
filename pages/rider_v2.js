@@ -13,7 +13,7 @@ import { APIRequest } from '../utils';
 import { defaultLocation } from '../config';
 import { routeIsV2 } from '../utils/v2/router';
 import { transformLocationsForRender } from '../utils/v2/stats/transformForRender';
-import { riderHasLapsAnywhere } from '../utils/v2/models/athlete';
+import { riderHasLapsAnywhere } from '../utils/v2/models/athleteHelpersClient';
 
 // Error Layouts
 import RiderMessage from '../components/layouts/rider/RiderMessage';
@@ -249,14 +249,10 @@ class RiderPage extends Component {
       shouldShowWelcome,
       shouldShowUpdated,
       isDuplicateSignup,
-      locations,
+      locations = {},
       currentLocation,
       router: routerProp,
     } = this.props;
-
-    if (!riderHasLapsAnywhere(locations)) {
-      return this.renderMessage('noLaps');
-    }
 
     const {
       showStatsBy,
@@ -265,6 +261,10 @@ class RiderPage extends Component {
       compareAthlete,
       chartRendered,
     } = this.state;
+
+    if (!riderHasLapsAnywhere(locations)) {
+      return this.renderMessage('noLaps');
+    }
 
     if (!locations[currentLocation]) {
       return this.renderMessage('noLapsLocation');

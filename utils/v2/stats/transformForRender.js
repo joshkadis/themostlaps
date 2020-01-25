@@ -37,7 +37,7 @@ function transformByMonth(data) {
  * @param {Object} location
  * @returns {Object}
  */
-function transformLocationsForRender(locations) {
+function transformLocationsForRender(locations = {}) {
   return Object.keys(locations).reduce((acc, locName) => {
     const location = locations[locName];
     acc[locName] = {
