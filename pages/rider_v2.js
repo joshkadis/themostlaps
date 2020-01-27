@@ -206,7 +206,6 @@ class RiderPage extends Component {
           hasCompareAthlete: true,
           compareAthlete: {
             athlete: apiResponse[0].athlete,
-            // @todo Set to response.stats vs response.stats.locations
             stats: transformLocationsForRender(apiResponse[0].stats.locations),
           },
         });
@@ -220,17 +219,22 @@ class RiderPage extends Component {
    */
   getCompareAthleteStats = () => {
     const {
-      hasCompareAthlete,
-      compareAthlete,
+      compareAthlete = false,
       currentLocation,
       showStatsYear,
     } = this.state;
 
+    let compareLocationStats = false;
+    if (compareAthlete
+      && compareAthlete.stats
+      && compareAthlete.stats[currentLocation]
+    ) {
+      compareLocationStats = compareAthlete.stats[currentLocation];
+    }
+
     // @todo Message if we're trying to compare an athlete
     // but they don't have stats for this location
-    if (!hasCompareAthlete
-      || !compareAthlete.stats
-      || compareAthlete.stats[currentLocation]) {
+    if (!compareLocationStats) {
       return {
         compareAthleteByYear: [],
         compareAthleteByMonth: [],
@@ -243,7 +247,7 @@ class RiderPage extends Component {
       byMonth = {
         [showStatsYear]: [],
       },
-    } = compareAthlete.stats[currentLocation];
+    } = compareLocationStats;
     return {
       compareAthleteByYear: byYear,
       compareAthleteByMonth: byMonth[showStatsYear] || [],
