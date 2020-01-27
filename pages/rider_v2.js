@@ -32,6 +32,13 @@ const DEFAULT_COMPARE_ATHLETE_STATE = {
   compareAthlete: {},
 };
 
+// eslint-disable-next-line arrow-body-style
+const getAvailableYears = (locationStats, key) => {
+  return locationStats[key]
+    ? Object.keys(locationStats[key]).map((yr) => Number(yr)).sort()
+    : [];
+};
+
 class RiderPage extends Component {
   static defaultProps = {
     status: NOT_FETCHED_STATUS,
@@ -67,11 +74,15 @@ class RiderPage extends Component {
     super(props);
     const {
       currentLocation,
+      locations,
     } = props;
+
 
     this.state = {
       ...this.state,
-      currentLocation, // @todo Enable changing location
+      currentLocation, // @todo Enable changing location from UI
+      yearsForByMonth: getAvailableYears(locations[currentLocation], 'byMonth'),
+      yearsForByYear: getAvailableYears(locations[currentLocation], 'byYear'),
     };
   }
 
@@ -150,8 +161,12 @@ class RiderPage extends Component {
 
   onSelectYear = (selected) => {
     const showStatsYear = selected.value
-      ? selected.value.toString()
-      : selected.toString();
+      ? Number(selected.value)
+      : Number(selected);
+
+    if (this.state.yearsForByMonth.indexOf(showStatsYear) === -1) {
+      return;
+    }
 
     this.setState({
       showStatsBy: 'byMonth',
@@ -191,7 +206,6 @@ class RiderPage extends Component {
           hasCompareAthlete: true,
           compareAthlete: {
             athlete: apiResponse[0].athlete,
-            // @todo Set to response.stats vs response.stats.locations
             stats: transformLocationsForRender(apiResponse[0].stats.locations),
           },
         });
@@ -205,17 +219,22 @@ class RiderPage extends Component {
    */
   getCompareAthleteStats = () => {
     const {
-      hasCompareAthlete,
-      compareAthlete,
+      compareAthlete = false,
       currentLocation,
       showStatsYear,
     } = this.state;
 
+    let compareLocationStats = false;
+    if (compareAthlete
+      && compareAthlete.stats
+      && compareAthlete.stats[currentLocation]
+    ) {
+      compareLocationStats = compareAthlete.stats[currentLocation];
+    }
+
     // @todo Message if we're trying to compare an athlete
     // but they don't have stats for this location
-    if (!hasCompareAthlete
-      || !compareAthlete.stats
-      || compareAthlete.stats[currentLocation]) {
+    if (!compareLocationStats) {
       return {
         compareAthleteByYear: [],
         compareAthleteByMonth: [],
@@ -228,7 +247,7 @@ class RiderPage extends Component {
       byMonth = {
         [showStatsYear]: [],
       },
-    } = compareAthlete.stats[currentLocation];
+    } = compareLocationStats;
     return {
       compareAthleteByYear: byYear,
       compareAthleteByMonth: byMonth[showStatsYear] || [],
@@ -241,25 +260,32 @@ class RiderPage extends Component {
    * @param {Bool} shouldIncrement `true` to increment, `false` to decrement
    */
   updateYear(shouldIncrement) {
-    if (this.state.showStatsBy !== 'byMonth') {
+    const {
+      showStatsBy,
+      showStatsYear: showStatsYearInState,
+      yearsForByMonth,
+    } = this.state;
+
+    if (showStatsBy !== 'byMonth') {
       return;
     }
 
-    // Make sure type of current and available years match
-    const showStatsYear = parseInt(this.state.showStatsYear, 10);
-    const availableYears = this.props.locations[this.state.currentLocation]
-      .availableYears
-      .map((yr) => Number.parseInt(yr, 10));
+    // Make sure type of current year matches available years
+    const showStatsYear = parseInt(showStatsYearInState, 10);
 
-    const showIdx = availableYears.indexOf(showStatsYear);
+    const showIdx = yearsForByMonth.indexOf(showStatsYear);
 
-    const firstYear = [...availableYears].shift();
-    const lastYear = [...availableYears].pop();
+    const firstYear = yearsForByMonth[0];
+    const lastYear = yearsForByMonth[yearsForByMonth.length - 1];
 
-    if (shouldIncrement && showStatsYear !== lastYear) {
-      this.setState({ showStatsYear: availableYears[showIdx + 1] });
-    } else if (!shouldIncrement && showStatsYear !== firstYear) {
-      this.setState({ showStatsYear: availableYears[showIdx - 1] });
+    if (shouldIncrement && showStatsYear < lastYear) {
+      this.setState({
+        showStatsYear: yearsForByMonth[showIdx + 1],
+      });
+    } else if (!shouldIncrement && showStatsYear > firstYear) {
+      this.setState({
+        showStatsYear: yearsForByMonth[showIdx - 1],
+      });
     }
   }
 
@@ -283,6 +309,7 @@ class RiderPage extends Component {
       hasCompareAthlete,
       compareAthlete,
       chartRendered,
+      yearsForByMonth,
     } = this.state;
 
     if (!riderHasLapsAnywhere(locations)) {
@@ -356,6 +383,7 @@ class RiderPage extends Component {
         {showStatsBy === 'byMonth' && (
           <SingleYear
             year={showStatsYear}
+            availableYears={yearsForByMonth}
             primaryData={primaryAthleteByMonth[showStatsYear]}
             primaryId={parseInt(query.athleteId, 10)}
             compareTo={compareAthleteMeta}

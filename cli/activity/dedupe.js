@@ -10,7 +10,7 @@ const Athlete = require('../../schema/Athlete');
 const Activity = require('../../schema/Activity');
 const { setupConnection } = require('../utils/setupConnection');
 const { dedupeSegmentEfforts } = require('../../utils/refreshAthlete/utils');
-const { updateAthletStatsFromActivityV1 } = require('../../utils/v2/stats/athleteStatsV1');
+const { updateAthletStatsFromActivityV1 } = require('./athleteStatsV1');
 
 /**
  * Dedupe segment efforts and update laps for an existing activity

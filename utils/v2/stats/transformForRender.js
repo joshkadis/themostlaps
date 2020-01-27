@@ -43,7 +43,7 @@ function transformByMonth(data) {
 }
 
 /**
- * Transform a single location for frontend display
+ * Transform stats.locations object for frontend display
  *
  * @param {Object} location
  * @returns {Object}

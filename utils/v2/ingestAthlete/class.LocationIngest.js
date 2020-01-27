@@ -133,7 +133,7 @@ class LocationIngest {
       return;
     }
 
-    // Create activity if not exists
+    // Set up formatted activity data
     if (!this.activities[activityId]) {
       const activityData = this.formatActivity(effortRaw);
       if (activityData) {
@@ -146,12 +146,13 @@ class LocationIngest {
     const prevNumSegmentEfforts = this.activities[activityId]
       .segment_efforts
       .length;
+    // addSegmentEffortToActivity will avoid duplication
     this.addSegmentEffortToActivity(activityId, effortRaw);
     const newNumSegmentEfforts = this.activities[activityId]
       .segment_efforts
       .length;
 
-    // Dedupe and hopefully increment activity's laps
+    // Increment laps if segment effort was added i.e. not a duplicate
     if (newNumSegmentEfforts > prevNumSegmentEfforts) {
       // This should always be 1
       const delta = newNumSegmentEfforts - prevNumSegmentEfforts;
@@ -231,8 +232,8 @@ class LocationIngest {
   saveActivity = async (activityDoc) => {
     // Insert Activity
     // If an activity has laps in 2 locations,
-    // only one Activity will be saved, for the one with more laps.
-    // Athlete.stats will be accurate for both locations though.
+    // only one Activity will be saved, for the location with more laps.
+    // Stats are not counted for the location that "loses"
     // Will fall back to default location
     // @todo Handle activity with multiple locations
     const existing = await Activity.findById(activityDoc.id);
@@ -302,7 +303,7 @@ class LocationIngest {
 
     // Enforce page limit
     const returnEfforts = [...allEfforts, ...efforts];
-    if (limitPages && page >= limitPages) {
+    if (limitPages > 0 && page >= limitPages) {
       return returnEfforts;
     }
 
@@ -345,6 +346,7 @@ class LocationIngest {
     start_date,
   }) => ({
     _id: activity.id,
+    // Add manually because not using Mongo generated ID
     added_date: new Date().toISOString(),
     athlete_id: this.athleteDoc._id,
     laps: this.shouldAddExtraLap ? 1 : 0,
