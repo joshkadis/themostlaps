@@ -22,6 +22,7 @@ import { mergeStatsSingleYear } from '../../utils/athleteStatsClient';
 //
 // Custom props:
 // year: PropTypes.string.isRequired,
+// availableYears: PropTypes.array,
 // onClickPrevYear: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]),
 // onClickNextYear: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]),
 // onClickBack: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]),
@@ -35,6 +36,37 @@ class SingleYear extends BaseChart {
   }
 
   renderTitle(props) {
+    const {
+      availableYears,
+      year: propsYear,
+    } = props;
+
+    const year = Number(propsYear);
+    const yearIdx = availableYears.indexOf(year);
+    let nextYear = null;
+    let prevYear = null;
+
+    if (!availableYears.length) {
+      // v1 rider page doesn't have props.availableYears
+      // so we don't use it for logic here
+      if ('function' === typeof props.onClickNextYear) {
+        nextYear = year + 1;
+      }
+      if ('function' === typeof props.onClickPrevYear) {
+        prevYear = year - 1;
+      }
+    } else {
+      // v2 will always pass onClickNextYear and onClickPrevYear in props
+      if (year < availableYears[availableYears.length - 1]) {
+        // Show next year if current year isn't the last available year
+        nextYear = availableYears[yearIdx + 1];
+      }
+      if (year > availableYears[0]) {
+        // Show prev year if current year isn't the first available year
+        prevYear = availableYears[yearIdx - 1];
+      }
+    }
+
     return (
       <div>
         <h2 className={styles.chart__title}>
@@ -44,12 +76,12 @@ class SingleYear extends BaseChart {
           }
         </h2>
         <div className={styles.chart__singleYear__nav}>
-          {'function' === typeof props.onClickPrevYear &&
+          {prevYear &&
             <a
               className={styles['chart__header--nav']}
               href="#0"
               onClick={props.onClickPrevYear}
-            >{`< ${(parseInt(props.year, 10) - 1)}`}</a>
+            >{`< ${prevYear}`}</a>
           }
 
           {'function' === typeof props.onClickBack &&
@@ -60,12 +92,12 @@ class SingleYear extends BaseChart {
             >All Years</a>
           }
 
-          {'function' === typeof props.onClickNextYear &&
+          {nextYear &&
             <a
               className={styles['chart__header--nav']}
               href="#0"
               onClick={props.onClickNextYear}
-            >{`${(parseInt(props.year, 10) + 1)} >`}</a>
+            >{`${nextYear} >`}</a>
           }
         </div>
       </div>
@@ -124,9 +156,13 @@ class SingleYear extends BaseChart {
   }
 }
 
-SingleYear.defaultProps = baseChartDefaultProps;
+SingleYear.defaultProps = {
+  ...baseChartDefaultProps,
+  availableYears: [],
+};
 SingleYear.propTypes = Object.assign({...baseChartPropTypes}, {
   year: PropTypes.string.isRequired,
+  availableYears: PropTypes.array,
   onClickPrevYear: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]).isRequired,
   onClickNextYear: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]).isRequired,
   onClickBack: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]).isRequired,
