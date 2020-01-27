@@ -15,7 +15,21 @@ async function doCommand({
   const athletes = await Athlete.find({});
   // eslint-disable-next-line
   for await (const athlete of athletes) {
-    const { _id: athlete_id, stats = {} } = athlete.toJSON();
+    const {
+      _id: athlete_id,
+      stats = {},
+      athlete: {
+        firstname,
+        lastname,
+      },
+      stats_version,
+    } = athlete.toJSON();
+
+    if (stats_version === 'v2') {
+      console.log(`Athlete ${athlete_id} (${firstname} ${lastname}) already upgraded to V2 stats`);
+      return;
+    }
+
     const { allTime: prevAllTime = 0 } = stats;
     const activities = await Activity.find({ athlete_id });
     const nextStats = await compileStatsForActivities(activities);

@@ -16,6 +16,33 @@ function daysAgoTimestamp(daysago = null) {
   return current - (days * 86400); // Seconds in a day
 }
 
+/**
+ * Check for expected number of args
+ * Note that args[0] will be name of subcommand
+ * args[1]... will be the actual arguments
+ *
+ * @param {Array} args.length Number of args received
+ * @param {Integer} num Expected number of args
+ * @param {String} warning Text for warning if wrong number of args
+ * @return {Bool}
+ */
+function makeCheckNumArgs(baseWarning) {
+  return ({ length }, num, warning) => {
+    if (length === num) {
+      return true;
+    }
+    if (length > num) {
+      console.warn('Too many arguments');
+    } else if (length < num) {
+      console.warn('Missing arguments');
+    }
+    console.warn(`${baseWarning} ${warning}`);
+    return false;
+  };
+}
+
+
 module.exports = {
   daysAgoTimestamp,
+  makeCheckNumArgs,
 };

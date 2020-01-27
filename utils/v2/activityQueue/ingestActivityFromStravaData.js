@@ -8,19 +8,19 @@ const {
   updateAthleteStats,
 } = require('../../athleteStats');
 const { slackError } = require('../../slackNotification');
-const { getEpochSecondsFromDateObj } = require('../../athleteUtils');
+const { getTimestampFromString } = require('../../athleteUtils');
 
 /**
  * Update athlete's last refreshed to match UTC datetime string
  *
  * @param {Document} athleteDoc
  * @param {String} dateTimeStr ISO-8601 string, presumably UTC
- * @return {Document} Updated document
+ * @returns {Boolean} Success of update
  */
 async function updateAthleteLastRefreshed(athleteDoc, dateTimeStr) {
-  const startDate = new Date(dateTimeStr); // UTC
+  const lastRefreshed = getTimestampFromString(dateTimeStr, { unit: 'seconds' }); // UTC
   const result = await athleteDoc.updateOne({
-    last_refreshed: getEpochSecondsFromDateObj(startDate),
+    last_refreshed: lastRefreshed,
   });
   return result && result.nModified;
 }
@@ -30,7 +30,7 @@ async function updateAthleteLastRefreshed(athleteDoc, dateTimeStr) {
  *
  * @param {Object} activityData Formatted data to create Activity
  * @param {Bool} isDryRun If true, will validate without saving
- * @return {Document|false} Saved document or false if error
+ * @returns {Document|false} Saved document or false if error
  */
 async function createActivityDocument(activityData, isDryRun = false) {
   const activityDoc = new Activity(activityData);
@@ -63,7 +63,9 @@ async function createActivityDocument(activityData, isDryRun = false) {
  * @param {Object} activityData JSON object from Strava API
  * @param {Athlete} athleteDoc
  * @param {Bool} isDryRun If true, no DB updates
- * @return {Object} Status and message to update QueueActivity document
+ * @returns {Object} result
+ * @returns {String} result.status Allowed status for QueueActivity document
+ * @returns {String} result.detail Extra info for QueueActivity document
  */
 async function ingestActivityFromStravaData(
   rawActivity,
@@ -119,14 +121,16 @@ async function ingestActivityFromStravaData(
   }
 
   // Get updated stats
-  // @todo refactor compileSpecialStats() so it doesn't always save the Activity document
+  // @todo refactor compileSpecialStats() so it
+  // can dry run without always saving the Activity document
   const updatedStats = await compileStatsForActivities(
     [activityDoc],
     athleteDoc.toJSON().stats,
   );
   console.log(`Added ${updatedStats.allTime - athleteDoc.get('stats.allTime')} to stats.allTime`);
 
-  // @todo Combine updateAthleteStats and updateAthleteLastRefreshed as single db write operation
+  // @todo Combine updateAthleteStats and updateAthleteLastRefreshed
+  // as single db write operation
   // Update Athlete's stats
   try {
     await updateAthleteStats(athleteDoc, updatedStats);
@@ -165,8 +169,8 @@ async function ingestActivityFromStravaData(
   }
 
   /*
-   Created a new Activity with laps
-   Updated Athlete's stats and last_refreshed
+   First we created a new Activity with laps
+   Then we updated Athlete's stats and last_refreshed
    We made it!
   */
   return {

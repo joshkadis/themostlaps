@@ -18,6 +18,7 @@ const {
   migrateSingle,
   migrateMany,
 } = require('./migrateAuthToken');
+const { getAthleteIdentifier } = require('../utils/v2/models/athleteHelpers');
 
 /**
  * Prompt for admin code then connect and run command

@@ -12,6 +12,11 @@ import RiderPageMessage from '../components/RiderPageMessage';
 import { APIRequest } from '../utils';
 import { defaultLocation } from '../config';
 import { routeIsV2 } from '../utils/v2/router';
+import { transformLocationsForRender } from '../utils/v2/stats/transformForRender';
+import {
+  riderHasLapsAnywhere,
+  riderHasStatsForLocation,
+} from '../utils/v2/models/athleteHelpersClient';
 
 // Error Layouts
 import RiderMessage from '../components/layouts/rider/RiderMessage';
@@ -72,10 +77,10 @@ class RiderPage extends Component {
 
   static async getInitialProps({ query, req = {} }) {
     // Basic props from context
-    const { athleteId = false, location = defaultLocation } = query;
+    const { athleteId = false, currentLocation = defaultLocation } = query;
 
     const defaultInitialProps = {
-      currentLocation: location,
+      currentLocation,
       pathname: req.path || `/rider/${athleteId}`,
       query,
       shouldShowWelcome: !!query.welcome,
@@ -94,6 +99,13 @@ class RiderPage extends Component {
           return defaultInitialProps;
         }
 
+        if (apiResponse[0].stats_version === 'v1') {
+          this.props.router.push(
+            `/rider?athleteId=${athleteId}`,
+            `/rider/${athleteId}`,
+          );
+        }
+
         const {
           athlete,
           status,
@@ -103,7 +115,7 @@ class RiderPage extends Component {
         return {
           ...defaultInitialProps,
           athlete,
-          locations,
+          locations: transformLocationsForRender(locations),
           status,
         };
       });
@@ -136,10 +148,14 @@ class RiderPage extends Component {
     this.setState({ chartRendered: true });
   }
 
-  onSelectYear = ({ value }) => {
+  onSelectYear = (selected) => {
+    const showStatsYear = selected.value
+      ? selected.value.toString()
+      : selected.toString();
+
     this.setState({
       showStatsBy: 'byMonth',
-      showStatsYear: value,
+      showStatsYear,
     });
   }
 
@@ -161,11 +177,22 @@ class RiderPage extends Component {
         if (!Array.isArray(apiResponse) || !apiResponse.length) {
           this.setState(DEFAULT_COMPARE_ATHLETE_STATE);
         }
+
+        if (!riderHasStatsForLocation(
+          apiResponse[0].stats,
+          this.state.currentLocation,
+        )) {
+          // @todo Add some message here!
+          this.setState(DEFAULT_COMPARE_ATHLETE_STATE);
+          return;
+        }
+
         this.setState({
           hasCompareAthlete: true,
           compareAthlete: {
             athlete: apiResponse[0].athlete,
-            stats: apiResponse[0].stats,
+            // @todo Set to response.stats vs response.stats.locations
+            stats: transformLocationsForRender(apiResponse[0].stats.locations),
           },
         });
       });
@@ -184,7 +211,11 @@ class RiderPage extends Component {
       showStatsYear,
     } = this.state;
 
-    if (!hasCompareAthlete) {
+    // @todo Message if we're trying to compare an athlete
+    // but they don't have stats for this location
+    if (!hasCompareAthlete
+      || !compareAthlete.stats
+      || compareAthlete.stats[currentLocation]) {
       return {
         compareAthleteByYear: [],
         compareAthleteByMonth: [],
@@ -197,7 +228,7 @@ class RiderPage extends Component {
       byMonth = {
         [showStatsYear]: [],
       },
-    } = compareAthlete.stats.locations[currentLocation];
+    } = compareAthlete.stats[currentLocation];
     return {
       compareAthleteByYear: byYear,
       compareAthleteByMonth: byMonth[showStatsYear] || [],
@@ -213,11 +244,13 @@ class RiderPage extends Component {
     if (this.state.showStatsBy !== 'byMonth') {
       return;
     }
-    const availableYears = [
-      ...this.props.locations[this.state.currentLocation].availableYears,
-    ];
-    // Cast current year as int
+
+    // Make sure type of current and available years match
     const showStatsYear = parseInt(this.state.showStatsYear, 10);
+    const availableYears = this.props.locations[this.state.currentLocation]
+      .availableYears
+      .map((yr) => Number.parseInt(yr, 10));
+
     const showIdx = availableYears.indexOf(showStatsYear);
 
     const firstYear = [...availableYears].shift();
@@ -239,7 +272,7 @@ class RiderPage extends Component {
       shouldShowWelcome,
       shouldShowUpdated,
       isDuplicateSignup,
-      locations,
+      locations = {},
       currentLocation,
       router: routerProp,
     } = this.props;
@@ -251,6 +284,14 @@ class RiderPage extends Component {
       compareAthlete,
       chartRendered,
     } = this.state;
+
+    if (!riderHasLapsAnywhere(locations)) {
+      return this.renderMessage('noLaps');
+    }
+
+    if (!locations[currentLocation]) {
+      return this.renderMessage('noLapsLocation');
+    }
 
     const {
       allTime,
@@ -270,9 +311,6 @@ class RiderPage extends Component {
     }
     if (status === 'ingesting') {
       return this.renderMessage('ingesting');
-    }
-    if (!allTime) {
-      return this.renderMessage('noLaps');
     }
 
     return (

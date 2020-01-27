@@ -48,15 +48,10 @@ class Navigation extends Component {
   navigateToRiderPage(selection) {
     if (selection && selection.value) {
       this.setState(this.defaultState);
-      const isV2 = routeIsV2(this.props.router);
-      const internal = isV2
-        ? `/rider_v2?athleteId=${selection.value}`
-        : `/rider?athleteId=${selection.value}`;
-      const external = isV2
-        ? `/rider/${selection.value}?v2`
-        : `/rider/${selection.value}`;
-
-      this.props.router.push(internal, external);
+      this.props.router.push(
+        `/rider?athleteId=${selection.value}`,
+        `/rider/${selection.value}`,
+      );
     }
   }
 

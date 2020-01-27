@@ -10,7 +10,7 @@ const Athlete = require('../../schema/Athlete');
 const Activity = require('../../schema/Activity');
 const { setupConnection } = require('../utils/setupConnection');
 const { dedupeSegmentEfforts } = require('../../utils/refreshAthlete/utils');
-const { updateAthleteStatsFromActivity } = require('../../utils/v2/stats/athleteStats');
+const { updateAthletStatsFromActivityV1 } = require('../../utils/v2/stats/athleteStatsV1');
 
 /**
  * Dedupe segment efforts and update laps for an existing activity
@@ -51,8 +51,13 @@ async function dedupeAthleteActivities(
   verbose = true,
   suppress = false,
 ) {
+  if (athleteDoc.stats_version === 'v2') {
+    console.log('****** ONLY APPLIES TO V1 STATS *******');
+    return false;
+  }
+
   const query = {
-    athlete_id: athleteDoc.id,
+    athlete_id: athleteDoc._id,
   };
 
   if (activityIds.length) {
@@ -108,7 +113,7 @@ async function dedupeAthleteActivities(
     const deltaEfforts = nextSegmentEfforts.length - prevSegmentEfforts.length;
 
     if (delta !== 0 || deltaEfforts !== 0) {
-      log[activity.id] = {
+      log[activity._id] = {
         delta,
         deltaEfforts,
         prevLaps,
@@ -124,7 +129,7 @@ async function dedupeAthleteActivities(
       summary.abs.push(delta);
       summary.rel.push((delta / prevLaps));
 
-      updateAthleteStatsFromActivity(athleteDoc, delta, startDateStr);
+      updateAthletStatsFromActivityV1(athleteDoc, delta, startDateStr);
 
       if (!isDryRun) {
         await activity.save();

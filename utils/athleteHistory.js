@@ -8,7 +8,7 @@ const {
   formatSegmentEffort,
 } = require('./refreshAthlete/utils');
 /**
- * Iterate though paginated history of segment efforts and concatenate
+ * Get complete history of athlete's efforts for canonical segment
  * @param {Document} athleteDoc
  * @param {Number} page
  * @param {Array} allEfforts

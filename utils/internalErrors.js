@@ -72,6 +72,15 @@ module.exports = (code = 0, data = '') => {
     case 120:
       return 'Could not refresh athlete access_token';
 
+    case 130:
+      return 'LocationIngest without Athlete document';
+
+    case 131:
+      return 'LocationIngest with invalid canonical segment ID';
+
+    case 132:
+      return 'LocationIngest exceeded max allowed invalid activities';
+
     default:
       return 'An error occurred.';
   }

@@ -4,7 +4,8 @@ import RiderPageHeader from '../../RiderPageHeader';
 
 const RIDER_MESSAGES = {
   ingesting: 'Compiling your stats. Please check back in a minute.',
-  noLaps: 'Not even one lap, ever! 😱',
+  noLaps: 'Not even one lap. Ever. Anywhere. 😱',
+  noLapsLocation: "You've never ridden here. Maybe you should check it out.",
   defaultMsg: 'An error occurred',
 };
 

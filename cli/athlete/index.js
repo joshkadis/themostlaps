@@ -1,0 +1,24 @@
+const { setupThenCommand: ingestV2Command } = require('./ingestV2');
+
+const SHOULD_FORCE_DRY_RUN = false;
+
+module.exports = {
+  command: [
+    'athlete <subcommand> [<subargs...>]',
+  ],
+  describe: 'Stats commands',
+  handler: async (args) => {
+    switch (args.subcommand) {
+      // FORCE DRY
+      case 'ingestv2':
+        ingestV2Command({
+          ...args,
+          dryRun: SHOULD_FORCE_DRY_RUN || args.dryRun,
+        });
+        break;
+
+      default:
+        console.log('Invalid subcommand');
+    }
+  },
+};

@@ -15,4 +15,7 @@ module.exports = {
     9699985, // Sprint between the lights
     740668, // E Lake Drive
   ],
+  // v2 updated properties
+  canonicalSegmentId: 5313629,
+  locationName: 'prospectpark',
 };

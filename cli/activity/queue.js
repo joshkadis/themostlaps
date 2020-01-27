@@ -16,7 +16,9 @@ const {
   cancelActivityQueue,
 } = require('../../utils/v2/activityQueue');
 const { setupConnection } = require('../utils/setupConnection');
+const { makeCheckNumArgs } = require('../utils');
 
+const checkNumArgs = makeCheckNumArgs('Use format: $ activity queue');
 /**
  * Get message from CLI args
  *
@@ -35,24 +37,6 @@ function getMessageValue({ m, message }) {
     return m.toString();
   }
   return false;
-}
-
-/**
- * Check for expected number of args
- * Note that args[0] will be name of subcommand
- * args[1]... will be the actual arguments
- *
- * @param {Array} args
- * @param {Integer} num Expected number of args
- * @param {String} warning Text for warning if wrong number of args
- * @return {Bool}
- */
-function checkNumArgs(args, num, warning) {
-  if (args.length !== num) {
-    console.warn(`Use format: $ activity queue ${warning}`);
-    return false;
-  }
-  return true;
 }
 
 /**

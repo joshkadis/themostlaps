@@ -15,6 +15,7 @@ const {
   callbackMigrateToken,
   // callbackMigrateLocation,
   // callbackMigrateStats,
+  callbackIngestAthleteV2,
 } = require ('./cli/callbacks');
 
 const { coldLapsPoints: { startActivity }, defaultLocation } = require('./config');
@@ -167,6 +168,7 @@ const argv = require('yargs')
     },
   )
   .command(require('./cli/activity'))
+  .command(require('./cli/athlete'))
   .command(require('./cli/stats'))
   .help()
   .argv;
