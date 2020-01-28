@@ -300,7 +300,7 @@ async function doCommand(args) {
       await doUpdate(args);
       break;
 
-    case 'ingestactivity':
+    case 'ingestfromqueue':
       await doIngestActivity(args);
       break;
 
