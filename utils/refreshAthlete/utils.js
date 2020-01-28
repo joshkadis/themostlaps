@@ -6,6 +6,7 @@ const fetchStravaAPI = require('../fetchStravaAPI');
 const calculateLapsFromSegmentEfforts = require('./calculateLapsFromSegmentEfforts');
 const { slackError } = require('../slackNotification');
 const Athlete = require('../../schema/Athlete');
+const { findPotentialLocations } = require('../v2/activityQueue/findPotentialLocations');
 
 /**
  * Fetch single activity from Strava API
@@ -48,14 +49,19 @@ async function fetchActivity(activityId, tokenOrDoc, includeAllEfforts = true) {
 
 /**
  * Check where an activity is eligible to maybe have laps.
- * Keep it eligible unless we know for sure that it can't have laps
+ * Keep it eligible for future checking
  * e.g. can't disqualify unless a property is *set* to a value we don't want
  *
  * @param {Object} activity
  * @param {Bool} verbose
+ * @param {Object} overrideLocations Will replace default locations when checking findPotentialLocations
  * @return {Array} Array of potential locations, if any are found
  */
-function activityCouldHaveLaps(activity, verbose = false) {
+function activityCouldHaveLaps(
+  activity,
+  verbose = false,
+  overrideLocations,
+) {
   const activityHas = (key) => _has(activity, key);
 
   const {
@@ -85,6 +91,22 @@ function activityCouldHaveLaps(activity, verbose = false) {
     }
     return false;
   }
+
+  if (
+    activityHas('distance')
+    && activityHas('start_latlng')
+    && activityHas('end_latlng')
+  ) {
+    const potentials = findPotentialLocations(
+      activity,
+      {
+        verbose,
+        locations: overrideLocations,
+      },
+    );
+    return potentials.length > 0;
+  }
+
   return true;
 }
 
