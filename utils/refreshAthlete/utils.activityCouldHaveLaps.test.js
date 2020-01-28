@@ -53,36 +53,4 @@ describe('activityCouldHaveLaps edge cases', () => {
     delete activity.distance;
     expect(activityCouldHaveLaps(activity)).toBe(true);
   });
-
-  test('starts or ends within allowed radius', () => {
-    const boston = [42.360081, -71.058884];
-    // start yes, end no
-    activity = {
-      ...baseValidActivity,
-      end_latlng: boston,
-    };
-    expect(activityCouldHaveLaps(activity)).toBe(true);
-    delete activity.end_latlng;
-    expect(activityCouldHaveLaps(activity)).toBe(true);
-
-    // start no, end yes
-    activity = {
-      ...baseValidActivity,
-      start_latlng: boston,
-    };
-    expect(activityCouldHaveLaps(activity)).toBe(true);
-    delete activity.start_latlng;
-    expect(activityCouldHaveLaps(activity)).toBe(true);
-
-    // start no, end no
-    activity = {
-      ...baseValidActivity,
-      start_latlng: boston,
-      end_latlng: boston,
-    };
-    expect(activityCouldHaveLaps(activity)).toBe(false);
-    delete activity.end_latlng;
-    delete activity.start_latlng;
-    expect(activityCouldHaveLaps(activity)).toBe(false);
-  });
 });
