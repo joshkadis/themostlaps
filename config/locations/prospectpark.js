@@ -4,7 +4,7 @@ module.exports = {
     longitude: -73.969681,
   },
   allowedRadius: 50000,
-  minDistance: 3300,
+  minDistance: 5000,
   addMakeupLap: true, // Avoids excess API calls when ingesting new user
   devFetchActivities: 10,
   lapSegmentId: 5313629, // Prospect Park Race Lap
@@ -18,4 +18,6 @@ module.exports = {
   // v2 updated properties
   canonicalSegmentId: 5313629,
   locationName: 'prospectpark',
+  locationLabel: 'Prospect Park',
+  locationCity: 'Brooklyn, NY',
 };
