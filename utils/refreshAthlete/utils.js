@@ -3,7 +3,7 @@ const { getDistance } = require('geolib');
 const {
   minDistance,
   allowedRadius,
-  parkCenter,
+  locationCenter,
   lapSegmentId,
 } = require('../../config');
 const fetchStravaAPI = require('../fetchStravaAPI');
@@ -16,13 +16,13 @@ const Athlete = require('../../schema/Athlete');
  * @param {Array} latlng
  * @return {Number}
  */
-function distFromParkCenter(latlng = null) {
+function distFromLocationCenter(latlng = null) {
   if (!latlng || latlng.length !== 2) {
     return null;
   }
 
   return getDistance(
-    parkCenter,
+    locationCenter,
     {
       latitude: latlng[0],
       longitude: latlng[1],
@@ -39,7 +39,7 @@ function distFromParkCenter(latlng = null) {
  * @return {Boolean}
  */
 function isWithinAllowedRadius(latlng) {
-  return latlng && distFromParkCenter(latlng) < allowedRadius;
+  return latlng && distFromLocationCenter(latlng) < allowedRadius;
 }
 
 /**
@@ -130,13 +130,13 @@ function activityCouldHaveLaps(activity, verbose = false) {
 
   const startIsOk = activityHas('start_latlng') && isWithinAllowedRadius(start_latlng);
   const endIsOk = activityHas('end_latlng') && isWithinAllowedRadius(end_latlng);
-  const nearParkCenter = startIsOk || endIsOk;
+  const nearLocationCenter = startIsOk || endIsOk;
 
-  if (verbose && !nearParkCenter) {
+  if (verbose && !nearLocationCenter) {
     console.log(`Activity ${id} is not near the park center.`);
   }
 
-  return nearParkCenter;
+  return nearLocationCenter;
 }
 
 /**

@@ -1,5 +1,5 @@
 module.exports = {
-  parkCenter: {
+  locationCenter: {
     latitude: 40.661990,
     longitude: -73.969681,
   },
