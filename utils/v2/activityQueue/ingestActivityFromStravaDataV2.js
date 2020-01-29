@@ -1,29 +1,10 @@
 const Activity = require('../../../schema/Activity');
 const {
   activityCouldHaveLaps,
-  getActivityData,
 } = require('../../refreshAthlete/utils');
-const {
-  compileStatsForActivities,
-  updateAthleteStats,
-} = require('../../athleteStats');
 const { slackError } = require('../../slackNotification');
 const { getTimestampFromString } = require('../../athleteUtils');
-
-/**
- * Update athlete's last refreshed to match UTC datetime string
- *
- * @param {Document} athleteDoc
- * @param {String} dateTimeStr ISO-8601 string, presumably UTC
- * @returns {Boolean} Success of update
- */
-async function updateAthleteLastRefreshed(athleteDoc, dateTimeStr) {
-  const lastRefreshed = getTimestampFromString(dateTimeStr, { unit: 'seconds' }); // UTC
-  const result = await athleteDoc.updateOne({
-    last_refreshed: lastRefreshed,
-  });
-  return result && result.nModified;
-}
+const { transformActivity } = require('../stats/transformActivity');
 
 /**
  * Create Activity document, validate, and save
@@ -32,7 +13,7 @@ async function updateAthleteLastRefreshed(athleteDoc, dateTimeStr) {
  * @param {Bool} isDryRun If true, will validate without saving
  * @returns {Document|false} Saved document or false if error
  */
-async function createActivityDocument(activityData, isDryRun = false) {
+async function createActivityDocument(activityData) {
   const activityDoc = new Activity(activityData);
   // Mongoose returns error here instead of throwing
   const invalid = activityDoc.validateSync();
@@ -41,19 +22,7 @@ async function createActivityDocument(activityData, isDryRun = false) {
     return false;
   }
 
-  if (isDryRun) {
-    return activityDoc;
-  }
-
-  try {
-    await activityDoc.save();
-    console.log(`Saved activity ${activityDoc.id}`);
-    return activityDoc;
-  } catch (err) {
-    console.log(`Error saving activity ${activityDoc.id}`);
-    console.log(err);
-    return false;
-  }
+  return activityDoc;
 }
 
 /**
@@ -86,20 +55,7 @@ async function ingestActivityFromStravaData(
     };
   }
 
-
-  // Get laps for activity
-  // { loc1: ..., loc2: ...  }
-
-  // Format Activity document
-
-  // if !dryrun: save Activity
-
-  // Update Athlete stats
-
-  // if !dryrun: save Athlete
-
-  // Check for laps
-  const activityData = getActivityData(rawActivity);
+  const activityData = transformActivity(rawActivity);
   if (!activityData.laps) {
     // Activity was processed but has no laps
     return {
@@ -108,18 +64,32 @@ async function ingestActivityFromStravaData(
     };
   }
 
-  /*
-    Start doing stuff that updates DB
-  */
-
-  // Save to activities collection
-  const activityDoc = await createActivityDocument(activityData, isDryRun);
+  const activityDoc = createActivityDocument(activityData);
   if (!activityDoc) {
     console.log('createActivityDocument() failed');
     return {
       status: 'error',
       errorMsg: 'createActivityDocument() failed',
     };
+  }
+  if (!isDryRun) {
+    await activityDoc.save();
+  }
+
+  // Get updated stats with something like:
+  const updatedStats addActivityToLocationStats(activityDoc)
+  const activityStartTimestamp = getTimestampFromString(
+    rawActivity.start_date,
+    { unit: 'seconds' },
+  );
+  athleteDoc.set({
+    stats: updatedStats,
+    last_refreshed: activityStartTimestamp,
+    last_updated: activityStartTimestamp,
+  });
+  athleteDoc.markModified('stats');
+  if (!isDryRun) {
+    await athleteDoc.save();
   }
 
   /*
@@ -132,53 +102,7 @@ async function ingestActivityFromStravaData(
     };
   }
 
-  // Get updated stats
-  // @todo refactor compileSpecialStats() so it
-  // can dry run without always saving the Activity document
-  const updatedStats = await compileStatsForActivities(
-    [activityDoc],
-    athleteDoc.toJSON().stats,
-  );
-  console.log(`Added ${updatedStats.allTime - athleteDoc.get('stats.allTime')} to stats.allTime`);
-
-  // @todo Combine updateAthleteStats and updateAthleteLastRefreshed
-  // as single db write operation
-  // Update Athlete's stats
-  try {
-    await updateAthleteStats(athleteDoc, updatedStats);
-  } catch (err) {
-    console.log(`Error with updateAthleteStats() for ${athleteDoc.id} after activity ${rawActivity.id}`);
-    slackError(90, {
-      function: 'updateAthleteStats',
-      athleteId: athleteDoc.id,
-      activityId: rawActivity.id,
-    });
-    return {
-      status: 'error',
-      errorMsg: 'updateAthleteStats() failed',
-    };
-  }
-
-  // Update Athlete's last_refreshed time
-  let success = true;
-  try {
-    // @todo Can this even return something falsy?
-    const updated = await updateAthleteLastRefreshed(
-      athleteDoc,
-      rawActivity.start_date,
-    );
-    success = !!updated;
-  } catch (err) {
-    success = false;
-  }
-
-  if (!success) {
-    console.log(`updateAthleteLastRefreshed() failed: athlete ${athleteDoc.id} | activity ${rawActivity.id}`);
-    return {
-      status: 'error',
-      errorMsg: 'updateAthleteLastRefreshed() failed',
-    };
-  }
+  // @todo return { status: 'error' } where needed!
 
   /*
    First we created a new Activity with laps
