@@ -36,7 +36,7 @@ async function createActivityDocument(activityData) {
  * @returns {String} result.status Allowed status for QueueActivity document
  * @returns {String} result.detail Extra info for QueueActivity document
  */
-async function ingestActivityFromStravaData(
+async function ingestActivityFromStravaDataV2(
   rawActivity,
   athleteDoc,
   isDryRun = false,
@@ -115,4 +115,4 @@ async function ingestActivityFromStravaData(
   };
 }
 
-module.exports = { ingestActivityFromStravaData };
+module.exports = { ingestActivityFromStravaDataV2 };
