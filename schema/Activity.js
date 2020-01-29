@@ -30,7 +30,7 @@ const activitySchema = new Schema({
   secondaryLocations: [{
     location: String,
     laps: Number,
-    segmentEfforts: [SegmentEffort],
+    segment_efforts: [SegmentEffort],
   }],
 });
 

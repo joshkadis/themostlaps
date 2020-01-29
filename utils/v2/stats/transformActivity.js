@@ -1,9 +1,82 @@
 const { locations: allLocations } = require('../../../config');
-const {
-  getCanonicalSegmentIds,
-  getSegmentIdFromLocName,
-} = require('../locations');
 const { findPotentialLocations } = require('../activityQueue/findPotentialLocations');
+const { getLocationNameFromSegmentId } = require('../locations');
+
+/**
+ * Convert raw Strava API data to base of Activity data model
+ *
+ * @param {Object} activity
+ * @param {Object} overrides Optional. Properties to override output
+ * @returns {Object}
+ */
+function formatActivity(activity, overrides) {
+  // @todo Refactor vs LocationIngest.formatActivity
+  const {
+    id: _id,
+    athlete,
+    start_date_local,
+    start_date,
+  } = activity;
+  return {
+    _id,
+    added_date: new Date().toISOString(),
+    athlete_id: athlete.id,
+    source: 'webhook',
+    start_date_local,
+    startDateUtc: new Date(start_date),
+    ...overrides,
+  };
+}
+
+/**
+ * Convert raw Strava API data to base of SegmentEffort data model
+ *
+ * @param {Object} activity
+ * @param {Object} overrides Optional. Properties to override output
+ * @returns {Object}
+ */
+function formatSegmentEffort(effort, overrides) {
+  // @todo Refactor vs LocationIngest.formatSegmentEffort
+  const {
+    id: _id,
+    elapsed_time,
+    moving_time,
+    start_date_local,
+    start_date,
+  } = effort;
+
+  return {
+    _id,
+    elapsed_time,
+    moving_time,
+    start_date_local,
+    startDateUtc: new Date(start_date),
+    ...overrides,
+  };
+}
+
+/**
+ * Get all possible sequence of section segments by Id
+ *
+ * @param {Number} canonicalId
+ * @returns {Array} sequences
+ * @returns {Array} sequences[idx] Array of section segment ids
+ */
+function getSegmentSequences(canonicalId) {
+  const locName = getLocationNameFromSegmentId(canonicalId);
+  const sectionIds = [...allLocations[locName].sectionSegmentIds];
+  const numSections = sectionIds.length;
+  const sequences = [];
+  sectionIds.forEach((sectionId, idx) => {
+    const sequence = [
+      ...sectionIds.slice(idx),
+      ...sectionIds.slice((numSections * -1), idx),
+    ];
+    sequence.pop();
+    sequences.push(sequence);
+  });
+  return sequences;
+}
 
 /**
  * Collapse relevant segment Ids into single array
@@ -34,7 +107,7 @@ function collapseRelevantSegmentIds(potentialLocs = []) {
  */
 function isDuplicateEffort(newEffort, prevEfforts) {
   for (let idx = 0; idx < prevEfforts.length; idx += 1) {
-    const prevEffort = prevEffort[idx]
+    const prevEffort = prevEfforts[idx];
     // Is duplicate if start time and segment id match
     if (newEffort.start_date === prevEffort.start_date
       && newEffort.segment.id === prevEffort.segment.id
@@ -49,22 +122,23 @@ function isDuplicateEffort(newEffort, prevEfforts) {
  * Filter and dedupe all segment efforts by canonical id
  *
  * @param {Array} segmentEfforts
+ * @param {Array} potentialLocations Optional. Specify location names to look for
  * @returns {Object} locations
- * @returns {Array} locations[locName].segmentEfforts
- * @returns {Array} locations[locName].laps
+ * @returns {Array} locations[locName].canonicalSegmentEfforts
+ * @returns {Array} locations[locName].relevantSegmentEfforts
  */
 function filterSegmentEfforts(segmentEfforts, potentialLocations = []) {
-  const relevantSegments = collapseRelevantSegmentIds(potentialLocations);
+  const allRelevantSegmentIds = collapseRelevantSegmentIds(potentialLocations);
   const searchLocNames = potentialLocations.length
-    ? potentialLocs
+    ? potentialLocations
     : Object.keys(allLocations);
 
-  // Loop through all segmentEfforts
-    // { locName: canonicalSegmentEfforts: [], sectionSegmentEfforts: [] }
+  // Loop through all segmentEfforts to set up object with all locations like:
+  // { locName: relevantSegmentEfforts: [], canonicalSegmentEfforts: [] }
   const filteredEfforts = searchLocNames.reduce((acc, locName) => {
     acc[locName] = {
+      relevantSegmentEfforts: [],
       canonicalSegmentEfforts: [],
-      sectionSegmentEfforts: [],
     };
     return acc;
   }, {});
@@ -72,47 +146,88 @@ function filterSegmentEfforts(segmentEfforts, potentialLocations = []) {
   // Loop through all efforts
   segmentEfforts.forEach((effort) => {
     const { segment } = effort;
-    const { id: segmentId } = segment;
+    const { id: segmentIdForEffort } = segment;
 
     // Will ignore almost all segments efforts,
-    // very few will be associated with anything in allLocations
-    if (relevantSegments.indexOf(segmentId) === -1) {
+    // very few will be actually associated with anything we care about
+    if (allRelevantSegmentIds.indexOf(segmentIdForEffort) === -1) {
       return;
     }
 
-    // Now we know this is a canonical or section segment effort
-    // So find its location and add it there
+    // Now we know this has to be a canonical or section segment effort
+    // for one of the locations. Now we figure out which one.
     searchLocNames.forEach((locName) => {
+      const { canonicalSegmentId } = allLocations[locName];
       const {
-        canonicalSegmentId,
-        sectionSegmentIds,
-      } = allLocations[locName];
-
-      const {
-        canonicalSegmentEfforts,
-        sectionSegmentEfforts,
+        relevantSegmentEfforts,
       } = filteredEfforts[locName];
 
-      // Add canonical segment effort if not duplicate
-      if (segmentId === canonicalSegmentId
-          && !isDuplicateEffort(effort, canonicalSegmentEfforts)
-      ) {
-        filteredEfforts[locName].canonicalSegmentEfforts.push(effort);
-      }
-
-      // Add section segment effort if not duplicate
-      if (sectionSegmentIds.indexOf(segmentId) !== -1
-        && !isDuplicateEffort(effort, sectionSegmentEfforts)
-      ) {
-        filteredEfforts[locName].sectionSegmentEfforts.push(effort);
+      if (!isDuplicateEffort(effort, relevantSegmentEfforts)) {
+        // Add to array of all relevant segment efforts
+        filteredEfforts[locName].relevantSegmentEfforts = [
+          ...filteredEfforts[locName].relevantSegmentEfforts,
+          effort,
+        ];
+        // Maybe add to array of efforts for the canonical segment
+        if (segmentIdForEffort === canonicalSegmentId) {
+          filteredEfforts[locName].canonicalSegmentEfforts = [
+            ...filteredEfforts[locName].canonicalSegmentEfforts,
+            effort,
+          ];
+        }
       }
     });
   });
-  // Now we've gone through all the segment efforts and done one of three things
-  // 1. Ignored it
-  // 2. Added it as a *canonical* segment effort for its location in filteredEfforts
-  // 3. Added it as a *segment* segment effort for its location in filteredEfforts
+  // Now each location has:
+  // relevantSegmentEfforts: An deduped array of all segment efforts for canonical lap and lap sections
+  // canonicalSegmentEfforts: A deduped array of all segment efforts for the canonical lap
   return filteredEfforts;
+}
+
+/**
+ * Calculate number of laps by assembling partial lap before/after full laps
+ *
+ * @param {Array} allEfforts Array of all relevant segment efforts for this location
+ * @param {Number} numCanonicalLaps Number of numCanonicalLaps we already know about
+ * @param {Number} segmentId ID of canonical segment we're building around
+ * @returns {Number} Number of laps from this activity for a single location
+ */
+function calculateLapsFromSegmentEfforts(
+  allEfforts,
+  numCanonicalLaps,
+  segmentId,
+) {
+  let numFoundLaps = 0;
+  // Array of section efforts before the first and after the last canonical lap
+  const partialLapEfforts = [];
+  allEfforts.forEach((effort) => {
+    if (effort.segment.id === segmentId) {
+      numFoundLaps += 1;
+      return;
+    }
+    if (numFoundLaps === 0 || numFoundLaps === numCanonicalLaps) {
+      partialLapEfforts.push(effort);
+    }
+  });
+
+  const sectionSegmentIdsStr = partialLapEfforts
+    .reduce((acc, { segment }) => acc + segment.id, '');
+
+  // Get sequences strings like ['123', '234', '341', '412']
+  // from set of segment ids like [1,2,3,4]
+  // leave off last segment to simulate enter/exit skipping a segment
+  const possibleSectionSequences = getSegmentSequences(segmentId)
+    .map((sequence) => sequence.join(''));
+
+  // If any of the sequence strings are found the string representing
+  // all the partial lap segments before first and after last full lap
+  // Count it as a lap
+  for (let idx = 0; idx < possibleSectionSequences.length; idx += 1) {
+    if (sectionSegmentIdsStr.indexOf(possibleSectionSequences[idx]) > -1) {
+      return numCanonicalLaps + 1;
+    }
+  }
+  return numCanonicalLaps;
 }
 
 /**
@@ -124,22 +239,79 @@ function filterSegmentEfforts(segmentEfforts, potentialLocations = []) {
  * @returns {Number} locations[locName].laps
  * @returns {Array} locations[locName].segmentEfforts
  */
-function getLapsFromRawActivity(activity) {
+function getStatsFromRawActivity(activity) {
   const {
     segment_efforts: segmentEfforts,
   } = activity;
 
+  // First filter the segment efforts
   const potentialLocs = findPotentialLocations(activity);
-  const locationsObj = getDataFromSegmentEfforts(
+  const filteredEfforts = filterSegmentEfforts(
     segmentEfforts,
-    potentialLocs
+    potentialLocs,
   );
 
-  // First filter the segment efforts
-  const result = filterSegmentEfforts(segmentEfforts);
+  let winningLocation = {};
+  const secondaryLocations = [];
 
-  // Then calculate laps by including assembly from partial laps
-  calculateLapsFromSegmentEfforts(result, segmentEfforts);
+  Object.keys(filteredEfforts)
+    .forEach((locName) => {
+      const numCanonicalLaps = filteredEfforts[locName]
+        .canonicalSegmentEfforts
+        .length;
+      const laps = calculateLapsFromSegmentEfforts(
+        filteredEfforts[locName].relevantSegmentEfforts,
+        numCanonicalLaps,
+        allLocations[locName].canonicalSegmentId,
+      );
 
-  return result;
+      const segment_efforts = filteredEfforts[locName].canonicalSegmentEfforts
+        .map(formatSegmentEffort);
+
+      const result = {
+        laps,
+        location: locName,
+        segment_efforts,
+      };
+
+      // Location with the most laps "wins"
+      if (!winningLocation.laps || laps > winningLocation.laps) {
+        winningLocation = result;
+      }
+
+      secondaryLocations.push(result);
+    });
+
+  const outputToActivity = {
+    ...winningLocation,
+    secondaryLocations,
+  };
+  return outputToActivity;
 }
+
+/**
+ * Transform raw Strava API response for activity
+ * into Activity data model
+ *
+ * @param {Object} activity Strava API response for activity
+ */
+function transformActivity(activity) {
+  const activityStats = getStatsFromRawActivity(activity);
+  const activityData = formatActivity(activity);
+  return {
+    ...activityData,
+    ...activityStats,
+  };
+}
+
+module.exports = {
+  transformActivity,
+  getStatsFromRawActivity,
+  collapseRelevantSegmentIds,
+  isDuplicateEffort,
+  filterSegmentEfforts,
+  getSegmentSequences,
+  calculateLapsFromSegmentEfforts,
+  formatActivity,
+  formatSegmentEffort,
+};

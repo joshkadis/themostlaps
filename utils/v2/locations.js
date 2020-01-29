@@ -17,8 +17,10 @@ function isValidCanonicalSegmentId(segmentId) {
   return getCanonicalSegmentIds().indexOf(segmentId) >= 0;
 }
 
-const getLocationNameFromSegmentId = (segmentId) => Object.keys(locations)
-  .find((name) => locations[name].canonicalSegmentId === segmentId);
+function getLocationNameFromSegmentId(segmentId) {
+  return Object.keys(locations)
+    .find((name) => locations[name].canonicalSegmentId === segmentId);
+}
 
 const getSegmentIdFromLocName = (locName) => (locations[locName]
   ? locations[locName].canonicalSegmentId
