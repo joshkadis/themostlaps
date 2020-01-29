@@ -9,5 +9,5 @@ module.exports = {
     latitude: 40.782864,
     longitude: -73.965355,
   },
-  // sectionSegmentIds: []
+  sectionSegmentIds: [],
 };

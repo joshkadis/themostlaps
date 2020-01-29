@@ -20,10 +20,15 @@ function isValidCanonicalSegmentId(segmentId) {
 const getLocationNameFromSegmentId = (segmentId) => Object.keys(locations)
   .find((name) => locations[name].canonicalSegmentId === segmentId);
 
+const getSegmentIdFromLocName = (locName) => (locations[locName]
+  ? locations[locName].canonicalSegmentId
+  : false);
+
 module.exports = {
   getLocationNames,
   isValidLocation,
   getCanonicalSegmentIds,
   isValidCanonicalSegmentId,
   getLocationNameFromSegmentId,
+  getSegmentIdFromLocName,
 };

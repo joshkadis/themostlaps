@@ -27,6 +27,11 @@ const activitySchema = new Schema({
     default: defaultLocation,
     index: true,
   },
+  secondaryLocations: [{
+    location: String,
+    laps: Number,
+    segmentEfforts: [SegmentEffort],
+  }],
 });
 
 const Activity = mongoose.model('Activity', activitySchema);
