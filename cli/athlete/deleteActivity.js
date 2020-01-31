@@ -4,7 +4,7 @@ const { setupConnection } = require('../utils/setupConnection');
 const { makeCheckNumArgs } = require('../utils');
 const { deleteActivityFromAthleteStats } = require('../../utils/v2/stats/deleteActivityFromAthlete');
 
-const checkNumArgs = makeCheckNumArgs('Use format: $ athlete ingestv2');
+const checkNumArgs = makeCheckNumArgs('Use format: $ athlete deleteactivity');
 const DRY_RUN_MSG = '** THIS IS A DRY RUN **';
 
 // eslint-disable-next-line
@@ -18,7 +18,7 @@ function summarizeStats({ locations }, location, year) {
   console.log(`Monthly totals: ${locations[location].byMonth[year].join(', ')}`);
 }
 /**
- * Redo activities ingestion for a given athlete
+ * Delete a single activity from activities collection and decrement athlete's stats
  */
 async function doCommand({
   subargs,

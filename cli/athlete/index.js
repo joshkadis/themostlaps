@@ -1,5 +1,6 @@
 const { setupThenCommand: ingestV2Command } = require('./ingestV2');
 const { setupThenCommand: deleteActivityCommand } = require('./deleteActivity');
+const { setupThenCommand: migrateStatsCommand } = require('./migrateStats');
 
 const SHOULD_FORCE_DRY_RUN = false;
 
@@ -20,6 +21,10 @@ module.exports = {
 
       case 'deleteactivity':
         deleteActivityCommand(args);
+        break;
+
+      case 'migratestats':
+        migrateStatsCommand(args);
         break;
 
       default:
