@@ -252,7 +252,7 @@ function getStatsFromRawActivity(activity) {
   );
 
   let winningLocation = {};
-  const allLocations = [];
+  const secondaryLocations = [];
 
   Object.keys(filteredEfforts)
     .forEach((locName) => {
@@ -279,12 +279,12 @@ function getStatsFromRawActivity(activity) {
         winningLocation = result;
       }
 
-      allLocations.push(result);
+      secondaryLocations.push(result);
     });
 
   const outputToActivity = {
     ...winningLocation,
-    allLocations,
+    secondaryLocations,
   };
   return outputToActivity;
 }
