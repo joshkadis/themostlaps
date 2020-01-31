@@ -30,7 +30,6 @@ async function clearAthleteHistoryV2(athleteDoc) {
   console.log(`Removed ${deletedCount} activities`);
 
   athleteDoc.set({
-    locations: [],
     stats: getDefaultV2Stats(),
     stats_version: 'v2',
   });

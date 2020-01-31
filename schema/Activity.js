@@ -15,7 +15,7 @@ const activitySchema = new Schema({
   _id: Number,
   added_date: String,
   athlete_id: { type: Number, required: true },
-  laps: Number,
+  laps: { type: Number, required: true },
   segment_efforts: [SegmentEffort],
   source: String,
   start_date_local: String,
@@ -27,6 +27,11 @@ const activitySchema = new Schema({
     default: defaultLocation,
     index: true,
   },
+  activityLocations: [{
+    location: String,
+    laps: Number,
+    segment_efforts: [SegmentEffort],
+  }],
 });
 
 const Activity = mongoose.model('Activity', activitySchema);

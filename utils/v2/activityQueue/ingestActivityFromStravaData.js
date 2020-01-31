@@ -73,7 +73,7 @@ async function ingestActivityFromStravaData(
   isDryRun = false,
 ) {
   /*
-    Note for dry runs:
+    Note for dry runs from `$ activity queue ingest <activityId>` :
     Processing won't reach this point unless the QueueActivity has
     passed the "same number of segment efforts twice in a row" test
   */

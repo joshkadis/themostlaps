@@ -4,7 +4,7 @@ const Condition = require('../../schema/Condition');
 const {
   timezoneOffset,
   conditionPadding,
-  parkCenter,
+  locationCenter,
   darkSkyRequestOpts,
   coldLapsPoints,
 } = require('../../config');
@@ -44,7 +44,7 @@ async function compileSpecialStats(activity, activityDateStr, stats = {}) {
 }
 
 const darkSkyApiUrl = (timestamp) =>
-  `https://api.darksky.net/forecast/${process.env.DARK_SKY_API_KEY}/${parkCenter.latitude},${parkCenter.longitude},${timestamp}?${stringify(darkSkyRequestOpts)}`;
+  `https://api.darksky.net/forecast/${process.env.DARK_SKY_API_KEY}/${locationCenter.latitude},${locationCenter.longitude},${timestamp}?${stringify(darkSkyRequestOpts)}`;
 
 
 /**

@@ -1,4 +1,5 @@
 const { setupThenCommand: ingestV2Command } = require('./ingestV2');
+const { setupThenCommand: deleteActivityCommand } = require('./deleteActivity');
 
 const SHOULD_FORCE_DRY_RUN = false;
 
@@ -15,6 +16,10 @@ module.exports = {
           ...args,
           dryRun: SHOULD_FORCE_DRY_RUN || args.dryRun,
         });
+        break;
+
+      case 'deleteactivity':
+        deleteActivityCommand(args);
         break;
 
       default:

@@ -1,46 +1,12 @@
 const _has = require('lodash/has');
-const { getDistance } = require('geolib');
 const {
-  minDistance,
-  allowedRadius,
-  parkCenter,
   lapSegmentId,
 } = require('../../config');
 const fetchStravaAPI = require('../fetchStravaAPI');
 const calculateLapsFromSegmentEfforts = require('./calculateLapsFromSegmentEfforts');
 const { slackError } = require('../slackNotification');
 const Athlete = require('../../schema/Athlete');
-/**
- * Get distance of [lat,lng] point from park center
- *
- * @param {Array} latlng
- * @return {Number}
- */
-function distFromParkCenter(latlng = null) {
-  if (!latlng || latlng.length !== 2) {
-    return null;
-  }
-
-  return getDistance(
-    parkCenter,
-    {
-      latitude: latlng[0],
-      longitude: latlng[1],
-    },
-    100,
-    1,
-  );
-}
-
-/**
- * Is lat/long pair within allowedRadius?
- *
- * @param {Array} latlng
- * @return {Boolean}
- */
-function isWithinAllowedRadius(latlng) {
-  return latlng && distFromParkCenter(latlng) < allowedRadius;
-}
+const { findPotentialLocations } = require('../v2/activityQueue/findPotentialLocations');
 
 /**
  * Fetch single activity from Strava API
@@ -82,15 +48,20 @@ async function fetchActivity(activityId, tokenOrDoc, includeAllEfforts = true) {
 }
 
 /**
- * Check if activity is eligible to maybe have laps.
- * Keep it eligible unless we know for sure that it can't have laps
+ * Check where an activity is eligible to maybe have laps.
+ * Keep it eligible for future checking
  * e.g. can't disqualify unless a property is *set* to a value we don't want
  *
  * @param {Object} activity
  * @param {Bool} verbose
- * @return {Bool}
+ * @param {Object} overrideLocations Will replace default locations when checking findPotentialLocations
+ * @return {Boolean} True if activity has the right attrs and is near at least one location
  */
-function activityCouldHaveLaps(activity, verbose = false) {
+function activityCouldHaveLaps(
+  activity,
+  verbose = false,
+  overrideLocations,
+) {
   const activityHas = (key) => _has(activity, key);
 
   const {
@@ -98,45 +69,45 @@ function activityCouldHaveLaps(activity, verbose = false) {
     type,
     trainer,
     manual,
-    start_latlng,
-    end_latlng,
-    distance,
   } = activity;
 
-  // Just make sure it has an id
+  // First make sure it has an id
   if (!activityHas('id')) {
     return false;
   }
 
+  let reason = '';
   if (activityHas('type') && type.toLowerCase() !== 'ride') {
+    reason = `Activity ${id} is not a Ride.`;
+  } else if (activityHas('manual') && manual) {
+    reason = `Activity ${id} is a manual activity.`;
+  } else if (activityHas('trainer') && trainer) {
+    reason = `Activity ${id} is a trainer activity.`;
+  }
+
+  if (reason) {
     if (verbose) {
-      console.log(`Activity ${id} is not a Ride.`);
+      console.log(reason);
     }
     return false;
   }
 
-  let reason = '';
-  if (activityHas('manual') && manual) {
-    reason = 'a manual activity';
-  } else if (activityHas('trainer') && trainer) {
-    reason = 'a trainer activity';
-  } else if (activityHas('distance') && distance < minDistance) {
-    reason = 'less than the min distance';
-  }
-  if (reason) {
-    console.log(`Activity ${id} is ${reason}.`);
-    return false;
-  }
-
-  const startIsOk = activityHas('start_latlng') && isWithinAllowedRadius(start_latlng);
-  const endIsOk = activityHas('end_latlng') && isWithinAllowedRadius(end_latlng);
-  const nearParkCenter = startIsOk || endIsOk;
-
-  if (verbose && !nearParkCenter) {
-    console.log(`Activity ${id} is not near the park center.`);
+  if (
+    activityHas('distance')
+    && activityHas('start_latlng')
+    && activityHas('end_latlng')
+  ) {
+    const potentials = findPotentialLocations(
+      activity,
+      {
+        verbose,
+        locations: overrideLocations,
+      },
+    );
+    return potentials.length > 0;
   }
 
-  return nearParkCenter;
+  return true;
 }
 
 /**
