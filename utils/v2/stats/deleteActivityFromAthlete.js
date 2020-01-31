@@ -7,7 +7,7 @@ const { applyActivityToLocationStats } = require('./generateStatsV2');
  *
  * @param {Activity|Number} activity Activity document or ID
  * @param {Boolean} isDryRun Default is false, no DB updates if true
- * @returns {Boolean} true if action completed, false if some error
+ * @returns {Athlete|Boolean} Updated Athlete document or false if error
  */
 async function deleteActivityFromAthleteStats(activity, isDryRun = false) {
   let activityDoc;
@@ -77,7 +77,7 @@ async function deleteActivityFromAthleteStats(activity, isDryRun = false) {
     await athleteDoc.save();
     await activityDoc.remove();
   }
-  return athleteDoc.toJSON();
+  return athleteDoc;
 }
 
 module.exports = {
