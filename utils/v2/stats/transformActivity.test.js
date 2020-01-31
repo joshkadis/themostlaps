@@ -1,12 +1,14 @@
 const {
   getSegmentSequences,
   calculateLapsFromSegmentEfforts,
+  filterSegmentEfforts,
 } = require('./transformActivity');
 
+const getIncrementedTimestamp = (idx) => `2018-02-${10 + idx * 2}T16:12:41Z`;
 const makeEfforts = (ids) => ids
   .map((id, idx) => ({
     segment: { id },
-    start_date: `2018-02-${10 + idx * 2}T16:12:41Z`,
+    start_date: getIncrementedTimestamp(idx),
   }));
 
 // lapSegmentId: 5313629, // Prospect Park Race Lap
@@ -119,4 +121,83 @@ test('calculateLapsFromSegmentEfforts', () => {
   ]);
   expect(calculateLapsFromSegmentEfforts(allEfforts, 0, 5313629))
     .toEqual(0);
+});
+
+test('filters segment efforts by location', () => {
+  const allEfforts = makeEfforts([
+    740668,
+    613198,
+    5313629,
+    4435603,
+    4362776,
+    9699985,
+    740668,
+    613198,
+    5313629,
+    4435603,
+    4362776,
+    9699985,
+  ]);
+  expect(filterSegmentEfforts(allEfforts, ['prospectpark']))
+    .toStrictEqual({
+      prospectpark: {
+        canonicalSegmentEfforts: [
+          {
+            segment: { id: 5313629 },
+            start_date: getIncrementedTimestamp(2),
+          },
+          {
+            segment: { id: 5313629 },
+            start_date: getIncrementedTimestamp(8),
+          },
+        ],
+        relevantSegmentEfforts: allEfforts,
+      },
+    });
+
+  const allEffortsWithDupes = makeEfforts([
+    740668,
+    613198,
+    5313629,
+    5313629,
+    4435603,
+    4362776,
+    9699985,
+    740668,
+    613198,
+    5313629,
+    4435603,
+    4435603,
+    4362776,
+    9699985,
+  ]);
+  allEffortsWithDupes[3].start_date = allEffortsWithDupes[2].start_date;
+  allEffortsWithDupes[11].start_date = allEffortsWithDupes[10].start_date;
+  const filtered = filterSegmentEfforts(allEffortsWithDupes);
+
+  // Should have filtered out two segments, one of which is canonical
+  expect(filtered.prospectpark.canonicalSegmentEfforts.length).toEqual(2);
+  expect(filtered.prospectpark.relevantSegmentEfforts.length).toEqual(12);
+  expect(filtered)
+    .toStrictEqual({
+      prospectpark: {
+        canonicalSegmentEfforts: [
+          {
+            segment: { id: 5313629 },
+            start_date: getIncrementedTimestamp(2),
+          },
+          {
+            segment: { id: 5313629 },
+            start_date: getIncrementedTimestamp(9),
+          },
+        ],
+        relevantSegmentEfforts: allEffortsWithDupes.filter(
+          (effort, idx) => idx !== 3 && idx !== 11,
+        ),
+      },
+      centralpark: {
+        canonicalSegmentEfforts: [],
+        relevantSegmentEfforts: [],
+      },
+    });
 });

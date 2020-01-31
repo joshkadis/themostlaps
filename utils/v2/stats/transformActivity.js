@@ -3,6 +3,22 @@ const { findPotentialLocations } = require('../activityQueue/findPotentialLocati
 const { getLocationNameFromSegmentId } = require('../locations');
 
 /**
+ * Get all segment Ids (canonical and section) for a location
+ *
+ * @param {String} loc
+ * @returns {Array|false} Array of Ids or false if location not found
+ */
+function getAllLocationSegmentIds(loc) {
+  if (!allLocations[loc]) {
+    return false;
+  }
+  return [
+    allLocations[loc].canonicalSegmentId,
+    ...allLocations[loc].sectionSegmentIds,
+  ];
+}
+
+/**
  * Convert raw Strava API data to base of Activity data model
  *
  * @param {Object} activity
@@ -85,16 +101,12 @@ function getSegmentSequences(canonicalId) {
  * @returns {Array} array of segment Ids
  */
 function collapseRelevantSegmentIds(potentialLocs = []) {
-  return Object.keys(allLocations).reduce((acc, key) => {
+  return Object.keys(allLocations).reduce((acc, locName) => {
     // If any locations are specified, skip any that aren't in the list
-    if (potentialLocs.length && potentialLocs.indexOf(key) === -1) {
+    if (potentialLocs.length && potentialLocs.indexOf(locName) === -1) {
       return acc;
     }
-    const {
-      canonicalSegmentId,
-      sectionSegmentIds,
-    } = allLocations[key];
-    return [...acc, canonicalSegmentId, ...sectionSegmentIds];
+    return [...acc, ...getAllLocationSegmentIds(locName)];
   }, []);
 }
 
@@ -162,7 +174,10 @@ function filterSegmentEfforts(segmentEfforts, potentialLocations = []) {
         relevantSegmentEfforts,
       } = filteredEfforts[locName];
 
-      if (!isDuplicateEffort(effort, relevantSegmentEfforts)) {
+      if (
+        getAllLocationSegmentIds(locName).indexOf(segmentIdForEffort) !== -1
+        && !isDuplicateEffort(effort, relevantSegmentEfforts)
+      ) {
         // Add to array of all relevant segment efforts
         filteredEfforts[locName].relevantSegmentEfforts = [
           ...filteredEfforts[locName].relevantSegmentEfforts,
