@@ -13,7 +13,7 @@ describe('updateAllStatsFromActivity', () => {
     activity = {
       start_date_local: '2019-04-08T19:16:08Z',
       startDateUtc: new Date('2019-04-08T19:16:08Z'), // timezone doesn't matter here
-      secondaryLocations: [
+      allLocations: [
         {
           laps: PP_LAPS,
           location: 'prospectpark',

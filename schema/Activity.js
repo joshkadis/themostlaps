@@ -27,7 +27,7 @@ const activitySchema = new Schema({
     default: defaultLocation,
     index: true,
   },
-  secondaryLocations: [{
+  allLocations: [{
     location: String,
     laps: Number,
     segment_efforts: [SegmentEffort],

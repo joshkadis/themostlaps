@@ -128,10 +128,10 @@ function updateAllStatsFromActivity(activityDoc, allStats) {
   const {
     start_date_local,
     startDateUtc,
-    secondaryLocations,
+    allLocations,
   } = activityDoc;
 
-  const updatedLocationsStats = secondaryLocations.reduce(
+  const updatedLocationsStats = allLocations.reduce(
     (acc, { laps, location: locName }) => {
       acc[locName] = addActivityToLocationStats(
         {
