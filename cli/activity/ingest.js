@@ -1,9 +1,9 @@
 /* eslint-disable no-underscore-dangle */
 const QueueActivity = require('../../schema/QueueActivity');
-const Activity = require('../../schema/Activity');
 const { setupConnection } = require('../utils/setupConnection');
 const { processQueueActivity } = require('../../utils/v2/activityQueue');
 const { makeCheckNumArgs } = require('../utils');
+const { deleteActivityFromAthleteStats } = require('../../utils/v2/stats/deleteActivityFromAthlete');
 
 const checkNumArgs = makeCheckNumArgs('Use format: $ activity ingest');
 
@@ -29,7 +29,7 @@ async function doCommand({ subargs, dryRun: isDryRun }) {
   }
 
   if (!isDryRun) {
-    Activity.deleteOne({ _id: activityId });
+    await deleteActivityFromAthleteStats(activityId);
   }
 
   queueActivityDoc.set({
