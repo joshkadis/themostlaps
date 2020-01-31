@@ -6,11 +6,11 @@ const { getLocationNameFromSegmentId } = require('../locations');
  * Get all segment Ids (canonical and section) for a location
  *
  * @param {String} loc
- * @returns {Array|false} Array of Ids or false if location not found
+ * @returns {Array} Array of Ids, empty array if location not found
  */
 function getAllLocationSegmentIds(loc) {
   if (!allLocations[loc]) {
-    return false;
+    return [];
   }
   return [
     allLocations[loc].canonicalSegmentId,
@@ -174,8 +174,9 @@ function filterSegmentEfforts(segmentEfforts, potentialLocations = []) {
         relevantSegmentEfforts,
       } = filteredEfforts[locName];
 
-      if (
-        getAllLocationSegmentIds(locName).indexOf(segmentIdForEffort) !== -1
+      // Check that effort belongs to this segment
+      // and is not a duplicate
+      if (getAllLocationSegmentIds(locName).indexOf(segmentIdForEffort) !== -1
         && !isDuplicateEffort(effort, relevantSegmentEfforts)
       ) {
         // Add to array of all relevant segment efforts
