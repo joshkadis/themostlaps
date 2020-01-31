@@ -1,5 +1,6 @@
 const { setupThenCommand: dedupeCommand } = require('./dedupe');
 const { setupThenCommand: queueCommand } = require('./queue');
+const { setupThenCommand: ingestCommand } = require('./ingest');
 
 module.exports = {
   command: [
@@ -14,6 +15,10 @@ module.exports = {
 
       case 'queue':
         queueCommand(args);
+        break;
+
+      case 'ingest':
+        ingestCommand(args);
         break;
 
       default:

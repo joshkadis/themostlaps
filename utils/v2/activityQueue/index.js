@@ -9,7 +9,7 @@ const {
 const {
   getQueueActivityData,
 } = require('./getQueueActivityData');
-const { ingestActivityFromStravaData } = require('./ingestActivityFromStravaData');
+const { ingestActivityFromStravaDataV2 } = require('./ingestActivityFromStravaDataV2');
 
 const MAX_INGEST_ATTEMPTS = 8;
 const INGEST_QUEUE_INTERVAL = 60 * 60 * 1000; // 1hr
@@ -31,7 +31,8 @@ async function processQueueActivity(
     if (!isDryRun) {
       await queueActivityDoc.save();
     }
-    console.log(`Completed ${queueActivityDoc.activityId}: ${queueActivityDoc.status}`);
+    console.log(`Completed ${queueActivityDoc.activityId}: ${queueActivityDoc.status}
+${queueActivityDoc.errorMsg || queueActivityDoc.detail}`);
   };
 
   const {
@@ -95,7 +96,7 @@ async function processQueueActivity(
 
     if (queueActivityDoc.status === 'shouldIngest') {
       // Ingest QueueActivity to Activity
-      const forUpdate = await ingestActivityFromStravaData(
+      const forUpdate = await ingestActivityFromStravaDataV2(
         apiData,
         athleteDoc,
         isDryRun,

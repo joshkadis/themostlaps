@@ -382,7 +382,6 @@ class LocationIngest {
     allLocationsStats[this.locationName] = this.stats;
 
     this.athleteDoc.set({
-      locations: Object.keys(allLocationsStats),
       stats_version: 'v2',
       stats: {
         ...this.athleteDoc.get('stats'),

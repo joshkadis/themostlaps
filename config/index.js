@@ -12,7 +12,7 @@ module.exports = {
   addMakeupLap: true, // Avoids excess API calls when ingesting new user
   devFetchActivities: 10,
   /* v1 legacy PP properties */
-  parkCenter: {
+  locationCenter: {
     latitude: 40.661990,
     longitude: -73.969681,
   },

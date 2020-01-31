@@ -22,6 +22,21 @@ function compareActivityLocations(
   };
 }
 
+/**
+ * Get Date object from Activity document. Assume difference between
+ * local timezone and UTC doesn't matter.
+ *
+ * @param {Activity} activity
+ * @param {String} activity.start_date_local All docs should have this
+ * @param {Date} activity.startDateUtc Older docs might not have this
+ * @returns {Date} Will return current Date if neither prop is found
+ */
+const getDateFromActivity = ({
+  start_date_local = '',
+  startDateUtc = false,
+}) => (startDateUtc || new Date(start_date_local));
+
 module.exports = {
+  getDateFromActivity,
   compareActivityLocations,
 };

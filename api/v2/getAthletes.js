@@ -26,7 +26,6 @@ function parseIdsString(idsString) {
  * Get data for athletes API request
  *
  * @param {String} idsString Comma-separated string of athlete ids
- * @param {String} locations CSV string locations to return in Query results
  * @return {Array}
  */
 async function getAthletes(idsString = '') {
