@@ -29,7 +29,7 @@ async function doCommand({ subargs, dryRun: isDryRun }) {
   }
 
   if (!isDryRun) {
-    Activity.removeOne({ _id: activityId });
+    Activity.deleteOne({ _id: activityId });
   }
 
   queueActivityDoc.set({

@@ -31,7 +31,8 @@ async function processQueueActivity(
     if (!isDryRun) {
       await queueActivityDoc.save();
     }
-    console.log(`Completed ${queueActivityDoc.activityId}: ${queueActivityDoc.status}`);
+    console.log(`Completed ${queueActivityDoc.activityId}: ${queueActivityDoc.status}
+${queueActivityDoc.errorMsg || queueActivityDoc.detail}`);
   };
 
   const {

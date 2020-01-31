@@ -1,10 +1,11 @@
+const _cloneDeep = require('lodash/cloneDeep');
 const Activity = require('../../../schema/Activity');
 const {
   activityCouldHaveLaps,
 } = require('../../refreshAthlete/utils');
-const { slackError } = require('../../slackNotification');
 const { getTimestampFromString } = require('../../athleteUtils');
 const { transformActivity } = require('../stats/transformActivity');
+const { updateAllStatsFromActivity } = require('../stats/generateStatsV2');
 
 /**
  * Create Activity document, validate, and save
@@ -13,7 +14,7 @@ const { transformActivity } = require('../stats/transformActivity');
  * @param {Bool} isDryRun If true, will validate without saving
  * @returns {Document|false} Saved document or false if error
  */
-async function createActivityDocument(activityData) {
+function createActivityDocument(activityData) {
   const activityDoc = new Activity(activityData);
   // Mongoose returns error here instead of throwing
   const invalid = activityDoc.validateSync();
@@ -77,7 +78,10 @@ async function ingestActivityFromStravaDataV2(
   }
 
   // Get updated stats with something like:
-  const updatedStats addActivityToLocationStats(activityDoc)
+  const updatedStats = updateAllStatsFromActivity(
+    activityDoc,
+    _cloneDeep(athleteDoc.stats),
+  );
   const activityStartTimestamp = getTimestampFromString(
     rawActivity.start_date,
     { unit: 'seconds' },

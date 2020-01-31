@@ -24,14 +24,14 @@ function addActivityToLocationStats(activity, locationStats) {
   const monthIdx = startDate.getMonth();
 
   let {
-    allTime,
-    single,
-    numActivities,
+    allTime = 0,
+    single = 0,
+    numActivities = 0,
   } = locationStats;
 
   const {
-    byYear,
-    byMonth,
+    byYear = {},
+    byMonth = {},
   } = locationStats;
 
   // Basic stuff...
@@ -116,9 +116,46 @@ async function generateLocationsStatsV2(athleteDoc, additionalStats = {}) {
  */
 const getLocationsFromStats = ({ locations }) => Object.keys(locations);
 
+/**
+ * Take a complete v2 stats object and update from a single Activity
+ *
+ * @param {Activity} activityDoc
+ * @param {Object} allStats
+ * @returns {Object} Updated stats object
+ */
+function updateAllStatsFromActivity(activityDoc, allStats) {
+  const { locations } = allStats;
+  const {
+    start_date_local,
+    startDateUtc,
+    secondaryLocations,
+  } = activityDoc;
+
+  const updatedLocationsStats = secondaryLocations.reduce(
+    (acc, { laps, location: locName }) => {
+      acc[locName] = addActivityToLocationStats(
+        {
+          laps,
+          start_date_local,
+          startDateUtc,
+        },
+        acc[locName] || {},
+      );
+      return acc;
+    },
+    locations,
+  );
+
+  return {
+    ...allStats,
+    locations: updatedLocationsStats,
+  };
+}
+
 module.exports = {
   addActivityToLocationStats,
   buildLocationsStatsFromActivities,
   getLocationsFromStats,
   generateLocationsStatsV2,
+  updateAllStatsFromActivity,
 };
