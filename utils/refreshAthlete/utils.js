@@ -55,7 +55,7 @@ async function fetchActivity(activityId, tokenOrDoc, includeAllEfforts = true) {
  * @param {Object} activity
  * @param {Bool} verbose
  * @param {Object} overrideLocations Will replace default locations when checking findPotentialLocations
- * @return {Array} Array of potential locations, if any are found
+ * @return {Boolean} True if activity has the right attrs and is near at least one location
  */
 function activityCouldHaveLaps(
   activity,
