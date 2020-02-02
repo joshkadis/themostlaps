@@ -56,7 +56,7 @@ const DRY_RUN_MSG = '** THIS IS A DRY RUN **';
  */
 async function doCommand({
   subargs,
-  dryRun: isDryRun = false, // Currently forcing true in index.js
+  dryRun: isDryRun = false,
 }) {
   if (!checkNumArgs(subargs, 1, '<atleteId>')) {
     return;

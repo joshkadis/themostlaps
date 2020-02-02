@@ -22,7 +22,7 @@ function summarizeStats({ locations }, location, year) {
  */
 async function doCommand({
   subargs,
-  dryRun: isDryRun = false, // Currently forcing true in index.js
+  dryRun: isDryRun = false,
 }) {
   if (!checkNumArgs(subargs, 2, '<athleteId> <activityId> [--dry-run]')) {
     return;
