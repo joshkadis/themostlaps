@@ -2,7 +2,7 @@ const { setupThenCommand: migrateStatsCommand } = require('./stats');
 
 module.exports = {
   command: [
-    'migrate <subcommand> [<subargs...>]',
+    'migration <subcommand> [<subargs...>]',
   ],
   describe: 'Migration commands affecting all athletes',
   handler: async (args) => {
