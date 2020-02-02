@@ -57,25 +57,36 @@ const DRY_RUN_MSG = '** THIS IS A DRY RUN **';
 async function doCommand({
   subargs,
   dryRun: isDryRun = false,
+  verbose = true,
 }) {
   if (!checkNumArgs(subargs, 1, '<atleteId>')) {
-    return;
+    return false;
   }
-  if (isDryRun) {
+  if (isDryRun && verbose) {
     console.log(DRY_RUN_MSG);
   }
 
   const athleteId = subargs[0];
   const athleteDoc = await Athlete.findById(athleteId);
   if (!athleteDoc) {
-    console.log(`Athlete ${athleteId} not found`);
-    return;
+    if (verbose) {
+      console.log(`Athlete ${athleteId} not found`);
+    }
+    return {
+      status: 'Not found',
+      athleteId,
+    };
   }
 
   if (athleteDoc.stats_version === 'v2') {
-    console.log(`-----------------
+    if (verbose) {
+      console.log(`-----------------
 Already migrated: ${getAthleteIdentifier(athleteDoc)}`);
-    return;
+    }
+    return {
+      status: 'Already V2',
+      athleteId,
+    };
   }
 
   const legacyStatsTest = getLegacyStatsTest(_cloneDeep(athleteDoc.stats));
@@ -92,17 +103,24 @@ Already migrated: ${getAthleteIdentifier(athleteDoc)}`);
   const statsMatch = _isEqual(v2StatsClone, legacyStatsTest);
 
   if (!statsMatch) {
-    console.log('V2 Stats:');
-    console.log(JSON.stringify(v2StatsClone, null, 2));
-    console.log('Legacy stats:');
-    console.log(JSON.stringify(legacyStatsTest, null, 2));
-    return;
+    if (verbose) {
+      console.log('V2 Stats:');
+      console.log(JSON.stringify(v2StatsClone, null, 2));
+      console.log('Legacy stats:');
+      console.log(JSON.stringify(legacyStatsTest, null, 2));
+    }
+    return {
+      status: 'Stats error',
+      athleteId,
+    };
   }
 
-  console.log(`-----------------
+  if (verbose) {
+    console.log(`-----------------
 Migration successful: ${getAthleteIdentifier(athleteDoc)}
 All-time PP laps: ${v2Stats.locations.prospectpark.allTime}
 Number PP Activitie: ${v2Stats.locations.prospectpark.numActivities}`);
+  }
 
 
   athleteDoc.set({
@@ -115,9 +133,14 @@ Number PP Activitie: ${v2Stats.locations.prospectpark.numActivities}`);
     await athleteDoc.save();
   }
 
-  if (isDryRun) {
+  if (isDryRun && verbose) {
     console.log(DRY_RUN_MSG);
   }
+
+  return {
+    status: 'Success',
+    athleteId,
+  };
 }
 
 async function setupThenCommand(args) {
@@ -126,4 +149,5 @@ async function setupThenCommand(args) {
 
 module.exports = {
   setupThenCommand,
+  migrateSingleAthlete: doCommand,
 };

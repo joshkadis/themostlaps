@@ -170,5 +170,6 @@ const argv = require('yargs')
   .command(require('./cli/activity'))
   .command(require('./cli/athlete'))
   .command(require('./cli/stats'))
+  .command(require('./cli/migrate'))
   .help()
   .argv;
