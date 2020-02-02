@@ -21,6 +21,11 @@ async function doCommand({
     { lean: true },
   );
 
+  if (!allIds.length) {
+    console.log('No athletes found with v1 stats');
+    return;
+  }
+
   const migrateStatsForAthlete = async (athleteId) => {
     console.log(`Migrating ${athleteId}`);
     return migrateSingleAthlete({
@@ -47,6 +52,7 @@ async function doCommand({
       status = 'Unknown',
       athleteId = 0,
     } = result;
+
     if (status === 'Success') {
       results.Success += 1;
     } else {
