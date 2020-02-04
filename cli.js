@@ -6,8 +6,6 @@ const {
   callbackRefreshUser,
   callbackRefreshMany,
   callbackActivityInfo,
-  callbackMailgun,
-  callbackMailgunAll,
   callbackRefreshBatch,
   callbackUpdateSubscriptions,
   callbackRetryWebhooks,

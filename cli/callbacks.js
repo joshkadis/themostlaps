@@ -8,9 +8,7 @@ const Athlete = require('../schema/Athlete');
 const Activity = require('../schema/Activity');
 const refreshAthlete = require('../utils/refreshAthlete');
 const getActivityInfo = require('./getActivityInfo');
-const sendEmailNotification = require('./sendEmailNotification')
 const { refreshAthletes } = require('../utils/scheduleNightlyRefresh');
-const { listAliases } = require('../config/email');
 const { testAthleteIds } = require('../config');
 const { mongooseConnectionOptions } = require('../config/mongodb');
 const calculateColdLaps = require('./calculateColdLaps');
@@ -142,54 +140,6 @@ const callbackActivityInfo = async ({ user, activity, fetch }) => {
   );
 }
 
-const callbackMailgun = async ({ user, type }) => {
-  let recipient;
-  switch (user) {
-    case 0:
-      recipient = `mailing list ${listAliases[0]}`;
-      break;
-
-    case 1:
-      recipient = `mailing list ${listAliases[1]}`;
-      break;
-
-    default:
-      recipient = `user ${user}`;
-  }
-
-  await doCommand(
-    `Enter admin code to send ${type} email notification to ${recipient}`,
-    () => sendEmailNotification(user, type)
-  );
-}
-
-const callbackMailgunAll = async ({ override, testonly }) => {
-  await doCommand(
-    `Enter admin code to send monthly email notification to all subscribed users`,
-    async () => {
-      const athletes = await Athlete.find(override ? {} : {
-        preferences: {
-          notifications: {
-            monthly: true,
-          },
-        },
-      });
-      console.log(`Sending to ${athletes.length} users`);
-
-      for (let i = 0; i < athletes.length; i++) {
-        if (testonly || !process.env.NODE_ENV || process.env.NODE_ENV !== 'production') {
-          if (-1 !== testAthleteIds.indexOf(athletes[i].get('_id'))) {
-            await sendEmailNotification(athletes[i], 'monthly', false);
-          }
-        } else {
-          await sendEmailNotification(athletes[i], 'monthly', false);
-        }
-      }
-      process.exit(0);
-    }
-  );
-}
-
 const callbackRefreshBatch = async ({ limit, skip, activities }) => {
   await doCommand(
     `Enter admin code to refresh batch of ${limit} athletes with offset ${skip}`,
@@ -203,42 +153,6 @@ const callbackRefreshBatch = async ({ limit, skip, activities }) => {
           sort: { _id: 1 },
         }
       ]);
-      process.exit(0);
-    }
-  );
-};
-
-const callbackUpdateSubscriptions = async (argv) => {
-  await doCommand(
-    `Enter admin code to update user subscription statuses`,
-    async () => {
-      const newsletterSubscribers = require('../utils/emails/MCNewsletterSegment');
-      const athletes = await Athlete.find();
-      let result = {
-        subscribed: 0,
-        notSubscribed: 0,
-      };
-      for (let i = 0; i < athletes.length; i++) {
-        const athleteDoc = athletes[i];
-        const shouldBeSubscribed =
-          newsletterSubscribers.indexOf(athleteDoc.get('athlete.email')) !== -1;
-
-        athleteDoc.set({
-          preferences: {
-            notifications: {
-              monthly: shouldBeSubscribed,
-            },
-          },
-        });
-
-        result[`${shouldBeSubscribed ? 's' : 'notS'}ubscribed`]++;
-
-        if (!isDryRun(argv)) {
-          await athleteDoc.save();
-        }
-      }
-
-      console.log(result);
       process.exit(0);
     }
   );
@@ -338,10 +252,7 @@ module.exports = {
   callbackRefreshUser,
   callbackRefreshMany,
   callbackActivityInfo,
-  callbackMailgun,
-  callbackMailgunAll,
   callbackRefreshBatch,
-  callbackUpdateSubscriptions,
   callbackRetryWebhooks,
   callbackColdLaps,
   callbackMigrateToken,

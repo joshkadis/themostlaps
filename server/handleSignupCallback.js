@@ -13,7 +13,6 @@ const {
   updateAthleteStats,
 } = require('../utils/athleteStats');
 const { slackSuccess, slackError } = require('../utils/slackNotification');
-const shouldSubscribe = require('../utils/emails/shouldSubscribe');
 
 /**
  * Factory for handling error while creating athlete in db
@@ -132,10 +131,7 @@ async function handleSignupCallback(req, res) {
       return;
     }
 
-    const formattedAthleteData = getAthleteModelFormat(
-      tokenExchangeResponse,
-      shouldSubscribe(req.query),
-    );
+    const formattedAthleteData = getAthleteModelFormat(tokenExchangeResponse);
     if (!formattedAthleteData) {
       return;
     }
