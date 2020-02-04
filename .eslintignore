@@ -10,12 +10,14 @@ dist/
 /**/*.js
 
 # Lint specific files/dirs as we go
+!cli.js
 !server.js
 !server/initApiRoutes.js
 !server/initWebhookRoutes.js
 !server/handleSignupCallback.js
 !schema/**/*.js
 !api/**/*.js
+!cli/callbacks.js
 !cli/deleteUser.js
 !cli/getActivityInfo.js
 !cli/activity/**/*.js

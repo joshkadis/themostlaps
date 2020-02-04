@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+/* eslint-disable prefer-destructuring,import/order,no-unused-vars */
+
 require('dotenv').config();
 const {
   callbackDeleteUser,
@@ -6,19 +8,14 @@ const {
   callbackRefreshUser,
   callbackRefreshMany,
   callbackActivityInfo,
-  callbackMailgun,
-  callbackMailgunAll,
   callbackRefreshBatch,
   callbackUpdateSubscriptions,
   callbackRetryWebhooks,
   callbackColdLaps,
   callbackMigrateToken,
-  // callbackMigrateLocation,
-  // callbackMigrateStats,
-  callbackIngestAthleteV2,
-} = require ('./cli/callbacks');
+} = require('./cli/callbacks');
 
-const { coldLapsPoints: { startActivity }, defaultLocation } = require('./config');
+const { coldLapsPoints: { startActivity } } = require('./config');
 
 function createPositionals(...args) {
   return (yargs) => {
@@ -26,7 +23,7 @@ function createPositionals(...args) {
   };
 }
 
-const argv = require('yargs')
+const setupArgv = require('yargs')
   .usage('$0 <cmd> [args]')
   /**
    * Delete a user
@@ -39,7 +36,7 @@ const argv = require('yargs')
       ['deauthorize', { type: 'boolean', default: false }],
       ['statuses', { type: 'string', default: 'deauthorized' }],
     ),
-    async (argv) => await callbackDeleteUser(argv),
+    async (argv) => callbackDeleteUser(argv),
   )
   /**
    * Delete a user's activities from the last n days
@@ -51,7 +48,7 @@ const argv = require('yargs')
       ['user', { type: 'number' }],
       ['daysago', { type: 'number', default: 0 }],
     ),
-    async (argv) => await callbackDeleteUserActivities(argv),
+    async (argv) => callbackDeleteUserActivities(argv),
   )
   /**
    * Refresh a user since last checked activity or for the last n days
@@ -63,7 +60,7 @@ const argv = require('yargs')
       ['user', { type: 'number' }],
       ['daysago', { type: 'number', default: 0 }],
     ),
-    async (argv) => await callbackRefreshUser(argv),
+    async (argv) => callbackRefreshUser(argv),
   )
   /**
    * Refresh an array of athletes since last checked activity or for the last n days
@@ -74,7 +71,7 @@ const argv = require('yargs')
     createPositionals(
       ['users', { type: 'array' }],
     ),
-    async (argv) => await callbackRefreshMany(argv),
+    async (argv) => callbackRefreshMany(argv),
   )
   /**
    * Get info for a specific activity
@@ -87,7 +84,7 @@ const argv = require('yargs')
       ['activity', { type: 'number' }],
       ['fetch', { type: 'boolean', default: false }],
     ),
-    async (argv) => await callbackActivityInfo(argv),
+    async (argv) => callbackActivityInfo(argv),
   )
   /**
    * Process batch of athletes w/ simulated nightly refresh
@@ -100,7 +97,7 @@ const argv = require('yargs')
       ['skip', { type: 'number' }],
       ['activities', { type: 'boolean', default: false }],
     ),
-    async (argv) => await callbackRefreshBatch(argv),
+    async (argv) => callbackRefreshBatch(argv),
   )
   /**
    * Process batch of athletes w/ simulated nightly refresh
@@ -111,7 +108,7 @@ const argv = require('yargs')
     createPositionals(
       ['dry-run', { type: 'boolean', default: false }],
     ),
-    async (argv) => await callbackUpdateSubscriptions(argv),
+    async (argv) => callbackUpdateSubscriptions(argv),
   )
   .command(
     'retrywebhooks startdate [--dry-run]',
@@ -120,7 +117,7 @@ const argv = require('yargs')
       ['startdate', { type: 'number' }],
       ['dry-run', { type: 'boolean', default: false }],
     ),
-    async (argv) => await callbackRetryWebhooks(argv),
+    async (argv) => callbackRetryWebhooks(argv),
   )
   .command(
     'coldlaps [startactivity] [--dry-run]',
@@ -129,43 +126,19 @@ const argv = require('yargs')
       ['startactivity', { type: 'number', default: startActivity }],
       ['dry-run', { type: 'boolean', default: false }],
     ),
-    async (argv) => await callbackColdLaps(argv),
-  ).command(
+    async (argv) => callbackColdLaps(argv),
+  )
+  .command(
     'migratetoken [athlete] [--find] [--options] [--dry-run] [--refresh]',
     false,
     createPositionals(
       ['athlete', { type: 'number', default: 0 }],
-      ['find', { type: 'string', default: ''}],
-      ['options', { type: 'string', default: ''}],
+      ['find', { type: 'string', default: '' }],
+      ['options', { type: 'string', default: '' }],
       ['dry-run', { type: 'boolean', default: false }],
       ['refresh', { type: 'boolean', default: false }],
     ),
-    async (argv) => await callbackMigrateToken(argv),
-  )
-  .command(
-    'migratelocation [location] [--dry-run]',
-    false,
-    createPositionals(
-      ['location', { type: 'string', default: defaultLocation }],
-      ['dry-run', { type: 'boolean', default: false }],
-    ),
-    async (argv) => {
-      console.log('migratelocation is closed for renovations.');
-      process.exit();
-      // await callbackMigrateLocation(argv)
-    },
-  )
-  .command(
-    'migratestats [location]',
-    false,
-    createPositionals(
-      ['location', { type: 'string', default: defaultLocation }],
-    ),
-    async (argv) => {
-      console.log('migratestats is closed for renovations.');
-      process.exit();
-      // await callbackMigrateStats(argv)
-    },
+    async (argv) => callbackMigrateToken(argv),
   )
   .command(require('./cli/activity'))
   .command(require('./cli/athlete'))
