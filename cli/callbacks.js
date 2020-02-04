@@ -1,3 +1,4 @@
+/* eslint-disable quotes,no-await-in-loop,no-restricted-syntax */
 const mongoose = require('mongoose');
 const promptly = require('promptly');
 const deleteUser = require('./deleteUser');
@@ -9,14 +10,12 @@ const Activity = require('../schema/Activity');
 const refreshAthlete = require('../utils/refreshAthlete');
 const getActivityInfo = require('./getActivityInfo');
 const { refreshAthletes } = require('../utils/scheduleNightlyRefresh');
-const { testAthleteIds } = require('../config');
 const { mongooseConnectionOptions } = require('../config/mongodb');
 const calculateColdLaps = require('./calculateColdLaps');
 const {
   migrateSingle,
   migrateMany,
 } = require('./migrateAuthToken');
-const { getAthleteIdentifier } = require('../utils/v2/models/athleteHelpers');
 
 /**
  * Prompt for admin code then connect and run command
@@ -44,20 +43,20 @@ const isDryRun = (argv) => argv.dryRun || argv.dryrun || false;
 const callbackDeleteUser = async ({ user, deauthorize, statuses }) => {
   await doCommand(
     `Enter admin code to delete user ${user}.`,
-    () => deleteUser(user, deauthorize, statuses)
+    () => deleteUser(user, deauthorize, statuses),
   );
 };
 
 const callbackDeleteUserActivities = async ({ user, daysago }) => {
-  if (0 === daysago) {
-    console.log('daysago must be >=1')
+  if (daysago === 1) {
+    console.log('daysago must be >=1');
     process.exit(0);
   }
 
   const after = daysAgoTimestamp(daysago);
   await doCommand(
     `Enter admin code to delete activities for user ${user} from last ${daysago} days.`,
-    () => deleteUserActivities(user, after)
+    () => deleteUserActivities(user, after),
   );
 };
 
@@ -67,38 +66,36 @@ const callbackRefreshUser = async ({ user, daysago }) => {
     async () => {
       const athleteDoc = await Athlete.findById(user);
       if (!athleteDoc) {
-        console.log(`User ${user} not found`)
+        console.log(`User ${user} not found`);
         process.exit(0);
       } else if (athleteDoc.get('status') === 'deauthorized') {
-        console.log(`User ${user} is deauthorized`)
+        console.log(`User ${user} is deauthorized`);
         process.exit(0);
       }
       await refreshAthlete(
         athleteDoc,
-        'undefined' !== typeof daysago && daysago ?
-          daysAgoTimestamp(daysago) :
-          false,
-        true
+        typeof daysago && daysago !== 'undefined'
+          ? daysAgoTimestamp(daysago)
+          : false,
+        true,
       );
       process.exit(0);
-    }
+    },
   );
-}
+};
 
 const callbackRefreshMany = async ({ users }) => {
   await doCommand(
     `Enter admin code to refresh ${users.length} users.`,
     async () => {
-      /**
-        Get number of days back to check
-      **/
+      /* Get number of days back to check */
       const daysagoInput = await promptly.prompt(
         'Press return to refresh from date of last update or enter a number of days to check:',
-        { silent: false, default: 'last' }
+        { silent: false, default: 'last' },
       );
       const daysago = daysagoInput !== 'last' ? parseInt(daysagoInput, 10) : 0;
-      if (isNaN(daysago)) {
-        console.log(`${daysagoInput} is not a number!`)
+      if (Number.isNaN(daysago)) {
+        console.log(`${daysagoInput} is not a number!`);
         process.exit(0);
       }
       console.log(`Checking ${daysago ? `${daysago} days back` : 'from last update'}`);
@@ -114,31 +111,31 @@ const callbackRefreshMany = async ({ users }) => {
       const athleteDocs = await Athlete.find({ _id: { $in: userIds } });
       console.log(`Found ${athleteDocs.length} Athlete documents from ${userIds.length} user IDs${"\n"}---------------------------`);
 
-      for (let idx = 0; idx < athleteDocs.length; idx++) {
+      for (let idx = 0; idx < athleteDocs.length; idx += 1) {
         const athleteDoc = athleteDocs[idx];
         if (athleteDoc.get('status') === 'deauthorized') {
-          console.log(`User ${athleteDoc.get('_id')} is deauthorized`)
+          console.log(`User ${athleteDoc.get('_id')} is deauthorized`);
         }
 
         await refreshAthlete(
           athleteDoc,
-          'undefined' !== typeof daysago && daysago ?
-            daysAgoTimestamp(daysago) :
-            false,
-          false
+          typeof daysago !== 'undefined' && daysago
+            ? daysAgoTimestamp(daysago)
+            : false,
+          false,
         );
       }
       process.exit(0);
-    }
+    },
   );
-}
+};
 
 const callbackActivityInfo = async ({ user, activity, fetch }) => {
   await doCommand(
     false,
-    () => getActivityInfo(user, activity, fetch)
+    () => getActivityInfo(user, activity, fetch),
   );
-}
+};
 
 const callbackRefreshBatch = async ({ limit, skip, activities }) => {
   await doCommand(
@@ -151,10 +148,10 @@ const callbackRefreshBatch = async ({ limit, skip, activities }) => {
           limit,
           skip,
           sort: { _id: 1 },
-        }
+        },
       ]);
       process.exit(0);
-    }
+    },
   );
 };
 
@@ -236,7 +233,7 @@ const callbackMigrateStats = async ({ location }) => {
         console.log(`Migrating stats for ${athleteDoc.get('_id')}`);
         athleteDoc.set(
           queryKey,
-          athleteDoc.get('stats')
+          athleteDoc.get('stats'),
         );
         await athleteDoc.save();
       }
