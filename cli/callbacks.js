@@ -48,7 +48,7 @@ const callbackDeleteUser = async ({ user, deauthorize, statuses }) => {
 };
 
 const callbackDeleteUserActivities = async ({ user, daysago }) => {
-  if (daysago === 1) {
+  if (daysago === 0) {
     console.log('daysago must be >=1');
     process.exit(0);
   }
@@ -74,7 +74,7 @@ const callbackRefreshUser = async ({ user, daysago }) => {
       }
       await refreshAthlete(
         athleteDoc,
-        typeof daysago && daysago !== 'undefined'
+        typeof daysago !== 'undefined' && daysago
           ? daysAgoTimestamp(daysago)
           : false,
         true,
