@@ -7,8 +7,8 @@ const {
   compileStatsForActivities,
   updateAthleteStats,
 } = require('../../athleteStats');
-const { slackError } = require('../../slackNotification');
 const { getTimestampFromString } = require('../../athleteUtils');
+const { captureSentry } = require('../services/sentry');
 
 /**
  * Update athlete's last refreshed to match UTC datetime string
@@ -135,12 +135,16 @@ async function ingestActivityFromStravaData(
   try {
     await updateAthleteStats(athleteDoc, updatedStats);
   } catch (err) {
-    console.log(`Error with updateAthleteStats() for ${athleteDoc.id} after activity ${rawActivity.id}`);
-    slackError(90, {
-      function: 'updateAthleteStats',
-      athleteId: athleteDoc.id,
-      activityId: rawActivity.id,
-    });
+    captureSentry(
+      'Error with updateAthleteStats()',
+      'updateAthleteStats',
+      {
+        extra: {
+          athleteId: athleteDoc.id,
+          activityId: rawActivity.id,
+        },
+      },
+    );
     return {
       status: 'error',
       errorMsg: 'updateAthleteStats() failed',
