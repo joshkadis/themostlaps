@@ -40,6 +40,7 @@ dist/
 !utils/athleteHistory.js
 !utils/ingest/handleDuplicateSignup.js
 !utils/getUpdatedAccessToken.js
+!utils/fetchStravaAPI.js
 
 # V2 Utils
 !utils/v2/**/*.js

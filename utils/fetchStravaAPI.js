@@ -21,7 +21,10 @@ async function fetchStravaAPI(endpoint, athleteDoc, params = false) {
   } else {
     // Get access_token using `forever token` or new auth logic
     const shouldMigrateOnFetch = process.env.SHOULD_MIGRATE_ON_FETCH;
-    access_token = await getUpdatedAccessToken(athleteDoc, shouldMigrateOnFetch);
+    access_token = await getUpdatedAccessToken(
+      athleteDoc,
+      shouldMigrateOnFetch,
+    );
     if (!access_token) {
       return {};
     }
@@ -38,11 +41,11 @@ async function fetchStravaAPI(endpoint, athleteDoc, params = false) {
     {
       headers: {
         Authorization: `Bearer ${access_token}`,
-      }
-    }
+      },
+    },
   );
 
-  if (response.status && 200 !== response.status) {
+  if (response.status && response.status !== 200) {
     let attemptedAthleteId = null;
     let attemptedAthleteDoc = false;
 
@@ -55,13 +58,12 @@ async function fetchStravaAPI(endpoint, athleteDoc, params = false) {
       attemptedAthleteDoc = await Athlete.findOne({ access_token });
       if (!attemptedAthleteDoc) {
         slackError(44, { url });
-        return;
-      } else {
-        attemptedAthleteId = attemptedAthleteDoc.get('_id');
+        return {};
       }
+      attemptedAthleteId = attemptedAthleteDoc.get('_id');
     }
 
-    if (attemptedAthleteDoc && attemptedAthleteId && 401 === response.status) {
+    if (attemptedAthleteDoc && attemptedAthleteId && response.status === 401) {
       // Set athlete status to deauthorized
       attemptedAthleteDoc.set('status', 'deauthorized');
       await attemptedAthleteDoc.save();
@@ -80,7 +82,7 @@ async function fetchStravaAPI(endpoint, athleteDoc, params = false) {
     return response;
   }
 
-  return await response.json();
+  return response.json();
 }
 
 module.exports = fetchStravaAPI;
