@@ -38,6 +38,7 @@ dist/
 !utils/refreshAthlete/calculateLapsFromSegmentEfforts.js
 !utils/athleteHistory.js
 !utils/ingest/handleDuplicateSignup.js
+!utils/getUpdatedAccessToken.js
 
 # V2 Utils
 !utils/v2/**/*.js

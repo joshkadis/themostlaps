@@ -5,18 +5,15 @@ const {
   tokenExpirationBuffer,
   tokenRefreshGrantType,
 } = require('../config');
-const {
-  slackError,
-  slackSuccess,
-} = require('./slackNotification');
-const Athlete = require('../schema/Athlete');
+const { captureSentry } = require('./v2/services/sentry');
 
 async function maybeDeauthorizeAthlete(responseData, status, athleteDoc) {
   let shouldDeauthorize = status === 401;
   if (!shouldDeauthorize) {
     const { errors = [] } = responseData;
-    const invalidTokens = errors.filter(({ resource = false, code = false }) =>
-      resource === 'RefreshToken' && code === 'invalid');
+    const invalidTokens = errors.filter(
+      ({ resource = false, code = false }) => resource === 'RefreshToken' && code === 'invalid',
+    );
     shouldDeauthorize = !!invalidTokens.length;
   }
 
@@ -42,8 +39,7 @@ const obfuscateToken = (token) => token.replace(/^\w{15}/, '***************');
 
 async function refreshAccessToken(
   access_token,
-  refresh_token,
-  now = null,
+  refresh_token = null,
   athleteDoc = null,
 ) {
   const athlete_id = athleteDoc ? athleteDoc.get('_id') : null;
@@ -54,45 +50,42 @@ async function refreshAccessToken(
     client_id: process.env.CLIENT_ID,
     client_secret: process.env.CLIENT_SECRET,
     grant_type: tokenRefreshGrantType,
-    refresh_token: refresh_token ? refresh_token : access_token,
+    refresh_token: refresh_token || access_token,
   };
 
   let response;
   try {
     response = await fetch(
       `${stravaOauthUrl}/token?${stringify(params)}`,
-      { method: 'POST' }
+      { method: 'POST' },
     );
   } catch (err) {
-    console.log(err);
-    slackError(120, {
-      error: err.message,
-      athlete_id,
-      refresh_token: obfuscateToken(refresh_token),
-      access_token: obfuscateToken(access_token),
+    captureSentry(err, 'refreshAccessToken', {
+      extra: {
+        athlete_id,
+        refresh_token: obfuscateToken(refresh_token),
+        access_token: obfuscateToken(access_token),
+        action: 'fetch failed',
+      },
     });
     return false;
   }
 
   const responseStatus = response.status;
   if (!response || responseStatus !== 200) {
-    const current_time = now || (Date.now() / 1000);
     const responseJson = await response.json();
-    const log = Object.assign(
-      {},
-      responseJson,
-      {
-        current_time,
-        athlete_id,
-        refresh_token: obfuscateToken(refresh_token),
-        access_token: obfuscateToken(access_token),
-      }
-    );
 
     await maybeDeauthorizeAthlete(responseJson, responseStatus, athleteDoc);
 
-    console.log(log);
-    slackError(120, log);
+    captureSentry('Could not refresh athlete access_token', 'refreshAccessToken', {
+      extra: {
+        ...responseJson,
+        athlete_id,
+        refresh_token: obfuscateToken(refresh_token),
+        access_token: obfuscateToken(access_token),
+        action: 'fetch returned invalid status',
+      },
+    });
     return false;
   }
 
@@ -101,32 +94,32 @@ async function refreshAccessToken(
   if (refresh_token
     && refresh_token !== refreshedResponse.refresh_token
   ) {
-    console.log(`${athlete_id} refresh token: ${refresh_token} -> ${refreshedResponse.refresh_token}`);
-    slackSuccess(
-      'refresh_token was changed',
-      {
-        athlete_id,
-        refresh_token,
-      }
-    );
+    captureSentry('refresh_token changed', 'refreshAccessToken', {
+      level: 'info',
+      extra: {
+        athleteId: athlete_id,
+        prevRefreshToken: obfuscateToken(refresh_token),
+        nextRefreshToken: obfuscateToken(refreshedResponse.refresh_token),
+      },
+    });
   }
 
   return refreshedResponse;
 }
 
 /**
-  Get athlete's access_token using new authentication pattern
-  if athlete has already been migrated to new pattern
-
-  @param {Document} athleteDoc Athlete document
-  @param {Boolean} shouldMigrateForeverToken Defaults to false. If true will use forever token to migrate to new auth logic
-  @param {Integer} now Optional stub for current time in seconds, for unit testing
-  @returns {String|Boolean} access_token or false if error
-**/
+ * Get athlete's access_token using new authentication pattern
+ * if athlete has already been migrated to new pattern
+ *
+ * @param {Document} athleteDoc Athlete document
+ * @param {Boolean} shouldMigrateForeverToken Defaults to false. If true will use forever token to migrate to new auth logic
+ * @param {Integer} now Optional stub for current time in seconds, for unit testing
+ * @returns {String|Boolean} access_token or false if error
+ */
 async function getUpdatedAccessToken(
   athleteDoc,
   shouldMigrateForeverToken = false,
-  now = null
+  now = null,
 ) {
   const athlete_id = athleteDoc.get('_id');
   const access_token = athleteDoc.get('access_token');
@@ -147,10 +140,19 @@ async function getUpdatedAccessToken(
   // migrate forever token
   let tokenData;
   try {
-    tokenData = await refreshAccessToken(access_token, refresh_token, now, athleteDoc);
+    tokenData = await refreshAccessToken(
+      access_token,
+      refresh_token,
+      now,
+      athleteDoc,
+    );
   } catch (err) {
-    slackError(120, `Refresh token failed for athlete ${athlete_id}`);
-    console.log(err);
+    captureSentry(err, 'refreshAccessToken', {
+      extra: {
+        athleteId: athleteDoc.id,
+        action: 'function return',
+      },
+    });
     return false;
   }
 
