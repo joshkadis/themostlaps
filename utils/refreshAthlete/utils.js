@@ -4,9 +4,9 @@ const {
 } = require('../../config');
 const fetchStravaAPI = require('../fetchStravaAPI');
 const calculateLapsFromSegmentEfforts = require('./calculateLapsFromSegmentEfforts');
-const { slackError } = require('../slackNotification');
 const Athlete = require('../../schema/Athlete');
 const { findPotentialLocations } = require('../v2/activityQueue/findPotentialLocations');
+const { captureSentry } = require('../v2/services/sentry');
 
 /**
  * Fetch single activity from Strava API
@@ -37,9 +37,12 @@ async function fetchActivity(activityId, tokenOrDoc, includeAllEfforts = true) {
 
   if (response.status && response.status !== 200) {
     console.log(`Error fetching activity ${activityId}`);
-    slackError(45, {
-      activityId,
-      status: response.status,
+    captureSentry('Error fetching activity', 'fetchActivity', {
+      extra: {
+        activityId,
+        athleteId: athleteDoc.id,
+        status: response.stats,
+      },
     });
     return false;
   }
