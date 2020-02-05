@@ -1,12 +1,13 @@
 require('isomorphic-fetch');
 const { lapSegmentId, addMakeupLap } = require('../config');
 const Activity = require('../schema/Activity');
-const { slackError } = require('./slackNotification');
 const fetchStravaAPI = require('./fetchStravaAPI');
 const {
   dedupeSegmentEfforts,
   formatSegmentEffort,
 } = require('./refreshAthlete/utils');
+const { captureSentry } = require('./v2/services/sentry');
+
 /**
  * Get complete history of athlete's efforts for canonical segment
  * @param {Document} athleteDoc
@@ -28,12 +29,17 @@ async function getLapEffortsHistory(athleteDoc, page = 1, allEfforts = []) {
   );
 
   if (efforts.status && efforts.status !== 200) {
-    console.log(`Error getLapEffortsHistory: ${athleteId}`);
-    slackError(45, {
-      athleteId,
-      path: `/segments/${lapSegmentId}/all_efforts`,
-      page,
-    });
+    captureSentry(
+      'Error fetching segment efforts',
+      'fetchAthleteHistory',
+      {
+        extra: {
+          athleteId,
+          path: `/segments/${lapSegmentId}/all_efforts`,
+          page,
+        },
+      },
+    );
     return allEfforts;
   }
 
@@ -110,10 +116,17 @@ async function fetchAthleteHistory(athlete) {
   // Use try/catch to be safe because this wasn't tested
   try {
     if (prevNumEfforts !== lapEfforts.length) {
-      slackError(0, {
-        note: 'Found duplicate segment efforts during athlete ingestion',
-        delta: `${prevNumEfforts} -> ${lapEfforts.length}`,
-      });
+      captureSentry(
+        'Duplicate segment efforts',
+        'fetchAthleteHistory',
+        {
+          level: 'info',
+          extra: {
+            athleteId: athlete.id,
+            delta: prevNumEfforts - lapEfforts.length,
+          },
+        },
+      );
     }
   } catch (err) {
     // hey, we tried...
