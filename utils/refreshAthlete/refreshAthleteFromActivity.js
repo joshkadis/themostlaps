@@ -12,7 +12,7 @@ const {
 const {
   getEpochSecondsFromDateObj,
 } = require('../athleteUtils');
-const { slackError } = require('../slackNotification');
+const { captureSentry } = require('../v2/services/sentry');
 
 /**
  * Validate activity model and save to database
@@ -115,7 +115,11 @@ async function refreshAthleteFromActivity(
   }
 
   if (!activity.segment_efforts || !activity.segment_efforts.length) {
-    slackError(111, { athleteId, activityId });
+    captureSentry(
+      'Activity has no segment efforts',
+      'refreshAthleteFromActivity',
+      { extra: { athleteId, activityId } },
+    );
     return false; // Strava still processing segment efforts, should retry
   }
 
@@ -156,11 +160,11 @@ async function refreshAthleteFromActivity(
     try {
       await updateAthleteStats(athleteDoc, stats);
     } catch (err) {
-      console.log(`Error with updateAthleteStats() for ${athleteId} after activity ${activityId}`);
-      slackError(90, {
-        athleteId,
-        activityId,
-      });
+      captureSentry(
+        err,
+        'refreshAthleteFromActivity',
+        { extra: { athleteId, activityId } },
+      );
       return false; // Should retry
     }
   }
