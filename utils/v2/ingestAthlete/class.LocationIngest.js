@@ -419,6 +419,22 @@ class LocationIngest {
    * @return {Object}
    */
   getActivityDocs = () => this.activityDocs;
+
+  /**
+   * Get invalid activities
+   *
+   * @return {Array}
+   */
+  getInvalidActivities = () => this.invalidActivities;
+
+  /**
+   * Get array of IDs of invalid activities
+   *
+   * @return {Array}
+   */
+  getInvalidActivitiesIds = () => this.invalidActivities.map(
+    ({ _id = 'unknown ID' }) => _id,
+  );
 }
 
 module.exports = LocationIngest;
