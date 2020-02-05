@@ -31,7 +31,34 @@ function initSentry(opts = {}) {
   });
 }
 
+/**
+ * Create a custom single-use exception and sednd to Sentry
+ *
+ * @param {String} message
+ * @param {Object} opts
+ * @param {Array} opts.tags
+ * @param {String} opts.level
+ * @param {Object} opts.extra
+ */
+function captureSentry(msg, opts = {}) {
+  Sentry.withScope((scope) => {
+    if (opts.tags) {
+      scope.setTag(opts.tags);
+    }
+    if (opts.level) {
+      scope.setLevel(opts.level);
+    }
+    if (opts.extra) {
+      scope.setExtra(opts.level);
+    }
+
+    // Other options?
+    Sentry.captureException(new Error(msg));
+  });
+}
+
 module.exports = {
   sentryEnvironment,
   initSentry,
+  captureSentry,
 };

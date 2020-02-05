@@ -13,7 +13,6 @@ const { initializeActivityQueue } = require('./utils/v2/activityQueue');
 
 // Route handlers
 const handleSignupCallback = require('./server/handleSignupCallback');
-const handleNotification = require('./server/handleNotification');
 const initApiRoutes = require('./server/initApiRoutes');
 const initWebhookRoutes = require('./server/initWebhookRoutes');
 const getRankingParams = require('./utils/getRankingParams');
@@ -86,14 +85,6 @@ app.prepare()
       app.render(req, res, '/page', {
         ...req.query,
         pageName: req.params[0],
-      });
-    });
-
-    server.get('/notifications/:encrypted', async (req, res) => {
-      const success = await handleNotification(req.params.encrypted, res);
-      app.render(req, res, '/notifications', {
-        ...req.query,
-        success,
       });
     });
 
