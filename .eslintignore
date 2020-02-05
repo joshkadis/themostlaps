@@ -33,6 +33,7 @@ dist/
 !utils/refreshAthlete/index.js
 !utils/refreshAthlete/refreshAthleteFromActivity.js
 !utils/refreshAthlete/fetchLapsFromActivities.js
+!utils/refreshAthlete/fetchAthleteActivities.js
 !utils/refreshAthlete/utils.js
 !utils/refreshAthlete/utils.activityCouldHaveLaps.test.js
 !utils/refreshAthlete/calculateLapsFromSegmentEfforts.js
