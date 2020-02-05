@@ -34,26 +34,39 @@ function initSentry(opts = {}) {
 /**
  * Create a custom single-use exception and sednd to Sentry
  *
- * @param {String} message
+ * @param {Error|String} err Error or string to create new Error
+ * @param {String} source Adds 'source' tag
  * @param {Object} opts
- * @param {Array} opts.tags
  * @param {String} opts.level
- * @param {Object} opts.extra
+ * @param {Object} opts.tags Expects key:value only
+ * @param {Object} opts.extra Expects key:value only
  */
-function captureSentry(msg, opts = {}) {
+function captureSentry(err, source = null, opts = {}) {
   Sentry.withScope((scope) => {
-    if (opts.tags) {
-      scope.setTag(opts.tags);
+    // Set "source" tag
+    if (source) {
+      scope.setTag('source', source);
     }
+
     if (opts.level) {
       scope.setLevel(opts.level);
     }
+    if (opts.tags) {
+      Object.keys(opts.tags).forEach((key) => {
+        scope.setTag(key, opts.tags[key]);
+      });
+    }
     if (opts.extra) {
-      scope.setExtra(opts.level);
+      Object.keys(opts.extra).forEach((key) => {
+        scope.setExtra(key, opts.extra[key]);
+      });
     }
 
-    // Other options?
-    Sentry.captureException(new Error(msg));
+    Sentry.captureException(new Error(
+      err instanceof Error
+        ? err
+        : new Error(err),
+    ));
   });
 }
 
