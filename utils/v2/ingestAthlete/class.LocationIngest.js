@@ -287,7 +287,6 @@ class LocationIngest {
     );
 
     if (efforts.status && efforts.status !== 200) {
-      console.log(`Error getLapEffortsHistory: ${athleteId}`);
       captureSentry('Strava API response error', 'LocationIngest', {
         athleteId,
         path: `/segments/${this.segmentId}/all_efforts`,

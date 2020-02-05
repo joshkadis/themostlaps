@@ -36,7 +36,6 @@ async function fetchActivity(activityId, tokenOrDoc, includeAllEfforts = true) {
   );
 
   if (response.status && response.status !== 200) {
-    console.log(`Error fetching activity ${activityId}`);
     captureSentry('Error fetching activity', 'fetchActivity', {
       extra: {
         activityId,
