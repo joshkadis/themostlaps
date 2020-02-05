@@ -2,7 +2,7 @@ const _unset = require('lodash/unset');
 const { defaultLocation } = require('../../../config');
 const { getDefaultLocationStats } = require('./utils');
 const Activity = require('../../../schema/Activity');
-const { slackError } = require('../../slackNotification');
+const { captureSentry } = require('../services/sentry');
 
 /**
  * Adds or remove single activity's data to stats for a given location
@@ -62,10 +62,17 @@ function applyActivityToLocationStats(activity, locationStats) {
     single = laps;
   } else if (isRemovingLaps && absLaps === single) {
     // @todo Handle removing location's biggest single activity
-    slackError(0, {
-      msg: 'Deleted activity with highest single total',
-      ...activity,
-    });
+    captureSentry(
+      'Deleted activity with highest single total',
+      'applyActivityToLocationStats',
+      {
+        level: 'warning',
+        tags: {
+          version: 'v2',
+        },
+        extra: activity,
+      },
+    );
     single = 0;
   }
 
