@@ -32,7 +32,7 @@ function initSentry(opts = {}) {
 }
 
 /**
- * Create a custom single-use exception and sednd to Sentry
+ * Create a custom single-use exception and send to Sentry
  *
  * @param {Error|String} err Error or string to create new Error
  * @param {String} source Adds 'source' tag
@@ -42,6 +42,17 @@ function initSentry(opts = {}) {
  * @param {Object} opts.extra Expects key:value only
  */
 function captureSentry(err, source = null, opts = {}) {
+  const msg = err instanceof Error ? err.message : err;
+  const isDryRun = opts.tags && (opts.tags.dryRun || opts.tags.isDryRun);
+
+  console.log(`
+-----${isDryRun ? 'v DRY RUN v' : '-----------'}-----
+Sentry: ${msg} | ${opts.level || 'error'}
+Source: ${source || 'undefined'}
+Tags: ${opts.tags ? JSON.stringify(opts.tags) : 'none'}
+Extra: ${opts.extra ? JSON.stringify(opts.extra) : 'none'}
+-----${isDryRun ? '^ DRY RUN ^' : '-----------'}-----`);
+
   Sentry.withScope((scope) => {
     // Set "source" tag
     if (source) {
