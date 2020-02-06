@@ -115,7 +115,7 @@ async function fetchAthleteHistory(athlete) {
 
   if (prevNumEfforts !== lapEfforts.length) {
     captureSentry(
-      'Duplicate segment efforts',
+      'Found duplicate segment efforts',
       'fetchAthleteHistory',
       {
         level: 'info',

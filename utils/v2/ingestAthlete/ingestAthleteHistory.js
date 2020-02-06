@@ -114,8 +114,6 @@ async function asyncIngestSingleLocation(
       stats: ingestor.getStats(),
     };
   } catch (err) {
-    console.warn(`${"\n"}Error ingesting ${locationName} | ${canonicalSegmentId}`);
-    console.log(err);
     captureSentry(err, 'asyncIngestSingleLocation', {
       extra: {
         locationName,

@@ -115,7 +115,10 @@ async function refreshAthleteFromActivity(
     captureSentry(
       'Activity has no segment efforts',
       'refreshAthleteFromActivity',
-      { extra: { athleteId, activityId } },
+      {
+        level: 'info',
+        extra: { athleteId, activityId },
+      },
     );
     return false; // Strava still processing segment efforts, should retry
   }

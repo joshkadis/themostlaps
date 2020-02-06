@@ -80,13 +80,13 @@ async function handleEvent(req, res) {
         slackSuccess('Athlete deauthorized', { owner_id });
         captureSentry('Athlete deauthorized', 'webhook', {
           level: 'info',
-          extra: { owner_id },
+          extra: { athleteId: owner_id },
         });
       } else {
         // Strava currently sends athlete webhooks only for deauthorization
         // but you never know...
         await refreshAthleteProfile(owner_id);
-        captureSentry('Unknown athlete update', 'webhook', {
+        captureSentry('Unknown athlete webhook', 'webhook', {
           level: 'info',
           extra: req.body,
         });
