@@ -1,9 +1,3 @@
-jest.mock('../slackNotification');
-const { slackError } = require('../slackNotification');
-slackError.mockImplementation(() => {
-  throw new Error('mocked slackError');
-});
-
 const {
   lapSegmentId,
 } = require('../../config');
