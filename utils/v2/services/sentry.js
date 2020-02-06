@@ -48,7 +48,7 @@ function captureSentry(err, source = null, opts = {}) {
   console.log(`
 -----${isDryRun ? 'v DRY RUN v' : '-----------'}-----
 Sentry: ${msg} | ${opts.level || 'error'}
-${new Date().toISOString}
+${new Date().toISOString()}
 Source: ${source || 'undefined'}
 Tags: ${opts.tags ? JSON.stringify(opts.tags) : 'none'}
 Extra: ${opts.extra ? JSON.stringify(opts.extra) : 'none'}
