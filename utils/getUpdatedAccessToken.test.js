@@ -33,7 +33,6 @@ describe('getUpdatedAccessToken', () => {
   let athleteDoc;
   beforeEach(() => {
     fetch.resetMocks();
-    jest.resetModules();
     athleteDoc = createAthleteDoc();
   });
 
