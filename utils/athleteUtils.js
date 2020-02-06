@@ -1,7 +1,8 @@
 const Activity = require('../schema/Activity');
 const Athlete = require('../schema/Athlete');
 const { testAthleteIds } = require('../config');
-const { slackError, slackSuccess } = require('./slackNotification');
+const { slackSuccess } = require('./slackNotification');
+const { captureSentry } = require('./v2/services/sentry');
 
 /**
  * Get epoch timestamp in seconds of athlete's last refresh (or creation)
@@ -82,7 +83,7 @@ function getAthleteModelFormat(athleteInfo, shouldSubscribe = true) {
       },
     };
   } catch (err) {
-    slackError(0, Object.assign(athleteInfo, { message: err.message || 'unknown' }));
+    captureSentry(err, 'getAthleteModelFormat', { extra: athleteInfo });
     return false;
   }
 }
@@ -173,8 +174,7 @@ async function removeAthlete(athlete, removableStatuses = ['deauthorized']) {
 
     slackSuccess(`Removed ${athleteId} from activities and athletes collections`);
   } catch (err) {
-    slackError(1, `removeAthlete(${athleteId})`);
-    console.log(err);
+    captureSentry(err, 'removeAthlete', { extra: { athleteId } });
   }
 }
 
