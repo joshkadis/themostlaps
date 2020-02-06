@@ -41,6 +41,7 @@ dist/
 !utils/ingest/handleDuplicateSignup.js
 !utils/getUpdatedAccessToken.js
 !utils/fetchStravaAPI.js
+!utils/stats/compileSpecialStats.js
 
 # V2 Utils
 !utils/v2/**/*.js
