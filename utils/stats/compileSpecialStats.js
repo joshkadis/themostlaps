@@ -9,7 +9,7 @@ const {
   coldLapsPoints,
 } = require('../../config');
 const { isTestUser } = require('../athleteUtils');
-const { slackError, slackSuccess } = require('../slackNotification');
+const { captureSentry } = require('../v2/services/sentry');
 
 /**
  * Update athlete special stats data from new activity
@@ -32,8 +32,7 @@ async function compileSpecialStats(activity, activityDateStr, stats = {}) {
       activity.set('coldLapsPoints', activityColdLaps);
       await activity.save();
     } catch (err) {
-      console.log(err);
-      slackError(114, `getColdLapsFromActivity(${activity.get('_id')}) failed; see server log`);
+      captureSentry(err, 'coldLaps', { extra: { activityId: activity.id } });
     }
   }
 
@@ -69,7 +68,10 @@ async function getConditionsForTimestamp(timestamp, activityId) {
   try {
     response = await fetch(darkSkyApiUrl(timestamp));
   } catch (err) {
-    slackError(115, darkSkyApiUrl(timestamp));
+    captureSentry(err, 'coldLaps', { extra: {
+      activityId,
+      url: darkSkyApiUrl(timestamp),
+    } });
     return null;
   }
 
@@ -113,7 +115,10 @@ async function getConditionsForTimestamp(timestamp, activityId) {
     });
     return newCondition.toJSON();
   } catch (err) {
-    slackError(116, JSON.stringify(resJson, null, 2));
+    captureSentry(err, 'coldLaps', { extra: {
+      activityId: activity.id,
+      url: darkSkyApiUrl(timestamp),
+    } });
     return null;
   }
 }
