@@ -1,6 +1,6 @@
 const { devFetchActivities } = require('../../config');
 const { fetchActivity, getActivityData } = require('./utils');
-
+const { captureSentry } = require('../v2/services/sentry');
 /**
  * Iterate over activity ids list and get laps.
  * Fetch sequentially for API rate limiting.
@@ -38,8 +38,9 @@ async function fetchActivityDetails(
       }
     }
   } catch (err) {
-    console.log(`Error processing activity ${activityIds[idx]}`);
-    console.log(err);
+    captureSentry(err, 'fetchLapsFromActivities', {
+      extra: { activityId: activityIds[idx] },
+    });
   }
 
   if ((idx + 1) === fetchNum) {

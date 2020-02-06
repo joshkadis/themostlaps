@@ -50,8 +50,9 @@ async function createActivityDocument(activityData, isDryRun = false) {
     console.log(`Saved activity ${activityDoc.id}`);
     return activityDoc;
   } catch (err) {
-    console.log(`Error saving activity ${activityDoc.id}`);
-    console.log(err);
+    captureSentry(err, 'ingestActivityFromStravaData', {
+      extra: { activityId: activityDoc.id },
+    });
     return false;
   }
 }

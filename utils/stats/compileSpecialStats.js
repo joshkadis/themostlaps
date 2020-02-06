@@ -56,11 +56,9 @@ async function getConditionsForTimestamp(timestamp, activityId) {
 
     let sunriseTime = null;
     let sunsetTime = null;
-    try {
+    if (resJson.daily && resJson.daily.data && resJson.daily.data.length) {
       sunriseTime = resJson.daily.data[0].sunriseTime;
       sunsetTime = resJson.daily.data[0].sunsetTime;
-    } catch (err) {
-      console.log(err);
     }
 
     const newCondition = await Condition.create({

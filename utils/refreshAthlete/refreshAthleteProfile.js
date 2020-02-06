@@ -1,5 +1,6 @@
 const Athlete = require('../../schema/Athlete');
 const fetchStravaAPI = require('../fetchStravaAPI');
+const { captureSentry } = require('../v2/services/sentry');
 
 /**
  * Update athlete profile data
@@ -8,9 +9,9 @@ const fetchStravaAPI = require('../fetchStravaAPI');
  * @return {Document|null} Updated document or null if no athlete found
  */
 async function refreshAthleteProfile(athlete) {
-  const athleteDoc = 'number' === typeof athlete ?
-    await Athlete.findById(athlete) :
-    athlete;
+  const athleteDoc = typeof athlete === 'number'
+    ? await Athlete.findById(athlete)
+    : athlete;
 
   if (!athleteDoc) {
     console.log(`Could not find athlete ${athlete} in db`);
@@ -20,7 +21,7 @@ async function refreshAthleteProfile(athlete) {
   if (athleteDoc.get('status') === 'deauthorized') {
     const {
       athlete: { firstname, lastname },
-      _id
+      _id,
     } = athleteDoc.toJSON();
     console.log(`${firstname} ${lastname} (${_id}) is already deauthorized`);
     return null;
@@ -33,7 +34,7 @@ async function refreshAthleteProfile(athlete) {
     if (!athleteResult || !Object.keys(athleteResult).length) {
       return null;
     }
-    
+
     const { firstname, lastname, profile } = athleteResult;
 
     console.log(`Updating ${firstname} ${lastname} (${athleteDoc.get('_id')})`);
@@ -50,7 +51,7 @@ async function refreshAthleteProfile(athlete) {
 
     return await athleteDoc.save();
   } catch (err) {
-    console.log(err);
+    captureSentry(err, 'refreshAthleteProfile', { extra: { athleteId: athleteDoc.id } });
     return null;
   }
 }

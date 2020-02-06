@@ -116,7 +116,13 @@ async function asyncIngestSingleLocation(
   } catch (err) {
     console.warn(`${"\n"}Error ingesting ${locationName} | ${canonicalSegmentId}`);
     console.log(err);
-    // eslint-disable-next-line quotes
+    captureSentry(err, 'asyncIngestSingleLocation', {
+      extra: {
+        locationName,
+        canonicalSegmentId,
+        athletedId: athleteDoc.id,
+      },
+    });
   }
   return false;
 }

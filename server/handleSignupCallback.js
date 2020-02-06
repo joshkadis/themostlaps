@@ -119,7 +119,7 @@ async function handleSignupCallback(req, res) {
     || tokenExchangeResponse.errorCode;
 
   if (error_code) {
-    handleSignupError(error_code, tokenExchangeResponse.athlete || false);
+    handleSignupError(error_code, tokenExchangeResponse);
     return;
   }
 
@@ -147,8 +147,7 @@ async function handleSignupCallback(req, res) {
     console.log(`Saved ${athleteDoc.get('_id')} to database`);
   } catch (err) {
     const errCode = err.message.indexOf('duplicate key') !== -1 ? 50 : 55;
-    console.log(err, tokenExchangeResponse);
-    handleSignupError(errCode, tokenExchangeResponse.athlete || false);
+    handleSignupError(errCode, tokenExchangeResponse);
     return;
   }
 

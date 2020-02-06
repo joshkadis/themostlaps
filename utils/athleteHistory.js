@@ -113,23 +113,18 @@ async function fetchAthleteHistory(athlete) {
   const prevNumEfforts = lapEfforts.length;
   lapEfforts = dedupeSegmentEfforts(lapEfforts);
 
-  // Use try/catch to be safe because this wasn't tested
-  try {
-    if (prevNumEfforts !== lapEfforts.length) {
-      captureSentry(
-        'Duplicate segment efforts',
-        'fetchAthleteHistory',
-        {
-          level: 'info',
-          extra: {
-            athleteId: athlete.id,
-            delta: prevNumEfforts - lapEfforts.length,
-          },
+  if (prevNumEfforts !== lapEfforts.length) {
+    captureSentry(
+      'Duplicate segment efforts',
+      'fetchAthleteHistory',
+      {
+        level: 'info',
+        extra: {
+          athleteId: athlete.id,
+          delta: prevNumEfforts - lapEfforts.length,
         },
-      );
-    }
-  } catch (err) {
-    // hey, we tried...
+      },
+    );
   }
 
   return getActivitiesFromEfforts(lapEfforts);

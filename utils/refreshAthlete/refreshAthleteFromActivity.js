@@ -34,15 +34,8 @@ async function validateActivityAndSave(activity, shouldUpdateDb = true) {
     return activityDoc;
   }
 
-  try {
-    await Activity.create(activityDoc);
-    console.log(`Saved activity ${activityDoc.get('_id')}`);
-    return activityDoc;
-  } catch (err) {
-    console.log(`Error saving activity ${activityDoc.get('_id')}`);
-    console.log(err);
-    return false;
-  }
+  await Activity.create(activityDoc);
+  return activityDoc;
 }
 
 /**
@@ -60,7 +53,11 @@ async function updateAthleteLastRefreshed(athleteDoc, startDateString) {
     console.log(`Updated last_refreshed to ${startDateString}`);
     return updatedDoc;
   } catch (err) {
-    console.log(`Error updating last_refreshed to ${startDateString}`);
+    captureSentry(
+      err,
+      'refreshAthleteFromActivity',
+      { extra: { startDateString } },
+    );
   }
   return athleteDoc;
 }

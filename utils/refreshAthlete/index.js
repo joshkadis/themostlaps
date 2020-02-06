@@ -25,12 +25,8 @@ async function getFetchTimestampFromAthlete(athleteDoc) {
     lastRefreshed = getEpochSecondsFromDateObj(createdDate);
 
     athleteDoc.set('last_refreshed', lastRefreshed);
-    try {
-      await athleteDoc.save();
-      console.log('Set last_refreshed timestamp from created');
-    } catch (err) {
-      console.log('Error setting last_refreshed timestamp from created');
-    }
+    await athleteDoc.save();
+    console.log('Set last_refreshed timestamp from created');
   }
 
   return lastRefreshed;
@@ -104,12 +100,8 @@ async function refreshAthlete(athlete, after = false, verbose = false) {
     return acc;
   }, []);
 
-  try {
-    await Activity.create(filtered);
-    console.log(`Created ${filtered.length} new activities`);
-  } catch (err) {
-    console.log(err);
-  }
+  await Activity.create(filtered);
+  console.log(`Created ${filtered.length} new activities`);
 
   // Merge into user document's stats
   const stats = await compileStatsForActivities(
