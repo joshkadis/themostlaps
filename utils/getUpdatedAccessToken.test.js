@@ -1,6 +1,7 @@
 require('dotenv').config();
 const {
   getUpdatedAccessToken,
+  maybeDeauthorizeAthlete,
 } = require('./getUpdatedAccessToken');
 const { tokenExpirationBuffer } = require('../config');
 const Athlete = require('../schema/Athlete');
@@ -26,6 +27,9 @@ const createAthleteDoc = () => {
     stats: {},
     stats_version: 'v2',
   });
+  doc.save = () => {
+    console.log('Mocked save');
+  };
   return doc;
 };
 
@@ -87,51 +91,51 @@ describe('getUpdatedAccessToken', () => {
   });
 });
 
-// describe('maybeDeauthorizeAthlete', () => {
-//   beforeEach(() => {
-//     fetch.resetMocks();
-//     jest.resetModules();
-//   });
-//   it('deauthorizes user after failed API call', async () => {
-//     let athleteDoc = getMockAthleteDoc();
-//     expect(athleteDoc.get('status')).toEqual('ready');
-//
-//     fetch.mockResponses(
-//       [
-//         '{"something": "does not matter"}',
-//         { status: 401 },
-//       ],
-//       [
-//         '{"something": "does not matter"}',
-//         { status: 200 },
-//       ],
-//       [
-//         '{"message":"Bad Request","errors":[{"resource":"RefreshToken","field":"code","code":"invalid"}]}',
-//         { status: 400 },
-//       ],
-//     );
-//
-//     let response = await fetch('https://fakeapi.com');
-//     let responseStatus = response.status;
-//     let responseJson = await response.json();
-//     let result = await maybeDeauthorizeAthlete(responseJson, responseStatus, athleteDoc);
-//     expect(result).toBe(true);
-//     expect(athleteDoc.get('status')).toEqual('deauthorized');
-//
-//     athleteDoc = getMockAthleteDoc();
-//     response = await fetch('https://fakeapi.com');
-//     responseStatus = response.status;
-//     responseJson = await response.json();
-//     result = await maybeDeauthorizeAthlete(responseJson, responseStatus, athleteDoc);
-//     expect(result).toBe(false);
-//     expect(athleteDoc.get('status')).toEqual('ready');
-//
-//     athleteDoc = getMockAthleteDoc();
-//     response = await fetch('https://fakeapi.com');
-//     responseStatus = response.status;
-//     responseJson = await response.json();
-//     result = await maybeDeauthorizeAthlete(responseJson, responseStatus, athleteDoc);
-//     expect(result).toBe(true);
-//     expect(athleteDoc.get('status')).toEqual('deauthorized');
-//   });
-// });
+describe('maybeDeauthorizeAthlete', () => {
+  let athleteDoc;
+  beforeEach(() => {
+    fetch.resetMocks();
+    athleteDoc = createAthleteDoc();
+  });
+  it('deauthorizes user after failed API call', async () => {
+    expect(athleteDoc.get('status')).toEqual('ready');
+
+    fetch.mockResponses(
+      [
+        '{"something": "does not matter"}',
+        { status: 401 },
+      ],
+      [
+        '{"something": "does not matter"}',
+        { status: 200 },
+      ],
+      [
+        '{"message":"Bad Request","errors":[{"resource":"RefreshToken","field":"code","code":"invalid"}]}',
+        { status: 400 },
+      ],
+    );
+
+    let response = await fetch('https://fakeapi.com');
+    let responseStatus = response.status;
+    let responseJson = await response.json();
+    let result = await maybeDeauthorizeAthlete(responseJson, responseStatus, athleteDoc);
+    expect(result).toBe(true);
+    expect(athleteDoc.get('status')).toEqual('deauthorized');
+
+    athleteDoc = createAthleteDoc();
+    response = await fetch('https://fakeapi.com');
+    responseStatus = response.status;
+    responseJson = await response.json();
+    result = await maybeDeauthorizeAthlete(responseJson, responseStatus, athleteDoc);
+    expect(result).toBe(false);
+    expect(athleteDoc.get('status')).toEqual('ready');
+
+    athleteDoc = createAthleteDoc();
+    response = await fetch('https://fakeapi.com');
+    responseStatus = response.status;
+    responseJson = await response.json();
+    result = await maybeDeauthorizeAthlete(responseJson, responseStatus, athleteDoc);
+    expect(result).toBe(true);
+    expect(athleteDoc.get('status')).toEqual('deauthorized');
+  });
+});
