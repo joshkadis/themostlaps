@@ -3,7 +3,7 @@ const Activity = require('../../../schema/Activity');
 const Athlete = require('../../../schema/Athlete');
 
 // Other
-const { slackError } = require('../../slackNotification');
+const { captureSentry } = require('../services/sentry');
 const {
   isValidCanonicalSegmentId,
   getLocationNameFromSegmentId,
@@ -78,16 +78,17 @@ class LocationIngest {
     if (athleteDoc instanceof Athlete) {
       this.athleteDoc = athleteDoc;
     } else {
-      slackError(130, athleteDoc);
-      throw new Error('LocationIngest without Athlete document');
+      captureSentry('LocationIngest without Athlete document', 'LocationIngest');
     }
 
     if (isValidCanonicalSegmentId(segmentId)) {
       this.segmentId = segmentId;
       this.locationName = getLocationNameFromSegmentId(segmentId);
     } else {
-      slackError(131, athleteDoc);
-      throw new Error('LocationIngest with invalid canonical segment ID');
+      captureSentry('LocationIngest with invalid segment ID', 'LocationIngest', {
+        segmentId,
+        athleteId: athleteDoc.id,
+      });
     }
   }
 
@@ -286,12 +287,11 @@ class LocationIngest {
     );
 
     if (efforts.status && efforts.status !== 200) {
-      console.log(`Error getLapEffortsHistory: ${athleteId}`);
-      slackError(45, {
+      captureSentry('Strava API response error', 'LocationIngest', {
         athleteId,
         path: `/segments/${this.segmentId}/all_efforts`,
         page,
-        efforts,
+        status: efforts.status,
       });
       return allEfforts;
     }
@@ -419,6 +419,22 @@ class LocationIngest {
    * @return {Object}
    */
   getActivityDocs = () => this.activityDocs;
+
+  /**
+   * Get invalid activities
+   *
+   * @return {Array}
+   */
+  getInvalidActivities = () => this.invalidActivities;
+
+  /**
+   * Get array of IDs of invalid activities
+   *
+   * @return {Array}
+   */
+  getInvalidActivitiesIds = () => this.invalidActivities.map(
+    ({ _id = 'unknown ID' }) => _id,
+  );
 }
 
 module.exports = LocationIngest;

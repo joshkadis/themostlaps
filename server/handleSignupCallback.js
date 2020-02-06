@@ -12,7 +12,9 @@ const {
   compileStatsForActivities,
   updateAthleteStats,
 } = require('../utils/athleteStats');
-const { slackSuccess, slackError } = require('../utils/slackNotification');
+const { slackSuccess } = require('../utils/slackNotification');
+const { captureSentry } = require('../utils/v2/services/sentry');
+const getInternalError = require('../utils/internalErrors');
 
 /**
  * Factory for handling error while creating athlete in db
@@ -22,15 +24,19 @@ const { slackSuccess, slackError } = require('../utils/slackNotification');
  */
 function createHandleSignupError(res) {
   /**
-   * Log error to Slack and redirect to error page
+   * Log error to Sentry and redirect to error page
    *
    * @param {Number} errorCode
    * @param {Any} errorAddtlInfo
    */
   return (errorCode = 0, errorAddtlInfo = false) => {
-    console.log(`Error ${errorCode} during athlete creation`, errorAddtlInfo);
-
-    slackError(errorCode, errorAddtlInfo);
+    captureSentry(
+      getInternalError(errorCode),
+      'handleSignupCallback',
+      {
+        extra: errorAddtlInfo,
+      },
+    );
 
     // @todo Make this a util getter/setter
     let errorQuery;
@@ -68,10 +74,11 @@ async function handleActivitiesIngestError(
   console.log(`Error ${errorCode} during ingest after athlete creation`, errorAddtlInfo);
 
   // Boo something broke...
-  slackError(
-    errorCode,
+  captureSentry(
+    getInternalError(errorCode),
+    'handleSignupCallback',
     {
-      ...athleteDoc.toJSON().athlete,
+      athleteId: athleteDoc.id,
       errorAddtlInfo,
     },
   );
@@ -112,7 +119,7 @@ async function handleSignupCallback(req, res) {
     || tokenExchangeResponse.errorCode;
 
   if (error_code) {
-    handleSignupError(error_code, tokenExchangeResponse.athlete || false);
+    handleSignupError(error_code, tokenExchangeResponse);
     return;
   }
 
@@ -140,8 +147,7 @@ async function handleSignupCallback(req, res) {
     console.log(`Saved ${athleteDoc.get('_id')} to database`);
   } catch (err) {
     const errCode = err.message.indexOf('duplicate key') !== -1 ? 50 : 55;
-    console.log(err, tokenExchangeResponse);
-    handleSignupError(errCode, tokenExchangeResponse.athlete || false);
+    handleSignupError(errCode, tokenExchangeResponse);
     return;
   }
 

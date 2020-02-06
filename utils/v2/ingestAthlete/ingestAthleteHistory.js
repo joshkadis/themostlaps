@@ -6,8 +6,9 @@ const { getAthleteIdentifier } = require('../models/athleteHelpers');
 const { getLocationNames } = require('../locations');
 const { makeArrayAsyncIterable } = require('../asyncUtils');
 const { clearAthleteHistoryV2 } = require('../models/athleteHelpers');
-const { slackError, slackSuccess } = require('../../slackNotification');
+const { slackSuccess } = require('../../slackNotification');
 const { sortUniq } = require('../utils');
+const { captureSentry } = require('../services/sentry');
 
 // Max. allowable portion of invalid activities
 const MAX_INVALID_ACTIVITIES = 0.05;
@@ -75,19 +76,25 @@ async function asyncIngestSingleLocation(
     }
 
     ingestor.prepareActivities();
-    const numInvalid = ingestor.invalidActivities.length;
+    const invalidActivities = ingestor.getInvalidActivities();
+    const numInvalid = invalidActivities.length;
 
     if (numInvalid) {
-      console.log(JSON.stringify(ingestor.invalidActivities[0], null, 2));
+      console.log(JSON.stringify(invalidActivities, null, 2));
     } else {
       console.log('All activites were validated successfully');
     }
 
-    if (numInvalid / ingestor.getNumActivities > MAX_INVALID_ACTIVITIES) {
-      if (isDryRun) {
-        throw new Error(`Athlete ${athleteDoc.id} exceeded max invalid activities`);
-      }
-      slackError(132, ingestor.invalidActivities);
+    if (numInvalid / ingestor.getNumActivities() > MAX_INVALID_ACTIVITIES) {
+      captureSentry('Exceeded max % invalid activities', 'ingestAthleteHistory', {
+        level: 'warning',
+        tags: { dryRun: isDryRun ? '1' : '0' },
+        extra: {
+          athlete: athleteDoc.id,
+          numInvalid,
+          activities: JSON.stringify(ingestor.getInvalidActivitiesIds()),
+        },
+      });
       return {};
     }
 
@@ -107,9 +114,13 @@ async function asyncIngestSingleLocation(
       stats: ingestor.getStats(),
     };
   } catch (err) {
-    console.warn(`${"\n"}Error ingesting ${locationName} | ${canonicalSegmentId}`);
-    console.log(err);
-    // eslint-disable-next-line quotes
+    captureSentry(err, 'asyncIngestSingleLocation', {
+      extra: {
+        locationName,
+        canonicalSegmentId,
+        athletedId: athleteDoc.id,
+      },
+    });
   }
   return false;
 }

@@ -1,11 +1,10 @@
 require('isomorphic-fetch');
-const { stringify } = require('query-string');
 const Activity = require('../../schema/Activity');
 const config = require('../../config');
 const { getEpochSecondsFromDateObj } = require('../athleteUtils');
 const { activityCouldHaveLaps } = require('./utils');
-const { slackError } = require('../slackNotification');
 const fetchStravaAPI = require('../fetchStravaAPI');
+const { captureSentry } = require('../v2/services/sentry');
 
 /**
  * Get all of a user's activities by iterating recursively over paginated API results
@@ -21,7 +20,7 @@ async function fetchAllAthleteActivities(
   afterTimestamp,
   page = 1,
   allActivities = [],
-  verbose = false
+  verbose = false,
 ) {
   const pathName = '/athlete/activities';
   if (verbose) {
@@ -36,15 +35,17 @@ async function fetchAllAthleteActivities(
       after: afterTimestamp,
       page,
       per_page: config.apiPerPage,
-    }
+    },
   );
 
-  if (activities.status && 200 !== activities.status) {
-    console.log(`Error ${activities.status} fetching /athlete/activities in fetchAthleteActivities`)
-    await slackError(45, {
-      athleteId: athleteDoc.get('_id'),
-      pathName,
-    });
+  if (activities.status && activities.status !== 200) {
+    captureSentry(
+      'Failed fetching /athlete/activities in fetchAthleteActivities',
+      'fetchAthleteActivities',
+      {
+        extra: { pathName, athleteId: athleteDoc.id },
+      },
+    );
     return allActivities;
   }
 
@@ -52,12 +53,12 @@ async function fetchAllAthleteActivities(
     return allActivities.concat(activities);
   }
 
-  return await fetchAllAthleteActivities(
+  return fetchAllAthleteActivities(
     athleteDoc,
     afterTimestamp,
     (page + 1),
     allActivities.concat(activities),
-    verbose
+    verbose,
   );
 }
 
@@ -114,19 +115,26 @@ function compareTimestampToDateString(timestamp, dateString) {
  * @return {Array}
  */
 module.exports = async (athleteDoc, afterTimestamp, verbose = false) => {
-  const activities = await fetchAllAthleteActivities(athleteDoc, afterTimestamp, 1, [], verbose);
+  const activities = await fetchAllAthleteActivities(
+    athleteDoc,
+    afterTimestamp,
+    1,
+    [],
+    verbose,
+  );
 
   // Use for loop instead of Array.filter because of async
   const eligibleActivities = [];
   let newestActivityStartTimestamp = 0;
-  for (let i = 0; i < activities.length; i++) {
+  for (let i = 0; i < activities.length; i += 1) {
     // Compare timestamp
     newestActivityStartTimestamp = compareTimestampToDateString(
       newestActivityStartTimestamp,
-      activities[i].start_date
+      activities[i].start_date,
     );
 
     // Check if activity is eligible to maybe have laps
+    // eslint-disable-next-line no-await-in-loop
     const isEligible = await activityIsEligible(activities[i], verbose);
     if (isEligible) {
       eligibleActivities.push(activities[i]);
@@ -134,15 +142,33 @@ module.exports = async (athleteDoc, afterTimestamp, verbose = false) => {
   }
 
   // Update athlete doc with time to start next search
-  if (0 < newestActivityStartTimestamp) {
+  if (newestActivityStartTimestamp >= 0) {
     athleteDoc.set('last_refreshed', newestActivityStartTimestamp);
     try {
       const updatedAthleteDoc = await athleteDoc.save();
       if (verbose) {
-        console.log(`Set athlete last_refreshed to ${updatedAthleteDoc.get('last_refreshed')}`);
+        captureSentry(
+          'Set athlete last_refreshed',
+          'fetchAthleteActivities',
+          {
+            level: 'info',
+            extra: {
+              last_refreshed: updatedAthleteDoc.last_refreshed,
+              athleteId: athleteDoc.id,
+            },
+          },
+        );
       }
     } catch (err) {
-      console.log(`Error updating last_refreshed for athlete ${updatedAthleteDoc.get('_id')}`);
+      captureSentry(
+        err,
+        'fetchAthleteActivities',
+        {
+          extra: {
+            athleteId: athleteDoc.id,
+          },
+        },
+      );
     }
   }
 
@@ -151,4 +177,4 @@ module.exports = async (athleteDoc, afterTimestamp, verbose = false) => {
   }
 
   return eligibleActivities.map(({ id }) => id);
-}
+};

@@ -12,7 +12,7 @@ const {
 const {
   getEpochSecondsFromDateObj,
 } = require('../athleteUtils');
-const { slackError } = require('../slackNotification');
+const { captureSentry } = require('../v2/services/sentry');
 
 /**
  * Validate activity model and save to database
@@ -34,15 +34,8 @@ async function validateActivityAndSave(activity, shouldUpdateDb = true) {
     return activityDoc;
   }
 
-  try {
-    await Activity.create(activityDoc);
-    console.log(`Saved activity ${activityDoc.get('_id')}`);
-    return activityDoc;
-  } catch (err) {
-    console.log(`Error saving activity ${activityDoc.get('_id')}`);
-    console.log(err);
-    return false;
-  }
+  await Activity.create(activityDoc);
+  return activityDoc;
 }
 
 /**
@@ -60,7 +53,11 @@ async function updateAthleteLastRefreshed(athleteDoc, startDateString) {
     console.log(`Updated last_refreshed to ${startDateString}`);
     return updatedDoc;
   } catch (err) {
-    console.log(`Error updating last_refreshed to ${startDateString}`);
+    captureSentry(
+      err,
+      'refreshAthleteFromActivity',
+      { extra: { startDateString } },
+    );
   }
   return athleteDoc;
 }
@@ -115,7 +112,14 @@ async function refreshAthleteFromActivity(
   }
 
   if (!activity.segment_efforts || !activity.segment_efforts.length) {
-    slackError(111, { athleteId, activityId });
+    captureSentry(
+      'Activity has no segment efforts',
+      'refreshAthleteFromActivity',
+      {
+        level: 'info',
+        extra: { athleteId, activityId },
+      },
+    );
     return false; // Strava still processing segment efforts, should retry
   }
 
@@ -156,11 +160,11 @@ async function refreshAthleteFromActivity(
     try {
       await updateAthleteStats(athleteDoc, stats);
     } catch (err) {
-      console.log(`Error with updateAthleteStats() for ${athleteId} after activity ${activityId}`);
-      slackError(90, {
-        athleteId,
-        activityId,
-      });
+      captureSentry(
+        err,
+        'refreshAthleteFromActivity',
+        { extra: { athleteId, activityId } },
+      );
       return false; // Should retry
     }
   }

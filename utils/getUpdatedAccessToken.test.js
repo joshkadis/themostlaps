@@ -4,53 +4,43 @@ const {
   maybeDeauthorizeAthlete,
 } = require('./getUpdatedAccessToken');
 const { tokenExpirationBuffer } = require('../config');
+const Athlete = require('../schema/Athlete');
 
 const EXPIRES_AT = 1000;
 
-/**
-  Mock an Athlete document.
-  get() and set() only work for top-level properties
-**/
-const getMockAthleteDoc = () => ({
-  get(key) { return this[key] },
-  set(key, value = null) {
-    if (typeof key === 'string' && value) {
-      this[key] = value
-    } else if (typeof key === 'object') {
-      Object.keys(key).forEach((_key) => {
-        this[_key] = key[_key];
-      });
-    }
-  },
-  save() { /* nothing to see here */ },
-  access_token: 'FOREVER_TOKEN',
-  token_type: 'Bearer',
-  athlete: {
-    id: 1245,
-  },
-  status: 'ready',
-  refresh_token: 'INITIAL_REFRESH_TOKEN',
-  expires_at: EXPIRES_AT,
-  state: 'STATE',
-  _id: 1245,
-});
+const createAthleteDoc = () => {
+  const time = new Date().toISOString();
+  const doc = new Athlete({
+    _id: 1245,
+    access_token: 'FOREVER_TOKEN',
+    refresh_token: 'INITIAL_REFRESH_TOKEN',
+    expires_at: EXPIRES_AT,
+    token_type: 'Bearer',
+    athlete: {
+      id: 1245,
+    },
+    status: 'ready',
+    state: 'STATE',
+    last_updated: time,
+    created: time,
+    last_refreshed: new Date().valueOf(),
+    stats: {},
+    stats_version: 'v2',
+  });
+  doc.save = () => {
+    console.log('Mocked save');
+  };
+  return doc;
+};
 
 describe('getUpdatedAccessToken', () => {
+  let athleteDoc;
   beforeEach(() => {
     fetch.resetMocks();
-    jest.resetModules();
-  });
-
-  it('mocks Athlete schema', () => {
-    const testMockAthleteDoc = getMockAthleteDoc();
-    expect(testMockAthleteDoc.get('access_token')).toEqual('FOREVER_TOKEN');
-    testMockAthleteDoc.set('access_token', 'GOODBYE_TOKEN');
-    expect(testMockAthleteDoc.get('access_token')).toEqual('GOODBYE_TOKEN');
-    expect(testMockAthleteDoc.get('token_type')).toEqual('Bearer');
+    athleteDoc = createAthleteDoc();
   });
 
   it('returns forever token if not migrated yet', async () => {
-    const athleteDoc = getMockAthleteDoc()
     athleteDoc.set({ refresh_token: null, expires_at: null });
     const access_token = await getUpdatedAccessToken(athleteDoc);
 
@@ -68,9 +58,8 @@ describe('getUpdatedAccessToken', () => {
       refresh_token: 'UPDATED_REFRESH_TOKEN',
       expires_at: EXPIRES_AT,
       state: 'STATE',
-    }))
+    }));
 
-    const athleteDoc = getMockAthleteDoc();
     expect(athleteDoc.get('access_token')).toEqual('FOREVER_TOKEN');
     expect(athleteDoc.get('refresh_token')).toEqual('INITIAL_REFRESH_TOKEN');
 
@@ -91,9 +80,8 @@ describe('getUpdatedAccessToken', () => {
       refresh_token: 'SHOULD_NEVER_SEE_THIS_REFRESH_TOKEN',
       expires_at: EXPIRES_AT,
       state: 'STATE',
-    }))
+    }));
 
-    const athleteDoc = getMockAthleteDoc()
     athleteDoc.set('access_token', 'INITIAL_ACCESS_TOKEN');
     const now = (EXPIRES_AT - tokenExpirationBuffer) - 5;
     const access_token = await getUpdatedAccessToken(athleteDoc, false, now);
@@ -104,12 +92,12 @@ describe('getUpdatedAccessToken', () => {
 });
 
 describe('maybeDeauthorizeAthlete', () => {
+  let athleteDoc;
   beforeEach(() => {
     fetch.resetMocks();
-    jest.resetModules();
+    athleteDoc = createAthleteDoc();
   });
   it('deauthorizes user after failed API call', async () => {
-    let athleteDoc = getMockAthleteDoc();
     expect(athleteDoc.get('status')).toEqual('ready');
 
     fetch.mockResponses(
@@ -134,7 +122,7 @@ describe('maybeDeauthorizeAthlete', () => {
     expect(result).toBe(true);
     expect(athleteDoc.get('status')).toEqual('deauthorized');
 
-    athleteDoc = getMockAthleteDoc();
+    athleteDoc = createAthleteDoc();
     response = await fetch('https://fakeapi.com');
     responseStatus = response.status;
     responseJson = await response.json();
@@ -142,7 +130,7 @@ describe('maybeDeauthorizeAthlete', () => {
     expect(result).toBe(false);
     expect(athleteDoc.get('status')).toEqual('ready');
 
-    athleteDoc = getMockAthleteDoc();
+    athleteDoc = createAthleteDoc();
     response = await fetch('https://fakeapi.com');
     responseStatus = response.status;
     responseJson = await response.json();

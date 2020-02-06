@@ -33,11 +33,17 @@ dist/
 !utils/refreshAthlete/index.js
 !utils/refreshAthlete/refreshAthleteFromActivity.js
 !utils/refreshAthlete/fetchLapsFromActivities.js
+!utils/refreshAthlete/fetchAthleteActivities.js
 !utils/refreshAthlete/utils.js
 !utils/refreshAthlete/utils.activityCouldHaveLaps.test.js
 !utils/refreshAthlete/calculateLapsFromSegmentEfforts.js
+!utils/refreshAthlete/refreshAthleteProfile.js
 !utils/athleteHistory.js
 !utils/ingest/handleDuplicateSignup.js
+!utils/getUpdatedAccessToken.js
+!utils/getUpdatedAccessToken.test.js
+!utils/fetchStravaAPI.js
+!utils/stats/compileSpecialStats.js
 
 # V2 Utils
 !utils/v2/**/*.js

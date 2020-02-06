@@ -8,44 +8,9 @@ const {
   darkSkyRequestOpts,
   coldLapsPoints,
 } = require('../../config');
-const { isTestUser } = require('../athleteUtils');
-const { slackError, slackSuccess } = require('../slackNotification');
+const { captureSentry } = require('../v2/services/sentry');
 
-/**
- * Update athlete special stats data from new activity
- *
- * @param {Activity} activity document
- * @param {String} activityDateStr ISO string of activity local start time
- * @param {Object} stats Existing stats, may be empty object
- * @return {Object} Updated stats object
- */
-async function compileSpecialStats(activity, activityDateStr, stats = {}) {
-  const activityLaps = activity.get('laps');
-
-  let activityColdLaps = 0;
-  const startDateObj = new Date(activityDateStr);
-  if (
-    startDateObj.valueOf() > (1000 * coldLapsPoints.startTimestamp)
-  ) {
-    try {
-      activityColdLaps = await getColdLapsFromActivity(activity);
-      activity.set('coldLapsPoints', activityColdLaps);
-      await activity.save();
-    } catch (err) {
-      console.log(err);
-      slackError(114, `getColdLapsFromActivity(${activity.get('_id')}) failed; see server log`);
-    }
-  }
-
-  return Object.assign({}, stats, {
-    giro2018: compileGiro2018(activityLaps, activityDateStr, stats.giro2018 || 0),
-    cold2019: (stats.cold2019 || 0) + activityColdLaps,
-  });
-}
-
-const darkSkyApiUrl = (timestamp) =>
-  `https://api.darksky.net/forecast/${process.env.DARK_SKY_API_KEY}/${locationCenter.latitude},${locationCenter.longitude},${timestamp}?${stringify(darkSkyRequestOpts)}`;
-
+const darkSkyApiUrl = (timestamp) => `https://api.darksky.net/forecast/${process.env.DARK_SKY_API_KEY}/${locationCenter.latitude},${locationCenter.longitude},${timestamp}?${stringify(darkSkyRequestOpts)}`;
 
 /**
  * Get temperature from database or fall back to DarkSky API
@@ -55,10 +20,12 @@ const darkSkyApiUrl = (timestamp) =>
  * @return {Object|null}
  */
 async function getConditionsForTimestamp(timestamp, activityId) {
-  const condition = await Condition.findOne({ time: {
-    $gte: (timestamp - conditionPadding),
-    $lte: (timestamp + conditionPadding),
-  }});
+  const condition = await Condition.findOne({
+    time: {
+      $gte: (timestamp - conditionPadding),
+      $lte: (timestamp + conditionPadding),
+    },
+  });
 
   if (condition) {
     return condition.toJSON();
@@ -69,11 +36,16 @@ async function getConditionsForTimestamp(timestamp, activityId) {
   try {
     response = await fetch(darkSkyApiUrl(timestamp));
   } catch (err) {
-    slackError(115, darkSkyApiUrl(timestamp));
+    captureSentry(err, 'coldLaps', {
+      extra: {
+        activityId,
+        url: darkSkyApiUrl(timestamp),
+      },
+    });
     return null;
   }
 
-  if (200 !== response.status) {
+  if (response.status !== 200) {
     return null;
   }
 
@@ -84,21 +56,16 @@ async function getConditionsForTimestamp(timestamp, activityId) {
 
     let sunriseTime = null;
     let sunsetTime = null;
-    try {
+    if (resJson.daily && resJson.daily.data && resJson.daily.data.length) {
       sunriseTime = resJson.daily.data[0].sunriseTime;
       sunsetTime = resJson.daily.data[0].sunsetTime;
-    } catch (err) {
-      console.log(err);
     }
 
     const newCondition = await Condition.create({
-      apparentTemperature: typeof weatherData.apparentTemperature !== 'undefined' ?
-        weatherData.apparentTemperature : null,
-      humidity: typeof weatherData.humidity !== 'undefined' ?
-        weatherData.humidity : null,
+      apparentTemperature: weatherData.apparentTemperature || null,
+      humidity: weatherData.humidity || null,
       icon: weatherData.icon || null,
-      precipIntensity: typeof weatherData.precipIntensity !== 'undefined' ?
-        weatherData.precipIntensity : null,
+      precipIntensity: weatherData.precipIntensity || null,
       precipType: weatherData.precipType || null,
       sourceActivity: activityId,
       summary: weatherData.summary || null,
@@ -106,14 +73,17 @@ async function getConditionsForTimestamp(timestamp, activityId) {
       sunsetTime,
       temperature: weatherData.temperature,
       time: weatherData.time,
-      windSpeed: typeof weatherData.windSpeed !== 'undefined' ?
-        weatherData.windSpeed : null,
-      windGust: typeof weatherData.windGust !== 'undefined' ?
-        weatherData.windGust : null,
+      windSpeed: weatherData.windSpeed || null,
+      windGust: weatherData.windGust || null,
     });
     return newCondition.toJSON();
   } catch (err) {
-    slackError(116, JSON.stringify(resJson, null, 2));
+    captureSentry(err, 'coldLaps', {
+      extra: {
+        activityId,
+        url: darkSkyApiUrl(timestamp),
+      },
+    });
     return null;
   }
 }
@@ -133,17 +103,18 @@ function getColdLapsPointsFromConditions(conditions) {
 
   // Assumes points are in descending order by temp
   if (apparentTemperature !== null) {
-    const tempPoints = coldLapsPoints.tempPoints.reduce((acc, [_temp, _points]) => {
-      if (apparentTemperature <= _temp) {
-        return _points;
-      }
-      return acc;
-    }, 0);
-    points = points + tempPoints;
+    const tempPoints = coldLapsPoints.tempPoints
+      .reduce((acc, [_temp, _points]) => {
+        if (apparentTemperature <= _temp) {
+          return _points;
+        }
+        return acc;
+      }, 0);
+    points += tempPoints;
   }
 
   if (precipType && coldLapsPoints.precipPoints[precipType]) {
-    points = points + coldLapsPoints.precipPoints[precipType];
+    points += coldLapsPoints.precipPoints[precipType];
   }
 
   return points;
@@ -165,8 +136,9 @@ async function getColdLapsFromActivity(activity, debug = false) {
   const segmentEfforts = activity.get('segment_efforts');
 
   // Get array of timestamps to check
-  let lapStartTimestamps = segmentEfforts.map(({ start_date_local }) =>
-    timestampFromLocalDateString(start_date_local));
+  let lapStartTimestamps = segmentEfforts.map(
+    ({ start_date_local }) => timestampFromLocalDateString(start_date_local),
+  );
 
   // Fudge extra timestamps for any laps not included in segment efforts
   if (segmentEfforts.length && activityLaps > segmentEfforts.length) {
@@ -176,7 +148,7 @@ async function getColdLapsFromActivity(activity, debug = false) {
     const avgLapTime = Math.floor(totalMovingTime / segmentEfforts.length);
 
     // Each extra lap is 1 average lap earlier than the first segment
-    for (let i = 1; i <= extraLaps; i++) {
+    for (let i = 1; i <= extraLaps; i += 1) {
       const extraLapTimestamp = lapStartTimestamps[0] - avgLapTime;
       lapStartTimestamps = [extraLapTimestamp, ...lapStartTimestamps];
     }
@@ -187,13 +159,14 @@ async function getColdLapsFromActivity(activity, debug = false) {
   }
 
   let coldLaps = 0;
-  for (let i = 0; i < lapStartTimestamps.length; i++) {
+  for (let i = 0; i < lapStartTimestamps.length; i += 1) {
+    // eslint-disable-next-line no-await-in-loop
     const conditions = await getConditionsForTimestamp(lapStartTimestamps[i], activity.get('_id'));
     if (conditions !== null) {
       if (debug && conditions.apparentTemperature) {
         console.log(`Lap ${i + 1}: ${conditions.apparentTemperature.toFixed(2)}º, ${conditions.precipType || 'no precipitation'}`);
       }
-      coldLaps = coldLaps + getColdLapsPointsFromConditions(conditions);
+      coldLaps += getColdLapsPointsFromConditions(conditions);
     } else if (debug) {
       console.log(`Lap ${i + 1}: could not find apparentTemperature`);
     }
@@ -225,18 +198,54 @@ function compileGiro2018(laps, activityDateStr, currentTotal) {
 
   // Giro runs from May 4-27 w 3 rest days
   if (
-    matches[1] == '2018' &&
-    matches[2] == '05' &&
-    activityDay >= 4 &&
-    activityDay <= 27 &&
-    activityDay !== 7 &&
-    activityDay !== 14 &&
-    activityDay !== 21
+    matches[1].toString() === '2018'
+    && matches[2].toString() === '05'
+    && activityDay >= 4
+    && activityDay <= 27
+    && activityDay !== 7
+    && activityDay !== 14
+    && activityDay !== 21
   ) {
     return currentTotal + laps;
   }
 
   return currentTotal;
+}
+
+/**
+ * Update athlete special stats data from new activity
+ *
+ * @param {Activity} activity document
+ * @param {String} activityDateStr ISO string of activity local start time
+ * @param {Object} stats Existing stats, may be empty object
+ * @return {Object} Updated stats object
+ */
+async function compileSpecialStats(activity, activityDateStr, stats = {}) {
+  const activityLaps = activity.get('laps');
+
+  let activityColdLaps = 0;
+  const startDateObj = new Date(activityDateStr);
+  if (
+    startDateObj.valueOf() > (1000 * coldLapsPoints.startTimestamp)
+  ) {
+    try {
+      activityColdLaps = await getColdLapsFromActivity(activity);
+      activity.set('coldLapsPoints', activityColdLaps);
+      await activity.save();
+    } catch (err) {
+      captureSentry(err, 'coldLaps', { extra: { activityId: activity.id } });
+    }
+  }
+
+  return {
+    ...stats,
+    giro2018: compileGiro2018(
+      activityLaps,
+      activityDateStr,
+      stats.giro2018 || 0,
+    ),
+    cold2019: (stats.cold2019 || 0) + activityColdLaps,
+  };
 }
 
 module.exports = {
