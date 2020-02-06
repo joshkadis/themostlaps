@@ -1,9 +1,6 @@
 const fetch = require('isomorphic-unfetch');
-const { stringify } = require('querystring');
 const {
-  stravaOauthUrl,
   tokenExpirationBuffer,
-  tokenRefreshGrantType,
 } = require('../config');
 const { captureSentry } = require('./v2/services/sentry');
 
@@ -46,19 +43,10 @@ async function refreshAccessToken(
 
   // Substitute access_token for refresh_token
   // if we don't have a refresh_token, i.e. we're migrating
-  const params = {
-    client_id: process.env.CLIENT_ID,
-    client_secret: process.env.CLIENT_SECRET,
-    grant_type: tokenRefreshGrantType,
-    refresh_token: refresh_token || access_token,
-  };
 
   let response;
   try {
-    response = await fetch(
-      `${stravaOauthUrl}/token?${stringify(params)}`,
-      { method: 'POST' },
-    );
+    response = await fetch('https://kadisco.com');
   } catch (err) {
     captureSentry(err, 'refreshAccessToken', {
       extra: {
@@ -94,14 +82,14 @@ async function refreshAccessToken(
   if (refresh_token
     && refresh_token !== refreshedResponse.refresh_token
   ) {
-    captureSentry('refresh_token changed', 'refreshAccessToken', {
-      level: 'info',
-      extra: {
-        athleteId: athlete_id,
-        prevRefreshToken: obfuscateToken(refresh_token),
-        nextRefreshToken: obfuscateToken(refreshedResponse.refresh_token),
-      },
-    });
+    // captureSentry('refresh_token changed', 'refreshAccessToken', {
+    //   level: 'info',
+    //   extra: {
+    //     athleteId: athlete_id,
+    //     prevRefreshToken: obfuscateToken(refresh_token),
+    //     nextRefreshToken: obfuscateToken(refreshedResponse.refresh_token),
+    //   },
+    // });
   }
   return refreshedResponse;
 }
