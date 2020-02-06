@@ -70,17 +70,14 @@
     "eslint-loader": "^3.0.2",
     "eslint-plugin-import": "^2.18.2",
     "eslint-plugin-react": "^7.14.3",
+    "fetch-mock": "^9.0.0-beta.2",
     "jest": "^24.9.0",
-    "jest-fetch-mock": "^2.1.2",
     "markdown-toc": "^1.2.0",
     "mockgoose": "^8.0.2"
   },
   "jest": {
     "automock": false,
     "testURL": "http://localhost/",
-    "testEnvironment": "node",
-    "setupFiles": [
-      "./setupJest.js"
-    ]
+    "testEnvironment": "node"
   }
 }
