@@ -1,9 +1,10 @@
 const fetch = require('isomorphic-unfetch');
 const { stringify } = require('querystring');
 const { apiUrl } = require('../config');
-const { slackError } = require('./slackNotification');
 const Athlete = require('../schema/Athlete');
 const { getUpdatedAccessToken } = require('./getUpdatedAccessToken');
+const { captureSentry } = require('./v2/services/sentry');
+
 /**
  * Fetch data from Strava API, throw error if unsuccessful
  * @note Use new token refresh logic
@@ -57,7 +58,14 @@ async function fetchStravaAPI(endpoint, athleteDoc, params = false) {
       // make sure it refers to a known athlete in database
       attemptedAthleteDoc = await Athlete.findOne({ access_token });
       if (!attemptedAthleteDoc) {
-        slackError(44, { url });
+        captureSentry(
+          'Attempted API call for unknown athlete',
+          'fetchStravaAPI',
+          {
+            level: 'warning',
+            extra: { url },
+          },
+        );
         return {};
       }
       attemptedAthleteId = attemptedAthleteDoc.get('_id');
@@ -68,17 +76,29 @@ async function fetchStravaAPI(endpoint, athleteDoc, params = false) {
       attemptedAthleteDoc.set('status', 'deauthorized');
       await attemptedAthleteDoc.save();
 
-      slackError(46, { attemptedAthleteId, url });
-      console.log(`Athlete ${attemptedAthleteId} is deauthorized; updated status`);
+      captureSentry(
+        'Attempted API call for deauthorized athlete',
+        'fetchStravaAPI',
+        {
+          level: 'warning',
+          extra: { url, athleteId: attemptedAthleteId },
+        },
+      );
     } else {
       // Notify for any other API error
-      slackError(45, {
-        attemptedAthleteId,
-        url,
-        status: response.status,
-      });
+      captureSentry(
+        'Strava API response error',
+        'fetchStravaAPI',
+        {
+          level: 'warning',
+          extra: {
+            url,
+            athleteId: attemptedAthleteId,
+            status: response.status,
+          },
+        },
+      );
     }
-    throw new Error(`${response.status} error fetching ${url} for athlete ${attemptedAthleteId}`);
     return response;
   }
 
