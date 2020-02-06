@@ -103,7 +103,6 @@ async function refreshAccessToken(
       },
     });
   }
-
   return refreshedResponse;
 }
 
@@ -143,7 +142,6 @@ async function getUpdatedAccessToken(
     tokenData = await refreshAccessToken(
       access_token,
       refresh_token,
-      now,
       athleteDoc,
     );
   } catch (err) {
