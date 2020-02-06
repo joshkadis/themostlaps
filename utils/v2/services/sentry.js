@@ -52,6 +52,7 @@ ${new Date().toISOString()}
 Source: ${source || 'undefined'}
 Tags: ${opts.tags ? JSON.stringify(opts.tags) : 'none'}
 Extra: ${opts.extra ? JSON.stringify(opts.extra) : 'none'}
+${err.stack}
 -----${isDryRun ? '^ DRY RUN ^' : '-----------'}-----`);
 
   Sentry.withScope((scope) => {
