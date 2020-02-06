@@ -1,47 +1,56 @@
 require('dotenv').config();
 const {
   getUpdatedAccessToken,
+  maybeDeauthorizeAthlete,
 } = require('./getUpdatedAccessToken');
 const { tokenExpirationBuffer } = require('../config');
-const Athlete = require('../schema/Athlete');
 
 const EXPIRES_AT = 1000;
 
-const createAthleteDoc = () => {
-  const time = new Date().toISOString();
-  const doc = new Athlete({
-    _id: 1245,
-    access_token: 'FOREVER_TOKEN',
-    refresh_token: 'INITIAL_REFRESH_TOKEN',
-    expires_at: EXPIRES_AT,
-    token_type: 'Bearer',
-    athlete: {
-      id: 1245,
-    },
-    status: 'ready',
-    state: 'STATE',
-    last_updated: time,
-    created: time,
-    last_refreshed: new Date().valueOf(),
-    stats: {},
-    stats_version: 'v2',
-  });
-  return doc;
-};
+/**
+  Mock an Athlete document.
+  get() and set() only work for top-level properties
+**/
+const getMockAthleteDoc = () => ({
+  get(key) { return this[key] },
+  set(key, value = null) {
+    if (typeof key === 'string' && value) {
+      this[key] = value
+    } else if (typeof key === 'object') {
+      Object.keys(key).forEach((_key) => {
+        this[_key] = key[_key];
+      });
+    }
+  },
+  save() { /* nothing to see here */ },
+  access_token: 'FOREVER_TOKEN',
+  token_type: 'Bearer',
+  athlete: {
+    id: 1245,
+  },
+  status: 'ready',
+  refresh_token: 'INITIAL_REFRESH_TOKEN',
+  expires_at: EXPIRES_AT,
+  state: 'STATE',
+  _id: 1245,
+});
 
 describe('getUpdatedAccessToken', () => {
-  let athleteDoc;
   beforeEach(() => {
-    // fetch.resetMocks();
-    // jest.resetModules();
-    athleteDoc = createAthleteDoc();
+    fetch.resetMocks();
+    jest.resetModules();
   });
 
-  it('setup', () => {
-    expect(athleteDoc instanceof Athlete).toBe(true);
+  it('mocks Athlete schema', () => {
+    const testMockAthleteDoc = getMockAthleteDoc();
+    expect(testMockAthleteDoc.get('access_token')).toEqual('FOREVER_TOKEN');
+    testMockAthleteDoc.set('access_token', 'GOODBYE_TOKEN');
+    expect(testMockAthleteDoc.get('access_token')).toEqual('GOODBYE_TOKEN');
+    expect(testMockAthleteDoc.get('token_type')).toEqual('Bearer');
   });
 
   it('returns forever token if not migrated yet', async () => {
+    const athleteDoc = getMockAthleteDoc()
     athleteDoc.set({ refresh_token: null, expires_at: null });
     const access_token = await getUpdatedAccessToken(athleteDoc);
 

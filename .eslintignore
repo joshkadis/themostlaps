@@ -41,7 +41,6 @@ dist/
 !utils/athleteHistory.js
 !utils/ingest/handleDuplicateSignup.js
 !utils/getUpdatedAccessToken.js
-!utils/getUpdatedAccessToken.test.js
 !utils/fetchStravaAPI.js
 !utils/stats/compileSpecialStats.js
 
