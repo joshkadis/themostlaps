@@ -221,6 +221,7 @@ class LocationIngest {
       } else {
         // If this location does not exist in activityLocations, add it
         primaryLocations.push(nextLocationObj);
+        prevLocationNames.push(nextLocation);
       }
 
       // Maybe update top-level properties of the activity
