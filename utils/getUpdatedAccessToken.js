@@ -63,7 +63,7 @@ async function refreshAccessToken(
     captureSentry(err, 'refreshAccessToken', {
       extra: {
         athlete_id,
-        refresh_token: obfuscateToken(refresh_token),
+        refresh_token,
         access_token: obfuscateToken(access_token),
         action: 'fetch failed',
       },
@@ -81,7 +81,7 @@ async function refreshAccessToken(
       extra: {
         ...responseJson,
         athlete_id,
-        refresh_token: obfuscateToken(refresh_token),
+        refresh_token,
         access_token: obfuscateToken(access_token),
         action: 'fetch returned invalid status',
       },
@@ -98,8 +98,8 @@ async function refreshAccessToken(
       level: 'info',
       extra: {
         athleteId: athlete_id,
-        prevRefreshToken: obfuscateToken(refresh_token),
-        nextRefreshToken: obfuscateToken(refreshedResponse.refresh_token),
+        prevRefreshToken: refresh_token,
+        nextRefreshToken: refreshedResponse.refresh_token,
       },
     });
   }
