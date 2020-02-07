@@ -1,20 +1,11 @@
 const { stringify } = require('querystring');
 const exchangeCodeForAthleteInfo = require('../utils/ingest/exchangeCodeForAthleteInfo');
-const { getSlackSuccessMessage } = require('../utils/ingest/utils');
 const { handleDuplicateSignup } = require('../utils/ingest/handleDuplicateSignup');
 const Athlete = require('../schema/Athlete');
 const { getAthleteModelFormat } = require('../utils/athleteUtils');
-const {
-  fetchAthleteHistory,
-  saveAthleteHistory,
-} = require('../utils/athleteHistory');
-const {
-  compileStatsForActivities,
-  updateAthleteStats,
-} = require('../utils/athleteStats');
-const { slackSuccess } = require('../utils/slackNotification');
 const { captureSentry } = require('../utils/v2/services/sentry');
 const getInternalError = require('../utils/internalErrors');
+const ingestAthleteHistory = require('../utils/v2/ingestAthlete/ingestAthleteHistory');
 
 /**
  * Factory for handling error while creating athlete in db
@@ -51,45 +42,6 @@ function createHandleSignupError(res) {
 
     res.redirect(303, `/error?${stringify(errorQuery)}`);
   };
-}
-
-/**
- * Handle error during activiities ingest after athlete has been created
- *
- * @param {Document} athleteDoc
- * @param {Number} errorCode
- * @param {Any} errAddtlInfo
- */
-async function handleActivitiesIngestError(
-  athleteDoc,
-  errorCode = 0,
-  errorAddtlInfo = false,
-) {
-  // Yay someone signed up!
-  slackSuccess(
-    'New signup!',
-    getSlackSuccessMessage(athleteDoc),
-  );
-
-  console.log(`Error ${errorCode} during ingest after athlete creation`, errorAddtlInfo);
-
-  // Boo something broke...
-  captureSentry(
-    getInternalError(errorCode),
-    'handleSignupCallback',
-    {
-      athleteId: athleteDoc.id,
-      errorAddtlInfo,
-    },
-  );
-
-  // Update status
-  athleteDoc.set('status', 'error');
-  await athleteDoc.save();
-
-  // Welcome...
-  // @note Disabled after Strava API change, Jan 2019
-  // sendIngestEmail(athleteDoc, { error: true });
 }
 
 /**
@@ -157,38 +109,7 @@ async function handleSignupCallback(req, res) {
   })}`);
 
   // Fetch athlete history
-  let athleteHistory;
-  try {
-    athleteHistory = await fetchAthleteHistory(athleteDoc, true);
-  } catch (err) {
-    await handleActivitiesIngestError(athleteDoc, 70, err);
-    return;
-  }
-
-  // Validate and save athlete history
-  let savedActivities;
-  if (athleteHistory && athleteHistory.length) {
-    try {
-      savedActivities = await saveAthleteHistory(athleteHistory);
-    } catch (err) {
-      await handleActivitiesIngestError(athleteDoc, 80);
-      return;
-    }
-  }
-
-  // Calculate stats and update athlete document
-  // Compile and update stats
-  try {
-    const stats = await compileStatsForActivities(savedActivities || []);
-    const updated = await updateAthleteStats(athleteDoc, stats);
-    // @note Disabled after Strava API change, Jan 2019
-    // sendIngestEmail(updated);
-    const successMessage = getSlackSuccessMessage(updated);
-    console.log(`New signup: ${successMessage}`);
-    slackSuccess('New signup!', successMessage);
-  } catch (err) {
-    await handleActivitiesIngestError(athleteDoc, 90);
-  }
+  await ingestAthleteHistory(athleteDoc);
 }
 
 module.exports = handleSignupCallback;
