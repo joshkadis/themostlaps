@@ -6,10 +6,10 @@ const Athlete = require('../../schema/Athlete');
 const DRY_RUN_MSG = '** THIS IS A DRY RUN **';
 
 /**
- * Redo activities ingestion for a given athlete
+ * Convert Athlete documents from v1 stats format to v2
  */
 async function doCommand({
-  dryRun: isDryRun = false, // Currently forcing true in index.js
+  dryRun: isDryRun = false,
 }) {
   if (isDryRun) {
     console.log(DRY_RUN_MSG);

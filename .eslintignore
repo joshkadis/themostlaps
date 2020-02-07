@@ -24,7 +24,7 @@ dist/
 !cli/athlete/**/*.js
 !cli/stats/**/*.js
 !cli/utils/**/*.js
-!cli/migrate/**/*.js
+!cli/migration/**/*.js
 
 # Utils included in refactoring
 !utils/athleteStatsClient.js
