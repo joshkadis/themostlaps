@@ -182,12 +182,60 @@ class LocationIngest {
   }
 
   /**
+   * Update the activityLocations field of a document from one or more documents
+   * that represent the same actual activity but with stats from different locations
+   *
+   * @param {Activity} primaryDoc
+   */
+  updateActivityLocations = (primaryDoc, ...docs) => {
+    const {
+      activityLocations: primaryLocations = [],
+    } = primaryDoc.toJSON();
+
+    const prevLocationNames = primaryLocations.length
+      ? primaryLocations.map(({ location }) => location)
+      : [];
+
+    [primaryDoc, ...docs].forEach((nextDoc) => {
+      const {
+        id,
+        location,
+        laps,
+        segment_efforts,
+      } = nextDoc;
+
+      // Make sure we're talking about the same activity
+      if (id !== primaryDoc.id) {
+        return;
+      }
+      const nextLocation = {
+        location,
+        laps,
+        segment_efforts,
+      };
+
+      const idx = prevLocationNames.indexOf(location);
+      if (idx !== -1) {
+        // If this location already exists in activityLocations, update it
+        primaryLocations[idx] = nextLocation;
+      } else {
+        // If this location does not exist in activityLocations, add it
+        primaryLocations.push(nextLocation);
+      }
+    });
+
+    primaryDoc.set({ activityLocations: primaryLocations });
+    primaryDoc.markModified('activityLocations');
+  }
+
+  /**
    * Create Activity documents from formatted data
    * and validate so they can be saved
    */
   prepareActivities() {
     Object.values(this.getRawActivities()).forEach((rawActivity) => {
       const activityDoc = new Activity(rawActivity);
+      // @todo Initialize activityLocations: []
 
       // Validate activity against Activity model
       const validationError = activityDoc.validateSync();
@@ -238,6 +286,8 @@ class LocationIngest {
     // @todo Handle activity with multiple locations
     const existing = await Activity.findById(activityDoc.id);
     if (existing) {
+      // @todo Reconcile with existing.activityLocations
+
       const {
         id: newId,
         location: newLocation,
