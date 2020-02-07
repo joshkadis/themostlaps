@@ -1,4 +1,5 @@
 const { setupThenCommand: migrateStatsCommand } = require('./stats');
+const { setupThenCommand: migrateActivitiesCommand } = require('./activities');
 
 module.exports = {
   command: [
@@ -7,8 +8,12 @@ module.exports = {
   describe: 'Migration commands affecting all athletes',
   handler: async (args) => {
     switch (args.subcommand) {
-      case 'stats':
+      case 'athletestats':
         migrateStatsCommand(args);
+        break;
+
+      case 'activitieslocation':
+        migrateActivitiesCommand(args);
         break;
 
       default:
