@@ -27,7 +27,7 @@ function createActivityDocument(activityData) {
 }
 
 /**
- * Ingest an activity after fetching it
+ * Ingest an activity with v2 data structure after fetching it
  * Refactored from utils/refresAthlete/refreshAthleteFromActivity.js for v2
  *
  * @param {Object} activityData JSON object from Strava API
