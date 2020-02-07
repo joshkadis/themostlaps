@@ -11,6 +11,17 @@ const SegmentEffort = new Schema({
   startDateUtc: Date,
 });
 
+const ActivityLocation = new Schema(
+  {
+    location: { type: String, required: true },
+    laps: { type: Number, required: true },
+    segment_efforts: [SegmentEffort],
+  },
+  {
+    _id: false,
+  },
+);
+
 const activitySchema = new Schema({
   _id: Number,
   added_date: String,
@@ -27,11 +38,7 @@ const activitySchema = new Schema({
     default: defaultLocation,
     index: true,
   },
-  activityLocations: [{
-    location: String,
-    laps: Number,
-    segment_efforts: [SegmentEffort],
-  }],
+  activityLocations: [ActivityLocation],
 });
 
 const Activity = mongoose.model('Activity', activitySchema);

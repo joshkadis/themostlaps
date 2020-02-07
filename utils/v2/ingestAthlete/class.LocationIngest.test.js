@@ -15,101 +15,147 @@ describe('Tests for LocationIngest class', () => {
     locationIngest = new LocationIngest(athleteDoc, 1532085);
   });
 
-  // test('setup class instance', () => {
-  //   expect(athleteDoc instanceof Athlete).toBe(true);
-  //   expect(locationIngest.segmentId).toBe(1532085);
-  // });
-  //
-  // test('formats segment effort', () => {
-  //   const actual = locationIngest.formatSegmentEffort(cpSegmentEffort);
-  //   const expected = {
-  //     _id: 53673868572,
-  //     elapsed_time: 773,
-  //     moving_time: 773,
-  //     start_date_local: '2016-08-28T06:16:15Z',
-  //     startDateUtc: new Date('2016-08-28T10:16:15Z'),
-  //   };
-  //   expect(actual).toStrictEqual(expected);
-  // });
-  //
-  // test('formats activity from segment effort', () => {
-  //   const actual = locationIngest.formatActivity(cpSegmentEffort);
-  //
-  //   // Should be valid date string
-  //   const addedDate = new Date(actual.added_date);
-  //   expect(addedDate).toBeInstanceOf(Date);
-  //   expect(addedDate.valueOf()).not.toBeNaN();
-  //
-  //   delete actual.added_date; // impossible to make exact match down to the ms
-  //   const expected = {
-  //     _id: 692349426,
-  //     location: 'centralpark',
-  //     start_date_local: '2016-08-28T06:16:15Z',
-  //     athlete_id: cpSegmentEffort.athlete.id,
-  //     laps: 1,
-  //     segment_efforts: [],
-  //     source: 'signup',
-  //     startDateUtc: new Date('2016-08-28T10:16:15Z'),
-  //   };
-  //   expect(actual).toStrictEqual(expected);
-  // });
-  //
-  // test('converts segment efforts to Activity model shapes', () => {
-  //   // These should fail gracefully
-  //   locationIngest.processEffort({ isSegmentEffort: 'no' });
-  //   expect(locationIngest.getRawActivities().length).toEqual(0);
-  //
-  //   locationIngest.processEffort({ activity: 'no' });
-  //   expect(locationIngest.getRawActivities().length).toEqual(0);
-  //
-  //   locationIngest.processEffort({ activity: { id: 10 } });
-  //   expect(locationIngest.getRawActivities().length).toEqual(0);
-  //
-  //   // Segment effort processing should succeed
-  //   locationIngest.processEffort(cpSegmentEffort);
-  //   expect(getActivityIds()).toEqual([692349426]);
-  //
-  //   const activities = locationIngest.getRawActivities();
-  //   expect(activities.length).toEqual(1);
-  //   expect(activities[0]._id).toEqual(692349426);
-  //   // 1 lap from shouldAddExtraLap + 1 from the segment effort
-  //   expect(activities[0].laps).toEqual(2);
-  // });
+  test('setup class instance', () => {
+    expect(athleteDoc instanceof Athlete).toBe(true);
+    expect(locationIngest.segmentId).toBe(1532085);
+  });
 
-  test('updates activityLocations array from one or more Activity docs', () => {
-    // Create a valid Activity doc by ingesting segment effort
-    locationIngest.processEffort(cpSegmentEffort);
-    const activityDoc = new Activity(locationIngest.getRawActivities()[0]);
-    expect(activityDoc instanceof Activity).toBe(true);
-    expect(activityDoc.validateSync()).toBeUndefined();
-    expect(activityDoc.toJSON().segment_efforts).toStrictEqual([{
+  test('formats segment effort', () => {
+    const actual = locationIngest.formatSegmentEffort(cpSegmentEffort);
+    const expected = {
       _id: 53673868572,
       elapsed_time: 773,
       moving_time: 773,
       start_date_local: '2016-08-28T06:16:15Z',
       startDateUtc: new Date('2016-08-28T10:16:15Z'),
-    }]);
+    };
+    expect(actual).toStrictEqual(expected);
+  });
 
-    // Update the activity locations array
-    locationIngest.updateActivityLocations(activityDoc);
-    expect(activityDoc.validateSync()).toBeUndefined();
+  test('formats activity from segment effort', () => {
+    const actual = locationIngest.formatActivity(cpSegmentEffort);
 
-    expect(
-      activityDoc.toJSON().activityLocations.map((loc) => {
-        delete loc._id;
-        return loc;
-      }),
-    ).toStrictEqual([{
-      laps: 2,
+    // Should be valid date string
+    const addedDate = new Date(actual.added_date);
+    expect(addedDate).toBeInstanceOf(Date);
+    expect(addedDate.valueOf()).not.toBeNaN();
+
+    delete actual.added_date; // impossible to make exact match down to the ms
+    const expected = {
+      _id: 692349426,
       location: 'centralpark',
-      segment_efforts: [{
-        _id: 53673868572,
-        elapsed_time: 773,
-        moving_time: 773,
-        start_date_local: '2016-08-28T06:16:15Z',
-        startDateUtc: new Date('2016-08-28T10:16:15Z'),
-      }],
-    }]);
+      start_date_local: '2016-08-28T06:16:15Z',
+      athlete_id: cpSegmentEffort.athlete.id,
+      laps: 1,
+      segment_efforts: [],
+      source: 'signup',
+      startDateUtc: new Date('2016-08-28T10:16:15Z'),
+    };
+    expect(actual).toStrictEqual(expected);
+  });
+
+  test('converts segment efforts to Activity model shapes', () => {
+    // These should fail gracefully
+    locationIngest.processEffort({ isSegmentEffort: 'no' });
+    expect(locationIngest.getRawActivities().length).toEqual(0);
+
+    locationIngest.processEffort({ activity: 'no' });
+    expect(locationIngest.getRawActivities().length).toEqual(0);
+
+    locationIngest.processEffort({ activity: { id: 10 } });
+    expect(locationIngest.getRawActivities().length).toEqual(0);
+
+    // Segment effort processing should succeed
+    locationIngest.processEffort(cpSegmentEffort);
+    expect(getActivityIds()).toEqual([692349426]);
+
+    const activities = locationIngest.getRawActivities();
+    expect(activities.length).toEqual(1);
+    expect(activities[0]._id).toEqual(692349426);
+    // 1 lap from shouldAddExtraLap + 1 from the segment effort
+    expect(activities[0].laps).toEqual(2);
+  });
+
+  test('updates activityLocations array from one or more Activity docs', () => {
+    // Create some activity documents
+    const firstPP = new Activity({
+      _id: 123,
+      athlete_id: 541773,
+      laps: 4,
+      segment_efforts: [],
+      location: 'prospectpark',
+    });
+
+    // Same activity with laps in second location
+    const firstCP = new Activity({
+      _id: 123,
+      athlete_id: 541773,
+      laps: 3,
+      segment_efforts: [],
+      location: 'centralpark',
+    });
+
+    // Same activity with updated laps in first location
+    const secondPP = new Activity({
+      _id: 123,
+      athlete_id: 541773,
+      laps: 8,
+      segment_efforts: [],
+      location: 'prospectpark',
+    });
+
+    // Other activity with laps in first location
+    const otherPP = new Activity({
+      _id: 456,
+      athlete_id: 541773,
+      laps: 99,
+      segment_efforts: [],
+      location: 'prospectpark',
+    });
+
+    // Should make activityLocations for single location
+    locationIngest.updateActivityLocations(firstPP);
+    expect(firstPP.validateSync()).toBeUndefined();
+    expect(firstPP.toJSON().activityLocations)
+      .toStrictEqual([{
+        laps: 4,
+        location: 'prospectpark',
+        segment_efforts: [],
+      }]);
+
+    // Should add second location and update number of laps for the first
+    locationIngest.updateActivityLocations(firstPP, firstCP, secondPP);
+    expect(firstPP.validateSync()).toBeUndefined();
+    expect(firstPP.toJSON().activityLocations)
+      .toStrictEqual([
+        {
+          laps: 8,
+          location: 'prospectpark',
+          segment_efforts: [],
+        },
+        {
+          laps: 3,
+          location: 'centralpark',
+          segment_efforts: [],
+        },
+      ]);
+
+    // Should not be able to update from another activity w same location
+    locationIngest.updateActivityLocations(firstPP, otherPP);
+    expect(firstPP.validateSync()).toBeUndefined();
+    expect(firstPP.toJSON().activityLocations)
+      .toStrictEqual([
+        {
+          laps: 8,
+          location: 'prospectpark',
+          segment_efforts: [],
+        },
+        {
+          laps: 3,
+          location: 'centralpark',
+          segment_efforts: [],
+        },
+      ]);
   });
 });
 

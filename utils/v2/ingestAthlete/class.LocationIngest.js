@@ -198,29 +198,36 @@ class LocationIngest {
 
     [primaryDoc, ...docs].forEach((nextDoc) => {
       const {
-        id,
-        location,
-        laps,
-        segment_efforts,
+        id: nextId,
+        location: nextLocation,
+        laps: nextLaps,
+        segment_efforts: nextSegmentEfforts,
       } = nextDoc;
 
       // Make sure we're talking about the same activity
-      if (id !== primaryDoc.id) {
+      if (nextId !== primaryDoc.id) {
         return;
       }
-      const nextLocation = {
-        location,
-        laps,
-        segment_efforts,
+      const nextLocationObj = {
+        location: nextLocation,
+        laps: nextLaps,
+        segment_efforts: nextSegmentEfforts,
       };
 
-      const idx = prevLocationNames.indexOf(location);
+      const idx = prevLocationNames.indexOf(nextLocation);
       if (idx !== -1) {
         // If this location already exists in activityLocations, update it
-        primaryLocations[idx] = nextLocation;
+        primaryLocations[idx] = nextLocationObj;
       } else {
         // If this location does not exist in activityLocations, add it
-        primaryLocations.push(nextLocation);
+        primaryLocations.push(nextLocationObj);
+      }
+
+      // Maybe update top-level properties of the activity
+      if (nextLocation === primaryDoc.location) {
+        primaryDoc.set({
+          ...nextLocationObj,
+        });
       }
     });
 
@@ -235,7 +242,7 @@ class LocationIngest {
   prepareActivities() {
     Object.values(this.getRawActivities()).forEach((rawActivity) => {
       const activityDoc = new Activity(rawActivity);
-      // @todo Initialize activityLocations: []
+      this.updateActivityLocations(activityDoc);
 
       // Validate activity against Activity model
       const validationError = activityDoc.validateSync();
@@ -301,6 +308,7 @@ class LocationIngest {
         console.log(`Multi-location activity ${newId} | New: ${newLocation} ${newLaps} | Prev: ${prevLocation} ${prevLaps}`);
       }
       activityDoc.set(compareActivityLocations(activityDoc, existing));
+      this.updateActivityLocations(activityDoc, existing);
       await existing.remove();
     }
 
