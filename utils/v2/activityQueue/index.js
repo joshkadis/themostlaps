@@ -9,7 +9,7 @@ const {
 const {
   getQueueActivityData,
 } = require('./getQueueActivityData');
-const { ingestActivityFromStravaDataV2 } = require('./ingestActivityFromStravaDataV2');
+const { ingestActivityFromStravaData } = require('./ingestActivityFromStravaData');
 
 const MAX_INGEST_ATTEMPTS = 8;
 const INGEST_QUEUE_INTERVAL = 60 * 60 * 1000; // 1hr
@@ -96,7 +96,7 @@ ${queueActivityDoc.errorMsg || queueActivityDoc.detail}`);
 
     if (queueActivityDoc.status === 'shouldIngest') {
       // Ingest QueueActivity to Activity
-      const forUpdate = await ingestActivityFromStravaDataV2(
+      const forUpdate = await ingestActivityFromStravaData(
         apiData,
         athleteDoc,
         isDryRun,
