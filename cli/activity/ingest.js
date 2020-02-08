@@ -8,7 +8,7 @@ const { deleteActivityFromAthleteStats } = require('../../utils/v2/stats/deleteA
 const checkNumArgs = makeCheckNumArgs('Use format: $ activity ingest');
 
 /**
- * Handle a CLI command `$ article ingest ...`
+ * Handle a CLI command `$ activity ingest ...`
  *
  * @param {Object} args From yargs
  */
