@@ -2,6 +2,7 @@ const { setupConnection } = require('../utils/setupConnection');
 const { makeCheckNumArgs } = require('../utils');
 const Athlete = require('../../schema/Athlete');
 const ingestAthleteHistory = require('../../utils/v2/ingestAthlete/ingestAthleteHistory');
+const { getLocationNames } = require('../../utils/v2/locations');
 
 const checkNumArgs = makeCheckNumArgs('Use format: $ athlete ingestv2');
 
@@ -12,6 +13,7 @@ const DRY_RUN_MSG = '** THIS IS A DRY RUN **';
 async function doCommand({
   subargs,
   dryRun: isDryRun = false,
+  location = '',
 }) {
   if (!checkNumArgs(subargs, 1, '<athleteId>')) {
     return;
@@ -28,11 +30,20 @@ async function doCommand({
     return;
   }
 
+  if (location && getLocationNames().indexOf(location) === -1) {
+    console.warn(`Unknown location: ${location}`);
+    return;
+  }
+
   if (isDryRun) {
     console.log(DRY_RUN_MSG);
   }
 
-  await ingestAthleteHistory(athleteDoc, isDryRun);
+  await ingestAthleteHistory(
+    athleteDoc,
+    location ? [location] : null,
+    isDryRun,
+  );
 
   if (isDryRun) {
     console.log(DRY_RUN_MSG);

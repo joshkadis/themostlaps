@@ -128,20 +128,45 @@ async function asyncIngestSingleLocation(
 /**
  * Handle historical activities for new athlete
  *
- * @param Athlete athleteDoc
- * @param Boolean isDryRun
+ * @param {Athlete} Athlete athleteDoc
+ * @param {Array|null} recdLocationsForIngest Array of location names, default to null
+ * @param {Boolean} isDryRun Default to false
  */
-async function ingestAthleteHistory(athleteDoc, isDryRun) {
-  console.log(`Ingesting ${getAthleteIdentifier(athleteDoc)} from athleteDoc`);
+async function ingestAthleteHistory(
+  athleteDoc,
+  recdLocationsForIngest = null,
+  isDryRun = false,
+) {
+  // Make sure that we're not trying to ingest an empty array.
+  // That would break stuff.
+  let locationsForIngest;
+  let locationsToLog;
+  if (Array.isArray(recdLocationsForIngest) && recdLocationsForIngest.length) {
+    locationsForIngest = recdLocationsForIngest;
+    locationsToLog = `${locationsForIngest.join(', ')}
+**Data for multi-location activites may be destroyed**`;
+  } else {
+    locationsForIngest = null;
+    locationsToLog = 'All';
+  }
 
-  // Will check all known locations
+  console.log(`----------------
+Ingesting history for ${getAthleteIdentifier(athleteDoc)}
+Locations: ${locationsToLog}
+-------------------`);
+
+
+  // Will check all known locations unless specified
   const asyncIngestAllLocations = makeArrayAsyncIterable(
-    getLocationNames(),
+    locationsForIngest || getLocationNames(),
     (loc) => asyncIngestSingleLocation(loc, athleteDoc, { isDryRun }),
   );
 
   if (!isDryRun) {
-    await clearAthleteHistoryV2(athleteDoc);
+    await clearAthleteHistoryV2(
+      athleteDoc,
+      locationsForIngest ? { location: { $in: locationsForIngest } } : {},
+    );
   }
 
   // @todo revert back to existing athlete stats propery

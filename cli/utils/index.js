@@ -1,3 +1,5 @@
+const { confirm } = require('promptly');
+
 /**
  * Get UTC timestamp in *seconds* minus a number of days
  *
@@ -41,8 +43,24 @@ function makeCheckNumArgs(baseWarning) {
   };
 }
 
+/**
+ * Require confirmation before proceeding with command
+ *
+ * @param {Function} callback
+ * @param {String} message Optional message
+ */
+async function withPrompt(callback, message = '') {
+  const res = await confirm(
+    `${message} Do you want to continue? [y/n]`,
+  );
+  if (!res) {
+    return;
+  }
+  callback();
+}
 
 module.exports = {
+  withPrompt,
   daysAgoTimestamp,
   makeCheckNumArgs,
 };

@@ -1,8 +1,7 @@
 const { setupThenCommand: ingestV2Command } = require('./ingestV2');
 const { setupThenCommand: deleteActivityCommand } = require('./deleteActivity');
 const { setupThenCommand: migrateStatsCommand } = require('./migrateStats');
-
-const SHOULD_FORCE_DRY_RUN = false;
+const { withPrompt } = require('../utils');
 
 module.exports = {
   command: [
@@ -10,21 +9,34 @@ module.exports = {
   ],
   describe: 'Stats commands',
   handler: async (args) => {
+    const usePrompt = (cmd, msg) => {
+      withPrompt(
+        () => { cmd(args); },
+        // eslint-disable-next-line quotes
+        `${msg}${!args.dryRun ? '' : `${"\n"}**DRY RUN**`}`,
+      );
+    };
+
     switch (args.subcommand) {
-      // FORCE DRY
-      case 'ingestv2':
-        ingestV2Command({
-          ...args,
-          dryRun: SHOULD_FORCE_DRY_RUN || args.dryRun,
-        });
+      case 'ingesthistory':
+        usePrompt(
+          ingestV2Command,
+          'Will overwrite athlete stats and activities. Data for multi-location activities MAY BE DESTROYED.',
+        );
         break;
 
       case 'deleteactivity':
-        deleteActivityCommand(args);
+        usePrompt(
+          deleteActivityCommand,
+          'This will delete an activity and decrement athlete stats.',
+        );
         break;
 
       case 'migratestats':
-        migrateStatsCommand(args);
+        usePrompt(
+          migrateStatsCommand,
+          'This will transform athlete stats from v1 to v2 format.',
+        );
         break;
 
       default:
