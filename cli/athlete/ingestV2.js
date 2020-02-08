@@ -2,6 +2,7 @@ const { setupConnection } = require('../utils/setupConnection');
 const { makeCheckNumArgs } = require('../utils');
 const Athlete = require('../../schema/Athlete');
 const ingestAthleteHistory = require('../../utils/v2/ingestAthlete/ingestAthleteHistory');
+const { getLocationNames } = require('../../utils/v2/locations');
 
 const checkNumArgs = makeCheckNumArgs('Use format: $ athlete ingestv2');
 
@@ -26,6 +27,11 @@ async function doCommand({
   const athleteDoc = await Athlete.findById(athleteId);
   if (!athleteDoc) {
     console.warn(`Athlete ${athleteId} not found`);
+    return;
+  }
+
+  if (location && getLocationNames().indexOf(location) === -1) {
+    console.warn(`Unknown location: ${location}`);
     return;
   }
 

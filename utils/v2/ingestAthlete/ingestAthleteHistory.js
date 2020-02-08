@@ -129,16 +129,29 @@ async function asyncIngestSingleLocation(
  * Handle historical activities for new athlete
  *
  * @param {Athlete} Athlete athleteDoc
- * @param {Array|null} locationsForIngest Array of location names, default to null
+ * @param {Array|null} recdLocationsForIngest Array of location names, default to null
  * @param {Boolean} isDryRun Default to false
  */
 async function ingestAthleteHistory(
   athleteDoc,
-  locationsForIngest = null,
+  recdLocationsForIngest = null,
   isDryRun = false,
 ) {
+  // Make sure that we're not trying to ingest an empty array.
+  // That would break stuff.
+  let locationsForIngest;
+  let locationsToLog;
+  if (Array.isArray(recdLocationsForIngest) && recdLocationsForIngest.length) {
+    locationsForIngest = recdLocationsForIngest;
+    locationsToLog = `${locationsForIngest.join(', ')}
+**Data for multi-location activites may be destroyed**`;
+  } else {
+    locationsForIngest = null;
+    locationsToLog = 'All';
+  }
+
   console.log(`Ingesting history for ${getAthleteIdentifier(athleteDoc)}
-Locations: ${locationsForIngest ? locationsForIngest.join(', ') : 'All'}`);
+Locations: ${locationsToLog}`);
 
 
   // Will check all known locations unless specified
@@ -150,7 +163,7 @@ Locations: ${locationsForIngest ? locationsForIngest.join(', ') : 'All'}`);
   if (!isDryRun) {
     await clearAthleteHistoryV2(
       athleteDoc,
-      locationsForIngest ? { location: { $in: locationsForIngest } } : null,
+      locationsForIngest ? { location: { $in: locationsForIngest } } : {},
     );
   }
 
