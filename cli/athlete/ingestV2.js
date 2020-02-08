@@ -12,6 +12,7 @@ const DRY_RUN_MSG = '** THIS IS A DRY RUN **';
 async function doCommand({
   subargs,
   dryRun: isDryRun = false,
+  location = '',
 }) {
   if (!checkNumArgs(subargs, 1, '<athleteId>')) {
     return;
@@ -32,7 +33,11 @@ async function doCommand({
     console.log(DRY_RUN_MSG);
   }
 
-  await ingestAthleteHistory(athleteDoc, isDryRun);
+  await ingestAthleteHistory(
+    athleteDoc,
+    location ? [location] : null,
+    isDryRun,
+  );
 
   if (isDryRun) {
     console.log(DRY_RUN_MSG);

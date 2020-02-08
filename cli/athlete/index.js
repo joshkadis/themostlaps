@@ -12,7 +12,7 @@ module.exports = {
   handler: async (args) => {
     switch (args.subcommand) {
       // FORCE DRY
-      case 'ingestv2':
+      case 'ingesthistory':
         ingestV2Command({
           ...args,
           dryRun: SHOULD_FORCE_DRY_RUN || args.dryRun,

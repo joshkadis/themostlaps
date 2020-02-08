@@ -128,20 +128,30 @@ async function asyncIngestSingleLocation(
 /**
  * Handle historical activities for new athlete
  *
- * @param Athlete athleteDoc
- * @param Boolean isDryRun
+ * @param {Athlete} Athlete athleteDoc
+ * @param {Array|null} locationsForIngest Array of location names, default to null
+ * @param {Boolean} isDryRun Default to false
  */
-async function ingestAthleteHistory(athleteDoc, isDryRun) {
-  console.log(`Ingesting ${getAthleteIdentifier(athleteDoc)} from athleteDoc`);
+async function ingestAthleteHistory(
+  athleteDoc,
+  locationsForIngest = null,
+  isDryRun = false,
+) {
+  console.log(`Ingesting history for ${getAthleteIdentifier(athleteDoc)}
+Locations: ${locationsForIngest ? locationsForIngest.join(', ') : 'All'}`);
 
-  // Will check all known locations
+
+  // Will check all known locations unless specified
   const asyncIngestAllLocations = makeArrayAsyncIterable(
-    getLocationNames(),
+    locationsForIngest || getLocationNames(),
     (loc) => asyncIngestSingleLocation(loc, athleteDoc, { isDryRun }),
   );
 
   if (!isDryRun) {
-    await clearAthleteHistoryV2(athleteDoc);
+    await clearAthleteHistoryV2(
+      athleteDoc,
+      locationsForIngest ? { location: { $in: locationsForIngest } } : null,
+    );
   }
 
   // @todo revert back to existing athlete stats propery
