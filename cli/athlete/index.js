@@ -12,7 +12,8 @@ module.exports = {
     const usePrompt = (cmd, msg) => {
       withPrompt(
         () => { cmd(args); },
-        msg,
+        // eslint-disable-next-line quotes
+        `${msg}${!args.dryRun ? '' : `${"\n"}**DRY RUN**`}`,
       );
     };
 

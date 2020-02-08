@@ -150,8 +150,10 @@ async function ingestAthleteHistory(
     locationsToLog = 'All';
   }
 
-  console.log(`Ingesting history for ${getAthleteIdentifier(athleteDoc)}
-Locations: ${locationsToLog}`);
+  console.log(`----------------
+Ingesting history for ${getAthleteIdentifier(athleteDoc)}
+Locations: ${locationsToLog}
+-------------------`);
 
 
   // Will check all known locations unless specified
