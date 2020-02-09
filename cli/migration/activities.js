@@ -6,7 +6,7 @@ const DRY_RUN_MSG = '** THIS IS A DRY RUN **';
 const MIGRATE_LOCATION = 'prospectpark';
 
 /**
- * Convert Athlete documents from v1 stats format to v2
+ * Create v2 stats format activityLocations for legacy prospectpark activities
  */
 async function doCommand({
   dryRun: isDryRun = false,

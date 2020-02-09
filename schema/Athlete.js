@@ -22,6 +22,7 @@ const athleteSchema = new Schema(
     last_refreshed: { type: Number, required: true },
     stats: { type: Mixed, required: true, default: {} },
     stats_version: { type: String, required: true, default: 'v2' },
+    legacyStats: Mixed,
     preferences: {
       notifications: {
         monthly: { type: Boolean, default: true },

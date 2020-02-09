@@ -89,7 +89,8 @@ Already migrated: ${getAthleteIdentifier(athleteDoc)}`);
     };
   }
 
-  const legacyStatsTest = getLegacyStatsTest(_cloneDeep(athleteDoc.stats));
+  const legacyStats = _cloneDeep(athleteDoc.stats);
+  const legacyStatsForTest = getLegacyStatsTest(legacyStats);
 
   const v2Stats = await transformStats(
     _cloneDeep(athleteDoc.stats),
@@ -100,14 +101,14 @@ Already migrated: ${getAthleteIdentifier(athleteDoc)}`);
   _unset(v2StatsClone, 'locations.prospectpark.byMonth');
   _unset(v2StatsClone, 'locations.prospectpark.numActivities');
 
-  const statsMatch = _isEqual(v2StatsClone, legacyStatsTest);
+  const statsMatch = _isEqual(v2StatsClone, legacyStatsForTest);
 
   if (!statsMatch) {
     if (verbose) {
       console.log('V2 Stats:');
       console.log(JSON.stringify(v2StatsClone, null, 2));
       console.log('Legacy stats:');
-      console.log(JSON.stringify(legacyStatsTest, null, 2));
+      console.log(JSON.stringify(legacyStatsForTest, null, 2));
     }
     return {
       status: 'Stats error',
@@ -124,10 +125,12 @@ Number PP Activitie: ${v2Stats.locations.prospectpark.numActivities}`);
 
 
   athleteDoc.set({
+    legacyStats,
     stats_version: 'v2',
     stats: v2Stats,
     last_updated: new Date().toISOString(),
   });
+  athleteDoc.markModified('legacyStats');
   athleteDoc.markModified('stats');
   if (!isDryRun) {
     await athleteDoc.save();

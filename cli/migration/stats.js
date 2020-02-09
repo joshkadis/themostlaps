@@ -10,6 +10,7 @@ const DRY_RUN_MSG = '** THIS IS A DRY RUN **';
  */
 async function doCommand({
   dryRun: isDryRun = false,
+  limit = 0,
 }) {
   if (isDryRun) {
     console.log(DRY_RUN_MSG);
@@ -18,7 +19,7 @@ async function doCommand({
   const allIds = await Athlete.find(
     { stats_version: 'v1' },
     '_id',
-    { lean: true },
+    { lean: true, limit },
   );
 
   if (!allIds.length) {
