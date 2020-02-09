@@ -1,5 +1,6 @@
 const { setupThenCommand: migrateStatsCommand } = require('./stats');
 const { setupThenCommand: migrateActivitiesCommand } = require('./activities');
+const { setupThenCommand: ingestLocationCommand } = require('./ingestLocation');
 const { withPrompt } = require('../utils');
 
 module.exports = {
@@ -28,6 +29,13 @@ module.exports = {
         usePrompt(
           migrateActivitiesCommand,
           'Will create v2 stats format activityLocations for legacy prospectpark activities.',
+        );
+        break;
+
+      case 'ingestlocation':
+        usePrompt(
+          ingestLocationCommand,
+          'Will ingest a location for all athletes in v2 format.',
         );
         break;
 
