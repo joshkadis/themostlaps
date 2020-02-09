@@ -1,11 +1,48 @@
+const fetch = require('node-fetch');
 const { slackSuccess } = require('../utils/slackNotification');
 const { removeAthlete } = require('../utils/athleteUtils');
-const refreshAthleteProfile = require('../utils/refreshAthlete/refreshAthleteProfile');
+// const refreshAthleteProfile = require('../utils/refreshAthlete/refreshAthleteProfile');
 const { handleActivityWebhook } = require('../utils/v2/activityQueue');
 const { captureSentry } = require('../utils/v2/services/sentry');
 /**
  * See https://developers.strava.com/docs/webhooks/
  */
+
+/**
+ * Forward a received webhook for testing on another dev tier
+ *
+ * @param {Object} body Body JS from original POST received
+ */
+async function forwardWebhook({ body }) {
+  const sendSentry = (err) => {
+    captureSentry(err, 'forwardWebhook', {
+      ...body,
+      webhookUrl: process.env.WEBHOOK_TEST_URL,
+    });
+  };
+
+  if (!process.env.WEBHOOK_TEST_URL) {
+    sendSentry('Webhook forwarding requires WEBHOOK_TEST_URL env var');
+    return false;
+  }
+
+  try {
+    const response = await fetch(process.env.WEBHOOK_TEST_URL, {
+      method: 'post',
+      body: JSON.stringify(body),
+      headers: { 'Content-Type': 'application/json' },
+    });
+    const text = await response.text();
+    if (text !== 'ok') {
+      sendSentry('Bad response from webhook forwarding');
+      return false;
+    }
+    return true;
+  } catch (err) {
+    sendSentry(err);
+    return false;
+  }
+}
 
 /**
  * Validate subscription callback via GET
@@ -70,6 +107,14 @@ async function handleEvent(req, res) {
 
     console.log(`Received webhook: ${aspect_type} | ${object_type} | ${object_id} | ${owner_id}`);
 
+    if (process.env.WEBHOOK_TEST_URL) {
+      const forwarded = await forwardWebhook(req);
+      const fwdMsg = forwarded
+        ? 'Forwarded webhook'
+        : 'Error forwarding webhook';
+      console.log(`${fwdMsg}: ${aspect_type} | ${object_type} | ${object_id} | ${owner_id}`);
+    }
+
     if (object_type === 'activity') {
       await handleActivityWebhook(req.body);
     }
@@ -85,7 +130,7 @@ async function handleEvent(req, res) {
       } else {
         // Strava currently sends athlete webhooks only for deauthorization
         // but you never know...
-        await refreshAthleteProfile(owner_id);
+        // await refreshAthleteProfile(owner_id);
         captureSentry('Unknown athlete webhook', 'webhook', {
           level: 'info',
           extra: req.body,
