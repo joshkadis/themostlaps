@@ -1,5 +1,6 @@
 const { setupThenCommand: migrateStatsCommand } = require('./stats');
 const { setupThenCommand: migrateActivitiesCommand } = require('./activities');
+const { withPrompt } = require('../utils');
 
 module.exports = {
   command: [
@@ -7,13 +8,27 @@ module.exports = {
   ],
   describe: 'Migration commands affecting all athletes',
   handler: async (args) => {
+    const usePrompt = (cmd, msg) => {
+      withPrompt(
+        () => { cmd(args); },
+        // eslint-disable-next-line quotes
+        `${msg}${!args.dryRun ? '' : `${"\n"}**DRY RUN**`}`,
+      );
+    };
+
     switch (args.subcommand) {
       case 'athletestats':
-        migrateStatsCommand(args);
+        usePrompt(
+          migrateStatsCommand,
+          'Will migrate *all athletes* from v1 to v2 stats format.',
+        );
         break;
 
       case 'activitieslocation':
-        migrateActivitiesCommand(args);
+        usePrompt(
+          migrateActivitiesCommand,
+          'Will create v2 stats format activityLocations for legacy prospectpark activities.',
+        );
         break;
 
       default:
