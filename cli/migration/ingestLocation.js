@@ -12,13 +12,14 @@ const DRY_RUN_MSG = '** THIS IS A DRY RUN **';
  */
 async function doCommand({
   dryRun: isDryRun = false,
-  location = false,
+  subargs = [],
   limit = 0,
 }) {
-  if (!location || getLocationNames().indexOf(location) === -1) {
+  if (!subargs.length || getLocationNames().indexOf(subargs[0]) === -1) {
     console.warn(`Requires valid location, one of: ${JSON.stringify(getLocationNames())}`);
     return;
   }
+  const location = subargs[0];
 
   if (isDryRun) {
     console.log(DRY_RUN_MSG);

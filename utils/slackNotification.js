@@ -46,11 +46,16 @@ function slackError(errorCode = 0, addtlInfo = false) {
 
 /**
  * Send success message and maybe details to Slack
+ * Use env var NO_SLACK_SUCCESS to suppress these
  *
  * @param {String} message
  * @param {Any} details Optional
  */
 function slackSuccess(message = '', details) {
+  if (process.env.NO_SLACK_SUCCESS) {
+    return;
+  }
+
   if (!message.length) {
     slackError(0, 'Attempted slackSuccess() with empty message');
     return;
