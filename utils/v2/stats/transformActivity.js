@@ -354,21 +354,29 @@ function getStatsFromRawActivity(activity) {
 
   Object.keys(filteredEfforts)
     .forEach((locName) => {
-      const numCanonicalLaps = filteredEfforts[locName]
-        .canonicalSegmentEfforts
-        .length;
+      const {
+        canonicalSegmentEfforts = [],
+        relevantSegmentEfforts = [],
+        lapBoundariesSegmentEfforts = [],
+      } = filteredEfforts[locName];
 
       const locConfig = allLocations[locName];
-      let laps;
-      if (filteredEfforts[locName].lapBoundariesSegmentEfforts.length) {
+      let laps = canonicalSegmentEfforts.length;
+      // calculate with newer lap boundaries method
+      if (
+        locConfig.lapBoundaries
+        && locConfig.lapBoundaries.length
+        && lapBoundariesSegmentEfforts.length
+      ) {
         laps = calculateLapsFromBoundaries(
-          filteredEfforts[locName].lapBoundariesSegmentEfforts,
+          lapBoundariesSegmentEfforts,
           locConfig,
         );
       } else {
+        // Fall back to original section segments method
         laps = calculateLapsFromSegmentEfforts(
-          filteredEfforts[locName].relevantSegmentEfforts,
-          numCanonicalLaps,
+          relevantSegmentEfforts,
+          canonicalSegmentEfforts.length,
           locConfig.canonicalSegmentId,
         );
       }

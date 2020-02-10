@@ -18,7 +18,13 @@ test('calculates laps using the lapBoundaries method', () => {
     cpConfig,
   )).toEqual(2);
 
-  // mismatched boundaries pair
+  // We got nothin
+  expect(calculateLapsFromBoundaries(
+    makeEfforts([123, 12540076, 345, 3911767]),
+    cpConfig,
+  )).toEqual(0);
+
+  // Enter at Engineers Gate, do a lap, exit E 72nd
   expect(calculateLapsFromBoundaries(
     makeEfforts([1397141, 1532085, 7169109]),
     cpConfig,
