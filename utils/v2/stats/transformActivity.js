@@ -1,6 +1,24 @@
+const _includes = require('lodash/includes');
+const _takeWhile = require('lodash/takeWhile');
+const _takeRightWhile = require('lodash/takeRightWhile');
+const _flatten = require('lodash/flatten');
+const _uniq = require('lodash/uniq');
 const { locations: allLocations } = require('../../../config');
 const { findPotentialLocations } = require('../activityQueue/findPotentialLocations');
 const { getLocationNameFromSegmentId } = require('../locations');
+
+/**
+ * Get array of unique segment IDs in lapBoundaries
+ *
+ * @param {String} locName
+ * @return {Array}
+ */
+const getLapBoundariesIds = (locName) => {
+  const {
+    lapBoundaries = [],
+  } = allLocations[locName];
+  return _uniq(_flatten(lapBoundaries));
+};
 
 /**
  * Get all segment Ids (canonical and section) for a location
@@ -8,14 +26,23 @@ const { getLocationNameFromSegmentId } = require('../locations');
  * @param {String} loc
  * @returns {Array} Array of Ids, empty array if location not found
  */
-function getAllLocationSegmentIds(loc) {
+function getAllSegmentIdsForLocation(loc) {
   if (!allLocations[loc]) {
     return [];
   }
-  return [
-    allLocations[loc].canonicalSegmentId,
-    ...allLocations[loc].sectionSegmentIds,
-  ];
+
+  const {
+    canonicalSegmentId,
+    sectionSegmentIds = [],
+    lapBoundaries = [],
+  } = allLocations[loc];
+  const lapBoundariesIds = _flatten(lapBoundaries);
+
+  return _uniq([
+    canonicalSegmentId,
+    ...sectionSegmentIds,
+    ...lapBoundariesIds,
+  ]);
 }
 
 /**
@@ -95,19 +122,23 @@ function getSegmentSequences(canonicalId) {
 }
 
 /**
- * Collapse relevant segment Ids into single array
+ * Collapse relevant segment Ids for multiple locations into single array
  *
  * @param {Array} potentialLocs Optional list of locations to filter for.
  * @returns {Array} array of segment Ids
  */
-function collapseRelevantSegmentIds(potentialLocs = []) {
-  return Object.keys(allLocations).reduce((acc, locName) => {
+function getAllSegmentIdsForAllLocations(potentialLocs = []) {
+  const allRelevantIds = Object.keys(allLocations).reduce((acc, locName) => {
     // If any locations are specified, skip any that aren't in the list
     if (potentialLocs.length && potentialLocs.indexOf(locName) === -1) {
       return acc;
     }
-    return [...acc, ...getAllLocationSegmentIds(locName)];
+    return [
+      ...acc,
+      ...getAllSegmentIdsForLocation(locName),
+    ];
   }, []);
+  return _uniq(allRelevantIds);
 }
 
 /**
@@ -131,26 +162,29 @@ function isDuplicateEffort(newEffort, prevEfforts) {
 }
 
 /**
- * Filter and dedupe all segment efforts by canonical id
+ * Filter and dedupe all segment efforts by canonicalSegmentId, sectionSegmentIds, lapBoundaries
  *
  * @param {Array} segmentEfforts
  * @param {Array} potentialLocations Optional. Specify location names to look for
  * @returns {Object} locations
  * @returns {Array} locations[locName].canonicalSegmentEfforts
+ * @returns {Array} locations[locName].lapBoundariesSegmentEfforts
  * @returns {Array} locations[locName].relevantSegmentEfforts
  */
 function filterSegmentEfforts(segmentEfforts, potentialLocations = []) {
-  const allRelevantSegmentIds = collapseRelevantSegmentIds(potentialLocations);
+  const allRelevantSegmentIds = getAllSegmentIdsForAllLocations(
+    potentialLocations,
+  );
   const searchLocNames = potentialLocations.length
     ? potentialLocations
     : Object.keys(allLocations);
 
-  // Loop through all segmentEfforts to set up object with all locations like:
-  // { locName: relevantSegmentEfforts: [], canonicalSegmentEfforts: [] }
+  // Set up object for each location to receive segment efforts
   const filteredEfforts = searchLocNames.reduce((acc, locName) => {
     acc[locName] = {
       relevantSegmentEfforts: [],
       canonicalSegmentEfforts: [],
+      lapBoundariesSegmentEfforts: [],
     };
     return acc;
   }, {});
@@ -160,48 +194,54 @@ function filterSegmentEfforts(segmentEfforts, potentialLocations = []) {
     const { segment } = effort;
     const { id: segmentIdForEffort } = segment;
 
-    // Will ignore almost all segments efforts,
-    // very few will be actually associated with anything we care about
+    // Skip all segments efforts that aren't relevant to any of our locations
     if (allRelevantSegmentIds.indexOf(segmentIdForEffort) === -1) {
       return;
     }
 
-    // Now we know this has to be a canonical or section segment effort
-    // for one of the locations. Now we figure out which one.
+    // Now we know that this segment effort is relevant to one of our locations.
+    // Let's figure out which one.
     searchLocNames.forEach((locName) => {
       const { canonicalSegmentId } = allLocations[locName];
       const {
         relevantSegmentEfforts,
+        lapBoundariesSegmentEfforts,
+        canonicalSegmentEfforts,
       } = filteredEfforts[locName];
 
-      // Check that effort belongs to this segment
-      // and is not a duplicate
-      if (getAllLocationSegmentIds(locName).indexOf(segmentIdForEffort) !== -1
-        && !isDuplicateEffort(effort, relevantSegmentEfforts)
+      if (getAllSegmentIdsForLocation(locName)
+        .indexOf(segmentIdForEffort) === -1
+        || isDuplicateEffort(effort, relevantSegmentEfforts)
       ) {
-        // Add to array of all relevant segment efforts
-        filteredEfforts[locName].relevantSegmentEfforts = [
-          ...filteredEfforts[locName].relevantSegmentEfforts,
-          effort,
-        ];
-        // Maybe add to array of efforts for the canonical segment
-        if (segmentIdForEffort === canonicalSegmentId) {
-          filteredEfforts[locName].canonicalSegmentEfforts = [
-            ...filteredEfforts[locName].canonicalSegmentEfforts,
-            effort,
-          ];
+        // Skip if not relevant to this location or is a duplicate
+        return;
+      }
+
+      relevantSegmentEfforts.push(effort);
+
+      if (getLapBoundariesIds(locName).indexOf(segmentIdForEffort) !== -1) {
+        lapBoundariesSegmentEfforts.push(effort);
+      }
+
+      if (segmentIdForEffort === canonicalSegmentId) {
+        if (getLapBoundariesIds(locName).length > 0) {
+          // Only need this if we are using the lapBoundaries method
+          lapBoundariesSegmentEfforts.push(effort);
         }
+        canonicalSegmentEfforts.push(effort);
       }
     });
   });
   // Now each location has:
-  // relevantSegmentEfforts: An deduped array of all segment efforts for canonical lap and lap sections
-  // canonicalSegmentEfforts: A deduped array of all segment efforts for the canonical lap
+  // relevantSegmentEfforts: Deduped array of all segment efforts for canonical lap, lap sections (v1), and lap boundaries (v2)
+  // lapBoundariesSegmentEfforts: Deduped array of all segment efforts for canonical laps and lap boundary segments (v2)
+  // canonicalSegmentEfforts: Deduped array of all segment efforts for the canonical lap
   return filteredEfforts;
 }
 
 /**
  * Calculate number of laps by assembling partial lap before/after full laps
+ * uses original sectionSegmentIds method
  *
  * @param {Array} allEfforts Array of all relevant segment efforts for this location
  * @param {Number} numCanonicalLaps Number of numCanonicalLaps we already know about
@@ -247,6 +287,48 @@ function calculateLapsFromSegmentEfforts(
 }
 
 /**
+ * Calculate laps using new lapBoundaries technique
+ *
+ * @param {Array} efforts Segment Efforts for lapBoundaries and canonical segments
+ * @param {Object} locConfig Config object for location
+ * @returns {Number}
+ */
+function calculateLapsFromBoundaries(efforts, locConfig) {
+  const {
+    canonicalSegmentId,
+    lapBoundaries,
+  } = locConfig;
+
+  const effortNotCanonical = (eff) => eff.segment.id !== canonicalSegmentId;
+
+  const numCanonicalLaps = efforts.filter((eff) => !effortNotCanonical(eff))
+    .length;
+
+  const segmentIdsBeforeFirstCanonical = _takeWhile(
+    efforts,
+    effortNotCanonical,
+  ).map((eff) => eff.segment.id);
+
+  const segmentIdsAfterLastCanonical = _takeRightWhile(
+    efforts,
+    effortNotCanonical,
+  ).map((eff) => eff.segment.id);
+
+  for (let idx = 0; idx < lapBoundaries.length; idx += 1) {
+    const startSegmentId = lapBoundaries[idx][0];
+    const endSegmentId = lapBoundaries[idx][1];
+    if (
+      _includes(segmentIdsBeforeFirstCanonical, startSegmentId)
+      && _includes(segmentIdsAfterLastCanonical, endSegmentId)
+      // @todo CHECK AGAINST MIN DISTANCE OF LAP
+    ) {
+      return numCanonicalLaps + 1;
+    }
+  }
+  return numCanonicalLaps;
+}
+
+/**
  * Get laps for locations contained in raw activity data
  *
  * @param {Object}
@@ -275,11 +357,21 @@ function getStatsFromRawActivity(activity) {
       const numCanonicalLaps = filteredEfforts[locName]
         .canonicalSegmentEfforts
         .length;
-      const laps = calculateLapsFromSegmentEfforts(
-        filteredEfforts[locName].relevantSegmentEfforts,
-        numCanonicalLaps,
-        allLocations[locName].canonicalSegmentId,
-      );
+
+      const locConfig = allLocations[locName];
+      let laps;
+      if (filteredEfforts[locName].lapBoundariesSegmentEfforts.length) {
+        laps = calculateLapsFromBoundaries(
+          filteredEfforts[locName].lapBoundariesSegmentEfforts,
+          locConfig,
+        );
+      } else {
+        laps = calculateLapsFromSegmentEfforts(
+          filteredEfforts[locName].relevantSegmentEfforts,
+          numCanonicalLaps,
+          locConfig.canonicalSegmentId,
+        );
+      }
 
       const segment_efforts = filteredEfforts[locName].canonicalSegmentEfforts
         .map(formatSegmentEffort);
@@ -322,8 +414,9 @@ function transformActivity(activity) {
 
 module.exports = {
   transformActivity,
+  calculateLapsFromBoundaries,
   getStatsFromRawActivity,
-  collapseRelevantSegmentIds,
+  getAllSegmentIdsForAllLocations,
   isDuplicateEffort,
   filterSegmentEfforts,
   getSegmentSequences,
