@@ -1,13 +1,11 @@
 const _find = require('lodash/find');
 const _includes = require('lodash/includes');
-const _takeWhile = require('lodash/takeWhile');
-const _takeRightWhile = require('lodash/takeRightWhile');
 const _flatten = require('lodash/flatten');
 const _uniq = require('lodash/uniq');
 const { locations: allLocations } = require('../../../config');
 const { findPotentialLocations } = require('../activityQueue/findPotentialLocations');
 const { getLocationNameFromSegmentId } = require('../locations');
-const { getTimestampFromString } = require('../../athleteUtils');
+
 /**
  * Get array of unique segment IDs in lapBoundaries
  *
@@ -21,37 +19,6 @@ const getLapBoundariesIds = (locName) => {
   return _uniq(_flatten(lapBoundaries));
 };
 
-/**
- * Confirm that a lap from boundary segments meets the min distance for a lap
- *
- * @param {Number} startSegmentId
- * @param {Number} endSegmentId
- * @param {Array} efforts
- * @param {Object} locConfig
- * @returns {Boolean}
- */
-function lapMeetsMinDistance(startSegmentId, endSegmentId, efforts, locConfig) {
-  const { minDistance } = locConfig;
-  const startEffort = _find(
-    efforts,
-    (eff) => eff.segment.id === startSegmentId,
-  );
-  const endEffort = _find(
-    efforts,
-    (eff) => eff.segment.id === endSegmentId,
-  );
-
-  const endTimestamp = endEffort.elapsedTime + getTimestampFromString(
-    endEffort.start_date,
-    { unit: 'seconds' },
-  );
-  const startTimestamp = getTimestampFromString(
-    startEffort.start_date,
-    { unit: 'seconds' },
-  );
-  const elapsedLapTime = endTimestamp - startTimestamp;
-
-}
 /**
  * Get all segment Ids (canonical and section) for a location
  *
@@ -256,17 +223,13 @@ function filterSegmentEfforts(segmentEfforts, potentialLocations = []) {
       }
 
       if (segmentIdForEffort === canonicalSegmentId) {
-        if (getLapBoundariesIds(locName).length > 0) {
-          // Only need this if we are using the lapBoundaries method
-          lapBoundariesSegmentEfforts.push(effort);
-        }
         canonicalSegmentEfforts.push(effort);
       }
     });
   });
   // Now each location has:
   // relevantSegmentEfforts: Deduped array of all segment efforts for canonical lap, lap sections (v1), and lap boundaries (v2)
-  // lapBoundariesSegmentEfforts: Deduped array of all segment efforts for canonical laps and lap boundary segments (v2)
+  // lapBoundariesSegmentEfforts: Deduped array of all segment efforts for lap boundary segments (v2)
   // canonicalSegmentEfforts: Deduped array of all segment efforts for the canonical lap
   return filteredEfforts;
 }
@@ -320,44 +283,45 @@ function calculateLapsFromSegmentEfforts(
 
 /**
  * Calculate laps using new lapBoundaries technique
+ * REQUIRES a unique start segment for each boundary pair
+ * DOES NOT use canonicalSegmentId!
  *
  * @param {Array} efforts Segment Efforts for lapBoundaries and canonical segments
  * @param {Object} locConfig Config object for location
  * @returns {Number}
  */
 function calculateLapsFromBoundaries(efforts, locConfig) {
+  // Segment IDs corresponding to segment efforts
+  const effortsSegmentIds = efforts.map((eff) => eff.segment.id);
   const {
-    canonicalSegmentId,
     lapBoundaries,
   } = locConfig;
 
-  const effortNotCanonical = (eff) => eff.segment.id !== canonicalSegmentId;
+  // Array of segment IDs which are the start of a boundary pair
+  // Map of start segments to pairs
+  const potentialStartIds = [];
+  const potenialPairsByStartId = {};
+  lapBoundaries.forEach((bounds) => {
+    potentialStartIds.push(bounds[0]);
+    potenialPairsByStartId[bounds[0]] = bounds;
+  });
 
-  const numCanonicalLaps = efforts.filter((eff) => !effortNotCanonical(eff))
-    .length;
+  // Find the start segment that appears first
+  // Assumes start segments are unique!!
+  const firstOccurringId = _find(
+    effortsSegmentIds,
+    (id) => _includes(potentialStartIds, id),
+  );
+  // Filter for identified boundary pair
+  const boundaryPair = potenialPairsByStartId[firstOccurringId];
+  const filteredSegmentIds = effortsSegmentIds.filter(
+    (id) => _includes(boundaryPair, id),
+  );
 
-  const segmentIdsBeforeFirstCanonical = _takeWhile(
-    efforts,
-    effortNotCanonical,
-  ).map((eff) => eff.segment.id);
-
-  const segmentIdsAfterLastCanonical = _takeRightWhile(
-    efforts,
-    effortNotCanonical,
-  ).map((eff) => eff.segment.id);
-
-  for (let idx = 0; idx < lapBoundaries.length; idx += 1) {
-    const startSegmentId = lapBoundaries[idx][0];
-    const endSegmentId = lapBoundaries[idx][1];
-    if (
-      _includes(segmentIdsBeforeFirstCanonical, startSegmentId)
-      && _includes(segmentIdsAfterLastCanonical, endSegmentId)
-      && lapMeetsMinDistance(startSegmentId, endSegmentId, efforts, locConfig)
-    ) {
-      return numCanonicalLaps + 1;
-    }
-  }
-  return numCanonicalLaps;
+  // Now look for start-end sequences
+  const lapRegex = new RegExp(`${boundaryPair[0]},${boundaryPair[1]}`, 'g');
+  const segmentIdsStr = filteredSegmentIds.join(',');
+  return (segmentIdsStr.match(lapRegex) || []).length;
 }
 
 /**
@@ -394,7 +358,7 @@ function getStatsFromRawActivity(activity) {
 
       const locConfig = allLocations[locName];
       let laps = canonicalSegmentEfforts.length;
-      // calculate with newer lap boundaries method
+      // Prefer calculate with newer lap boundaries method
       if (
         locConfig.lapBoundaries
         && locConfig.lapBoundaries.length

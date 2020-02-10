@@ -46,6 +46,6 @@ module.exports = {
     [ // 5th Ave and Central Park South
       7169109, // Horse Shit Alley
       11938482, // D6_CP.4:7,
-    ]
+    ],
   ],
 };
