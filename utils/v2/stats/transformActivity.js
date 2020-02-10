@@ -1,3 +1,4 @@
+const _find = require('lodash/find');
 const _includes = require('lodash/includes');
 const _takeWhile = require('lodash/takeWhile');
 const _takeRightWhile = require('lodash/takeRightWhile');
@@ -6,7 +7,7 @@ const _uniq = require('lodash/uniq');
 const { locations: allLocations } = require('../../../config');
 const { findPotentialLocations } = require('../activityQueue/findPotentialLocations');
 const { getLocationNameFromSegmentId } = require('../locations');
-
+const { getTimestampFromString } = require('../../athleteUtils');
 /**
  * Get array of unique segment IDs in lapBoundaries
  *
@@ -20,6 +21,37 @@ const getLapBoundariesIds = (locName) => {
   return _uniq(_flatten(lapBoundaries));
 };
 
+/**
+ * Confirm that a lap from boundary segments meets the min distance for a lap
+ *
+ * @param {Number} startSegmentId
+ * @param {Number} endSegmentId
+ * @param {Array} efforts
+ * @param {Object} locConfig
+ * @returns {Boolean}
+ */
+function lapMeetsMinDistance(startSegmentId, endSegmentId, efforts, locConfig) {
+  const { minDistance } = locConfig;
+  const startEffort = _find(
+    efforts,
+    (eff) => eff.segment.id === startSegmentId,
+  );
+  const endEffort = _find(
+    efforts,
+    (eff) => eff.segment.id === endSegmentId,
+  );
+
+  const endTimestamp = endEffort.elapsedTime + getTimestampFromString(
+    endEffort.start_date,
+    { unit: 'seconds' },
+  );
+  const startTimestamp = getTimestampFromString(
+    startEffort.start_date,
+    { unit: 'seconds' },
+  );
+  const elapsedLapTime = endTimestamp - startTimestamp;
+
+}
 /**
  * Get all segment Ids (canonical and section) for a location
  *
@@ -320,7 +352,7 @@ function calculateLapsFromBoundaries(efforts, locConfig) {
     if (
       _includes(segmentIdsBeforeFirstCanonical, startSegmentId)
       && _includes(segmentIdsAfterLastCanonical, endSegmentId)
-      // @todo CHECK AGAINST MIN DISTANCE OF LAP
+      && lapMeetsMinDistance(startSegmentId, endSegmentId, efforts, locConfig)
     ) {
       return numCanonicalLaps + 1;
     }

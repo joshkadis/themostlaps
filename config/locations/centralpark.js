@@ -32,16 +32,20 @@ module.exports = {
       20604213, // Base of Harlem Hill -> W 75th
     ],
     [ // W 67th
-      1786662, // Carousel -> E 72nd
+      4056892, // View 6th Ave Entrance to 72nd St Exit
       12540076, // Top of Harlem Hill to W 68th (ends before Tavern/67th)
     ],
     [ // Columbus Circle
-      1786662, // Carousel -> E 72nd
+      10633522, // South Park to 102nd
       12540076, // Top of Harlem Hill -> W 68th
     ],
     [ // 6th Ave -> 7th Ave
       1786662, // Carousel -> 72nd
       12540076, // Top of Harlem Hill -> W 68th
     ],
+    [ // 5th Ave and Central Park South
+      7169109, // Horse Shit Alley
+      11938482, // D6_CP.4:7,
+    ]
   ],
 };
