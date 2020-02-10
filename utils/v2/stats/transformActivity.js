@@ -432,4 +432,5 @@ module.exports = {
   calculateLapsFromSegmentEfforts,
   formatActivity,
   formatSegmentEffort,
+  getLapBoundariesIds,
 };

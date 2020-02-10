@@ -6,6 +6,7 @@ const {
   calculateLapsFromSegmentEfforts,
   filterSegmentEfforts,
   getAllSegmentIdsForLocation,
+  getLapBoundariesIds,
 } = require('./transformActivity');
 
 // Copied from transformActivity.test.js
@@ -16,6 +17,28 @@ const makeEfforts = (ids) => ids
     start_date: getIncrementedTimestamp(idx),
   }));
 
+test('getLapBoundariesIds', () => {
+  expect(getLapBoundariesIds('prospectpark')).toStrictEqual([]);
+  const actualCpIds = getLapBoundariesIds('centralpark');
+  actualCpIds.sort();
+  const expectedCpIds = [
+    849072,
+    7169109,
+    1397141,
+    3911767,
+    12540076,
+    1666631,
+    1541329,
+    9258510,
+    20604213,
+    4056892,
+    10633522,
+    1786662,
+    11938482,
+  ];
+  expectedCpIds.sort();
+  expect(actualCpIds).toEqual(expectedCpIds);
+});
 test('getAllSegmentIdsForLocation', () => {
   let actual = getAllSegmentIdsForLocation('centralpark');
   actual.sort();
