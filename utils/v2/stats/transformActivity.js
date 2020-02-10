@@ -294,8 +294,12 @@ function calculateLapsFromBoundaries(efforts, locConfig) {
   // Segment IDs corresponding to segment efforts
   const effortsSegmentIds = efforts.map((eff) => eff.segment.id);
   const {
-    lapBoundaries,
+    lapBoundaries = [],
   } = locConfig;
+
+  if (!lapBoundaries.length) {
+    return 0;
+  }
 
   // Array of segment IDs which are the start of a boundary pair
   // Map of start segments to pairs

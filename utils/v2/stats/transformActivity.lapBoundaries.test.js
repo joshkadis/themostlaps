@@ -1,6 +1,9 @@
 const cpConfig = require('../../../config/locations/centralpark');
+const ppConfig = require('../../../config/locations/prospectpark');
+
 const {
   calculateLapsFromBoundaries,
+  filterSegmentEfforts,
 } = require('./transformActivity');
 
 // Copied from transformActivity.test.js
@@ -97,4 +100,63 @@ test('calculates laps using the lapBoundaries method', () => {
     makeEfforts(ids),
     cpConfig,
   )).toEqual(2);
+});
+
+test('filters segment efforts with both methods', () => {
+  // Use some PP segments, some CP segments, some dupes
+  const allEfforts = makeEfforts([
+    740668,
+    613198,
+    5313629,
+    5313629,
+    4435603,
+    4362776,
+    9699985,
+    740668,
+    613198,
+    5313629,
+    4435603,
+    4435603,
+    4362776,
+    9699985,
+    10633522,
+    1786662,
+    1532085,
+    12540076,
+    12540076,
+    10633522,
+    1532085,
+    1786662,
+    12540076,
+    1532085,
+    12540076,
+    10633522,
+    1786662,
+    12540076,
+    12540076,
+    1532085,
+  ]);
+  allEfforts[3].start_date = allEfforts[2].start_date;
+  allEfforts[11].start_date = allEfforts[10].start_date;
+  allEfforts[18].start_date = allEfforts[17].start_date;
+  const {
+    prospectpark: actualPP,
+    centralpark: actualCP,
+  } = filterSegmentEfforts(allEfforts);
+
+  // Prospect Park does not use lap boundaries method
+  expect(actualPP.lapBoundariesSegmentEfforts.length).toEqual(0);
+  expect(
+    calculateLapsFromBoundaries(
+      actualPP.lapBoundariesSegmentEfforts,
+      ppConfig,
+    ),
+  ).toEqual(0);
+  // Prospect Park uses section segments method
+  expect(actualPP.relevantSegmentEfforts).toStrictEqual(
+    // relevantSegmentEfforts should be deduped
+    allEfforts.filter(
+      (effort, idx) => idx !== 3 && idx !== 11 && idx !== 18,
+    ),
+  );
 });
