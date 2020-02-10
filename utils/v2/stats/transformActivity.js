@@ -424,6 +424,7 @@ module.exports = {
   transformActivity,
   calculateLapsFromBoundaries,
   getStatsFromRawActivity,
+  getAllSegmentIdsForLocation,
   getAllSegmentIdsForAllLocations,
   isDuplicateEffort,
   filterSegmentEfforts,

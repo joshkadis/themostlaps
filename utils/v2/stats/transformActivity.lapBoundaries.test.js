@@ -3,7 +3,9 @@ const ppConfig = require('../../../config/locations/prospectpark');
 
 const {
   calculateLapsFromBoundaries,
+  calculateLapsFromSegmentEfforts,
   filterSegmentEfforts,
+  getAllSegmentIdsForLocation,
 } = require('./transformActivity');
 
 // Copied from transformActivity.test.js
@@ -13,6 +15,42 @@ const makeEfforts = (ids) => ids
     segment: { id },
     start_date: getIncrementedTimestamp(idx),
   }));
+
+test('getAllSegmentIdsForLocation', () => {
+  let actual = getAllSegmentIdsForLocation('centralpark');
+  actual.sort();
+  const cpIds = [
+    1532085,
+    849072,
+    7169109,
+    1397141,
+    3911767,
+    12540076,
+    1666631,
+    1541329,
+    9258510,
+    20604213,
+    4056892,
+    10633522,
+    1786662,
+    11938482,
+  ];
+  cpIds.sort();
+  expect(actual).toStrictEqual(cpIds);
+
+  actual = getAllSegmentIdsForLocation('prospectpark');
+  actual.sort();
+  const ppIds = [
+    5313629,
+    613198, // Prospect Park hill
+    4435603, // Top of Prospect Park
+    4362776, // Prospect Pure Downhill
+    9699985, // Sprint between the lights
+    740668, // E Lake Drive
+  ];
+  ppIds.sort();
+  expect(actual).toStrictEqual(ppIds);
+});
 
 test('calculates laps using the lapBoundaries method', () => {
   // basic example
@@ -119,7 +157,7 @@ test('filters segment efforts with both methods', () => {
     4435603,
     4362776,
     9699985,
-    10633522,
+    10633522, // Start of Cental Park
     1786662,
     1532085,
     12540076,
@@ -145,18 +183,38 @@ test('filters segment efforts with both methods', () => {
   } = filterSegmentEfforts(allEfforts);
 
   // Prospect Park does not use lap boundaries method
-  expect(actualPP.lapBoundariesSegmentEfforts.length).toEqual(0);
-  expect(
-    calculateLapsFromBoundaries(
-      actualPP.lapBoundariesSegmentEfforts,
-      ppConfig,
+  expect(actualPP).toStrictEqual({
+    relevantSegmentEfforts: allEfforts.filter(
+      (effort, idx) => idx !== 3 && idx !== 11 && getAllSegmentIdsForLocation('centralpark').indexOf(effort.segment.id) === -1,
     ),
-  ).toEqual(0);
-  // Prospect Park uses section segments method
-  expect(actualPP.relevantSegmentEfforts).toStrictEqual(
-    // relevantSegmentEfforts should be deduped
-    allEfforts.filter(
-      (effort, idx) => idx !== 3 && idx !== 11 && idx !== 18,
+    canonicalSegmentEfforts: allEfforts.filter(
+      (effort, idx) => effort.segment.id === ppConfig.canonicalSegmentId
+        && idx !== 3,
     ),
-  );
+    lapBoundariesSegmentEfforts: [],
+  });
+  expect(calculateLapsFromSegmentEfforts(
+    actualPP.relevantSegmentEfforts,
+    2,
+    ppConfig.canonicalSegmentId,
+  )).toEqual(3);
+
+  // Central Park uses lap boundaries method
+  expect(actualCP).toStrictEqual({
+    relevantSegmentEfforts: allEfforts.filter(
+      (effort, idx) => idx !== 18 && getAllSegmentIdsForLocation('prospectpark').indexOf(effort.segment.id) === -1,
+    ),
+    canonicalSegmentEfforts: allEfforts.filter(
+      (effort) => effort.segment.id === cpConfig.canonicalSegmentId,
+    ),
+    lapBoundariesSegmentEfforts: allEfforts.filter(
+      (effort, idx) => idx !== 18
+        && getAllSegmentIdsForLocation('centralpark').indexOf(effort.segment.id) >= 0
+        && effort.segment.id !== cpConfig.canonicalSegmentId,
+    ),
+  });
+  expect(calculateLapsFromBoundaries(
+    actualCP.lapBoundariesSegmentEfforts,
+    cpConfig,
+  )).toEqual(3);
 });
