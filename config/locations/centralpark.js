@@ -10,6 +10,10 @@ module.exports = {
     longitude: -73.965355,
   },
   sectionSegmentIds: [],
+  /*
+   * 1. Start segments must be unique
+   * 2. Segments cannot contain start/finish of canonical lap
+   */
   lapBoundaries: [
     [ // E 72nd
       849072, // Cat's Paw
@@ -21,7 +25,7 @@ module.exports = {
     ],
     [ // Harlem end of CP
       12540076, // Top of Harlem Hill -> W 68th
-      1666631, // MOMA -> after Engineers Gate
+      3911767, // Before E 72nd to MOMA
     ],
     [ // anywhere between Harlem and W 72nd
       1541329, // W 78th -> E 79th (Bottom Half)
@@ -36,7 +40,7 @@ module.exports = {
       12540076, // Top of Harlem Hill to W 68th (ends before Tavern/67th)
     ],
     [ // Columbus Circle
-      10633522, // South Park to 102nd
+      7848923, // Alt. Horse Shit Alley
       12540076, // Top of Harlem Hill -> W 68th
     ],
     [ // 6th Ave -> 7th Ave
