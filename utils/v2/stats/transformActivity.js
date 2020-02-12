@@ -1,10 +1,10 @@
 const _find = require('lodash/find');
-const _includes = require('lodash/includes');
 const _flatten = require('lodash/flatten');
 const _uniq = require('lodash/uniq');
 const { locations: allLocations } = require('../../../config');
 const { findPotentialLocations } = require('../activityQueue/findPotentialLocations');
 const { getLocationNameFromSegmentId } = require('../locations');
+const { countFilteredLaps } = require('./countLaps');
 
 /**
  * Get array of unique segment IDs in lapBoundaries
@@ -294,7 +294,6 @@ function calculateLapsFromSegmentEfforts(
 /**
  * Calculate laps using new lapBoundaries technique
  * REQUIRES a unique start segment for each boundary pair
- * DOES NOT use canonicalSegmentId!
  *
  * @param {Array} efforts Segment Efforts for lapBoundaries and canonical segments
  * @param {Object} locConfig Config object for location
@@ -305,6 +304,7 @@ function calculateLapsFromBoundaries(efforts, locConfig) {
   const effortsSegmentIds = efforts.map((eff) => eff.segment.id);
   const {
     lapBoundaries = [],
+    canonicalSegmentId: canonicalId,
   } = locConfig;
 
   if (!lapBoundaries.length) {
@@ -312,30 +312,27 @@ function calculateLapsFromBoundaries(efforts, locConfig) {
   }
 
   // Array of segment IDs which are the start of a boundary pair
+  const boundaryStartIds = [];
   // Map of start segments to pairs
-  const potentialStartIds = [];
-  const potenialPairsByStartId = {};
+  const boundaryPairsMap = {};
   lapBoundaries.forEach((bounds) => {
-    potentialStartIds.push(bounds[0]);
-    potenialPairsByStartId[bounds[0]] = bounds;
+    boundaryStartIds.push(bounds[0]);
+    boundaryPairsMap[bounds[0]] = bounds;
   });
 
   // Find the start segment that appears first
   // Assumes start segments are unique!!
   const firstOccurringId = _find(
     effortsSegmentIds,
-    (id) => _includes(potentialStartIds, id),
-  );
-  // Filter for identified boundary pair
-  const boundaryPair = potenialPairsByStartId[firstOccurringId];
-  const filteredSegmentIds = effortsSegmentIds.filter(
-    (id) => _includes(boundaryPair, id),
+    (id) => boundaryStartIds.indexOf(id) !== -1,
   );
 
-  // Now look for start-end sequences
-  const lapRegex = new RegExp(`${boundaryPair[0]},${boundaryPair[1]}`, 'g');
-  const segmentIdsStr = filteredSegmentIds.join(',');
-  return (segmentIdsStr.match(lapRegex) || []).length;
+  // Filter for identified boundary pair or canonical segments
+  const boundaryPair = boundaryPairsMap[firstOccurringId];
+  const filteredSegmentIds = effortsSegmentIds.filter(
+    (id) => [...boundaryPair, canonicalId].indexOf(id) !== -1,
+  );
+  return countFilteredLaps(filteredSegmentIds, boundaryPair, canonicalId);
 }
 
 /**
