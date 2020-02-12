@@ -3,7 +3,7 @@ const { slackSuccess } = require('../utils/slackNotification');
 const { removeAthlete } = require('../utils/athleteUtils');
 // const refreshAthleteProfile = require('../utils/refreshAthlete/refreshAthleteProfile');
 const { handleActivityWebhook } = require('../utils/v2/activityQueue');
-
+const { captureSentry } = require('../utils/v2/services/sentry');
 /**
  * See https://developers.strava.com/docs/webhooks/
  */
@@ -120,9 +120,13 @@ async function handleEvent(req, res) {
     }
 
     if (object_type === 'athlete') {
-      slackSuccess('Received athlete webhook', req.body);
       if (updates.authorized === false) {
         await removeAthlete(owner_id, ['any']);
+        slackSuccess('Athlete deauthorized', { owner_id });
+        captureSentry('Athlete deauthorized', 'webhook', {
+          level: 'info',
+          extra: { athleteId: owner_id },
+        });
       } else {
         // Strava currently sends athlete webhooks only for deauthorization
         // but you never know...
@@ -134,8 +138,9 @@ async function handleEvent(req, res) {
       }
     }
   } catch (err) {
-    console.log(err.message);
-    slackError(110, JSON.stringify(req.body, null, 2));
+    captureSentry(err, 'webhook', {
+      extra: req.body,
+    });
   }
 }
 
