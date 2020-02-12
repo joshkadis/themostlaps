@@ -27,12 +27,11 @@ test('getLapBoundariesIds', () => {
     1397141,
     3911767,
     12540076,
-    1666631,
     1541329,
     9258510,
     20604213,
     4056892,
-    10633522,
+    7848923,
     1786662,
     11938482,
   ];
@@ -49,12 +48,11 @@ test('getAllSegmentIdsForLocation', () => {
     1397141,
     3911767,
     12540076,
-    1666631,
     1541329,
     9258510,
     20604213,
     4056892,
-    10633522,
+    7848923,
     1786662,
     11938482,
   ];
@@ -84,7 +82,7 @@ test('calculates laps using the lapBoundaries method', () => {
 
   // We got nothin
   expect(calculateLapsFromBoundaries(
-    makeEfforts([123, 12540076, 345, 3911767]),
+    makeEfforts([123, 12540076, 345, 1541329]),
     cpConfig,
   )).toEqual(0);
 
@@ -102,28 +100,28 @@ test('calculates laps using the lapBoundaries method', () => {
 
   // should only count multiple valid pairs as one lap
   expect(calculateLapsFromBoundaries(
-    makeEfforts([849072, 12540076, 1532085, 7169109, 1666631]),
+    makeEfforts([849072, 12540076, 1532085, 7169109, 3911767]),
     cpConfig,
   )).toEqual(1);
 
   // should count valid pair and mismatched pair as one lap
   expect(calculateLapsFromBoundaries(
-    makeEfforts([849072, 12540076, 1532085, 20604213, 1666631, 7169109]),
+    makeEfforts([849072, 12540076, 1532085, 20604213, 3911767, 7169109]),
     cpConfig,
   )).toEqual(1);
 
   // overlapping pairs with same end segment
   expect(calculateLapsFromBoundaries(
     makeEfforts([
-      10633522,
+      7848923,
       1786662,
       12540076,
       12540076,
-      10633522,
+      7848923,
       1786662,
       12540076,
       12540076,
-      10633522,
+      7848923,
       1786662,
       12540076,
       12540076,
@@ -180,18 +178,18 @@ test('filters segment efforts with both methods', () => {
     4435603,
     4362776,
     9699985,
-    10633522, // Start of Cental Park
+    7848923, // Start of Cental Park
     1786662,
     1532085,
     12540076,
     12540076,
-    10633522,
+    7848923,
     1532085,
     1786662,
     12540076,
     1532085,
     12540076,
-    10633522,
+    7848923,
     1786662,
     12540076,
     12540076,
@@ -232,8 +230,7 @@ test('filters segment efforts with both methods', () => {
     ),
     lapBoundariesSegmentEfforts: allEfforts.filter(
       (effort, idx) => idx !== 18
-        && getAllSegmentIdsForLocation('centralpark').indexOf(effort.segment.id) >= 0
-        && effort.segment.id !== cpConfig.canonicalSegmentId,
+        && getAllSegmentIdsForLocation('centralpark').indexOf(effort.segment.id) >= 0,
     ),
   });
   expect(calculateLapsFromBoundaries(

@@ -98,7 +98,8 @@ function formatSegmentEffort(effort, overrides) {
 }
 
 /**
- * Get all possible sequence of section segments by Id
+ * Get all possible sequence of section segments by ID
+ * To use with original lap calculation method
  *
  * @param {Number} canonicalId
  * @returns {Array} sequences
@@ -216,20 +217,29 @@ function filterSegmentEfforts(segmentEfforts, potentialLocations = []) {
         return;
       }
 
+      // Add everything to relevant segments
       relevantSegmentEfforts.push(effort);
 
-      if (getLapBoundariesIds(locName).indexOf(segmentIdForEffort) !== -1) {
+      const boundaryIds = getLapBoundariesIds(locName);
+      // Add lap boundary efforts if using lap boundaries method
+      if (boundaryIds.length
+        && boundaryIds.indexOf(segmentIdForEffort) !== -1
+      ) {
         lapBoundariesSegmentEfforts.push(effort);
       }
 
       if (segmentIdForEffort === canonicalSegmentId) {
+        // Add canonical segment efforts if using lap boundaries method
+        if (boundaryIds.length) {
+          lapBoundariesSegmentEfforts.push(effort);
+        }
         canonicalSegmentEfforts.push(effort);
       }
     });
   });
   // Now each location has:
   // relevantSegmentEfforts: Deduped array of all segment efforts for canonical lap, lap sections (v1), and lap boundaries (v2)
-  // lapBoundariesSegmentEfforts: Deduped array of all segment efforts for lap boundary segments (v2)
+  // lapBoundariesSegmentEfforts: Deduped array of all segment efforts for lap boundary segments (v2) and canonical lap
   // canonicalSegmentEfforts: Deduped array of all segment efforts for the canonical lap
   return filteredEfforts;
 }
