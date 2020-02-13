@@ -1,5 +1,4 @@
 const {
-  getSegmentSequences,
   calculateLapsFromSegmentEfforts,
   filterSegmentEfforts,
 } = require('./transformActivity');
@@ -20,15 +19,6 @@ const makeEfforts = (ids) => ids
 //   740668, // E Lake Drive
 // ],
 //
-test('getSegmentSequences', () => {
-  expect(getSegmentSequences(5313629)).toStrictEqual([
-    [613198, 4435603, 4362776, 9699985],
-    [4435603, 4362776, 9699985, 740668],
-    [4362776, 9699985, 740668, 613198],
-    [9699985, 740668, 613198, 4435603],
-    [740668, 613198, 4435603, 4362776],
-  ]);
-});
 
 test('calculateLapsFromSegmentEfforts', () => {
   // All partial segments surrounding 2 canonical laps => 3 laps
