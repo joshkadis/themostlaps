@@ -4,7 +4,7 @@ const { getColdLapsFromActivity } = require('../utils/stats/compileSpecialStats'
 const { fetchActivity, getActivityData } = require('../utils/refreshAthlete/utils');
 
 async function getActivityInfo(userId, activityId, fetch) {
-  const athleteDoc = await Athlete.findById(userId, 'access_token');
+  const athleteDoc = await Athlete.findById(userId);
   if (!athleteDoc) {
     console.log('Athete not found');
     process.exit(0);
