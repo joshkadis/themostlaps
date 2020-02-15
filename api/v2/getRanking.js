@@ -37,6 +37,7 @@ function getReqType(primary, secondary = '') {
     return primary;
   }
   // Year only
+  // @todo Validate years and months i.e. /2043/22
   if (/20\d{2}/.test(primary)) {
     if (!secondary) {
       return `byYear.${primary}`;
