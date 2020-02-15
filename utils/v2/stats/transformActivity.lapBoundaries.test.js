@@ -2,11 +2,11 @@ const cpConfig = require('../../../config/locations/centralpark');
 const ppConfig = require('../../../config/locations/prospectpark');
 
 const {
-  calculateLapsFromBoundaries,
+  calculateLapsFromDefinitions,
   calculateLapsFromSegmentEfforts,
   filterSegmentEfforts,
   getAllSegmentIdsForLocation,
-  getLapBoundariesIds,
+  getlapDefinitionsIds,
 } = require('./transformActivity');
 
 // Copied from transformActivity.test.js
@@ -17,9 +17,9 @@ const makeEfforts = (ids) => ids
     start_date: getIncrementedTimestamp(idx),
   }));
 
-test('getLapBoundariesIds', () => {
-  expect(getLapBoundariesIds('prospectpark')).toStrictEqual([]);
-  const actualCpIds = getLapBoundariesIds('centralpark');
+test('getlapDefinitionsIds', () => {
+  expect(getlapDefinitionsIds('prospectpark')).toStrictEqual([]);
+  const actualCpIds = getlapDefinitionsIds('centralpark');
   actualCpIds.sort();
   const expectedCpIds = [
     849072,
@@ -73,45 +73,45 @@ test('getAllSegmentIdsForLocation', () => {
   expect(actual).toStrictEqual(ppIds);
 });
 
-test('calculates laps using the lapBoundaries method', () => {
+test('calculates laps using the lapDefinitions method', () => {
   // basic example
-  expect(calculateLapsFromBoundaries(
+  expect(calculateLapsFromDefinitions(
     makeEfforts([849072, 1532085, 7169109]),
     cpConfig,
   )).toEqual(1);
 
   // We got nothin
-  expect(calculateLapsFromBoundaries(
+  expect(calculateLapsFromDefinitions(
     makeEfforts([123, 12540076, 345, 1541329]),
     cpConfig,
   )).toEqual(0);
 
   // Enter at Engineers Gate, do a lap, exit E 72nd
-  expect(calculateLapsFromBoundaries(
+  expect(calculateLapsFromDefinitions(
     makeEfforts([1397141, 1532085, 7169109]),
     cpConfig,
   )).toEqual(0);
 
-  // Just boundaries, no canonical
-  expect(calculateLapsFromBoundaries(
+  // Just definitions, no canonical
+  expect(calculateLapsFromDefinitions(
     makeEfforts([849072, 7169109]),
     cpConfig,
   )).toEqual(1);
 
-  // should only count multiple valid pairs as one lap
-  expect(calculateLapsFromBoundaries(
+  // should only count multiple valid definition sets as one lap
+  expect(calculateLapsFromDefinitions(
     makeEfforts([849072, 12540076, 1532085, 7169109, 3911767]),
     cpConfig,
   )).toEqual(1);
 
-  // should count valid pair and mismatched pair as one lap
-  expect(calculateLapsFromBoundaries(
+  // should count valid set and mismatched set as one lap
+  expect(calculateLapsFromDefinitions(
     makeEfforts([849072, 12540076, 1532085, 20604213, 3911767, 7169109]),
     cpConfig,
   )).toEqual(1);
 
-  // overlapping pairs with same end segment
-  expect(calculateLapsFromBoundaries(
+  // overlapping sets with same end segment
+  expect(calculateLapsFromDefinitions(
     makeEfforts([
       7848923,
       1786662,
@@ -155,7 +155,7 @@ test('calculates laps using the lapBoundaries method', () => {
     12540076,
     7169109, // third end
   ];
-  expect(calculateLapsFromBoundaries(
+  expect(calculateLapsFromDefinitions(
     makeEfforts(ids),
     cpConfig,
   )).toEqual(2);
@@ -203,7 +203,7 @@ test('filters segment efforts with both methods', () => {
     centralpark: actualCP,
   } = filterSegmentEfforts(allEfforts);
 
-  // Prospect Park does not use lap boundaries method
+  // Prospect Park does not use lap definitions method
   expect(actualPP).toStrictEqual({
     relevantSegmentEfforts: allEfforts.filter(
       (effort, idx) => idx !== 3 && idx !== 11 && getAllSegmentIdsForLocation('centralpark').indexOf(effort.segment.id) === -1,
@@ -212,7 +212,7 @@ test('filters segment efforts with both methods', () => {
       (effort, idx) => effort.segment.id === ppConfig.canonicalSegmentId
         && idx !== 3,
     ),
-    lapBoundariesSegmentEfforts: [],
+    lapDefinitionsSegmentEfforts: [],
   });
   expect(calculateLapsFromSegmentEfforts(
     actualPP.relevantSegmentEfforts,
@@ -220,7 +220,7 @@ test('filters segment efforts with both methods', () => {
     ppConfig.canonicalSegmentId,
   )).toEqual(3);
 
-  // Central Park uses lap boundaries method
+  // Central Park uses lap definitions method
   expect(actualCP).toStrictEqual({
     relevantSegmentEfforts: allEfforts.filter(
       (effort, idx) => idx !== 18 && getAllSegmentIdsForLocation('prospectpark').indexOf(effort.segment.id) === -1,
@@ -228,13 +228,13 @@ test('filters segment efforts with both methods', () => {
     canonicalSegmentEfforts: allEfforts.filter(
       (effort) => effort.segment.id === cpConfig.canonicalSegmentId,
     ),
-    lapBoundariesSegmentEfforts: allEfforts.filter(
+    lapDefinitionsSegmentEfforts: allEfforts.filter(
       (effort, idx) => idx !== 18
         && getAllSegmentIdsForLocation('centralpark').indexOf(effort.segment.id) >= 0,
     ),
   });
-  expect(calculateLapsFromBoundaries(
-    actualCP.lapBoundariesSegmentEfforts,
+  expect(calculateLapsFromDefinitions(
+    actualCP.lapDefinitionsSegmentEfforts,
     cpConfig,
   )).toEqual(3);
 });

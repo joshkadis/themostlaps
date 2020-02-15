@@ -142,7 +142,7 @@ test('filters segment efforts by location', () => {
           },
         ],
         relevantSegmentEfforts: allEfforts,
-        lapBoundariesSegmentEfforts: [],
+        lapDefinitionsSegmentEfforts: [],
       },
     });
 
@@ -185,12 +185,12 @@ test('filters segment efforts by location', () => {
         relevantSegmentEfforts: allEffortsWithDupes.filter(
           (effort, idx) => idx !== 3 && idx !== 11,
         ),
-        lapBoundariesSegmentEfforts: [],
+        lapDefinitionsSegmentEfforts: [],
       },
       centralpark: {
         canonicalSegmentEfforts: [],
         relevantSegmentEfforts: [],
-        lapBoundariesSegmentEfforts: [],
+        lapDefinitionsSegmentEfforts: [],
       },
     });
 });

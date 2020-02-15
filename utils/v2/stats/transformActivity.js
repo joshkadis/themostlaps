@@ -4,20 +4,20 @@ const { locations: allLocations } = require('../../../config');
 const { findPotentialLocations } = require('../activityQueue/findPotentialLocations');
 const {
   calculateLapsFromSegmentEfforts,
-  calculateLapsFromBoundaries,
+  calculateLapsFromDefinitions,
 } = require('./calculateLaps');
 
 /**
- * Get array of unique segment IDs in lapBoundaries
+ * Get array of unique segment IDs in lapDefinitions
  *
  * @param {String} locName
  * @return {Array}
  */
-const getLapBoundariesIds = (locName) => {
+const getlapDefinitionsIds = (locName) => {
   const {
-    lapBoundaries = [],
+    lapDefinitions = [],
   } = allLocations[locName];
-  return _uniq(_flatten(lapBoundaries));
+  return _uniq(_flatten(lapDefinitions));
 };
 
 /**
@@ -34,14 +34,14 @@ function getAllSegmentIdsForLocation(loc) {
   const {
     canonicalSegmentId,
     sectionSegmentIds = [],
-    lapBoundaries = [],
+    lapDefinitions = [],
   } = allLocations[loc];
-  const lapBoundariesIds = _flatten(lapBoundaries);
+  const lapDefinitionsIds = _flatten(lapDefinitions);
 
   return _uniq([
     canonicalSegmentId,
     ...sectionSegmentIds,
-    ...lapBoundariesIds,
+    ...lapDefinitionsIds,
   ]);
 }
 
@@ -139,13 +139,13 @@ function isDuplicateEffort(newEffort, prevEfforts) {
 }
 
 /**
- * Filter and dedupe all segment efforts by canonicalSegmentId, sectionSegmentIds, lapBoundaries
+ * Filter and dedupe all segment efforts by canonicalSegmentId, sectionSegmentIds, lapDefinitions
  *
  * @param {Array} segmentEfforts
  * @param {Array} potentialLocations Optional. Specify location names to look for
  * @returns {Object} locations
  * @returns {Array} locations[locName].canonicalSegmentEfforts
- * @returns {Array} locations[locName].lapBoundariesSegmentEfforts
+ * @returns {Array} locations[locName].lapDefinitionsSegmentEfforts
  * @returns {Array} locations[locName].relevantSegmentEfforts
  */
 function filterSegmentEfforts(segmentEfforts, potentialLocations = []) {
@@ -161,7 +161,7 @@ function filterSegmentEfforts(segmentEfforts, potentialLocations = []) {
     acc[locName] = {
       relevantSegmentEfforts: [],
       canonicalSegmentEfforts: [],
-      lapBoundariesSegmentEfforts: [],
+      lapDefinitionsSegmentEfforts: [],
     };
     return acc;
   }, {});
@@ -182,7 +182,7 @@ function filterSegmentEfforts(segmentEfforts, potentialLocations = []) {
       const { canonicalSegmentId } = allLocations[locName];
       const {
         relevantSegmentEfforts,
-        lapBoundariesSegmentEfforts,
+        lapDefinitionsSegmentEfforts,
         canonicalSegmentEfforts,
       } = filteredEfforts[locName];
 
@@ -197,12 +197,12 @@ function filterSegmentEfforts(segmentEfforts, potentialLocations = []) {
       // Add everything to relevant segments
       relevantSegmentEfforts.push(effort);
 
-      const boundaryIds = getLapBoundariesIds(locName);
-      // Add lap boundary efforts if using lap boundaries method
-      if (boundaryIds.length
-        && boundaryIds.indexOf(segmentIdForEffort) !== -1
+      const definitionIds = getlapDefinitionsIds(locName);
+      // Add lap definition efforts if using lap definitions method
+      if (definitionIds.length
+        && definitionIds.indexOf(segmentIdForEffort) !== -1
       ) {
-        lapBoundariesSegmentEfforts.push(effort);
+        lapDefinitionsSegmentEfforts.push(effort);
       }
 
       if (segmentIdForEffort === canonicalSegmentId) {
@@ -211,8 +211,8 @@ function filterSegmentEfforts(segmentEfforts, potentialLocations = []) {
     });
   });
   // Now each location has:
-  // relevantSegmentEfforts: Deduped array of all segment efforts for canonical lap, lap sections (v1), and lap boundaries (v2)
-  // lapBoundariesSegmentEfforts: Deduped array of all segment efforts for lap boundary segments (v2)
+  // relevantSegmentEfforts: Deduped array of all segment efforts for canonical lap, lap sections (v1), and lap definitions (v2)
+  // lapDefinitionsSegmentEfforts: Deduped array of all segment efforts for lap definition segments (v2)
   // canonicalSegmentEfforts: Deduped array of all segment efforts for the canonical lap
   return filteredEfforts;
 }
@@ -246,19 +246,19 @@ function getStatsFromRawActivity(activity) {
       const {
         canonicalSegmentEfforts = [],
         relevantSegmentEfforts = [],
-        lapBoundariesSegmentEfforts = [],
+        lapDefinitionsSegmentEfforts = [],
       } = filteredEfforts[locName];
 
       const locConfig = allLocations[locName];
       let laps = canonicalSegmentEfforts.length;
-      // Prefer calculate with newer lap boundaries method
+      // Prefer calculate with newer lap definitions method
       if (
-        locConfig.lapBoundaries
-        && locConfig.lapBoundaries.length
-        && lapBoundariesSegmentEfforts.length
+        locConfig.lapDefinitions
+        && locConfig.lapDefinitions.length
+        && lapDefinitionsSegmentEfforts.length
       ) {
-        laps = calculateLapsFromBoundaries(
-          lapBoundariesSegmentEfforts,
+        laps = calculateLapsFromDefinitions(
+          lapDefinitionsSegmentEfforts,
           locConfig,
         );
       } else {
@@ -318,5 +318,5 @@ module.exports = {
   filterSegmentEfforts,
   formatActivity,
   formatSegmentEffort,
-  getLapBoundariesIds,
+  getlapDefinitionsIds,
 };

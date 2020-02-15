@@ -18,7 +18,7 @@ module.exports = {
    * - Additional segments should not overlap the entry point
    * - Guard against cut-throughs for partial laps 🤓
    */
-  lapBoundaries: [
+  lapDefinitions: [
     // E 72nd
     [849072, 12540076, 7169109],
     // Engineers Gate

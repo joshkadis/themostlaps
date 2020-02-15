@@ -28,13 +28,13 @@ function getSegmentSequences(canonicalId) {
 
 /**
  * Counts laps from segment IDs that have been filtered to include
- * boundary start-mid-end segments
+ * definition start-mid-end segments
  *
  * @param {Array} filteredSegmentIds Array of segment IDs
- * @param {Array} boundarySegments Segment IDs
- * @param {Number} boundarySegments[0] ID of start segment
- * @param {Number} boundarySegments[1] ID of middle segment
- * @param {Number} boundarySegments[2] ID of end segment
+ * @param {Array} definitionSegments Segment IDs
+ * @param {Number} definitionSegments[0] ID of start segment
+ * @param {Number} definitionSegments[1] ID of middle segment
+ * @param {Number} definitionSegments[2] ID of end segment
  * @returns {Number} Number of laps completed
  */
 function countFilteredLaps(
@@ -47,47 +47,47 @@ function countFilteredLaps(
 }
 
 /**
- * Calculate laps using new lapBoundaries technique
- * REQUIRES a unique start segment for each boundary pair
+ * Calculate laps using new lapDefinitions technique
+ * REQUIRES a unique start segment for each definition set
  *
- * @param {Array} efforts Segment Efforts for lapBoundaries and canonical segments
+ * @param {Array} efforts Segment Efforts for lapDefinitions and canonical segments
  * @param {Object} locConfig Config object for location
  * @returns {Number}
  */
-function calculateLapsFromBoundaries(efforts, locConfig) {
+function calculateLapsFromDefinitions(efforts, locConfig) {
   // Segment IDs corresponding to segment efforts
   const effortsSegmentIds = efforts.map((eff) => eff.segment.id);
   const {
-    lapBoundaries = [],
+    lapDefinitions = [],
     canonicalSegmentId: canonicalId,
   } = locConfig;
 
-  if (!lapBoundaries.length) {
+  if (!lapDefinitions.length) {
     return 0;
   }
 
-  // Array of segment IDs which are the start of a boundary pair
-  const boundaryStartIds = [];
-  // Map of start segments to pairs
-  const boundaryPairsMap = {};
-  lapBoundaries.forEach((bounds) => {
-    boundaryStartIds.push(bounds[0]);
-    boundaryPairsMap[bounds[0]] = bounds;
+  // Array of segment IDs which are the start of a definition set
+  const definitionStartIds = [];
+  // Map of start segments to definition sets
+  const definitionPairsMap = {};
+  lapDefinitions.forEach((bounds) => {
+    definitionStartIds.push(bounds[0]);
+    definitionPairsMap[bounds[0]] = bounds;
   });
 
   // Find the start segment that appears first
   // Assumes start segments are unique!!
   const firstOccurringId = _find(
     effortsSegmentIds,
-    (id) => boundaryStartIds.indexOf(id) !== -1,
+    (id) => definitionStartIds.indexOf(id) !== -1,
   );
 
-  // Filter for identified boundary pair or canonical segments
-  const boundaryPair = boundaryPairsMap[firstOccurringId];
+  // Filter for identified definition set or canonical segments
+  const definitionPair = definitionPairsMap[firstOccurringId];
   const filteredSegmentIds = effortsSegmentIds.filter(
-    (id) => [...boundaryPair, canonicalId].indexOf(id) !== -1,
+    (id) => [...definitionPair, canonicalId].indexOf(id) !== -1,
   );
-  return countFilteredLaps(filteredSegmentIds, boundaryPair, canonicalId);
+  return countFilteredLaps(filteredSegmentIds, definitionPair, canonicalId);
 }
 
 /**
@@ -138,7 +138,7 @@ function calculateLapsFromSegmentEfforts(
 }
 
 module.exports = {
-  calculateLapsFromBoundaries,
+  calculateLapsFromDefinitions,
   calculateLapsFromSegmentEfforts,
   countFilteredLaps,
   getSegmentSequences,
