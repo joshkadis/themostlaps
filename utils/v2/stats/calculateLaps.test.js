@@ -196,6 +196,7 @@ test('calculates laps using the lapDefinitions method', () => {
 
   // kitchen sink
   const ids = [
+    849072, // incomplete start
     849072, // first start
     1532085,
     9258510,
@@ -218,6 +219,11 @@ test('calculates laps using the lapDefinitions method', () => {
     9258510,
     12540076,
     7169109, // third end
+    9258510,
+    12540076, // incomplete lap segment 2
+    1397141,
+    1532085,
+    7169109, // incomplete lap segment 3
   ];
   expect(calculateLapsFromDefinitions(
     makeEfforts(ids),
