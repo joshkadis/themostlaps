@@ -9,7 +9,7 @@ module.exports = {
   devFetchActivities: 10,
   lapSegmentId: 5313629, // Prospect Park Race Lap
   // sectionSegmentIds is deprecated
-  // use lapBoundaries instead for new locations
+  // use lapDefinitions instead for new locations
   sectionSegmentIds: [
     613198, // Prospect Park hill
     4435603, // Top of Prospect Park

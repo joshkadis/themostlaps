@@ -8,7 +8,6 @@ const { daysAgoTimestamp } = require('./utils');
 const Athlete = require('../schema/Athlete');
 const Activity = require('../schema/Activity');
 const refreshAthlete = require('../utils/refreshAthlete');
-const getActivityInfo = require('./getActivityInfo');
 const { refreshAthletes } = require('../utils/scheduleNightlyRefresh');
 const { mongooseConnectionOptions } = require('../config/mongodb');
 const calculateColdLaps = require('./calculateColdLaps');
@@ -130,13 +129,6 @@ const callbackRefreshMany = async ({ users }) => {
   );
 };
 
-const callbackActivityInfo = async ({ user, activity, fetch }) => {
-  await doCommand(
-    false,
-    () => getActivityInfo(user, activity, fetch),
-  );
-};
-
 const callbackRefreshBatch = async ({ limit, skip, activities }) => {
   await doCommand(
     `Enter admin code to refresh batch of ${limit} athletes with offset ${skip}`,
@@ -248,7 +240,6 @@ module.exports = {
   callbackDeleteUserActivities,
   callbackRefreshUser,
   callbackRefreshMany,
-  callbackActivityInfo,
   callbackRefreshBatch,
   callbackRetryWebhooks,
   callbackColdLaps,

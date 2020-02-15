@@ -1,6 +1,7 @@
 const { setupThenCommand: dedupeCommand } = require('./dedupe');
 const { setupThenCommand: queueCommand } = require('./queue');
 const { setupThenCommand: ingestCommand } = require('./ingest');
+const { setupThenCommand: activityInfoCommand } = require('./info');
 
 module.exports = {
   command: [
@@ -19,6 +20,10 @@ module.exports = {
 
       case 'ingest':
         ingestCommand(args);
+        break;
+
+      case 'info':
+        activityInfoCommand(args);
         break;
 
       default:

@@ -7,7 +7,6 @@ const {
   callbackDeleteUserActivities,
   callbackRefreshUser,
   callbackRefreshMany,
-  callbackActivityInfo,
   callbackRefreshBatch,
   callbackUpdateSubscriptions,
   callbackRetryWebhooks,
@@ -72,19 +71,6 @@ const setupArgv = require('yargs')
       ['users', { type: 'array' }],
     ),
     async (argv) => callbackRefreshMany(argv),
-  )
-  /**
-   * Get info for a specific activity
-   */
-  .command(
-    'activityinfo user activity [--fetch]',
-    false,
-    createPositionals(
-      ['user', { type: 'number' }],
-      ['activity', { type: 'number' }],
-      ['fetch', { type: 'boolean', default: false }],
-    ),
-    async (argv) => callbackActivityInfo(argv),
   )
   /**
    * Process batch of athletes w/ simulated nightly refresh

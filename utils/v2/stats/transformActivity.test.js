@@ -1,8 +1,15 @@
+const cpConfig = require('../../../config/locations/centralpark');
+const ppConfig = require('../../../config/locations/prospectpark');
+
 const {
-  getSegmentSequences,
-  calculateLapsFromSegmentEfforts,
   filterSegmentEfforts,
+  getlapDefinitionsIds,
+  getAllSegmentIdsForLocation,
 } = require('./transformActivity');
+const {
+  calculateLapsFromDefinitions,
+  calculateLapsFromSegmentEfforts,
+} = require('./calculateLaps');
 
 const getIncrementedTimestamp = (idx) => `2018-02-${10 + idx * 2}T16:12:41Z`;
 const makeEfforts = (ids) => ids
@@ -11,116 +18,65 @@ const makeEfforts = (ids) => ids
     start_date: getIncrementedTimestamp(idx),
   }));
 
-// lapSegmentId: 5313629, // Prospect Park Race Lap
-// sectionSegmentIds: [
-//   613198, // Prospect Park hill
-//   4435603, // Top of Prospect Park
-//   4362776, // Prospect Pure Downhill
-//   9699985, // Sprint between the lights
-//   740668, // E Lake Drive
-// ],
-//
-test('getSegmentSequences', () => {
-  expect(getSegmentSequences(5313629)).toStrictEqual([
-    [613198, 4435603, 4362776, 9699985],
-    [4435603, 4362776, 9699985, 740668],
-    [4362776, 9699985, 740668, 613198],
-    [9699985, 740668, 613198, 4435603],
-    [740668, 613198, 4435603, 4362776],
-  ]);
+
+test('getlapDefinitionsIds', () => {
+  expect(getlapDefinitionsIds('prospectpark')).toStrictEqual([]);
+  const actualCpIds = getlapDefinitionsIds('centralpark');
+  actualCpIds.sort();
+  const expectedCpIds = [
+    849072,
+    7169109,
+    11938517,
+    1397141,
+    643782,
+    3911767,
+    12540076,
+    1541329,
+    9258510,
+    20604213,
+    4056892,
+    7848923,
+    1786662,
+    11938482,
+  ];
+  expectedCpIds.sort();
+  expect(actualCpIds).toEqual(expectedCpIds);
 });
+test('getAllSegmentIdsForLocation', () => {
+  let actual = getAllSegmentIdsForLocation('centralpark');
+  actual.sort();
+  const cpIds = [
+    1532085,
+    849072,
+    7169109,
+    1397141,
+    3911767,
+    11938517,
+    12540076,
+    1541329,
+    9258510,
+    20604213,
+    4056892,
+    643782,
+    7848923,
+    1786662,
+    11938482,
+  ];
+  cpIds.sort();
+  expect(actual).toStrictEqual(cpIds);
 
-test('calculateLapsFromSegmentEfforts', () => {
-  // All partial segments surrounding 2 canonical laps => 3 laps
-  let allEfforts = makeEfforts([
-    740668,
-    613198,
+  actual = getAllSegmentIdsForLocation('prospectpark');
+  actual.sort();
+  const ppIds = [
     5313629,
-    4435603,
-    4362776,
-    9699985,
-    740668,
-    613198,
-    5313629,
-    4435603,
-    4362776,
-    9699985,
-  ]);
-  expect(calculateLapsFromSegmentEfforts(allEfforts, 2, 5313629))
-    .toEqual(3);
-
-  // 4 of 5 partial segments surrounding 2 canonical laps => 3 laps
-  allEfforts = makeEfforts([
-    613198,
-    5313629,
-    4435603,
-    4362776,
-    9699985,
-    740668,
-    613198,
-    5313629,
-    4435603,
-    4362776,
-    9699985,
-  ]);
-  expect(calculateLapsFromSegmentEfforts(allEfforts, 2, 5313629))
-    .toEqual(3);
-
-  // 3 of 5 partial segments surrounding 2 canonical laps => 2 laps
-  allEfforts = makeEfforts([
-    613198,
-    5313629,
-    4435603,
-    4362776,
-    9699985,
-    740668,
-    613198,
-    5313629,
-    4435603,
-    4362776,
-  ]);
-  expect(calculateLapsFromSegmentEfforts(allEfforts, 2, 5313629))
-    .toEqual(2);
-
-  // 4 of 5 partial segments surrounding 1 canonical laps => 2 laps
-  allEfforts = makeEfforts([
-    613198,
-    5313629,
-    4435603,
-    4362776,
-    9699985,
-  ]);
-  expect(calculateLapsFromSegmentEfforts(allEfforts, 1, 5313629))
-    .toEqual(2);
-
-  // 3 of 5 partial segments surrounding 1 canonical laps => 1 laps
-  allEfforts = makeEfforts([
-    613198,
-    5313629,
-    4435603,
-    4362776,
-  ]);
-  expect(calculateLapsFromSegmentEfforts(allEfforts, 1, 5313629))
-    .toEqual(1);
-
-  // 4 of 5 partial segments surrounding 0 canonical laps => 1 laps
-  allEfforts = makeEfforts([
-    613198,
-    4435603,
-    4362776,
-    9699985,
-  ]);
-  expect(calculateLapsFromSegmentEfforts(allEfforts, 0, 5313629))
-    .toEqual(1);
-
-  // 3 of 5 partial segments surrounding 0 canonical laps => 0 laps
-  allEfforts = makeEfforts([
-    613198,
-    4435603,
-    4362776,
-  ]);
-  expect(calculateLapsFromSegmentEfforts(allEfforts, 0, 5313629))
-    .toEqual(0);
+    613198, // Prospect Park hill
+    4435603, // Top of Prospect Park
+    4362776, // Prospect Pure Downhill
+    9699985, // Sprint between the lights
+    740668, // E Lake Drive
+  ];
+  ppIds.sort();
+  expect(actual).toStrictEqual(ppIds);
 });
 
 test('filters segment efforts by location', () => {
@@ -152,7 +108,7 @@ test('filters segment efforts by location', () => {
           },
         ],
         relevantSegmentEfforts: allEfforts,
-        lapBoundariesSegmentEfforts: [],
+        lapDefinitionsSegmentEfforts: [],
       },
     });
 
@@ -195,12 +151,91 @@ test('filters segment efforts by location', () => {
         relevantSegmentEfforts: allEffortsWithDupes.filter(
           (effort, idx) => idx !== 3 && idx !== 11,
         ),
-        lapBoundariesSegmentEfforts: [],
+        lapDefinitionsSegmentEfforts: [],
       },
       centralpark: {
         canonicalSegmentEfforts: [],
         relevantSegmentEfforts: [],
-        lapBoundariesSegmentEfforts: [],
+        lapDefinitionsSegmentEfforts: [],
       },
     });
+});
+
+test('filters segment efforts with both methods', () => {
+  // Use some PP segments, some CP segments, some dupes
+  const allEfforts = makeEfforts([
+    740668,
+    613198,
+    5313629,
+    5313629,
+    4435603,
+    4362776,
+    9699985,
+    740668,
+    613198,
+    5313629,
+    4435603,
+    4435603,
+    4362776,
+    9699985,
+    7848923, // Start of Cental Park
+    1786662,
+    1532085,
+    12540076,
+    12540076,
+    7848923,
+    1532085,
+    1786662,
+    12540076,
+    1532085,
+    12540076,
+    7848923,
+    1786662,
+    12540076,
+    12540076,
+    1532085,
+  ]);
+  allEfforts[3].start_date = allEfforts[2].start_date;
+  allEfforts[11].start_date = allEfforts[10].start_date;
+  allEfforts[18].start_date = allEfforts[17].start_date;
+  const {
+    prospectpark: actualPP,
+    centralpark: actualCP,
+  } = filterSegmentEfforts(allEfforts);
+
+  // Prospect Park does not use lap definitions method
+  expect(actualPP).toStrictEqual({
+    relevantSegmentEfforts: allEfforts.filter(
+      (effort, idx) => idx !== 3 && idx !== 11 && getAllSegmentIdsForLocation('centralpark').indexOf(effort.segment.id) === -1,
+    ),
+    canonicalSegmentEfforts: allEfforts.filter(
+      (effort, idx) => effort.segment.id === ppConfig.canonicalSegmentId
+        && idx !== 3,
+    ),
+    lapDefinitionsSegmentEfforts: [],
+  });
+  expect(calculateLapsFromSegmentEfforts(
+    actualPP.relevantSegmentEfforts,
+    2,
+    ppConfig.canonicalSegmentId,
+  )).toEqual(3);
+
+  // Central Park uses lap definitions method
+  expect(actualCP).toStrictEqual({
+    relevantSegmentEfforts: allEfforts.filter(
+      (effort, idx) => idx !== 18 && getAllSegmentIdsForLocation('prospectpark').indexOf(effort.segment.id) === -1,
+    ),
+    canonicalSegmentEfforts: allEfforts.filter(
+      (effort) => effort.segment.id === cpConfig.canonicalSegmentId,
+    ),
+    lapDefinitionsSegmentEfforts: allEfforts.filter(
+      (effort, idx) => idx !== 18
+        && effort.segment.id !== cpConfig.canonicalSegmentId
+        && getAllSegmentIdsForLocation('centralpark').indexOf(effort.segment.id) >= 0,
+    ),
+  });
+  expect(calculateLapsFromDefinitions(
+    actualCP.lapDefinitionsSegmentEfforts,
+    cpConfig,
+  )).toEqual(3);
 });
