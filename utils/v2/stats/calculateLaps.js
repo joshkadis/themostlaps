@@ -31,7 +31,7 @@ function getSegmentSequences(canonicalId) {
  * definition start-mid-end segments
  *
  * @param {Array} filteredSegmentIds Array of segment IDs
- * @param {Array} definitionSegments Segment IDs
+ * @param {Array} definitionSegments Segment IDs defining a lap from a single entry point
  * @param {Number} definitionSegments[0] ID of start segment
  * @param {Number} definitionSegments[1] ID of middle segment
  * @param {Number} definitionSegments[2] ID of end segment
@@ -39,9 +39,9 @@ function getSegmentSequences(canonicalId) {
  */
 function countFilteredLaps(
   filteredSegmentIds,
-  [startId, midId, endId],
+  definitionSet,
 ) {
-  const lapRegex = new RegExp([startId, midId, endId].join(','), 'g');
+  const lapRegex = new RegExp(definitionSet.join(','), 'g');
   const matches = filteredSegmentIds.join(',').match(lapRegex) || [];
   return matches.length;
 }
@@ -50,7 +50,7 @@ function countFilteredLaps(
  * Calculate laps using new lapDefinitions technique
  * REQUIRES a unique start segment for each definition set
  *
- * @param {Array} efforts Segment Efforts for lapDefinitions and canonical segments
+ * @param {Array} efforts Segment Efforts for lapDefinitions
  * @param {Object} locConfig Config object for location
  * @returns {Number}
  */
@@ -59,7 +59,6 @@ function calculateLapsFromDefinitions(efforts, locConfig) {
   const effortsSegmentIds = efforts.map((eff) => eff.segment.id);
   const {
     lapDefinitions = [],
-    canonicalSegmentId: canonicalId,
   } = locConfig;
 
   if (!lapDefinitions.length) {
@@ -69,10 +68,10 @@ function calculateLapsFromDefinitions(efforts, locConfig) {
   // Array of segment IDs which are the start of a definition set
   const definitionStartIds = [];
   // Map of start segments to definition sets
-  const definitionPairsMap = {};
+  const definitionSetsMap = {};
   lapDefinitions.forEach((bounds) => {
     definitionStartIds.push(bounds[0]);
-    definitionPairsMap[bounds[0]] = bounds;
+    definitionSetsMap[bounds[0]] = bounds;
   });
 
   // Find the start segment that appears first
@@ -82,12 +81,12 @@ function calculateLapsFromDefinitions(efforts, locConfig) {
     (id) => definitionStartIds.indexOf(id) !== -1,
   );
 
-  // Filter for identified definition set or canonical segments
-  const definitionPair = definitionPairsMap[firstOccurringId];
+  // Filter for identified definition set
+  const definitionSet = definitionSetsMap[firstOccurringId];
   const filteredSegmentIds = effortsSegmentIds.filter(
-    (id) => [...definitionPair, canonicalId].indexOf(id) !== -1,
+    (id) => definitionSet.indexOf(id) !== -1,
   );
-  return countFilteredLaps(filteredSegmentIds, definitionPair, canonicalId);
+  return countFilteredLaps(filteredSegmentIds, definitionSet);
 }
 
 /**

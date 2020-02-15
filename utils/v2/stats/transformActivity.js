@@ -1,3 +1,4 @@
+
 const _flatten = require('lodash/flatten');
 const _uniq = require('lodash/uniq');
 const { locations: allLocations } = require('../../../config');
