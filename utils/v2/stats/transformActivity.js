@@ -275,7 +275,8 @@ function getStatsFromRawActivity(activity) {
         .map(formatSegmentEffort);
 
       const result = {
-        laps,
+        // If for some reason we have more canonical laps than calculated laps, go with that
+        laps: laps < segment_efforts.length ? segment_efforts.length : laps,
         location: locName,
         segment_efforts,
       };
