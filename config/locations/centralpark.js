@@ -11,18 +11,22 @@ module.exports = {
   },
   sectionSegmentIds: [],
   /*
-   * 1. Start segments must be unique
-   * 2. Segments cannot contain start/finish of canonical lap
+   * Lap Definitions
+   * - Start segments correspond to ciurcuit entry points
+   * - Start segments MUST be unique
+   * - Include as many additional segments as need to define a complete lap
+   * - Additional segments should not overlap the entry point
+   * - Guard against cut-throughs for partial laps 🤓
    */
   lapBoundaries: [
     // E 72nd
-    [849072, 7169109],
+    [849072, 12540076, 7169109],
     // Engineers Gate
-    [1397141, 3911767],
+    [11938517, 1541329],
     // Harlem end of CP
-    [12540076, 3911767],
+    [12540076, 643782],
     // anywhere between Harlem and W 72nd
-    [1541329, 1397141],
+    [1541329, 643782, 1397141],
     // W 72nd
     [9258510, 20604213],
     // W 67th
@@ -32,6 +36,6 @@ module.exports = {
     // 6th Ave -> 7th Ave
     [1786662, 12540076],
     // 5th Ave and Central Park South
-    [7169109, 11938482],
+    [3911767, 1397141, 11938482],
   ],
 };
