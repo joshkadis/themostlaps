@@ -140,6 +140,9 @@ test('getSegmentSequences', () => {
     [9699985, 740668, 613198, 4435603],
     [740668, 613198, 4435603, 4362776],
   ]);
+
+  expect(getSegmentSequences(1532085)).toStrictEqual([]);
+  expect(getSegmentSequences(9999)).toStrictEqual([]);
 });
 
 
