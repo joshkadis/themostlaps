@@ -82,11 +82,11 @@ async function initApiRoutes(server) {
     );
   });
 
-  server.get('/api/v2/ranking/:type', async (req, res) => {
+  server.get('/api/v2/ranking/:reqPrimary/:reqSecondary?', async (req, res) => {
     await handleAPIRequest(
       req,
       res,
-      async ({ params: { type }, query }) => v2GetRanking(type, query),
+      async ({ params, query }) => v2GetRanking(params, query),
     );
   });
 }

@@ -31,9 +31,31 @@ function formatAthleteForRanking(athlete, reqType, reqLocation) {
   };
 }
 
+function getReqType(primary, secondary = '') {
+  // Top-level request
+  if (['allTime', 'single', 'numActivities'].indexOf(primary) !== -1) {
+    return primary;
+  }
+  // Year only
+  if (/20\d{2}/.test(primary)) {
+    if (!secondary) {
+      return `byYear.${primary}`;
+    }
+    // Year and month
+    if (/\d{2}/.test(secondary)) {
+      const monthIdx = Number(secondary) - 1;
+      return `byMonth.${primary}.${monthIdx}`;
+    }
+  }
+  // Invalid request
+  return false;
+}
 
 async function getRanking(
-  reqType,
+  {
+    reqPrimary,
+    reqSecondary = '',
+  },
   {
     location: reqLocation = 'unspecified',
     page = '1',
@@ -47,15 +69,12 @@ async function getRanking(
       data: `Invalid location: ${reqLocation}`,
     };
   }
-  // validate request type
-  if (reqType !== 'allTime') {
-    return {
-      error: true,
-      data: `Invalid location: ${JSON.stringify(reqLocation)}`,
-    };
-  }
+
+  const reqType = getReqType(reqPrimary, reqSecondary);
 
   const locQueryKey = `stats.locations.${reqLocation}.${reqType}`;
+
+  // @todo Return error for invalid param or just set to default?
   const limit = /\d+/.test(perPage.toString())
     ? Number(perPage)
     : ATHLETES_PER_PAGE;
