@@ -12,6 +12,12 @@ const { getLocationNameFromSegmentId } = require('../locations');
  */
 function getSegmentSequences(canonicalId) {
   const locName = getLocationNameFromSegmentId(canonicalId);
+  if (!allLocations[locName].sectionSegmentIds
+    || !allLocations[locName].sectionSegmentIds.length
+  ) {
+    return [];
+  }
+
   const sectionIds = [...allLocations[locName].sectionSegmentIds];
   const numSections = sectionIds.length;
   const sequences = [];
