@@ -4,12 +4,13 @@
  * @param {Object} query
  * @returns {String}
  */
-function getQueryPath(
-  [reqPrimary = 'allTime', reqSecondary = ''],
+function getApiQueryPath(
+  [reqPrimary = '', reqSecondary = ''],
 ) {
-  return `/${reqPrimary}${reqSecondary ? `/${reqSecondary}` : ''}`;
+  // @todo Update from actual month
+  return `/v2/ranking/${reqPrimary}/01`;
 }
 
 module.exports = {
-  getQueryPath,
+  getApiQueryPath,
 };

@@ -50,11 +50,12 @@ app.prepare()
     const primaryRankings = allowedRankingTypes.join('|');
 
     server.get(
-      `^\\/ranking\\/(${primaryRankings}|\\d{4})?\\/(\\d{2})?$`,
+      `/ranking/:reqPrimary(${primaryRankings}|\\d{4})?/:reqSecondary(\\d{2})?`,
       (req, res) => {
-        app.render(req, res, '/ranking', {
+        app.render(req, res, '/ranking_v2', {
           query: req.query,
           params: req.params,
+        });
       },
     );
 
