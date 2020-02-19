@@ -10,12 +10,12 @@ const { defaultLocation } = require('./config');
 const { mongooseConnectionOptions } = require('./config/mongodb');
 const { initSentry } = require('./utils/v2/services/sentry');
 const { initializeActivityQueue } = require('./utils/v2/activityQueue');
+const { allowedRankingTypes } = require('./api/apiConfig');
 
 // Route handlers
 const handleSignupCallback = require('./server/handleSignupCallback');
 const initApiRoutes = require('./server/initApiRoutes');
 const initWebhookRoutes = require('./server/initWebhookRoutes');
-const getRankingParams = require('./utils/getRankingParams');
 
 // Services
 initSentry();
@@ -47,18 +47,16 @@ app.prepare()
       });
     });
 
-    server.get(/^\/ranking\/(allTime|single|[\d]{4,4})?\/?(\d{2,2})?$/, (req, res) => {
-      const params = getRankingParams(req.params);
-      if (!params.type) {
-        res.statusCode = 404;
-        app.render(req, res, '/_error', {});
-      } else {
+    const primaryRankings = allowedRankingTypes.join('|');
+
+    server.get(
+      `^\\/ranking\\/(${primaryRankings}|\\d{4})?\\/(\\d{2})?$`,
+      (req, res) => {
         app.render(req, res, '/ranking', {
-          ...req.query,
-          params,
-        });
-      }
-    });
+          query: req.query,
+          params: req.params,
+      },
+    );
 
     server.get('/rider/:athleteId(\\d+)/:currentLocation?', async (req, res) => {
       const athleteId = parseInt(req.params.athleteId, 10);

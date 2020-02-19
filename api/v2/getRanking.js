@@ -1,8 +1,7 @@
 const _get = require('lodash/get');
 const Athlete = require('../../schema/Athlete');
 const { isValidLocation } = require('../../utils/v2/locations');
-
-const ATHLETES_PER_PAGE = 15;
+const { rankingPerPage } = require('../apiConfig');
 
 function formatAthleteForRanking(athlete, reqType, reqLocation) {
   const {
@@ -60,7 +59,7 @@ async function getRanking(
   {
     location: reqLocation = 'unspecified',
     page = '1',
-    perPage = ATHLETES_PER_PAGE,
+    perPage = rankingPerPage,
   },
 ) {
   // validate location
@@ -78,7 +77,7 @@ async function getRanking(
   // @todo Return error for invalid param or just set to default?
   const limit = /\d+/.test(perPage.toString())
     ? Number(perPage)
-    : ATHLETES_PER_PAGE;
+    : rankingPerPage;
   const skip = /\d+/.test(page.toString())
     ? limit * (Number(page) - 1)
     : 0;

@@ -2,8 +2,7 @@ module.exports = {
   allowedRankingTypes: [
     'allTime',
     'single',
-    'special',
-    'timePeriod',
+    'activities',
   ],
   allowedSpecialFilters: [
     'giro2018',
