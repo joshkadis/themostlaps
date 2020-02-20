@@ -10,14 +10,12 @@ const { defaultLocation } = require('./config');
 const { mongooseConnectionOptions } = require('./config/mongodb');
 const { initSentry } = require('./utils/v2/services/sentry');
 const { initializeActivityQueue } = require('./utils/v2/activityQueue');
-const { isValidLocation } = require('./utils/v2/locations');
-const { allowedRankingTypes } = require('./api/apiConfig');
 
 // Route handlers
 const handleSignupCallback = require('./server/handleSignupCallback');
 const initApiRoutes = require('./server/initApiRoutes');
 const initWebhookRoutes = require('./server/initWebhookRoutes');
-
+const handleRankingRoute = require('./server/ranking');
 // Services
 initSentry();
 
@@ -30,7 +28,7 @@ const handle = app.getRequestHandler();
  * because we need to account for both
  * Next frontend and non-Next backend/API routes
  */
- app.prepare()
+app.prepare()
   .then(() => {
     const server = express();
     server.use(bodyParser.json());
@@ -45,13 +43,7 @@ const handle = app.getRequestHandler();
     /**
      * Next.js routing
      */
-    server.get(/^\/ranking\/(giro2018|cold2019)$/, (req, res) => {
-      app.render(req, res, '/ranking', {
-        ...req.query,
-        type: 'special',
-        filter: req.params[0],
-      });
-    });
+    handleRankingRoute(server, app.render);
 
     server.get('/rider/:athleteId(\\d+)/:currentLocation?', async (req, res) => {
       const athleteId = parseInt(req.params.athleteId, 10);
