@@ -10,6 +10,7 @@ const { defaultLocation } = require('./config');
 const { mongooseConnectionOptions } = require('./config/mongodb');
 const { initSentry } = require('./utils/v2/services/sentry');
 const { initializeActivityQueue } = require('./utils/v2/activityQueue');
+const { isValidLocation } = require('./utils/v2/locations');
 const { allowedRankingTypes } = require('./api/apiConfig');
 
 // Route handlers
@@ -48,13 +49,36 @@ app.prepare()
     });
 
     const primaryRankings = allowedRankingTypes.join('|');
-
+    const primaryRegex = new RegExp(`${primaryRankings}|\\d{4}`)
     server.get(
-      `/ranking/:reqPrimary(${primaryRankings}|\\d{4})?/:reqSecondary(\\d{2})?`,
+      `/ranking/:location?/:reqPrimary?/:reqSecondary(\\d{2})?`,
       (req, res) => {
+        const { params } = req;
+        const renderParams = {};
+        Cases:
+        - /ranking
+        - /ranking/year
+        - /ranking/month
+        - ranking/location
+        - ranking/location/year
+        - ranking/location/year/month
+        - ranking/invalid...
+
+        if ( Object.keys(params).length === 0) {
+          // no params, all good
+        }
+        else if (params.location) {
+          if (isValidLocation(params.location)) {
+            // location only, all good
+          } else if (primaryRegex.test(params.location)) {
+
+            renderParams.location = defaultLocation;
+            renderParams.reqPrimary = params.location;
+          }
+        }
         app.render(req, res, '/ranking_v2', {
-          query: req.query,
-          params: req.params,
+          ...req.query,
+          ...req.params,
         });
       },
     );

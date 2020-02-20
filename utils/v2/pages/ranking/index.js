@@ -8,7 +8,7 @@ function getApiQueryPath(
   [reqPrimary = '', reqSecondary = ''],
 ) {
   // @todo Update from actual month
-  return `/v2/ranking/${reqPrimary}/01`;
+  return `/v2/ranking/${reqPrimary}${/\d+/.test(reqPrimary) ? '/01' : ''}`;
 }
 
 module.exports = {

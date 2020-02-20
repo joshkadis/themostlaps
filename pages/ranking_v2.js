@@ -30,28 +30,27 @@ class RankingPage extends Component {
     };
   }
 
-  static async getInitialProps({ query = {}, params = {} }) {
+  static async getInitialProps({ query }) {
     const defaultDate = new Date();
     const {
       reqPrimary = defaultDate.getFullYear(),
       reqSecondary = monthString(defaultDate.getMonth() + 1),
-    } = query;
-    const {
       location = defaultLocation,
-    } = params;
+    } = query;
 
     const apiQueryPath = getApiQueryPath([reqPrimary, reqSecondary]);
     return APIRequest(
       apiQueryPath,
-      { location },
+      {
+        location,
+        ...query,
+      },
       [], // @todo Add default response
     )
-      .then(({ ranking }) => {
-        return {
-          rankedAthletes: ranking,
-          location,
-        };
-      });
+      .then(({ ranking }) => ({
+        rankedAthletes: ranking,
+        location,
+      }));
   }
 
   render() {
