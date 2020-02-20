@@ -1,92 +1,47 @@
-/**
- * Translate provided params correct format
- * @param {Object} params
- * @returns {Object}
- */
-function formatParamsForRender(params) {
-  const {
-    location: param1 = false,
-    reqPrimary: param2 = false,
-    reqSecondary: param3 = false,
-  } = params;
+const { defaultLocation } = require('../config');
+const { allowedRankingTypes } = require('../api/apiConfig');
+const { getLocationNames } = require('../utils/v2/locations');
 
-  // /ranking
-  if (!param1) {
-    return {};
-  }
+const locationsReStr = getLocationNames().join('|');
+const yearReStr = '(?:20[12]\\d)';
+const monthReStr = '(?:0\\d)|1[0-2]';
+const rankingTypeReStr = `${allowedRankingTypes.join('|')}|${yearReStr}`;
 
-  // /ranking/<location>/<reqPrimary>/<reqSecondary>
-  if (param3) {
-    return params;
-  }
-
-  if (isValidLocation(param1)) {
-    if (param2) {
-      // /ranking/<location>/<reqPrimary>
-      return {
-        location: param1,
-        reqPrimary: param2,
-      };
-    }
-    // /ranking/<location>
-    return { location: param1 };
-  }
-
-  if (param2) {
-    // /ranking/<reqPrimary>/<reqSecondary>
-    return {
-      location: defaultLocation,
-      reqPrimary: param1,
-      reqSecondary: param2,
-    };
-  }
-
-  // /ranking/<reqPrimary>
-  return {
-    location: defaultLocation,
-    reqPrimary: param1,
-  };
-}
 
 /**
  * Handle requests for `ranking` routes
  */
-const primaryRankings = allowedRankingTypes.join('|');
-const primaryRegex = new RegExp(`${primaryRankings}|\\d{4}`)
-
 function handleRankingRoute(server, renderCallback) {
+  server.get('/ranking', (req, res) => {
+    res.redirect(301, `/ranking/${defaultLocation}`);
+  });
+
   server.get(
-    '/ranking/:location?/:reqPrimary?/:reqSecondary(\\d{2})?',
+    `/ranking/:location(${locationsReStr})/:reqPrimary($|${rankingTypeReStr})/:reqSecondary($|${monthReStr})`,
     (req, res) => {
-      const { params } = req;
-      const renderParams = formatParamsForRender(params);
+      res.send(JSON.stringify(req.params));
+      // renderCallback(req, res, '/ranking_v2', {
+      //   query: req.query,
+      //   params: req.params,
+      // });
+    },
+  );
 
+  server.get(
+    `/ranking/:type(${allowedRankingTypes.join('|')})`,
+    ({ params: { type, filter = false } }, res) => {
+      // redirect to /ranking/{defaultLocation}/{rankingType}?/{rankingFilter}
+      res.redirect(301, `/ranking/${defaultLocation}/${type}${filter ? `/${filter}` : ''}`);
+    },
+  );
 
+  server.get(
+    `/ranking/:year(${yearReStr})/:month(${monthReStr})?`,
+    ({ params: { year, month = false } }, res) => {
+      // redirect to /ranking/{defaultLocation}/{rankingType}?/{rankingFilter}
+      res.redirect(301, `/ranking/${defaultLocation}/${year}${month ? `/${month}` : ''}`);
+    },
+  );
+}
 
-     Cases:
-     - /ranking/year
-     - ranking/location
-     - ranking/invalid...
-
-     if ( Object.keys(params).length === 0) {
-       // no params, all good
-     }
-     else if (params.location) {
-       if (isValidLocation(params.location)) {
-         // location only, all good
-       } else if (primaryRegex.test(params.location)) {
-
-         renderParams.location = defaultLocation;
-         renderParams.reqPrimary = params.location;
-       }
-     }
-     app.render(req, res, '/ranking_v2', {
-       ...req.query,
-       ...req.params,
-     });
-   },
- );
-
-module.exports = {
-  handleRankingRoute,
-};
+module.exports = handleRankingRoute;
