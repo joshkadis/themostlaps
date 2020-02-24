@@ -15,7 +15,7 @@ const { initializeActivityQueue } = require('./utils/v2/activityQueue');
 const handleSignupCallback = require('./server/handleSignupCallback');
 const initApiRoutes = require('./server/initApiRoutes');
 const initWebhookRoutes = require('./server/initWebhookRoutes');
-const handleRankingRoute = require('./server/ranking');
+const { handleRankingRoute } = require('./server/ranking');
 // Services
 initSentry();
 

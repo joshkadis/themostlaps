@@ -1,6 +1,9 @@
 const { defaultLocation } = require('../config');
 const { allowedRankingTypes } = require('../api/apiConfig');
-const { getLocationNames } = require('../utils/v2/locations');
+const {
+  getLocationNames,
+  isValidLocation,
+} = require('../utils/v2/locations');
 
 const locationsReStr = getLocationNames().join('|');
 const yearReStr = '(?:20[12]\\d)';
@@ -12,16 +15,28 @@ const yearReStr = '(?:20[12]\\d)';
  * @param {String} params.reqSecondary
  * @returns {Bool}
  */
-function requestParamsAreValid({ reqPrimary = '', reqSecondary = '' }) {
-  const primaryIsValidType = reqPrimary && reqPrimary.match(
-    new RegExp(`(${allowedRankingTypes.join('|')}`),
+function requestParamsAreValid({
+  location = '',
+  reqPrimary = '',
+  reqSecondary = '',
+}) {
+  if (!isValidLocation(location)) {
+    return false;
+  }
+  if (!reqPrimary && !reqSecondary) {
+    return true;
+  }
+
+  const primaryIsValidType = reqPrimary && reqPrimary.toString().match(
+    new RegExp(`(${allowedRankingTypes.join('|')})`),
   );
-  const primaryIsValidYear = reqPrimary && reqPrimary.match(
-    /(?:20[12]\d)/,
-  );
-  const secondaryIsValidMonth = !reqSecondary || reqSecondary.match(
-    /(?:(?:0\d)|1[0-2])/,
-  );
+  const primaryIsValidYear = reqPrimary
+    && parseInt(reqPrimary, 10) >= 2010
+    && parseInt(reqPrimary, 10) <= 2019;
+
+  const secondaryIsValidMonth = !reqSecondary
+    || (parseInt(reqSecondary, 10) >= 1
+    && parseInt(reqSecondary, 10) <= 12);
 
   if (
     (primaryIsValidType && !reqSecondary) // /ranking/single
@@ -80,4 +95,7 @@ function handleRankingRoute(server, renderCallback) {
   );
 }
 
-module.exports = handleRankingRoute;
+module.exports = {
+  handleRankingRoute,
+  requestParamsAreValid,
+};

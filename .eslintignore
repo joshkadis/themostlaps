@@ -16,6 +16,7 @@ dist/
 !server/initWebhookRoutes.js
 !server/handleSignupCallback.js
 !server/ranking.js
+!server/ranking.test.js
 !schema/**/*.js
 !api/**/*.js
 !cli/callbacks.js
