@@ -6,11 +6,11 @@ const {
 } = require('../utils/v2/locations');
 
 const locationsReStr = getLocationNames().join('|');
-const yearReStr = '(?:20[12]\\d)';
 
 /**
  * Validate reqPrimary and reqSecondary
  *
+ * @param {String} params.location Pass true to automatically validate
  * @param {String} params.reqPrimary
  * @param {String} params.reqSecondary
  * @returns {Bool}
@@ -20,7 +20,7 @@ function requestParamsAreValid({
   reqPrimary = '',
   reqSecondary = '',
 }) {
-  if (!isValidLocation(location)) {
+  if (!isValidLocation(location) && location !== true) {
     return false;
   }
   if (!reqPrimary && !reqSecondary) {
@@ -66,15 +66,22 @@ function handleRankingRoute(server, renderCallback) {
 
   // year and optional month
   server.get(
-    `/ranking/:year(${yearReStr})/:month?`,
+    '/ranking/:year(\\d+)/:month?',
     (req, res) => {
-      const { params: { year, month = '' } } = req;
+      const { params } = req;
       // Validate month because regex not working with optional param
-      if (month && !/(?:(?:0\d)|1[0-2])/.test(month)) {
-        // 404
+      if (!requestParamsAreValid({
+        ...params,
+        location: true,
+      })) {
+        res.statusCode = 404;
+        renderCallback(req, res, '/_error', {});
         return;
       }
-      res.redirect(301, `/ranking/${defaultLocation}/${year}/${month}`);
+      res.redirect(
+        301,
+        `/ranking/${defaultLocation}/${params.year}/${params.month || ''}`,
+      );
     },
   );
 
@@ -83,7 +90,8 @@ function handleRankingRoute(server, renderCallback) {
     (req, res) => {
       const { params } = req;
       if (!requestParamsAreValid(params)) {
-        // 404
+        res.statusCode = 404;
+        renderCallback(req, res, '/_error', {});
         return;
       }
 
