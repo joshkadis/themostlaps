@@ -5,6 +5,7 @@ const {
   isValidLocation,
 } = require('../utils/v2/locations');
 
+const RANKING_PAGE_NAME = 'ranking_v2';
 const locationsReStr = getLocationNames().join('|');
 
 /**
@@ -95,7 +96,7 @@ function handleRankingRoute(server, renderCallback) {
         return;
       }
 
-      renderCallback(req, res, '/ranking_v2', {
+      renderCallback(req, res, `/${RANKING_PAGE_NAME}`, {
         query: req.query,
         params: req.params,
       });
