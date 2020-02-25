@@ -2,10 +2,14 @@ import { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'next/router';
 
-import { getApiQueryPath } from '../utils/v2/pages/ranking';
+import {
+  getApiQueryPath,
+  getPageTitle,
+} from '../utils/v2/pages/ranking';
 import { APIRequest } from '../utils';
 import { timePartString as monthString } from '../utils/dateTimeUtils';
 import { defaultLocation } from '../config';
+import Layout from '../components/Layout';
 
 class RankingPage extends Component {
   static defaultProps = {
@@ -16,11 +20,11 @@ class RankingPage extends Component {
   static propTypes = {
     location: PropTypes.string,
     rankedAthletes: PropTypes.array,
+    reqPrimary: PropTypes.string.required,
+    reqSecondary: PropTypes.string.required,
   };
 
-  state = {
-
-  };
+  state = {};
 
   constructor(props) {
     super(props);
@@ -68,34 +72,11 @@ class RankingPage extends Component {
 
   render() {
     const {
-      location,
-    } = this.props;
-    const {
       pageTitle,
-      rankedAthletes,
-      shouldDisableShowMore,
-      onClickShowMore,
     } = this.state;
     return (
-      <Layout
-        pathname={pathname}
-        query={query}
-      >
+      <Layout>
         <h1>{pageTitle}</h1>
-        <LocationHero {...location} />
-        <RankingSelector current={query} />
-        {rankedAthletes.length
-          ? <Fragment>
-              <RankingTable {...rankedAthletes}/>
-              <Button
-                disabled={shouldDisableShowMore}
-                onClick={onClickShowMore}
-              >
-                Show more
-              </Button>
-            </Fragment>
-          : <p>Sorry, no ranking for this view. 😞</p>
-        }
       </Layout>
     );
   }
