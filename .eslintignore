@@ -52,7 +52,7 @@ dist/
 !utils/server/**/*.js
 
 # V2 Pages
-!pages/*_v2.js
+# !pages/*_v2.js
 
 # Components
 !components/Navigation.js

@@ -28,6 +28,7 @@ class RankingPage extends Component {
       rankedAthletes: props.rankedAthletes,
       location: props.location,
     };
+    this.setPageTitle();
   }
 
   static async getInitialProps({ query }) {
@@ -50,15 +51,52 @@ class RankingPage extends Component {
       .then(({ ranking }) => ({
         rankedAthletes: ranking,
         location,
+        reqPrimary,
+        reqSecondary,
       }));
   }
 
+  setPageTitle() {
+    const {
+      reqPrimary: primary,
+      reqSecondary: secondary,
+    } = this.props;
+    this.setState({
+      pageTitle: getPageTitle(primary, secondary),
+    });
+  }
+
   render() {
+    const {
+      location,
+    } = this.props;
+    const {
+      pageTitle,
+      rankedAthletes,
+      shouldDisableShowMore,
+      onClickShowMore,
+    } = this.state;
     return (
-      <div>
-        <p>{JSON.stringify(this.state)}</p>
-        <p>{JSON.stringify(this.props)}</p>
-      </div>
+      <Layout
+        pathname={pathname}
+        query={query}
+      >
+        <h1>{pageTitle}</h1>
+        <LocationHero {...location} />
+        <RankingSelector current={query} />
+        {rankedAthletes.length
+          ? <Fragment>
+              <RankingTable {...rankedAthletes}/>
+              <Button
+                disabled={shouldDisableShowMore}
+                onClick={onClickShowMore}
+              >
+                Show more
+              </Button>
+            </Fragment>
+          : <p>Sorry, no ranking for this view. 😞</p>
+        }
+      </Layout>
     );
   }
 }
