@@ -1,12 +1,6 @@
 const { defaultLocation } = require('../config');
 const { allowedRankingTypes } = require('../api/apiConfig');
-const {
-  getLocationNames,
-  isValidLocation,
-} = require('../utils/v2/locations');
-
-const RANKING_PAGE_NAME = 'ranking_v2';
-const locationsReStr = getLocationNames().join('|');
+const { isValidLocation } = require('../utils/v2/locations');
 
 /**
  * Validate reqPrimary and reqSecondary
@@ -83,23 +77,6 @@ function handleRankingRoute(server, renderCallback) {
         301,
         `/ranking/${defaultLocation}/${params.year}/${params.month || ''}`,
       );
-    },
-  );
-
-  server.get(
-    `/ranking/:location(${locationsReStr})/:reqPrimary?/:reqSecondary?`,
-    (req, res) => {
-      const { params } = req;
-      if (!requestParamsAreValid(params)) {
-        res.statusCode = 404;
-        renderCallback(req, res, '/_error', {});
-        return;
-      }
-
-      renderCallback(req, res, `/${RANKING_PAGE_NAME}`, {
-        query: req.query,
-        params: req.params,
-      });
     },
   );
 }

@@ -10,16 +10,21 @@ const { defaultLocation } = require('./config');
 const { mongooseConnectionOptions } = require('./config/mongodb');
 const { initSentry } = require('./utils/v2/services/sentry');
 const { initializeActivityQueue } = require('./utils/v2/activityQueue');
+const { getLocationNames } = require('./utils/v2/locations');
 
 // Route handlers
 const handleSignupCallback = require('./server/handleSignupCallback');
 const initApiRoutes = require('./server/initApiRoutes');
 const initWebhookRoutes = require('./server/initWebhookRoutes');
-const { handleRankingRoute } = require('./server/ranking');
+const {
+  requestParamsAreValid,
+  handleRankingRoute,
+} = require('./server/ranking');
 // Services
 initSentry();
 
 // Next.js setup
+const locationsReStr = getLocationNames().join('|');
 const app = next({ dev: process.env.NODE_ENV !== 'production' });
 const handle = app.getRequestHandler();
 
@@ -44,6 +49,22 @@ app.prepare()
      * Next.js routing
      */
     handleRankingRoute(server, app.render);
+    server.get(
+      `/ranking/:location(${locationsReStr})/:reqPrimary?/:reqSecondary?`,
+      (req, res) => {
+        const { params } = req;
+        if (!requestParamsAreValid(params)) {
+          res.statusCode = 404;
+          app.render(req, res, '/_error', {});
+          return;
+        }
+
+        app.render(req, res, '/ranking_v2', {
+          query: req.query,
+          params: req.params,
+        });
+      },
+    );
 
     server.get('/rider/:athleteId(\\d+)/:currentLocation?', async (req, res) => {
       const athleteId = parseInt(req.params.athleteId, 10);
