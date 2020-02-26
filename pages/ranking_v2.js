@@ -20,8 +20,8 @@ class RankingPage extends Component {
   static propTypes = {
     location: PropTypes.string,
     rankedAthletes: PropTypes.array,
-    reqPrimary: PropTypes.string.required,
-    reqSecondary: PropTypes.string.required,
+    reqPrimary: PropTypes.string.isRequired,
+    reqSecondary: PropTypes.string.isRequired,
   };
 
   state = {};
@@ -31,14 +31,14 @@ class RankingPage extends Component {
     this.state = {
       rankedAthletes: props.rankedAthletes,
       location: props.location,
+      pageTitle: getPageTitle(props.reqPrimary, props.reqSecondary),
     };
-    this.setPageTitle();
   }
 
   static async getInitialProps({ query }) {
     const defaultDate = new Date();
     const {
-      reqPrimary = defaultDate.getFullYear(),
+      reqPrimary = defaultDate.getFullYear().toString(),
       reqSecondary = monthString(defaultDate.getMonth() + 1),
       location = defaultLocation,
     } = query;
@@ -58,16 +58,6 @@ class RankingPage extends Component {
         reqPrimary,
         reqSecondary,
       }));
-  }
-
-  setPageTitle() {
-    const {
-      reqPrimary: primary,
-      reqSecondary: secondary,
-    } = this.props;
-    this.setState({
-      pageTitle: getPageTitle(primary, secondary),
-    });
   }
 
   render() {
