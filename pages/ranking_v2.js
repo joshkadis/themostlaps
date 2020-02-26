@@ -9,7 +9,9 @@ import {
 import { APIRequest } from '../utils';
 import { timePartString as monthString } from '../utils/dateTimeUtils';
 import { defaultLocation } from '../config';
+
 import Layout from '../components/Layout';
+import LocationHero from '../components/pages/ranking/LocationHero';
 
 class RankingPage extends Component {
   static defaultProps = {
@@ -29,8 +31,6 @@ class RankingPage extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      rankedAthletes: props.rankedAthletes,
-      location: props.location,
       pageTitle: getPageTitle(props.reqPrimary, props.reqSecondary),
     };
   }
@@ -62,11 +62,16 @@ class RankingPage extends Component {
 
   render() {
     const {
+      location,
+    } = this.props;
+
+    const {
       pageTitle,
     } = this.state;
     return (
       <Layout>
         <h1>{pageTitle}</h1>
+        <LocationHero {...location} />
       </Layout>
     );
   }

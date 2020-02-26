@@ -58,6 +58,7 @@ dist/
 !components/Navigation.js
 !components/RiderPageHeader.js
 !components/layouts/**/*.js
+!components/pages/**/*.js
 
 # Confic
 !config/index.js
