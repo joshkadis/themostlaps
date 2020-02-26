@@ -35,20 +35,20 @@ class RankingPage extends Component {
     };
   }
 
-  static async getInitialProps({ query }) {
+  static async getInitialProps({ query: { params } }) {
     const defaultDate = new Date();
     const {
       reqPrimary = defaultDate.getFullYear().toString(),
       reqSecondary = monthString(defaultDate.getMonth() + 1),
       location = defaultLocation,
-    } = query;
+    } = params;
 
     const apiQueryPath = getApiQueryPath([reqPrimary, reqSecondary]);
     return APIRequest(
       apiQueryPath,
       {
         location,
-        ...query,
+        ...params,
       },
       [], // @todo Add default response
     )
