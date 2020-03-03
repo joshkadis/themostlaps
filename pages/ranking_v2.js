@@ -12,11 +12,13 @@ import { defaultLocation } from '../config';
 
 import Layout from '../components/Layout';
 import LocationHero from '../components/pages/ranking/LocationHero';
+import RankingTable from '../components/pages/ranking/RankingTable';
 
 class RankingPage extends Component {
   static defaultProps = {
     location: defaultLocation,
     rankedAthletes: [],
+    statsKey: 'allTime',
   };
 
   static propTypes = {
@@ -24,6 +26,7 @@ class RankingPage extends Component {
     rankedAthletes: PropTypes.array,
     reqPrimary: PropTypes.string.isRequired,
     reqSecondary: PropTypes.string.isRequired,
+    statsKey: PropTypes.string,
   };
 
   state = {};
@@ -52,17 +55,20 @@ class RankingPage extends Component {
       },
       [], // @todo Add default response
     )
-      .then(({ ranking }) => ({
+      .then(({ ranking, statsKey }) => ({
         rankedAthletes: ranking,
         location,
         reqPrimary,
         reqSecondary,
+        statsKey,
       }));
   }
 
   render() {
     const {
       location,
+      rankedAthletes = [],
+      statsKey,
     } = this.props;
 
     const {
@@ -72,6 +78,14 @@ class RankingPage extends Component {
       <Layout>
         <h1>{pageTitle}</h1>
         <LocationHero {...location} />
+        {
+          rankedAthletes.length
+            ? <RankingTable
+                rankedAthletes={rankedAthletes}
+                statsKey={statsKey}
+              />
+            : <p>No ranking for this view.</p>
+        }
       </Layout>
     );
   }
