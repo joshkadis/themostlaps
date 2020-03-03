@@ -19,6 +19,7 @@ class RankingPage extends Component {
     location: defaultLocation,
     rankedAthletes: [],
     statsKey: 'allTime',
+    asPath: '/prospectpark',
   };
 
   static propTypes = {
@@ -27,6 +28,7 @@ class RankingPage extends Component {
     reqPrimary: PropTypes.string.isRequired,
     reqSecondary: PropTypes.string.isRequired,
     statsKey: PropTypes.string,
+    asPath: PropTypes.string,
   };
 
   state = {};
@@ -38,7 +40,7 @@ class RankingPage extends Component {
     };
   }
 
-  static async getInitialProps({ query: { params } }) {
+  static async getInitialProps({ query: { params }, asPath }) {
     const defaultDate = new Date();
     const {
       reqPrimary = defaultDate.getFullYear().toString(),
@@ -61,6 +63,7 @@ class RankingPage extends Component {
         reqPrimary,
         reqSecondary,
         statsKey,
+        asPath,
       }));
   }
 
@@ -69,13 +72,14 @@ class RankingPage extends Component {
       location,
       rankedAthletes = [],
       statsKey,
+      asPath,
     } = this.props;
 
     const {
       pageTitle,
     } = this.state;
     return (
-      <Layout>
+      <Layout pathname={asPath}>
         <h1>{pageTitle}</h1>
         <LocationHero {...location} />
         {
