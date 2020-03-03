@@ -81,7 +81,7 @@ class RankingPage extends Component {
     return (
       <Layout pathname={asPath}>
         <h1>{pageTitle}</h1>
-        <LocationHero {...location} />
+        <LocationHero location={location} />
         {
           rankedAthletes.length
             ? <RankingTable
