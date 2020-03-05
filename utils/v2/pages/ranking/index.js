@@ -8,16 +8,19 @@ const PAGE_TITLES = {
 };
 
 /**
- * Get API query path from Express params
+ * Get API query path from Express request params
+ * Assume that Express routing has already validated params
  *
- * @param {Object} query
+ * @param {String} reqPrimary
+ * @param {String} reqSecondary
  * @returns {String}
  */
-function getApiQueryPath(
-  [reqPrimary = '', reqSecondary = ''],
-) {
-  // @todo Update from actual month
-  return `/v2/ranking/${reqPrimary}${/\d+/.test(reqPrimary) ? '/01' : ''}`;
+function getApiQueryPath(reqPrimary = '', reqSecondary = '') {
+  // Assume reqPrimary is a valid type (e.g. 'single') or YYYY
+  // and reqSecondary is a valid MM string if it's provided
+  const shouldUseMonth = /\d{4}/.test(reqPrimary) && /\d{2}/.test(reqSecondary);
+
+  return `/v2/ranking/${reqPrimary}${shouldUseMonth ? `/${reqSecondary}` : ''}`;
 }
 
 /**

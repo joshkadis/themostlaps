@@ -1,4 +1,21 @@
-const { getPageTitle } = require('./index');
+const {
+  getPageTitle,
+  getApiQueryPath,
+} = require('./index');
+
+test('getApiQueryPath', () => {
+  expect(getApiQueryPath('single'))
+    .toEqual('/v2/ranking/single');
+
+  expect(getApiQueryPath('single', '12'))
+    .toEqual('/v2/ranking/single');
+
+  expect(getApiQueryPath('2009'))
+    .toEqual('/v2/ranking/2009');
+
+  expect(getApiQueryPath('2009', '11'))
+    .toEqual('/v2/ranking/2009/11');
+});
 
 test('getPageTitle', () => {
   // Make sure the defined titles work

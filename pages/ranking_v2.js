@@ -31,6 +31,7 @@ class RankingPage extends Component {
     reqSecondary: PropTypes.string.isRequired,
     statsKey: PropTypes.string,
     asPath: PropTypes.string,
+    apiQueryPath: PropTypes.string.isRequired,
   };
 
   state = {
@@ -55,7 +56,7 @@ class RankingPage extends Component {
       location = defaultLocation,
     } = params;
 
-    const apiQueryPath = getApiQueryPath([reqPrimary, reqSecondary]);
+    const apiQueryPath = getApiQueryPath(reqPrimary, reqSecondary);
     return APIRequest(
       apiQueryPath,
       {
@@ -71,6 +72,7 @@ class RankingPage extends Component {
         reqSecondary,
         statsKey,
         asPath,
+        apiQueryPath,
       }));
   }
 
@@ -84,12 +86,11 @@ class RankingPage extends Component {
       return;
     }
     const {
-      reqPrimary,
-      reqSecondary,
       location,
+      apiQueryPath,
     } = this.props;
     APIRequest(
-      getApiQueryPath([reqPrimary, reqSecondary]),
+      apiQueryPath,
       { location, page: nextPage, perPage: rankingPerPage },
       [],
     ).then(({ ranking }) => {
