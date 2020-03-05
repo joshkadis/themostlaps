@@ -18,7 +18,7 @@ const initApiRoutes = require('./server/initApiRoutes');
 const initWebhookRoutes = require('./server/initWebhookRoutes');
 const {
   requestParamsAreValid,
-  handleRankingRoute,
+  handleRankingRouteRedirects,
 } = require('./server/ranking');
 // Services
 initSentry();
@@ -48,7 +48,7 @@ app.prepare()
     /**
      * Next.js routing
      */
-    handleRankingRoute(server, app.render);
+    handleRankingRouteRedirects(server, app.render);
     server.get(
       `/ranking/:location(${locationsReStr})/:reqPrimary?/:reqSecondary?`,
       (req, res) => {

@@ -45,7 +45,7 @@ function requestParamsAreValid({
 /**
  * Handle requests for `ranking` routes
  */
-function handleRankingRoute(server, renderCallback) {
+function handleRankingRouteRedirects(server, renderCallback) {
   server.get('/ranking', (req, res) => {
     res.redirect(301, `/ranking/${defaultLocation}`);
   });
@@ -82,6 +82,6 @@ function handleRankingRoute(server, renderCallback) {
 }
 
 module.exports = {
-  handleRankingRoute,
+  handleRankingRouteRedirects,
   requestParamsAreValid,
 };
