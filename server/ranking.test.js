@@ -16,6 +16,12 @@ test('ranking parameters validation', () => {
     reqPrimary: 'single',
   })).toBe(true);
 
+  // Should be case-insensitive
+  expect(requestParamsAreValid({
+    location: 'prospectpark',
+    reqPrimary: 'SinGlE',
+  })).toBe(true);
+
   expect(requestParamsAreValid({
     location: 'prospectpark',
     reqPrimary: 'single',

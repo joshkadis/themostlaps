@@ -23,8 +23,9 @@ function requestParamsAreValid({
   }
 
   const primaryIsValidType = reqPrimary && reqPrimary.toString().match(
-    new RegExp(`(${allowedRankingTypes.join('|')})`),
+    new RegExp(`(${allowedRankingTypes.join('|')})`, 'i'),
   );
+
   const primaryIsValidYear = reqPrimary
     && parseInt(reqPrimary, 10) >= 2010
     && parseInt(reqPrimary, 10) <= 2019;
