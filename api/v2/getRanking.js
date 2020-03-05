@@ -32,11 +32,23 @@ function formatAthleteForRanking(athlete, reqType, reqLocation) {
 
 function getReqType(primary, secondary = '') {
   // Top-level request
-  if (['allTime', 'single', 'numActivities'].indexOf(primary) !== -1) {
-    return primary;
+  if (['alltime', 'single', 'numactivities'].indexOf(primary.toLowerCase()) !== -1) {
+    // @hack! We want the `?location` param in the API url to be case-insensitive
+    // but we need to convert to a DB field that _is_ case-sensitive
+    switch (primary.toLowerCase()) {
+      case 'single':
+        return 'single';
+
+      case 'numactivities':
+        return 'numActivities';
+
+      default: // Can only be 'alltime' in the if statement above
+        return 'allTime';
+    }
   }
   // Year only
-  // @todo Validate years and months i.e. /2043/22
+  // @todo Validate years and months within acceptable ranges
+  //  i.e. don't allow /2043/22
   if (/20\d{2}/.test(primary)) {
     if (!secondary) {
       return `byYear.${primary}`;
@@ -57,12 +69,13 @@ async function getRanking(
     reqSecondary = '',
   },
   {
-    location: reqLocation = 'unspecified',
+    location = 'unspecified',
     page = '1',
     perPage = rankingPerPage,
   },
 ) {
   // validate location
+  const reqLocation = location.toLowerCase();
   if (!reqLocation || !isValidLocation(reqLocation)) {
     return {
       error: true,
