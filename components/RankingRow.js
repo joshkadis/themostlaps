@@ -17,7 +17,7 @@ const RankingRow = ({
   <tr className="big">
     <td className={classNames(
       { biggest: rank === 1, bigger: rank !== 1 },
-      { [styles['ranking-row__first']]: rank === 1 }
+      { [styles['ranking-row__first']]: rank === 1 },
     )}>
       {rank}
     </td>
@@ -47,7 +47,7 @@ RankingRow.propTypes = {
   lastname: PropTypes.string.isRequired,
   img: PropTypes.string.isRequired,
   value: PropTypes.number.isRequired,
-  unit: PropTypes.string
+  unit: PropTypes.string,
 };
 
 export default RankingRow;

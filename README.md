@@ -10,8 +10,9 @@ Find out at https://themostlaps.com
   * [ESLint](#eslint)
   * [Babel](#babel)
   * [Webpack](#webpack)
-- [Other stuff](#other-stuff)
-  * [V2 stats data structure](#v2-stats-data-structure)
+- [V2 API](#v2-api)
+  * [Athletes](#athletes)
+  * [Ranking](#ranking)
 
 <!-- tocstop -->
 
@@ -27,6 +28,10 @@ Find out at https://themostlaps.com
 * Hotfixes on master should be pushed down to `development`
 * Merge in features branches with Pull Requests
 * Automated deployment to https://themostlaps-staging.herokuapp.com/
+
+**production**
+
+* Use to avoid bottlenecks with `master`
 * Manual deployment to production via [Heroku pipeline](https://dashboard.heroku.com/pipelines/f5d2a8c2-2cfb-401b-8442-ded0cbb5e593)
 
 ## Dev tools
@@ -63,12 +68,18 @@ Eventually we'll get around to separating client and server applications.
 ### Webpack
 Same as Babel: Next for frontend, nothing for server-side.
 
-## Other stuff
-In no particular order...
+## V2 API
 
-### V2 stats data structure
+Base path is `/api/v2`
 
-API output should look like this for _the initial release_ of v2:
+### Athletes
+
+`/athletes/:ids`
+
+Param | Accepts
+----|----
+`ids`|CSV string of athlete IDs
+
 
 ```
 {
@@ -91,15 +102,7 @@ API output should look like this for _the initial release_ of v2:
             { month: 'Jan', value: xx },
             { month: 'Feb', value: xx },
             { month: 'Mar', value: xx },
-            { month: 'Apr', value: xx },
-            { month: 'May', value: xx },
-            { month: 'Jun', value: xx },
-            { month: 'Jul', value: xx },
-            { month: 'Aug', value: xx },
-            { month: 'Sep', value: xx },
-            { month: 'Oct', value: xx },
-            { month: 'Nov', value: xx },
-            { month: 'Dec', value: xx }
+            <remaining months, including 0 values>
           ],
         }
       },
@@ -108,3 +111,14 @@ API output should look like this for _the initial release_ of v2:
   }
 }
 ```
+### Ranking
+
+`</ranking/:reqPrimary/:reqSeconday`
+
+Param | Accepts
+----|----
+`reqPrimary`|Top-level ranking: `allTime`, `single`, `numActivities`, or year as YYYY
+`reqSecondary`|Optional. Month as MM if `reqPrimary` is a Year
+`?location`|Required. `prospectpark` or `centralpark`
+`?page`|Defaults to 1
+`?perPage`|Defaults to 15

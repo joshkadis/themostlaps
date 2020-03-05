@@ -15,6 +15,8 @@ dist/
 !server/initApiRoutes.js
 !server/initWebhookRoutes.js
 !server/handleSignupCallback.js
+!server/ranking.js
+!server/ranking.test.js
 !schema/**/*.js
 !api/**/*.js
 !cli/callbacks.js
@@ -55,7 +57,9 @@ dist/
 # Components
 !components/Navigation.js
 !components/RiderPageHeader.js
+!components/RankingRow.js
 !components/layouts/**/*.js
+!components/pages/**/*.js
 
 # Confic
 !config/index.js

@@ -10,20 +10,29 @@ const { defaultLocation } = require('./config');
 const { mongooseConnectionOptions } = require('./config/mongodb');
 const { initSentry } = require('./utils/v2/services/sentry');
 const { initializeActivityQueue } = require('./utils/v2/activityQueue');
+const { getLocationNames } = require('./utils/v2/locations');
 
 // Route handlers
 const handleSignupCallback = require('./server/handleSignupCallback');
 const initApiRoutes = require('./server/initApiRoutes');
 const initWebhookRoutes = require('./server/initWebhookRoutes');
-const getRankingParams = require('./utils/getRankingParams');
-
+const {
+  requestParamsAreValid,
+  handleRankingRoute,
+} = require('./server/ranking');
 // Services
 initSentry();
 
 // Next.js setup
+const locationsReStr = getLocationNames().join('|');
 const app = next({ dev: process.env.NODE_ENV !== 'production' });
 const handle = app.getRequestHandler();
 
+/**
+ * Handing routes here instead of automatically through Next
+ * because we need to account for both
+ * Next frontend and non-Next backend/API routes
+ */
 app.prepare()
   .then(() => {
     const server = express();
@@ -39,26 +48,23 @@ app.prepare()
     /**
      * Next.js routing
      */
-    server.get(/^\/ranking\/(giro2018|cold2019)$/, (req, res) => {
-      app.render(req, res, '/ranking', {
-        ...req.query,
-        type: 'special',
-        filter: req.params[0],
-      });
-    });
+    handleRankingRoute(server, app.render);
+    server.get(
+      `/ranking/:location(${locationsReStr})/:reqPrimary?/:reqSecondary?`,
+      (req, res) => {
+        const { params } = req;
+        if (!requestParamsAreValid(params)) {
+          res.statusCode = 404;
+          app.render(req, res, '/_error', {});
+          return;
+        }
 
-    server.get(/^\/ranking\/(allTime|single|[\d]{4,4})?\/?(\d{2,2})?$/, (req, res) => {
-      const params = getRankingParams(req.params);
-      if (!params.type) {
-        res.statusCode = 404;
-        app.render(req, res, '/_error', {});
-      } else {
-        app.render(req, res, '/ranking', {
-          ...req.query,
-          params,
+        app.render(req, res, '/ranking_v2', {
+          query: req.query,
+          params: req.params,
         });
-      }
-    });
+      },
+    );
 
     server.get('/rider/:athleteId(\\d+)/:currentLocation?', async (req, res) => {
       const athleteId = parseInt(req.params.athleteId, 10);

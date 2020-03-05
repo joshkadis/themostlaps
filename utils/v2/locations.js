@@ -1,4 +1,4 @@
-const { locations } = require('../../config');
+const { locations, defaultLocation } = require('../../config');
 
 function getLocationNames() {
   return Object.keys(locations);
@@ -26,7 +26,11 @@ const getSegmentIdFromLocName = (locName) => (locations[locName]
   ? locations[locName].canonicalSegmentId
   : false);
 
+const getLocation = (locName) => locations[locName]
+  || locations[defaultLocation];
+
 module.exports = {
+  getLocation,
   getLocationNames,
   isValidLocation,
   getCanonicalSegmentIds,
