@@ -12,6 +12,7 @@ const { mongooseConnectionOptions } = require('./config/mongodb');
 const { initSentry } = require('./utils/v2/services/sentry');
 const { initializeActivityQueue } = require('./utils/v2/activityQueue');
 const { getLocationNames } = require('./utils/v2/locations');
+const { filterParamsToLowerCase } = require('./utils/v2/server');
 
 // Route handlers
 const handleSignupCallback = require('./server/handleSignupCallback');
@@ -62,7 +63,7 @@ app.prepare()
 
         app.render(req, res, '/ranking_v2', {
           query,
-          params: _mapValues(params, (val) => val.toString().toLowerCase()),
+          params: filterParamsToLowerCase(params),
         });
       },
     );
