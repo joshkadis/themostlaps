@@ -20,6 +20,7 @@ function getApiQueryPath(reqPrimary = '', reqSecondary = '') {
   // and reqSecondary is a valid MM string if it's provided
   const shouldUseMonth = /\d{4}/.test(reqPrimary) && /\d{2}/.test(reqSecondary);
 
+  // API route will handle reqPrimary as case-insensitive
   return `/v2/ranking/${reqPrimary}${shouldUseMonth ? `/${reqSecondary}` : ''}`;
 }
 
