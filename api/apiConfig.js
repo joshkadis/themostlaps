@@ -1,6 +1,6 @@
 module.exports = {
   allowedRankingTypes: [
-    'allTime',
+    'alltime',
     'single',
     'activities',
   ],

@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const express = require('express');
 const bodyParser = require('body-parser');
 const next = require('next');
+const _mapValues = require('lodash/mapValues');
 
 const Athlete = require('./schema/Athlete');
 const { scheduleNightlyRefresh } = require('./utils/scheduleNightlyRefresh');
@@ -52,7 +53,7 @@ app.prepare()
     server.get(
       `/ranking/:location(${locationsReStr})/:reqPrimary?/:reqSecondary?`,
       (req, res) => {
-        const { params } = req;
+        const { params, query } = req;
         if (!requestParamsAreValid(params)) {
           res.statusCode = 404;
           app.render(req, res, '/_error', {});
@@ -60,8 +61,8 @@ app.prepare()
         }
 
         app.render(req, res, '/ranking_v2', {
-          query: req.query,
-          params: req.params,
+          query,
+          params: _mapValues(params, (val) => val.toString().toLowerCase()),
         });
       },
     );

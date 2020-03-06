@@ -11,21 +11,18 @@ const _uniq = require('lodash/uniq');
 const sortUniq = (arr) => _sortBy(_uniq(arr), [(val) => val]);
 
 /**
- * Get case-sensitive request type. Pretty hacky.
+ * Match a case-insensitive API request type to
+ * a case-sensitive field in the Athlete document
  *
  * @param {String} type Case-insensitive request type
  * @returns {String|false}
  */
-function getCaseSensitiveRequestType(type) {
-  // @todo Clean up 'activities' vs 'numActivities'
-  // Should be 'activities' everywhere except DB query
+function getStatsFieldFromRankingType(type) {
   switch (type.toLowerCase()) {
     case 'single':
       return 'single';
 
     case 'activities':
-      return 'activities';
-
     case 'numactivities':
       return 'numActivities';
 

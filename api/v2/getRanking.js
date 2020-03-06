@@ -2,7 +2,7 @@ const _get = require('lodash/get');
 const Athlete = require('../../schema/Athlete');
 const { isValidLocation } = require('../../utils/v2/locations');
 const { rankingPerPage } = require('../apiConfig');
-const { getCaseSensitiveRequestType } = require('../../utils/v2/utils');
+const { getStatsFieldFromRankingType } = require('../../utils/v2/utils');
 
 function formatAthleteForRanking(athlete, reqType, reqLocation) {
   const {
@@ -32,9 +32,7 @@ function formatAthleteForRanking(athlete, reqType, reqLocation) {
 }
 
 function getReqType(primary, secondary = '') {
-  // @hack! We want the `?location` param in the API url to be case-insensitive
-  // but we need to convert to a DB field that _is_ case-sensitive
-  const namedRequestType = getCaseSensitiveRequestType(primary);
+  const namedRequestType = getStatsFieldFromRankingType(primary);
   if (namedRequestType) {
     return namedRequestType;
   }

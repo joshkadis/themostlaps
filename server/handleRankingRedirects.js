@@ -15,7 +15,7 @@ function requestParamsAreValid({
   reqPrimary = '',
   reqSecondary = '',
 }) {
-  if (!isValidLocation(location) && location !== true) {
+  if (!isValidLocation(location, false) && location !== true) {
     return false;
   }
   if (!reqPrimary && !reqSecondary) {

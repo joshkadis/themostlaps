@@ -1,10 +1,10 @@
 const {
   requestParamsAreValid,
-} = require('./ranking');
+} = require('./handleRankingRedirects');
 
 test('ranking parameters validation', () => {
   expect(requestParamsAreValid({
-    location: 'prospectpark',
+    location: 'PROSPECTpark',
   })).toBe(true);
 
   expect(requestParamsAreValid({
@@ -18,7 +18,7 @@ test('ranking parameters validation', () => {
 
   // Should be case-insensitive
   expect(requestParamsAreValid({
-    location: 'prospectpark',
+    location: 'prospectPark',
     reqPrimary: 'SinGlE',
   })).toBe(true);
 
