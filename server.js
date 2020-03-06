@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 const express = require('express');
 const bodyParser = require('body-parser');
 const next = require('next');
-const _mapValues = require('lodash/mapValues');
 
 const Athlete = require('./schema/Athlete');
 const { scheduleNightlyRefresh } = require('./utils/scheduleNightlyRefresh');
