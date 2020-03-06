@@ -2,6 +2,7 @@ const _get = require('lodash/get');
 const Athlete = require('../../schema/Athlete');
 const { isValidLocation } = require('../../utils/v2/locations');
 const { rankingPerPage } = require('../apiConfig');
+const { getStatsFieldFromRankingType } = require('../../utils/v2/utils');
 
 function formatAthleteForRanking(athlete, reqType, reqLocation) {
   const {
@@ -31,12 +32,14 @@ function formatAthleteForRanking(athlete, reqType, reqLocation) {
 }
 
 function getReqType(primary, secondary = '') {
-  // Top-level request
-  if (['allTime', 'single', 'numActivities'].indexOf(primary) !== -1) {
-    return primary;
+  const namedRequestType = getStatsFieldFromRankingType(primary);
+  if (namedRequestType) {
+    return namedRequestType;
   }
+
   // Year only
-  // @todo Validate years and months i.e. /2043/22
+  // @todo Validate years and months within acceptable ranges
+  //  i.e. don't allow /2043/22
   if (/20\d{2}/.test(primary)) {
     if (!secondary) {
       return `byYear.${primary}`;
@@ -57,12 +60,13 @@ async function getRanking(
     reqSecondary = '',
   },
   {
-    location: reqLocation = 'unspecified',
+    location = 'unspecified',
     page = '1',
     perPage = rankingPerPage,
   },
 ) {
   // validate location
+  const reqLocation = location.toLowerCase();
   if (!reqLocation || !isValidLocation(reqLocation)) {
     return {
       error: true,

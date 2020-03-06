@@ -51,10 +51,18 @@ class RankingPage extends Component {
   static async getInitialProps({ query: { params }, asPath }) {
     const defaultDate = new Date();
     const {
-      reqPrimary = defaultDate.getFullYear().toString(),
-      reqSecondary = monthString(defaultDate.getMonth() + 1),
       location = defaultLocation,
     } = params;
+    // Default to current year+month if no primary request
+    let reqPrimary;
+    let reqSecondary;
+    if (params.reqPrimary) {
+      reqPrimary = params.reqPrimary;
+      reqSecondary = params.reqSecondary || '';
+    } else {
+      reqPrimary = defaultDate.getFullYear().toString();
+      reqSecondary = monthString(defaultDate.getMonth() + 1);
+    }
 
     const apiQueryPath = getApiQueryPath(reqPrimary, reqSecondary);
     return APIRequest(

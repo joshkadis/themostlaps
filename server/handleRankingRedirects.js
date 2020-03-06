@@ -15,7 +15,7 @@ function requestParamsAreValid({
   reqPrimary = '',
   reqSecondary = '',
 }) {
-  if (!isValidLocation(location) && location !== true) {
+  if (!isValidLocation(location, false) && location !== true) {
     return false;
   }
   if (!reqPrimary && !reqSecondary) {
@@ -23,8 +23,9 @@ function requestParamsAreValid({
   }
 
   const primaryIsValidType = reqPrimary && reqPrimary.toString().match(
-    new RegExp(`(${allowedRankingTypes.join('|')})`),
+    new RegExp(`(${allowedRankingTypes.join('|')})`, 'i'),
   );
+
   const primaryIsValidYear = reqPrimary
     && parseInt(reqPrimary, 10) >= 2010
     && parseInt(reqPrimary, 10) <= 2019;
@@ -45,7 +46,7 @@ function requestParamsAreValid({
 /**
  * Handle requests for `ranking` routes
  */
-function handleRankingRoute(server, renderCallback) {
+function handleRankingRedirects(server, renderCallback) {
   server.get('/ranking', (req, res) => {
     res.redirect(301, `/ranking/${defaultLocation}`);
   });
@@ -82,6 +83,6 @@ function handleRankingRoute(server, renderCallback) {
 }
 
 module.exports = {
-  handleRankingRoute,
+  handleRankingRedirects,
   requestParamsAreValid,
 };

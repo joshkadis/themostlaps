@@ -2,8 +2,8 @@ const { getMonthName } = require('../../../dateTimeUtils');
 
 const PAGE_TITLES = {
   single: 'Longest Ride',
-  activities: 'Rides With Laps',
-  allTime: 'The Most Laps',
+  activities: 'Most Rides With Laps',
+  alltime: 'The Most Laps',
   default: 'Laps',
 };
 
@@ -20,6 +20,7 @@ function getApiQueryPath(reqPrimary = '', reqSecondary = '') {
   // and reqSecondary is a valid MM string if it's provided
   const shouldUseMonth = /\d{4}/.test(reqPrimary) && /\d{2}/.test(reqSecondary);
 
+  // API route will handle reqPrimary as case-insensitive
   return `/v2/ranking/${reqPrimary}${shouldUseMonth ? `/${reqSecondary}` : ''}`;
 }
 
@@ -31,15 +32,19 @@ function getApiQueryPath(reqPrimary = '', reqSecondary = '') {
  * @returns {String} Page title
  */
 function getPageTitle(primary = 'default', secondary = '0') {
+  // Handle year or month rankings
   if (/^\d+/.test(primary.toString())) {
-    const secondaryIdx = secondary
+    const monthIdx = secondary
       ? parseInt(secondary, 10)
       : 0;
-    return secondaryIdx
-      ? `${getMonthName(secondaryIdx)} ${primary}`
-      : primary.toString();
+    return monthIdx
+      ? `Laps for ${getMonthName(monthIdx)} ${primary}`
+      : `Laps for ${primary.toString()}`;
   }
-  return PAGE_TITLES[primary] || PAGE_TITLES.default;
+
+  // Other ranking types
+  const key = primary.toLowerCase();
+  return PAGE_TITLES[key] || PAGE_TITLES.default;
 }
 
 module.exports = {

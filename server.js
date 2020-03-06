@@ -11,6 +11,7 @@ const { mongooseConnectionOptions } = require('./config/mongodb');
 const { initSentry } = require('./utils/v2/services/sentry');
 const { initializeActivityQueue } = require('./utils/v2/activityQueue');
 const { getLocationNames } = require('./utils/v2/locations');
+const { filterParamsToLowerCase } = require('./utils/v2/server');
 
 // Route handlers
 const handleSignupCallback = require('./server/handleSignupCallback');
@@ -18,8 +19,8 @@ const initApiRoutes = require('./server/initApiRoutes');
 const initWebhookRoutes = require('./server/initWebhookRoutes');
 const {
   requestParamsAreValid,
-  handleRankingRoute,
-} = require('./server/ranking');
+  handleRankingRedirects,
+} = require('./server/handleRankingRedirects');
 // Services
 initSentry();
 
@@ -48,11 +49,11 @@ app.prepare()
     /**
      * Next.js routing
      */
-    handleRankingRoute(server, app.render);
+    handleRankingRedirects(server, app.render);
     server.get(
       `/ranking/:location(${locationsReStr})/:reqPrimary?/:reqSecondary?`,
       (req, res) => {
-        const { params } = req;
+        const { params, query } = req;
         if (!requestParamsAreValid(params)) {
           res.statusCode = 404;
           app.render(req, res, '/_error', {});
@@ -60,8 +61,8 @@ app.prepare()
         }
 
         app.render(req, res, '/ranking_v2', {
-          query: req.query,
-          params: req.params,
+          query,
+          params: filterParamsToLowerCase(params),
         });
       },
     );

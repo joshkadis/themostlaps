@@ -4,8 +4,10 @@ function getLocationNames() {
   return Object.keys(locations);
 }
 
-function isValidLocation(location) {
-  return getLocationNames().indexOf(location) >= 0;
+function isValidLocation(location, caseSensitive = true) {
+  return getLocationNames().indexOf(
+    caseSensitive ? location : location.toLowerCase(),
+  ) >= 0;
 }
 
 function getCanonicalSegmentIds() {
