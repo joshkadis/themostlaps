@@ -35,6 +35,6 @@ function getStatsFieldFromRankingType(type) {
 }
 
 module.exports = {
-  getCaseSensitiveRequestType,
+  getStatsFieldFromRankingType,
   sortUniq,
 };
