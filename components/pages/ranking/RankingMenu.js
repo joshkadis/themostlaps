@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import Router from 'next/router';
 import Button from '@material-ui/core/Button';
+import SplitButton from '../../SplitButton';
 import { RankingContext } from '../../../utils/v2/pages/ranking/rankingContext';
 import { getRankingPathname } from '../../../utils/v2/pages/ranking';
 import { locations } from '../../../config';
@@ -54,6 +55,7 @@ const Types = () => (<div>
       buttonVal={type}
     >{type}</MenuButton>)
   }
+  <SplitButton />
 </div>);
 
 const RankingMenu = () => <nav>

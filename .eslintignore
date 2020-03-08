@@ -58,6 +58,7 @@ dist/
 !components/Navigation.js
 !components/RiderPageHeader.js
 !components/RankingRow.js
+!components/SplitButton.js
 !components/layouts/**/*.js
 !components/pages/**/*.js
 
