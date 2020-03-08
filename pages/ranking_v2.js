@@ -130,7 +130,7 @@ class RankingPage extends Component {
       <RankingContext.Provider value={{
         location,
         reqPrimary,
-        reqSecondary
+        reqSecondary,
       }}>
         <Layout pathname={asPath}>
           <h1>{pageTitle}</h1>

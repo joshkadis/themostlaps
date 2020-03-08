@@ -1,4 +1,5 @@
 const { getMonthName } = require('../../../dateTimeUtils');
+const { defaultLocation } = require('../../../../config');
 
 const PAGE_TITLES = {
   single: 'Longest Ride',
@@ -22,6 +23,27 @@ function getApiQueryPath(reqPrimary = '', reqSecondary = '') {
 
   // API route will handle reqPrimary as case-insensitive
   return `/v2/ranking/${reqPrimary}${shouldUseMonth ? `/${reqSecondary}` : ''}`;
+}
+
+/**
+ * Get API query path from Express request params
+ * Assume that Express routing has already validated params
+ *
+ * @param {String} reqPrimary
+ * @param {String} reqSecondary
+ * @returns {String}
+ */
+function getRankingPathname({
+  location = defaultLocation,
+  reqPrimary = '',
+  reqSecondary = '',
+}) {
+  // Assume reqPrimary is a valid type (e.g. 'single') or YYYY
+  // and reqSecondary is a valid MM string if it's provided
+  const shouldUseMonth = /\d{4}/.test(reqPrimary) && /\d{2}/.test(reqSecondary);
+
+  // API route will handle reqPrimary as case-insensitive
+  return `/ranking/${location}/${reqPrimary}${shouldUseMonth ? `/${reqSecondary}` : ''}`;
 }
 
 /**
@@ -50,4 +72,5 @@ function getPageTitle(primary = 'default', secondary = '0') {
 module.exports = {
   getPageTitle,
   getApiQueryPath,
+  getRankingPathname,
 };
