@@ -15,6 +15,8 @@ import Layout from '../components/Layout';
 import LocationHero from '../components/pages/ranking/LocationHero';
 import RankingTable from '../components/pages/ranking/RankingTable';
 import Button from '../components/lib/Button';
+import RankingMenu from '../components/pages/ranking/RankingMenu';
+import { RankingContext } from '../utils/v2/pages/ranking/rankingContext';
 
 class RankingPage extends Component {
   static defaultProps = {
@@ -113,6 +115,8 @@ class RankingPage extends Component {
   render() {
     const {
       location,
+      reqPrimary,
+      reqSecondary,
       statsKey,
       asPath,
     } = this.props;
@@ -123,28 +127,35 @@ class RankingPage extends Component {
       rankedAthletes = [],
     } = this.state;
     return (
-      <Layout pathname={asPath}>
-        <h1>{pageTitle}</h1>
-        <LocationHero location={location} />
-        {
-          rankedAthletes.length
-            ? <Fragment>
-                <RankingTable
-                  rankedAthletes={rankedAthletes}
-                  statsKey={statsKey}
-                />
-                <div style={{ margin: '1rem 0', textAlign: 'center' }}>
-                  <Button
-                    disabled={!canShowMore}
-                    onClick={this.onClickShowMore}
-                  >
-                    Show more
-                  </Button>
-                </div>
-              </Fragment>
-            : <p>No ranking for this view.</p>
-        }
-      </Layout>
+      <RankingContext.Provider value={{
+        location,
+        reqPrimary,
+        reqSecondary
+      }}>
+        <Layout pathname={asPath}>
+          <h1>{pageTitle}</h1>
+          <LocationHero location={location} />
+          <RankingMenu />
+          {
+            rankedAthletes.length
+              ? <Fragment>
+                  <RankingTable
+                    rankedAthletes={rankedAthletes}
+                    statsKey={statsKey}
+                  />
+                  <div style={{ margin: '1rem 0', textAlign: 'center' }}>
+                    <Button
+                      disabled={!canShowMore}
+                      onClick={this.onClickShowMore}
+                    >
+                      Show more
+                    </Button>
+                  </div>
+                </Fragment>
+              : <p>No ranking for this view.</p>
+          }
+        </Layout>
+      </RankingContext.Provider>
     );
   }
 }
