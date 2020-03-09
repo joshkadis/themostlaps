@@ -50,17 +50,40 @@ class RankingPage extends Component {
     };
   }
 
-  static async getInitialProps({ query: { params }, asPath }) {
+  componentDidUpdate(prevProps) {
+    const {
+      location,
+      reqPrimary,
+      reqSecondary,
+      rankedAthletes,
+    } = this.props;
+    const routeDidChange = !(
+      location === prevProps.location
+      && reqPrimary === prevProps.reqPrimary
+      && reqSecondary === prevProps.reqSecondary
+    );
+
+    if (routeDidChange) {
+      this.setState({
+        pageTitle: getPageTitle(reqPrimary, reqSecondary),
+        rankedAthletes,
+      });
+    }
+  }
+
+  static async getInitialProps({ query, asPath }) {
     const defaultDate = new Date();
     const {
       location = defaultLocation,
-    } = params;
+      reqPrimary: receivedPrimary = '',
+      reqSecondary: receivedSecondary = '',
+    } = query;
     // Default to current year+month if no primary request
     let reqPrimary;
     let reqSecondary;
-    if (params.reqPrimary) {
-      reqPrimary = params.reqPrimary;
-      reqSecondary = params.reqSecondary ? monthString(params.reqSecondary) : '';
+    if (receivedPrimary) {
+      reqPrimary = receivedPrimary;
+      reqSecondary = receivedSecondary ? monthString(receivedSecondary) : '';
     } else {
       reqPrimary = defaultDate.getFullYear().toString();
       reqSecondary = monthString(defaultDate.getMonth() + 1);
@@ -71,10 +94,7 @@ class RankingPage extends Component {
     const apiQueryPath = getApiQueryPath(reqPrimary, reqSecondary);
     return APIRequest(
       apiQueryPath,
-      {
-        location,
-        ...params,
-      },
+      { location },
       [], // @todo Add default response
     )
       .then(({ ranking, statsKey }) => ({
