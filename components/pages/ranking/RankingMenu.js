@@ -7,12 +7,20 @@ import { RankingContext } from '../../../utils/v2/pages/ranking/rankingContext';
 import { getRankingPathname } from '../../../utils/v2/pages/ranking';
 import { locations, rankingStartYear } from '../../../config';
 import { allowedRankingTypes } from '../../../api/apiConfig';
-import { isValidYear } from '../../../utils/dateTimeUtils';
+import {
+  isValidYear,
+  getMonthName,
+  timePartString,
+  isValidMonth,
+} from '../../../utils/dateTimeUtils';
 
 const yearOptions = [];
 for (let yr = new Date().getFullYear(); yr >= rankingStartYear; yr -= 1) {
   yearOptions.push(yr);
 }
+const monthOptions = new Array(12)
+  .fill(1)
+  .map((val, idx) => getMonthName(val + idx, 3));
 
 const navigateFromMenu = (query) => {
   Router.push(
@@ -66,6 +74,25 @@ const YearSplitButton = () => (<RankingContext.Consumer>
     }}
 </RankingContext.Consumer>);
 
+const MonthSplitButton = () => (<RankingContext.Consumer>
+    {(context) => {
+      const navigateToMonth = (nextMonthName) => {
+        const nextMonthNum = monthOptions.indexOf(nextMonthName) + 1;
+        if (nextMonthNum !== Number(context.reqSecondary)) {
+          navigateFromMenu({
+            ...context,
+            reqSecondary: timePartString(nextMonthNum),
+          });
+        }
+      };
+      return (<SplitButton
+        options={monthOptions}
+        variant={isValidMonth(context.reqSecondary) ? 'contained' : 'outlined'}
+        onSelectOption={navigateToMonth}
+      />);
+    }}
+</RankingContext.Consumer>);
+
 const Locations = () => (<div>
   {Object.values(locations).map(({ locationName }) => <MenuButton
       key={`location-button-${locationName}`}
@@ -85,6 +112,7 @@ const Types = () => (<div>
     >{type}</MenuButton>)
   }
   <YearSplitButton />
+  <MonthSplitButton />
 </div>);
 
 const RankingMenu = () => <nav>

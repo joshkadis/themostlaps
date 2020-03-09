@@ -83,6 +83,7 @@ export default function SplitButton({
                       key={option}
                       selected={index === selectedIndex}
                       onClick={(event) => handleMenuItemClick(event, index)}
+                      style={{ textTransform: 'none' }}
                     >
                       {option}
                     </MenuItem>
