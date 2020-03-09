@@ -1,14 +1,18 @@
+const { rankingStartYear } = require('../config');
+
 /**
  * Convert int to min. 2-digit string
+ * Just assume a valid month, ok?
  *
- * @param {Int} part
+ * @param {String|Number} part
  * @return {String}
  */
 function timePartString(part) {
-  if (part >= 10) {
-    return part.toString();
+  const numPart = Number(part);
+  if (numPart >= 10) {
+    return numPart.toString();
   }
-  return `0${part}`;
+  return `0${numPart}`;
 }
 
 /**
@@ -69,7 +73,37 @@ function getMonthName(idx, chars) {
   }
 }
 
+/**
+ * Is a year within the allowed range 2010+
+ *
+ * @param {String|Number} year
+ * @returns {Bool}
+ */
+function isValidYear(year = 0) {
+  // year must be 4-digit integer, not string like '2010.0'
+  // 2010.0 as a float is fine, whatever
+  if (!/^\d{4}$/.test(year.toString())) {
+    return false;
+  }
+  const yearInt = Number(year);
+  return yearInt >= rankingStartYear
+    && yearInt <= new Date().getFullYear();
+}
+
+/**
+ * Month represented by 1-based string or int is valid
+ *
+ * @param {String|Number} month
+ */
+function isValidMonth(month = 0) {
+  // '01', '1', 1, '12', 12 are all ok
+  // '12.0' is not ok, 12.0 is ok I guess
+  return /^(0?[1-9]|1[0-2])$/.test(month.toString());
+}
+
 module.exports = {
+  isValidMonth,
+  isValidYear,
   timePartString,
   getYearKey,
   getMonthKey,

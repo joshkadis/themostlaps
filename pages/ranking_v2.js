@@ -60,11 +60,13 @@ class RankingPage extends Component {
     let reqSecondary;
     if (params.reqPrimary) {
       reqPrimary = params.reqPrimary;
-      reqSecondary = params.reqSecondary || '';
+      reqSecondary = params.reqSecondary ? monthString(params.reqSecondary) : '';
     } else {
       reqPrimary = defaultDate.getFullYear().toString();
       reqSecondary = monthString(defaultDate.getMonth() + 1);
     }
+
+    // @todo Redirect to 404 if request params are invalid
 
     const apiQueryPath = getApiQueryPath(reqPrimary, reqSecondary);
     return APIRequest(

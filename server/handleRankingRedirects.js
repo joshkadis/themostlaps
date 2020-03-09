@@ -1,7 +1,7 @@
 const { defaultLocation } = require('../config');
 const { allowedRankingTypes } = require('../api/apiConfig');
 const { isValidLocation } = require('../utils/v2/locations');
-
+const { isValidYear, isValidMonth } = require('../utils/dateTimeUtils');
 /**
  * Validate reqPrimary and reqSecondary
  *
@@ -26,13 +26,8 @@ function requestParamsAreValid({
     new RegExp(`(${allowedRankingTypes.join('|')})`, 'i'),
   );
 
-  const primaryIsValidYear = reqPrimary
-    && parseInt(reqPrimary, 10) >= 2010
-    && parseInt(reqPrimary, 10) <= 2019;
-
-  const secondaryIsValidMonth = !reqSecondary
-    || (parseInt(reqSecondary, 10) >= 1
-    && parseInt(reqSecondary, 10) <= 12);
+  const primaryIsValidYear = isValidYear(reqPrimary);
+  const secondaryIsValidMonth = !reqSecondary || isValidMonth(reqSecondary);
 
   if (
     (primaryIsValidType && !reqSecondary) // /ranking/single
