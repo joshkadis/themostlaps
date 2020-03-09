@@ -1,11 +1,26 @@
 /* eslint-disable react/prop-types */
+import { stringify } from 'query-string';
 import Router from 'next/router';
 import Button from '@material-ui/core/Button';
 import SplitButton from '../../SplitButton';
 import { RankingContext } from '../../../utils/v2/pages/ranking/rankingContext';
 import { getRankingPathname } from '../../../utils/v2/pages/ranking';
-import { locations } from '../../../config';
+import { locations, rankingStartYear } from '../../../config';
 import { allowedRankingTypes } from '../../../api/apiConfig';
+import { isValidYear } from '../../../utils/dateTimeUtils';
+
+const yearOptions = [];
+for (let yr = new Date().getFullYear(); yr >= rankingStartYear; yr -= 1) {
+  yearOptions.push(yr);
+}
+
+const navigateFromMenu = (query) => {
+  Router.push(
+    `/ranking_v2?${stringify(query)}`,
+    getRankingPathname(query),
+  );
+};
+
 
 const MenuButton = ({
   buttonKey,
@@ -15,26 +30,40 @@ const MenuButton = ({
   {(context) => {
     // Update route from this button
     // i.e. change the ranking view
-    const navigateFromMenu = () => {
-      const query = {
-        ...context,
-        [buttonKey]: buttonVal,
-      };
-      Router.push(
-        getRankingPathname(query),
-      );
-    };
     // Button style
     const variant = context[buttonKey] === buttonVal
       ? 'contained'
       : 'outlined';
 
+    const query = {
+      ...context,
+      [buttonKey]: buttonVal,
+    };
     return (<Button
       variant={variant}
       disableElevation
-      onClick={navigateFromMenu}
+      onClick={() => navigateFromMenu(query)}
     >{children}</Button>);
   }}
+</RankingContext.Consumer>);
+
+const YearSplitButton = () => (<RankingContext.Consumer>
+    {(context) => {
+      const navigateToYear = (nextReqPrimary) => {
+        if (nextReqPrimary !== context.reqPrimary) {
+          navigateFromMenu({
+            ...context,
+            reqPrimary: nextReqPrimary,
+            reqSecondary: '',
+          });
+        }
+      };
+      return (<SplitButton
+        options={yearOptions}
+        variant={isValidYear(context.reqPrimary) ? 'contained' : 'outlined'}
+        onSelectOption={navigateToYear}
+      />);
+    }}
 </RankingContext.Consumer>);
 
 const Locations = () => (<div>
@@ -55,7 +84,7 @@ const Types = () => (<div>
       buttonVal={type}
     >{type}</MenuButton>)
   }
-  <SplitButton />
+  <YearSplitButton />
 </div>);
 
 const RankingMenu = () => <nav>

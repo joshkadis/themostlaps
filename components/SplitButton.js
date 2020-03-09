@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 /**
  * Button copied from
  * https://material-ui.com/components/button-group/#split-button
@@ -13,20 +14,23 @@ import Popper from '@material-ui/core/Popper';
 import MenuItem from '@material-ui/core/MenuItem';
 import MenuList from '@material-ui/core/MenuList';
 
-const options = ['Create a merge commit', 'Squash and merge', 'Rebase and merge'];
-
-export default function SplitButton() {
+export default function SplitButton({
+  options = [],
+  variant = 'contained',
+  onSelectOption = () => {},
+}) {
   const [open, setOpen] = React.useState(false);
   const anchorRef = React.useRef(null);
-  const [selectedIndex, setSelectedIndex] = React.useState(1);
+  const [selectedIndex, setSelectedIndex] = React.useState(0);
 
   const handleClick = () => {
-    console.info(`You clicked ${options[selectedIndex]}`);
+    onSelectOption(options[selectedIndex]);
   };
 
   const handleMenuItemClick = (event, index) => {
     setSelectedIndex(index);
     setOpen(false);
+    onSelectOption(options[index]);
   };
 
   const handleToggle = () => {
@@ -43,7 +47,7 @@ export default function SplitButton() {
 
   return (
     <Fragment>
-      <ButtonGroup variant="contained" color="primary" ref={anchorRef} aria-label="split button">
+      <ButtonGroup variant={variant} color="primary" ref={anchorRef} aria-label="split button">
         <Button onClick={handleClick}>{options[selectedIndex]}</Button>
         <Button
           color="primary"
@@ -77,7 +81,6 @@ export default function SplitButton() {
                   {options.map((option, index) => (
                     <MenuItem
                       key={option}
-                      disabled={index === 2}
                       selected={index === selectedIndex}
                       onClick={(event) => handleMenuItemClick(event, index)}
                     >
