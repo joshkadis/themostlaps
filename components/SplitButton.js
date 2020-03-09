@@ -17,6 +17,7 @@ import MenuList from '@material-ui/core/MenuList';
 export default function SplitButton({
   options = [],
   variant = 'contained',
+  shouldDisable = false,
   onSelectOption = () => {},
 }) {
   const [open, setOpen] = React.useState(false);
@@ -48,8 +49,14 @@ export default function SplitButton({
   return (
     <Fragment>
       <ButtonGroup variant={variant} color="primary" ref={anchorRef} aria-label="split button">
-        <Button onClick={handleClick}>{options[selectedIndex]}</Button>
         <Button
+          onClick={handleClick}
+          disabled={shouldDisable}
+        >
+          {options[selectedIndex]}
+        </Button>
+        <Button
+          disabled={shouldDisable}
           color="primary"
           size="small"
           aria-controls={open ? 'split-button-menu' : undefined}

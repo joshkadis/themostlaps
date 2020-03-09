@@ -1,4 +1,5 @@
 /* eslint-disable react/prop-types */
+import { Fragment } from 'react';
 import { stringify } from 'query-string';
 import Router from 'next/router';
 import Button from '@material-ui/core/Button';
@@ -36,9 +37,6 @@ const MenuButton = ({
   children,
 }) => (<RankingContext.Consumer>
   {(context) => {
-    // Update route from this button
-    // i.e. change the ranking view
-    // Button style
     const variant = context[buttonKey] === buttonVal
       ? 'contained'
       : 'outlined';
@@ -46,6 +44,9 @@ const MenuButton = ({
     const query = {
       ...context,
       [buttonKey]: buttonVal,
+      reqSecondary: isValidYear(buttonVal)
+        ? context.reqSecondary
+        : '',
     };
     return (<Button
       variant={variant}
@@ -74,6 +75,8 @@ const YearSplitButton = () => (<RankingContext.Consumer>
     }}
 </RankingContext.Consumer>);
 
+// @todo for this thing:
+// - Disable when year not in use
 const MonthSplitButton = () => (<RankingContext.Consumer>
     {(context) => {
       const navigateToMonth = (nextMonthName) => {
@@ -85,11 +88,23 @@ const MonthSplitButton = () => (<RankingContext.Consumer>
           });
         }
       };
-      return (<SplitButton
-        options={monthOptions}
-        variant={isValidMonth(context.reqSecondary) ? 'contained' : 'outlined'}
-        onSelectOption={navigateToMonth}
-      />);
+      return (<Fragment>
+        <SplitButton
+          options={monthOptions}
+          variant={isValidMonth(context.reqSecondary) ? 'contained' : 'outlined'}
+          onSelectOption={navigateToMonth}
+          shouldDisable={!isValidYear(context.reqPrimary)}
+        />
+        {isValidYear(context.reqPrimary)
+          && isValidMonth(context.reqSecondary)
+          && (<Button size='small' onClick={() => navigateFromMenu({
+            ...context,
+            reqSecondary: '',
+          })}>
+            clear month
+          </Button>)
+        }
+      </Fragment>);
     }}
 </RankingContext.Consumer>);
 
