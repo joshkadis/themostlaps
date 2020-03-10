@@ -76,7 +76,7 @@ const YearSplitButton = () => (<RankingContext.Consumer>
 </RankingContext.Consumer>);
 
 // @todo for this thing:
-// - Disable when year not in use
+// - Don't include future months for current year
 const MonthSplitButton = () => (<RankingContext.Consumer>
     {(context) => {
       const navigateToMonth = (nextMonthName) => {
