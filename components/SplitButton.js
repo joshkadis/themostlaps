@@ -1,10 +1,9 @@
 /* eslint-disable react/prop-types */
 /**
- * Button copied from
+ * Split button mostly copied from
  * https://material-ui.com/components/button-group/#split-button
  */
 import { Fragment } from 'react';
-import Button from '@material-ui/core/Button';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
@@ -14,9 +13,11 @@ import Popper from '@material-ui/core/Popper';
 import MenuItem from '@material-ui/core/MenuItem';
 import MenuList from '@material-ui/core/MenuList';
 
+import Button from './lib/Button';
+
 export default function SplitButton({
   options = [],
-  variant = 'contained',
+  buttonClassName = '',
   shouldDisable = false,
   onSelectOption = () => {},
 }) {
@@ -35,7 +36,13 @@ export default function SplitButton({
   };
 
   const handleToggle = () => {
-    setOpen((prevOpen) => !prevOpen);
+    setOpen((prevOpen) => {
+      // Don't open if disabled
+      if (!prevOpen && shouldDisable) {
+        return false;
+      }
+      return !prevOpen;
+    });
   };
 
   const handleClose = (event) => {
@@ -48,22 +55,18 @@ export default function SplitButton({
 
   return (
     <Fragment>
-      <ButtonGroup variant={variant} color="primary" ref={anchorRef} aria-label="split button">
+      <ButtonGroup ref={anchorRef}>
         <Button
           onClick={handleClick}
           disabled={shouldDisable}
+          className={buttonClassName}
         >
           {options[selectedIndex]}
         </Button>
         <Button
           disabled={shouldDisable}
-          color="primary"
-          size="small"
-          aria-controls={open ? 'split-button-menu' : undefined}
-          aria-expanded={open ? 'true' : undefined}
-          aria-label="select merge strategy"
-          aria-haspopup="menu"
           onClick={handleToggle}
+          className={buttonClassName}
         >
           <ArrowDropDownIcon />
         </Button>

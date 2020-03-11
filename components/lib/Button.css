@@ -9,6 +9,12 @@
 
 }
 
+.button__deselected {
+  background-color: #e4cafd;
+  box-shadow: inset 0 0 0 1px #6125ff;
+  color: #914cfe;
+}
+
 .button__disabled {
   cursor: default;
   transition: none;

@@ -2,8 +2,10 @@
 import { Fragment } from 'react';
 import { stringify } from 'query-string';
 import Router from 'next/router';
-import Button from '@material-ui/core/Button';
+
+import Button from '../../lib/Button';
 import SplitButton from '../../SplitButton';
+
 import { RankingContext } from '../../../utils/v2/pages/ranking/rankingContext';
 import { getRankingPathname } from '../../../utils/v2/pages/ranking';
 import { locations, rankingStartYear } from '../../../config';
@@ -14,6 +16,7 @@ import {
   timePartString,
   isValidMonth,
 } from '../../../utils/dateTimeUtils';
+import { button__deselected } from '../../lib/Button.css';
 
 const yearOptions = [];
 for (let yr = new Date().getFullYear(); yr >= rankingStartYear; yr -= 1) {
@@ -30,6 +33,19 @@ const navigateFromMenu = (query) => {
   );
 };
 
+const ClearMonthButton = ({ onClick }) => (
+  <Button
+    onClick={onClick}
+    className='link'
+    style={{
+      background: 'none',
+      border: 'none',
+      fontSize: '.8em',
+    }}
+  >
+    clear month
+  </Button>
+);
 
 const MenuButton = ({
   buttonKey,
@@ -37,9 +53,9 @@ const MenuButton = ({
   children,
 }) => (<RankingContext.Consumer>
   {(context) => {
-    const variant = context[buttonKey] === buttonVal
-      ? 'contained'
-      : 'outlined';
+    const className = context[buttonKey] === buttonVal
+      ? ''
+      : button__deselected;
 
     const query = {
       ...context,
@@ -49,9 +65,8 @@ const MenuButton = ({
         : '',
     };
     return (<Button
-      variant={variant}
-      disableElevation
       onClick={() => navigateFromMenu(query)}
+      className={className}
     >{children}</Button>);
   }}
 </RankingContext.Consumer>);
@@ -67,9 +82,14 @@ const YearSplitButton = () => (<RankingContext.Consumer>
           });
         }
       };
+
+      const className = isValidYear(context.reqPrimary)
+        ? ''
+        : button__deselected;
+
       return (<SplitButton
         options={yearOptions}
-        variant={isValidYear(context.reqPrimary) ? 'contained' : 'outlined'}
+        buttonClassName={className}
         onSelectOption={navigateToYear}
       />);
     }}
@@ -88,21 +108,25 @@ const MonthSplitButton = () => (<RankingContext.Consumer>
           });
         }
       };
+      const className = isValidMonth(context.reqSecondary)
+        ? ''
+        : button__deselected;
+
       return (<Fragment>
         <SplitButton
           options={monthOptions}
-          variant={isValidMonth(context.reqSecondary) ? 'contained' : 'outlined'}
+          buttonClassName={className}
           onSelectOption={navigateToMonth}
           shouldDisable={!isValidYear(context.reqPrimary)}
         />
         {isValidYear(context.reqPrimary)
           && isValidMonth(context.reqSecondary)
-          && (<Button size='small' onClick={() => navigateFromMenu({
+          && (<ClearMonthButton onClick={() => navigateFromMenu({
             ...context,
             reqSecondary: '',
           })}>
             clear month
-          </Button>)
+          </ClearMonthButton>)
         }
       </Fragment>);
     }}

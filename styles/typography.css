@@ -80,7 +80,8 @@ strong {
   font-weight: 700;
 }
 
-a {
+a,
+:global(.link) {
   color: var(--purple);
   &:hover {
     color: var(--purpleDark);
