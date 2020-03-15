@@ -61,6 +61,7 @@ dist/
 !components/SplitButton.js
 !components/layouts/**/*.js
 !components/pages/**/*.js
+!components/lib/Button.js
 
 # Confic
 !config/index.js

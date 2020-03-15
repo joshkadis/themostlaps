@@ -68,7 +68,9 @@ export default function SplitButton({
           onClick={handleToggle}
           className={buttonClassName}
         >
-          <ArrowDropDownIcon />
+          <ArrowDropDownIcon
+            disabled={shouldDisable}
+          />
         </Button>
       </ButtonGroup>
       <Popper

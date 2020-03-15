@@ -1,3 +1,5 @@
+/* eslint-disable react/prop-types */
+
 import classNames from 'classnames';
 import * as styles from './Button.css';
 
@@ -14,7 +16,10 @@ const Button = ({
       { [styles.button__disabled]: disabled },
       className,
     )}
-    onClick={onClick}
+    onClick={disabled
+      ? ({ target }) => target.blur()
+      : onClick
+    }
     style={style}
   >
     {children}
