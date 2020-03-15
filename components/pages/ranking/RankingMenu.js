@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { Fragment, useState } from 'react';
+import { useState } from 'react';
 import { stringify } from 'query-string';
 import Router from 'next/router';
 import classNames from 'classnames';
@@ -45,15 +45,13 @@ const TypesButtons = () => (<div className={styles.RankingMenu__row}>
 </div>);
 
 function RankingMenu() {
-  const [isCollapsed, setCollapsed] = useState(false);
-  const toggleCollapsed = () => {
-    debugger;
-    setCollapsed(!!isCollapsed)
-    debugger;
-  };
+  const [isCollapsed, setCollapsed] = useState(true);
 
-  return (<Fragment>
-    <button onClick={toggleCollapsed}>Filters</button>
+  return (<>
+    <button onClick={
+      () => setCollapsed(!isCollapsed)
+    }>Filters</button>
+      {isCollapsed ? 'collapsed' : 'not collapsed'}
       <div className={classNames(
         styles.RankingMenu__outer,
         isCollapsed ? styles['RankingMenu__outer--collapsed'] : '',
@@ -63,7 +61,7 @@ function RankingMenu() {
           <TypesButtons />
         </nav>
       </div>
-  </Fragment>);
+  </>);
 }
 
 export default RankingMenu;
