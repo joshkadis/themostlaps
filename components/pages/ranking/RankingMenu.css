@@ -1,0 +1,52 @@
+@import '../../../styles/vars';
+
+.RankingMenu__outer {
+  display: flex;
+  justify-items: center;
+}
+
+.RankingMenu__outer--collapsed {
+  & .RankingMenu__container {
+    height: 0;
+    overflow-y: hidden;
+  }
+}
+
+.RankingMenu__container {
+  transform: height;
+  height: 100%;
+  margin: 0 auto 1.25rem auto;
+  display: inline-flex;
+  align-items: baseline;
+  flex-direction: column;
+  align-items: flex-start;
+
+  @media (--smallViewport) {
+    flex-direction: row;
+  }
+}
+
+.RankingMenu__row {
+  margin-bottom: 1rem;
+  flex-basis: 100%;
+  @media (--smallViewport) {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  & > :nth-child(n) {
+    margin-right: .5rem;
+
+    @media (--smallViewport) {
+      margin-bottom: 1rem;
+    }
+  }
+
+  & :last-child {
+    margin-right: 0;
+    @media (--smallViewport) {
+      margin-bottom: 0;
+    }
+  }
+}

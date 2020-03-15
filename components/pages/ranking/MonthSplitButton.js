@@ -13,7 +13,7 @@ import { button__deselected } from '../../lib/Button.css';
 
 const monthOptions = new Array(12)
   .fill(1)
-  .map((val, idx) => getMonthName(val + idx, 3));
+  .map((val, idx) => getMonthName(val + idx));
 
 const ClearMonthButton = ({ onClick }) => (
   <Button

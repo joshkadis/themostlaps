@@ -43,6 +43,6 @@
   }
 }
 
-@custom-media --xsViewport (max-width: 349px);
+@custom-media --xsViewport (max-width: 399px);
 @custom-media --smallViewport (max-width: 799px);
 @custom-media --largeViewport (min-width: 800px);

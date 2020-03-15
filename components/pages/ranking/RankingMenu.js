@@ -1,11 +1,13 @@
 /* eslint-disable react/prop-types */
-
+import { Fragment, useState } from 'react';
 import { stringify } from 'query-string';
 import Router from 'next/router';
+import classNames from 'classnames';
 
 import MonthSplitButton from './MonthSplitButton';
 import YearSplitButton from './YearSplitButton';
 import MenuButton from './MenuButton';
+import * as styles from './RankingMenu.css';
 
 import { getRankingPathname } from '../../../utils/v2/pages/ranking';
 import { locations } from '../../../config';
@@ -18,7 +20,7 @@ const navigateFromMenu = (query) => {
   );
 };
 
-const LocationsButtons = () => (<div>
+const LocationsButtons = () => (<div className={styles.RankingMenu__row}>
   {Object.values(locations).map(({ locationName }) => <MenuButton
       key={`location-button-${locationName}`}
       buttonKey='location'
@@ -30,7 +32,7 @@ const LocationsButtons = () => (<div>
 
 // @todo Replace {type} with type mapped to label
 // e.g. alltime to All Time
-const TypesButtons = () => (<div>
+const TypesButtons = () => (<div className={styles.RankingMenu__row}>
   {allowedRankingTypes.map((type) => <MenuButton
       key={`type-button-${type}`}
       buttonKey='reqPrimary'
@@ -42,9 +44,26 @@ const TypesButtons = () => (<div>
   <MonthSplitButton clickHandler={navigateFromMenu}/>
 </div>);
 
-const RankingMenu = () => <nav>
-  <LocationsButtons />
-  <TypesButtons />
-</nav>;
+function RankingMenu() {
+  const [isCollapsed, setCollapsed] = useState(false);
+  const toggleCollapsed = () => {
+    debugger;
+    setCollapsed(!!isCollapsed)
+    debugger;
+  };
+
+  return (<Fragment>
+    <button onClick={toggleCollapsed}>Filters</button>
+      <div className={classNames(
+        styles.RankingMenu__outer,
+        isCollapsed ? styles['RankingMenu__outer--collapsed'] : '',
+      )}>
+        <nav className={styles.RankingMenu__container}>
+          <LocationsButtons />
+          <TypesButtons />
+        </nav>
+      </div>
+  </Fragment>);
+}
 
 export default RankingMenu;
