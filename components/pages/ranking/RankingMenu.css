@@ -74,6 +74,7 @@
   @apply --fadeLink;
   @apply --button;
 
+  font-size: .8rem;
   text-decoration: none;
   padding: 0.5rem;
   background: none;
