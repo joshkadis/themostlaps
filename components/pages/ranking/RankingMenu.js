@@ -9,7 +9,10 @@ import YearSplitButton from './YearSplitButton';
 import MenuButton from './MenuButton';
 import * as styles from './RankingMenu.css';
 
-import { getRankingPathname } from '../../../utils/v2/pages/ranking';
+import {
+  getRankingPathname,
+  getFilterLabel,
+} from '../../../utils/v2/pages/ranking';
 import { locations } from '../../../config';
 import { allowedRankingTypes } from '../../../api/apiConfig';
 
@@ -38,7 +41,7 @@ const TypesButtons = () => (<div className={styles.RankingMenu__row}>
       buttonKey='reqPrimary'
       buttonVal={type}
       clickHandler={navigateFromMenu}
-    >{type}</MenuButton>)
+    >{getFilterLabel(type)}</MenuButton>)
   }
   <YearSplitButton clickHandler={navigateFromMenu}/>
   <MonthSplitButton clickHandler={navigateFromMenu}/>
