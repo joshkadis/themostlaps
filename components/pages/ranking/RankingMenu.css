@@ -1,11 +1,11 @@
 @import '../../../styles/vars';
 
 .RankingMenu__outer {
-  transition: max-height .5s linear;
+  transition: max-height .3s linear, opacity .1s linear .3s;
   max-height: 150px;
   display: flex;
   justify-items: center;
-
+  opacity: 1;
   @media (--smallViewport) {
     max-height: 350px;
   }
@@ -13,7 +13,7 @@
 
 .RankingMenu__outer--collapsed {
   max-height: 0;
-
+  opacity: 0;
   & .RankingMenu__container {
     overflow-y: hidden;
   }
@@ -31,6 +31,14 @@
   }
 }
 
+.RankingMenu__container--center {
+  align-items: center;
+  @media (--smallViewport) {
+    justify-content: center;
+  }
+}
+
+
 .RankingMenu__row {
   margin-bottom: 1rem;
   flex-basis: 100%;
@@ -40,9 +48,15 @@
     align-items: flex-start;
   }
 
+  &:last-of-type {
+    @media (--smallViewport) {
+      border-left: 1px solid var(--purple);
+      padding-left: .5rem;
+    }
+  }
+
   & > :nth-child(n) {
     margin-right: .5rem;
-    display: block;
     @media (--smallViewport) {
       margin-bottom: 1rem;
     }
@@ -54,4 +68,15 @@
       margin-bottom: 0;
     }
   }
+}
+
+.RankingMenu__filtertoggle {
+  @apply --fadeLink;
+  @apply --button;
+
+  text-decoration: none;
+  padding: 0.5rem;
+  background: none;
+  border: 1px solid var(--purpleDark);
+  color: var(--purpleDark);
 }

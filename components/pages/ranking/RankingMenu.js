@@ -47,20 +47,34 @@ const TypesButtons = () => (<div className={styles.RankingMenu__row}>
 function RankingMenu() {
   const [isCollapsed, setCollapsed] = useState(true);
 
+  function toggleFilters({ target }) {
+    setCollapsed(!isCollapsed);
+    target.blur();
+  }
+
   return (<>
-    <button onClick={
-      () => setCollapsed(!isCollapsed)
-    }>Filters</button>
-      {isCollapsed ? 'collapsed' : 'not collapsed'}
-      <div className={classNames(
-        styles.RankingMenu__outer,
-        isCollapsed ? styles['RankingMenu__outer--collapsed'] : '',
-      )}>
-        <nav className={styles.RankingMenu__container}>
-          <LocationsButtons />
-          <TypesButtons />
-        </nav>
-      </div>
+    <div
+      className={classNames(
+        styles.RankingMenu__container,
+        styles['RankingMenu__container--center'],
+      )}
+    >
+      <button
+        className={styles.RankingMenu__filtertoggle}
+        onClick={toggleFilters }
+      >
+        {isCollapsed ? 'Show ' : 'Hide '}Filters
+      </button>
+    </div>
+    <div className={classNames(
+      styles.RankingMenu__outer,
+      isCollapsed ? styles['RankingMenu__outer--collapsed'] : '',
+    )}>
+      <nav className={styles.RankingMenu__container}>
+        <LocationsButtons />
+        <TypesButtons />
+      </nav>
+    </div>
   </>);
 }
 
