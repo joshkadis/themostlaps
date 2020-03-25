@@ -69,8 +69,31 @@ function getPageTitle(primary = 'default', secondary = '0') {
   return PAGE_TITLES[key] || PAGE_TITLES.default;
 }
 
+/**
+ * Get label for filter button in ranking menu
+ *
+ * @param {String} type Allowed ranking type
+ * @returns {String}
+ */
+function getFilterLabel(type) {
+  switch (type.toString().toLowerCase()) {
+    case 'alltime':
+      return 'Most Laps';
+
+    case 'single':
+      return 'Longest Ride';
+
+    case 'activities':
+      return 'Most Rides';
+
+    default:
+      return 'Laps';
+  }
+}
+
 module.exports = {
   getPageTitle,
   getApiQueryPath,
   getRankingPathname,
+  getFilterLabel,
 };

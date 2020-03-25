@@ -155,8 +155,8 @@ class RankingPage extends Component {
         reqSecondary,
       }}>
         <Layout pathname={asPath}>
-          <h1>{pageTitle}</h1>
           <LocationHero location={location} />
+          <h1>{pageTitle}</h1>
           <RankingMenu />
           {
             rankedAthletes.length

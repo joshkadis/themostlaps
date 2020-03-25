@@ -12,6 +12,7 @@ import { modalControlsShape } from '../utils/propTypes';
 import { trackModalOpen, setDimensions } from '../utils/analytics';
 import SearchUsers from './lib/SearchUsers';
 import { isSmallViewport } from '../utils/window';
+import { defaultLocation } from '../config';
 
 class Navigation extends Component {
   constructor(props) {
@@ -107,7 +108,10 @@ class Navigation extends Component {
           )}
           ref={(el) => { this.linksContainer = el; }}
         >
-          <Link href="/ranking">
+          <Link
+            href={`/ranking_v2?location=${defaultLocation}`}
+            as={`/ranking/${defaultLocation}`}
+          >
             <a className={styles.link}>Rankings</a>
           </Link>
 
