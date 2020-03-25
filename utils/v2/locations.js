@@ -4,9 +4,9 @@ function getLocationNames() {
   return Object.keys(locations);
 }
 
-function isValidLocation(location, caseSensitive = true) {
+function isValidLocation(location = '', caseSensitive = true) {
   return getLocationNames().indexOf(
-    caseSensitive ? location : location.toLowerCase(),
+    caseSensitive ? location : location.toString().toLowerCase(),
   ) >= 0;
 }
 

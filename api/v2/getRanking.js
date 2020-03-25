@@ -3,6 +3,7 @@ const Athlete = require('../../schema/Athlete');
 const { isValidLocation } = require('../../utils/v2/locations');
 const { rankingPerPage } = require('../apiConfig');
 const { getStatsFieldFromRankingType } = require('../../utils/v2/utils');
+const { isValidYear, isValidMonth } = require('../../utils/dateTimeUtils');
 
 function formatAthleteForRanking(athlete, reqType, reqLocation) {
   const {
@@ -37,15 +38,16 @@ function getReqType(primary, secondary = '') {
     return namedRequestType;
   }
 
-  // Year only
-  // @todo Validate years and months within acceptable ranges
-  //  i.e. don't allow /2043/22
-  if (/20\d{2}/.test(primary)) {
+  if (isValidYear(primary)) {
+    // Year only
     if (!secondary) {
       return `byYear.${primary}`;
     }
+
     // Year and month
-    if (/\d{2}/.test(secondary)) {
+    // Month is 1-based
+    if (isValidMonth(secondary)) {
+      // DB query is 0-based
       const monthIdx = Number(secondary) - 1;
       return `byMonth.${primary}.${monthIdx}`;
     }

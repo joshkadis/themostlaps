@@ -12,7 +12,6 @@ import { modalControlsShape } from '../utils/propTypes';
 import { trackModalOpen, setDimensions } from '../utils/analytics';
 import SearchUsers from './lib/SearchUsers';
 import { isSmallViewport } from '../utils/window';
-import { routeIsV2 } from '../utils/v2/router';
 
 class Navigation extends Component {
   constructor(props) {

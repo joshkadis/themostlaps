@@ -61,8 +61,8 @@ app.prepare()
         }
 
         app.render(req, res, '/ranking_v2', {
-          query,
-          params: filterParamsToLowerCase(params),
+          ...query,
+          ...filterParamsToLowerCase(params),
         });
       },
     );

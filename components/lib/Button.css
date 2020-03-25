@@ -6,14 +6,28 @@
 
   text-decoration: none;
   padding: 0.5rem;
+}
 
+.button__deselected {
+  background-color: #e4cafd;
+  box-shadow: inset 0 0 0 1px #6125ff;
+  color: #914cfe;
 }
 
 .button__disabled {
   cursor: default;
   transition: none;
+  box-shadow: inset 0 0 0 1px #bbbbbb;
   background: #bbbbbb;
+  color: #4a4a4a;
+  & svg {
+    fill: #4a4a4a;
+  }
   &:hover {
     background: #bbbbbb;
+    color: #4a4a4a;
+    & svg{
+      fill: #4a4a4a;
+    }
   }
 }

@@ -15,6 +15,8 @@ import Layout from '../components/Layout';
 import LocationHero from '../components/pages/ranking/LocationHero';
 import RankingTable from '../components/pages/ranking/RankingTable';
 import Button from '../components/lib/Button';
+import RankingMenu from '../components/pages/ranking/RankingMenu';
+import { RankingContext } from '../utils/v2/pages/ranking/rankingContext';
 
 class RankingPage extends Component {
   static defaultProps = {
@@ -48,29 +50,51 @@ class RankingPage extends Component {
     };
   }
 
-  static async getInitialProps({ query: { params }, asPath }) {
+  componentDidUpdate(prevProps) {
+    const {
+      location,
+      reqPrimary,
+      reqSecondary,
+      rankedAthletes,
+    } = this.props;
+    const routeDidChange = !(
+      location === prevProps.location
+      && reqPrimary === prevProps.reqPrimary
+      && reqSecondary === prevProps.reqSecondary
+    );
+
+    if (routeDidChange) {
+      this.setState({
+        pageTitle: getPageTitle(reqPrimary, reqSecondary),
+        rankedAthletes,
+      });
+    }
+  }
+
+  static async getInitialProps({ query, asPath }) {
     const defaultDate = new Date();
     const {
       location = defaultLocation,
-    } = params;
+      reqPrimary: receivedPrimary = '',
+      reqSecondary: receivedSecondary = '',
+    } = query;
     // Default to current year+month if no primary request
     let reqPrimary;
     let reqSecondary;
-    if (params.reqPrimary) {
-      reqPrimary = params.reqPrimary;
-      reqSecondary = params.reqSecondary || '';
+    if (receivedPrimary) {
+      reqPrimary = receivedPrimary;
+      reqSecondary = receivedSecondary ? monthString(receivedSecondary) : '';
     } else {
       reqPrimary = defaultDate.getFullYear().toString();
       reqSecondary = monthString(defaultDate.getMonth() + 1);
     }
 
+    // @todo Redirect to 404 if request params are invalid
+
     const apiQueryPath = getApiQueryPath(reqPrimary, reqSecondary);
     return APIRequest(
       apiQueryPath,
-      {
-        location,
-        ...params,
-      },
+      { location },
       [], // @todo Add default response
     )
       .then(({ ranking, statsKey }) => ({
@@ -113,6 +137,8 @@ class RankingPage extends Component {
   render() {
     const {
       location,
+      reqPrimary,
+      reqSecondary,
       statsKey,
       asPath,
     } = this.props;
@@ -123,28 +149,35 @@ class RankingPage extends Component {
       rankedAthletes = [],
     } = this.state;
     return (
-      <Layout pathname={asPath}>
-        <h1>{pageTitle}</h1>
-        <LocationHero location={location} />
-        {
-          rankedAthletes.length
-            ? <Fragment>
-                <RankingTable
-                  rankedAthletes={rankedAthletes}
-                  statsKey={statsKey}
-                />
-                <div style={{ margin: '1rem 0', textAlign: 'center' }}>
-                  <Button
-                    disabled={!canShowMore}
-                    onClick={this.onClickShowMore}
-                  >
-                    Show more
-                  </Button>
-                </div>
-              </Fragment>
-            : <p>No ranking for this view.</p>
-        }
-      </Layout>
+      <RankingContext.Provider value={{
+        location,
+        reqPrimary,
+        reqSecondary,
+      }}>
+        <Layout pathname={asPath}>
+          <h1>{pageTitle}</h1>
+          <LocationHero location={location} />
+          <RankingMenu />
+          {
+            rankedAthletes.length
+              ? <Fragment>
+                  <RankingTable
+                    rankedAthletes={rankedAthletes}
+                    statsKey={statsKey}
+                  />
+                  <div style={{ margin: '1rem 0', textAlign: 'center' }}>
+                    <Button
+                      disabled={!canShowMore}
+                      onClick={this.onClickShowMore}
+                    >
+                      Show more
+                    </Button>
+                  </div>
+                </Fragment>
+              : <p>No ranking for this view.</p>
+          }
+        </Layout>
+      </RankingContext.Provider>
     );
   }
 }
