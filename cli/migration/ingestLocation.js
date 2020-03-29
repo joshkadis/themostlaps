@@ -14,6 +14,7 @@ async function doCommand({
   dryRun: isDryRun = false,
   subargs = [],
   limit = 0,
+  skip = 0,
 }) {
   if (!subargs.length || getLocationNames().indexOf(subargs[0]) === -1) {
     console.warn(`Requires valid location, one of: ${JSON.stringify(getLocationNames())}`);
@@ -29,7 +30,7 @@ async function doCommand({
   const allAthleteDocs = await Athlete.find(
     { [queryField]: { $exists: false } },
     null,
-    { limit },
+    { limit, skip },
   );
 
   const migrateLocationForAthlete = async (athleteDoc) => {
