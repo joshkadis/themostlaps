@@ -1,6 +1,7 @@
 const { setupThenCommand: ingestV2Command } = require('./ingestV2');
 const { setupThenCommand: deleteActivityCommand } = require('./deleteActivity');
 const { setupThenCommand: migrateStatsCommand } = require('./migrateStats');
+const { setupThenCommand: recalculateStatsCommand } = require('./recalculateStats');
 const { withPrompt } = require('../utils');
 
 module.exports = {
@@ -18,6 +19,14 @@ module.exports = {
     };
 
     switch (args.subcommand) {
+      case 'recalculatestats':
+        recalculateStatsCommand(args);
+        // usePrompt(
+        //   recalculateStatsCommand,
+        //   'This will override all athlete stats.',
+        // );
+        break;
+
       case 'ingesthistory':
         usePrompt(
           ingestV2Command,

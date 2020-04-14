@@ -150,7 +150,7 @@ async function generateLocationsStatsV2(athleteDoc, additionalStats = {}) {
 
   if (!allActivities.length) {
     // nothing to merge into so just return additional stats
-    return additionalStats;
+    return { locations: {}, additionalStats };
   }
 
   return {
