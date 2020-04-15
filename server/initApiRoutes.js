@@ -7,6 +7,7 @@ const getSearchUsers = require('../api/getSearchUsers');
 // v2
 const { getAthletes: v2GetAthletes } = require('../api/v2/getAthletes');
 const { getRanking: v2GetRanking } = require('../api/v2/getRanking');
+const { recentActivities } = require('../api/v2/recentActivities');
 
 /**
  * Validate and fetch data for API request
@@ -87,6 +88,14 @@ async function initApiRoutes(server) {
       req,
       res,
       async ({ params, query }) => v2GetRanking(params, query),
+    );
+  });
+
+  server.get('/api/v2/recentactivities', async (req, res) => {
+    await handleAPIRequest(
+      req,
+      res,
+      async ({ query }) => recentActivities(query),
     );
   });
 }
