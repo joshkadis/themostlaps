@@ -1,6 +1,7 @@
 const { setupThenCommand: migrateStatsCommand } = require('./stats');
 const { setupThenCommand: migrateActivitiesCommand } = require('./activities');
 const { setupThenCommand: ingestLocationCommand } = require('./ingestLocation');
+const { setupThenCommand: recalculateStatsCommand } = require('./recalculateStats');
 const { withPrompt } = require('../utils');
 
 module.exports = {
@@ -18,6 +19,14 @@ module.exports = {
     };
 
     switch (args.subcommand) {
+      case 'recalculatestats':
+        recalculateStatsCommand(args);
+        // usePrompt(
+        //   recalculateStatsCommand,
+        //   'Will overwrite stats for *all athletes*',
+        // );
+        break;
+
       case 'athletestats':
         usePrompt(
           migrateStatsCommand,
