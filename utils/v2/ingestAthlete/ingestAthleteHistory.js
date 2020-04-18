@@ -34,6 +34,7 @@ async function setAthleteAvailableYears(athleteDoc, athleteStats) {
       ...athleteDoc.stats,
       availableYears,
     },
+    stats_version: 'v2',
   });
   athleteDoc.markModified('stats');
   await athleteDoc.save();
