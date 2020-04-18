@@ -49,7 +49,7 @@ async function recentActivities(query) {
       startDateUtc: { $gte: new Date(afterDate) },
       activityLocations: { $elemMatch: { location } },
     },
-    '_id athlete_id',
+    'activityLocations startDateUtc',
     {
       limit,
       skip,
@@ -57,11 +57,19 @@ async function recentActivities(query) {
     },
   ).lean();
 
+  const transformedActivities = activities.map(
+    ({ startDateUtc, activityLocations }) => ({
+      date: startDateUtc,
+      locations: activityLocations.map(
+        ({ location: loc, laps }) => ({ location: loc, laps }),
+      ),
+    }),
+  );
+
   return {
     error: false,
-    data: activities,
+    data: transformedActivities,
   };
-  // Map activities to API response format
 }
 
 module.exports = {
