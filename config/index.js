@@ -90,5 +90,6 @@ module.exports = {
   rankingStartYear: 2010,
   recentActivities: {
     days: 7,
+    perPage: 10,
   },
 };
