@@ -88,4 +88,8 @@ module.exports = {
   stravaOauthUrl: 'https://www.strava.com/oauth',
   tokenRefreshGrantType: 'refresh_token',
   rankingStartYear: 2010,
+  recentActivities: {
+    days: 7,
+    perPage: 10,
+  },
 };

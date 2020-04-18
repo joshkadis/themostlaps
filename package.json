@@ -40,6 +40,7 @@
     "isomorphic-fetch": "^2.2.1",
     "isomorphic-unfetch": "^2.1.1",
     "lodash": "^4.17.15",
+    "moment": "^2.24.0",
     "mongoose": "^5.7.11",
     "next": "^9.0.5",
     "node-fetch": "^2.6.0",
