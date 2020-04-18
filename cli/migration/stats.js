@@ -17,13 +17,19 @@ async function doCommand({
   }
 
   const allIds = await Athlete.find(
-    { stats_version: 'v1' },
+    { stats_version: { $ne: 'v2' } },
     '_id',
-    { lean: true, limit },
+    {
+      lean: true,
+      limit,
+      sort: {
+        _id: 1,
+      },
+    },
   );
 
   if (!allIds.length) {
-    console.log('No athletes found with v1 stats');
+    console.log('No athletes found without v2 stats');
     return;
   }
 
