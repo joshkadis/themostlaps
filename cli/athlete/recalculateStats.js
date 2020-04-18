@@ -51,8 +51,14 @@ Not yet migrated to v2: ${getAthleteIdentifier(athleteDoc)}`);
   athleteDoc.set({
     stats: nextStats,
     locations: undefined,
+    migration: {
+      ...(athleteDoc.migration || {}),
+      recalculateStats: true,
+    },
   });
 
+  athleteDoc.markModified('stats');
+  athleteDoc.markModified('migration');
   if (!isDryRun) {
     await athleteDoc.save();
   }

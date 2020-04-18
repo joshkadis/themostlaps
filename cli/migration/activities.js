@@ -35,7 +35,14 @@ async function doCommand({
       laps: doc.laps,
       segment_efforts: doc.segment_efforts,
     }];
-    doc.set({ activityLocations });
+    doc.set({
+      activityLocations,
+      migration: {
+        ...(doc.migration || {}),
+        location: true,
+      },
+    });
+    doc.markModified('migration');
     doc.markModified('activityLocations');
     if (!isDryRun) {
       await doc.save();
