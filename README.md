@@ -80,36 +80,56 @@ Param | Accepts
 ----|----
 `ids`|CSV string of athlete IDs
 
+Returns **array** of athletes in format:
 
 ```
-{
-  <Other properties from athlete document>,
-  locations: ['prospectpark', 'centralpark'],
-  stats_version: 'v2',
-  stats: {
-    <Top-level athlete stats TBD>,
-    locations: {
-      prospectpark: {
-        allTime: xx,
-        single: xx,
-        numActivities: xx,
-        availableYears: [2014],
-        byYear: {
-          { year: 2014, value: xx },
-        },
-        byMonth: {
-          2014: [
-            { month: 'Jan', value: xx },
-            { month: 'Feb', value: xx },
-            { month: 'Mar', value: xx },
-            <remaining months, including 0 values>
+[
+  {
+    "_id": 541773,
+    "status": "ready",
+    "athlete": {
+      "firstname": "josh",
+      "lastname": "kadis – themostlaps.com",
+      "profile": <Absolute URL of profile picture>
+    },
+    "stats": {
+      <Top-level stats TBD>,
+      "locations": {
+        <Additional locations in same format>,
+        "centralpark": {
+          "allTime": 39,
+          "single": 10,
+          "numActivities": 10,
+          <Additional years included as below>
+          "availableYears": [
+            2013,
           ],
+          "byYear": {
+            "2013": 39,
+          },
+          "byMonth": {
+              "2013": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                10,
+                13,
+                16,
+                0,
+                0,
+                0,
+                0
+              ]
+            }
+          }
         }
-      },
-      centralpark: <Same thing as prospectpark>
-    }
+      }
+    },
+    "stats_version": "v2"
   }
-}
+]
 ```
 ### Ranking
 
@@ -122,3 +142,30 @@ Param | Accepts
 `?location`|Required. `prospectpark` or `centralpark`
 `?page`|Defaults to 1
 `?perPage`|Defaults to 15
+
+### Recent Activities
+
+`/recentactivities`
+
+Param | Accepts
+----|----
+`days`|Number of days back from today, defaults to 10
+`location`|Valid location, defaults to `prospectpark`
+`perPage`|results per page, defaults to 10
+`page`|Defaults to 1, obviously
+
+Results will include activities with laps in the requested location. Recall that an activity may have laps in multiple locations.
+
+```
+[
+  {
+    date: '2020-03-20T15:57:35.000Z',
+    locations: [
+      {
+        location: 'centralpark',
+        laps: 3
+      }
+    ]
+  }
+]
+```
