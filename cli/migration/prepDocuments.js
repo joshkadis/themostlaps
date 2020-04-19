@@ -33,12 +33,19 @@ async function doCommand({
 
   const athletes = await Athlete.find({}, null, { limit, skip });
 
+  const athletesResults = {
+    stats_version: 0,
+    app_version: 0,
+  };
+
   const prepAthlete = async (doc) => {
     try {
       if (shouldSetVersion(doc, 'stats_version')) {
+        athletesResults.stats_version += 1;
         doc.set('stats_version', nextVersion);
       }
       if (shouldSetVersion(doc, 'app_version')) {
+        athletesResults.app_version += 1;
         doc.set('app_version', nextVersion);
       }
       if (!isDryRun) {
@@ -70,19 +77,30 @@ async function doCommand({
       return;
     }
   }
+  console.table(athletesResults);
   progressBar1.stop();
 
   /**
    * Activities
    */
   console.log(`Preparing activities for ${nextVersion}`);
+  const activitiesResults = { app_version: 0 };
+  const activities = await Activity.find(
+    { app_version: { $ne: nextVersion } },
+    null,
+    { limit, skip },
+  );
 
-  const activities = await Activity.find({}, null, { limit, skip });
+  if (!activities.length) {
+    console.log(`All activities have been set to ${nextVersion}`);
+    return;
+  }
 
   const prepActivity = async (doc) => {
     try {
       if (shouldSetVersion(doc, 'app_version')) {
         doc.set('app_version', nextVersion);
+        activitiesResults.app_version += 1;
       }
       if (!isDryRun) {
         await doc.save();
@@ -113,6 +131,7 @@ async function doCommand({
       return;
     }
   }
+  console.table(activitiesResults);
   progressBar2.stop();
 
   if (isDryRun) {

@@ -1,3 +1,4 @@
+const cliProgress = require('cli-progress');
 const { setupConnection } = require('../utils/setupConnection');
 const { makeArrayAsyncIterable } = require('../../utils/v2/asyncUtils');
 const Activity = require('../../schema/Activity');
@@ -50,6 +51,12 @@ async function doCommand({
     return doc.id;
   };
 
+  const progressBar = new cliProgress.SingleBar(
+    {},
+    cliProgress.Presets.shades_classic,
+  );
+  progressBar.start(activityDocs.length, 0);
+
   const iterable = makeArrayAsyncIterable(
     activityDocs,
     migrateActivityFormat,
@@ -60,7 +67,6 @@ async function doCommand({
   const results = {
     success: [],
     error: [],
-    effortsCheck: [],
   };
 
   // eslint-disable-next-line
@@ -90,19 +96,18 @@ async function doCommand({
         && nextNumSegmentEfforts === prevNumSegmentEfforts
       ) {
         results.success.push(id);
-        if (nextNumSegmentEfforts > 0 && results.effortsCheck.length < 10) {
-          results.effortsCheck.push(id);
-        }
       } else {
         results.error.push(id);
       }
     }
+    progressBar.increment();
   }
+
+  progressBar.stop();
 
   console.table({
     Success: results.success.length,
     Error: results.error.length,
-    CheckActivity: results.effortsCheck,
   });
 
   if (isDryRun) {
