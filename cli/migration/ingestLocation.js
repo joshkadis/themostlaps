@@ -40,6 +40,19 @@ async function doCommand({
         location ? [location] : null,
         isDryRun,
       );
+      const migrationKey = `ingest${location.toLowerCase()}`;
+
+      athleteDoc.set({
+        migration: {
+          ...(athleteDoc.migration || {}),
+          [migrationKey]: true,
+        },
+      });
+      athleteDoc.markModified('migration');
+      if (!isDryRun) {
+        await athleteDoc.save();
+      }
+
       return { success: true };
     } catch (err) {
       captureSentry(err, 'ingestlocation', {

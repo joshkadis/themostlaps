@@ -39,6 +39,10 @@ const activitySchema = new Schema({
     index: true,
   },
   activityLocations: [ActivityLocation],
+  app_version: String, // 'v1' if created before Apr 2020 migration
+  migration: {
+    location: Boolean,
+  },
 });
 
 const Activity = mongoose.model('Activity', activitySchema);

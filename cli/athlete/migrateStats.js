@@ -129,7 +129,13 @@ Number PP Activitie: ${v2Stats.locations.prospectpark.numActivities}`);
     stats_version: 'v2',
     stats: v2Stats,
     last_updated: new Date().toISOString(),
+    migration: {
+      ...(athleteDoc.migration || {}),
+      athleteStats: true,
+    },
   });
+
+  athleteDoc.markModified('migration');
   athleteDoc.markModified('legacyStats');
   athleteDoc.markModified('stats');
   if (!isDryRun) {

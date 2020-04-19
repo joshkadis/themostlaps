@@ -28,6 +28,12 @@ const athleteSchema = new Schema(
         monthly: { type: Boolean, default: true },
       },
     },
+    app_version: String, // 'v1' if created before Apr 2020 migration
+    migration: {
+      athleteStats: Boolean,
+      ingestcentralpark: Boolean,
+      recalculateStats: Boolean,
+    },
   },
   {
     autoIndex: false,
