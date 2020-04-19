@@ -21,7 +21,7 @@ const athleteSchema = new Schema(
     created: { type: String, required: true },
     last_refreshed: { type: Number, required: true },
     stats: { type: Mixed, required: true, default: {} },
-    stats_version: { type: String, required: true, default: 'v2' },
+    stats_version: String,
     legacyStats: Mixed,
     preferences: {
       notifications: {

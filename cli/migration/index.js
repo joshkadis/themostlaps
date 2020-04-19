@@ -2,6 +2,7 @@ const { setupThenCommand: migrateStatsCommand } = require('./stats');
 const { setupThenCommand: migrateActivitiesCommand } = require('./activities');
 const { setupThenCommand: ingestLocationCommand } = require('./ingestLocation');
 const { setupThenCommand: recalculateStatsCommand } = require('./recalculateStats');
+const { setupThenCommand: prepDocumentsCommand } = require('./prepDocuments');
 const { withPrompt } = require('../utils');
 
 module.exports = {
@@ -20,11 +21,10 @@ module.exports = {
 
     switch (args.subcommand) {
       case 'recalculatestats':
-        recalculateStatsCommand(args);
-        // usePrompt(
-        //   recalculateStatsCommand,
-        //   'Will overwrite stats for *all athletes*',
-        // );
+        usePrompt(
+          recalculateStatsCommand,
+          'Will overwrite stats for *all athletes*',
+        );
         break;
 
       case 'athletestats':
@@ -45,6 +45,13 @@ module.exports = {
         usePrompt(
           ingestLocationCommand,
           'Will ingest a location for all athletes in v2 format.',
+        );
+        break;
+
+      case 'prepdocuments':
+        usePrompt(
+          prepDocumentsCommand,
+          'Will mark all athletes and activities with version.',
         );
         break;
 
