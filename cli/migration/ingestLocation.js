@@ -40,7 +40,7 @@ async function doCommand({
         location ? [location] : null,
         isDryRun,
       );
-      const migrationKey = `ingest${location}`;
+      const migrationKey = `ingest${location.toLowerCase()}`;
 
       athleteDoc.set({
         migration: {
