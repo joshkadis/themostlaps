@@ -29,6 +29,7 @@ const athleteSchema = new Schema(
       },
     },
     app_version: String, // 'v1' if created before Apr 2020 migration
+    locations: [String],
     migration: {
       athleteStats: Boolean,
       ingestcentralpark: Boolean,
