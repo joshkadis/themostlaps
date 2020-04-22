@@ -19,7 +19,7 @@ async function doCommand({
 
   const activityDocs = await Activity.find(
     {
-      activityLocations: { $exists: false },
+      'migration.location': { $ne: true },
     },
     null,
     limit ? { limit } : null,
@@ -38,6 +38,7 @@ async function doCommand({
     }];
     doc.set({
       activityLocations,
+      app_version: 'v2',
       migration: {
         ...(doc.migration || {}),
         location: true,
