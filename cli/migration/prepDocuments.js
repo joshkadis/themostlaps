@@ -13,15 +13,9 @@ async function doCommand({
   dryRun: isDryRun = false,
   limit = 0,
   skip = 0,
-  force = false,
   version,
 }) {
   const nextVersion = version || 'v1';
-  const shouldSetVersion = (doc, prop) => (
-    force
-    || typeof doc[prop] === 'undefined'
-  );
-
   if (isDryRun) {
     console.log(DRY_RUN_MSG);
   }
@@ -36,18 +30,29 @@ async function doCommand({
   const athletesResults = {
     stats_version: 0,
     app_version: 0,
+    emptied_locations: 0,
+    location_pp: 0,
   };
 
   const prepAthlete = async (doc) => {
     try {
-      if (shouldSetVersion(doc, 'stats_version')) {
-        athletesResults.stats_version += 1;
-        doc.set('stats_version', nextVersion);
-      }
-      if (shouldSetVersion(doc, 'app_version')) {
+      if (doc.app_version !== nextVersion) {
+        doc.set({ app_version: nextVersion });
         athletesResults.app_version += 1;
-        doc.set('app_version', nextVersion);
       }
+      if (doc.stats_version !== nextVersion) {
+        doc.set({ stats_version: nextVersion });
+        athletesResults.stats_version += 1;
+      }
+      if (!doc.stats.allTime) {
+        doc.set('locations', []);
+        athletesResults.emptied_locations += 1;
+      } else {
+        athletesResults.location_pp += 1;
+        doc.set('locations', ['prospectpark']);
+      }
+      doc.markModified('locations');
+
       if (!isDryRun) {
         await doc.save();
       }
@@ -77,8 +82,8 @@ async function doCommand({
       return;
     }
   }
-  console.table(athletesResults);
   progressBar1.stop();
+  console.table(athletesResults);
 
   /**
    * Activities
@@ -98,7 +103,7 @@ async function doCommand({
 
   const prepActivity = async (doc) => {
     try {
-      if (shouldSetVersion(doc, 'app_version')) {
+      if (doc.app_version !== version) {
         doc.set('app_version', nextVersion);
         activitiesResults.app_version += 1;
       }
@@ -131,8 +136,8 @@ async function doCommand({
       return;
     }
   }
-  console.table(activitiesResults);
   progressBar2.stop();
+  console.table(activitiesResults);
 
   if (isDryRun) {
     console.log(DRY_RUN_MSG);
