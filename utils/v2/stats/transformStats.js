@@ -43,6 +43,10 @@ async function transformStats(v1Stats, athleteId = false) {
   const byYear = {};
   const byMonth = {};
 
+  if (!v1Stats.allTime) {
+    return getDefaultV2Stats();
+  }
+
   Object.keys(v1Stats).forEach((key) => {
     if (key === 'allTime' || key === 'single') {
       return;
