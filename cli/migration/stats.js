@@ -17,7 +17,9 @@ async function doCommand({
   }
 
   const allIds = await Athlete.find(
-    { stats_version: { $ne: 'v2' } },
+    {
+      'migration.athleteStats': { $ne: true },
+    },
     '_id',
     {
       lean: true,
