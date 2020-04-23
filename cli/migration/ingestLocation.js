@@ -26,9 +26,9 @@ async function doCommand({
     console.log(DRY_RUN_MSG);
   }
 
-  const queryField = `stats.locations.${location}`;
+  const migrationKey = `ingest${location.toLowerCase()}`;
   const allAthleteDocs = await Athlete.find(
-    { [queryField]: { $exists: false } },
+    { [`migration.${migrationKey}`]: { $ne: true } },
     null,
     { limit, skip },
   );
@@ -40,7 +40,6 @@ async function doCommand({
         location ? [location] : null,
         isDryRun,
       );
-      const migrationKey = `ingest${location.toLowerCase()}`;
 
       athleteDoc.set({
         migration: {
