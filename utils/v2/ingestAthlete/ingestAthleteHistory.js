@@ -50,7 +50,7 @@ async function setAthleteAvailableYears(athleteDoc, athleteStats) {
  * @returns {Object} obj.locationName
  * @returns {Object} obj.stats
  */
-async function asyncIngestSingleLocation(
+export async function asyncIngestSingleLocation(
   locationName,
   athleteDoc,
   { isDryRun = false },

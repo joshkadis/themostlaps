@@ -2,7 +2,7 @@ const { setupConnection } = require('../utils/setupConnection');
 const { makeArrayAsyncIterable } = require('../../utils/v2/asyncUtils');
 const { getLocationNames } = require('../../utils/v2/locations');
 const Athlete = require('../../schema/Athlete');
-const ingestAthleteHistory = require('../../utils/v2/ingestAthlete/ingestAthleteHistory');
+const { asyncIngestSingleLocation } = require('../../utils/v2/ingestAthlete/ingestAthleteHistory');
 const { captureSentry } = require('../../utils/v2/services/sentry');
 
 const DRY_RUN_MSG = '** THIS IS A DRY RUN **';
@@ -27,7 +27,7 @@ async function doCommand({
   }
 
   const migrationKey = `ingest${location.toLowerCase()}`;
-  const allAthleteDocs = await Athlete.find(
+  const athleteDocs = await Athlete.find(
     { [`migration.${migrationKey}`]: { $ne: true } },
     null,
     { limit, skip },
@@ -35,9 +35,9 @@ async function doCommand({
 
   const migrateLocationForAthlete = async (athleteDoc) => {
     try {
-      await ingestAthleteHistory(
+      await asyncIngestSingleLocation(
+        location,
         athleteDoc,
-        location ? [location] : null,
         isDryRun,
       );
 
@@ -62,11 +62,11 @@ async function doCommand({
     }
   };
   const iterable = makeArrayAsyncIterable(
-    allAthleteDocs,
+    athleteDocs,
     migrateLocationForAthlete,
   );
 
-  console.log(`Migrating stats for ${allAthleteDocs.length} athletes`);
+  console.log(`Ingesting location ${location} for ${athleteDocs.length} athletes`);
 
   const results = {
     Success: 0,
