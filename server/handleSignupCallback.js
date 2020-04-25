@@ -5,7 +5,7 @@ const Athlete = require('../schema/Athlete');
 const { getAthleteModelFormat } = require('../utils/athleteUtils');
 const { captureSentry } = require('../utils/v2/services/sentry');
 const getInternalError = require('../utils/internalErrors');
-const ingestAthleteHistory = require('../utils/v2/ingestAthlete/ingestAthleteHistory');
+const { ingestAthleteHistory } = require('../utils/v2/ingestAthlete/ingestAthleteHistory');
 
 /**
  * Factory for handling error while creating athlete in db

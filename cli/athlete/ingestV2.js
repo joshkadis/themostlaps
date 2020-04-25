@@ -1,7 +1,7 @@
 const { setupConnection } = require('../utils/setupConnection');
 const { makeCheckNumArgs } = require('../utils');
 const Athlete = require('../../schema/Athlete');
-const ingestAthleteHistory = require('../../utils/v2/ingestAthlete/ingestAthleteHistory');
+const { ingestAthleteHistory } = require('../../utils/v2/ingestAthlete/ingestAthleteHistory');
 const { getLocationNames } = require('../../utils/v2/locations');
 
 const checkNumArgs = makeCheckNumArgs('Use format: $ athlete ingestv2');

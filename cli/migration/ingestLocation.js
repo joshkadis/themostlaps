@@ -2,7 +2,7 @@ const { setupConnection } = require('../utils/setupConnection');
 const { makeArrayAsyncIterable } = require('../../utils/v2/asyncUtils');
 const { getLocationNames } = require('../../utils/v2/locations');
 const Athlete = require('../../schema/Athlete');
-const { asyncIngestSingleLocation } = require('../../utils/v2/ingestAthlete/ingestAthleteHistory');
+const { ingestSingleLocation } = require('../../utils/v2/ingestAthlete/ingestAthleteHistory');
 const { captureSentry } = require('../../utils/v2/services/sentry');
 
 const DRY_RUN_MSG = '** THIS IS A DRY RUN **';
@@ -35,7 +35,7 @@ async function doCommand({
 
   const migrateLocationForAthlete = async (athleteDoc) => {
     try {
-      await asyncIngestSingleLocation(
+      await ingestSingleLocation(
         location,
         athleteDoc,
         isDryRun,

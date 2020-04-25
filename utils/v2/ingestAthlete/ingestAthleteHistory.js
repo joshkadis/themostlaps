@@ -50,7 +50,7 @@ async function setAthleteAvailableYears(athleteDoc, athleteStats) {
  * @returns {Object} obj.locationName
  * @returns {Object} obj.stats
  */
-export async function asyncIngestSingleLocation(
+async function ingestSingleLocation(
   locationName,
   athleteDoc,
   { isDryRun = false },
@@ -115,7 +115,7 @@ export async function asyncIngestSingleLocation(
       stats: ingestor.getStats(),
     };
   } catch (err) {
-    captureSentry(err, 'asyncIngestSingleLocation', {
+    captureSentry(err, 'ingestSingleLocation', {
       extra: {
         locationName,
         canonicalSegmentId,
@@ -160,7 +160,7 @@ Locations: ${locationsToLog}
   // Will check all known locations unless specified
   const asyncIngestAllLocations = makeArrayAsyncIterable(
     locationsForIngest || getLocationNames(),
-    (loc) => asyncIngestSingleLocation(loc, athleteDoc, { isDryRun }),
+    (loc) => ingestSingleLocation(loc, athleteDoc, { isDryRun }),
   );
 
   if (!isDryRun) {
@@ -208,4 +208,7 @@ ${JSON.stringify(summary, null, 2)}
 ${isDryRun ? '**THIS WAS A DRY RUN**' : ''}`);
 }
 
-module.exports = ingestAthleteHistory;
+module.exports = {
+  ingestAthleteHistory,
+  ingestSingleLocation,
+};
