@@ -1,6 +1,9 @@
 const _unset = require('lodash/unset');
 const { defaultLocation } = require('../../../config');
-const { getDefaultLocationStats } = require('./utils');
+const {
+  getDefaultLocationStats,
+  getDefaultV2Stats,
+} = require('./utils');
 const Activity = require('../../../schema/Activity');
 const { captureSentry } = require('../services/sentry');
 
@@ -141,7 +144,7 @@ function buildLocationsStatsFromActivities(activities) {
  *
  * @param {Athlete} athleteDoc
  * @param {Object} additionalStats Anything to merge into top-level stats at the end
- * @returns {Object}
+ * @returns {Object} Complete stats object for athlete
  */
 async function generateLocationsStatsV2(athleteDoc, additionalStats = {}) {
   const allActivities = await Activity
@@ -150,7 +153,7 @@ async function generateLocationsStatsV2(athleteDoc, additionalStats = {}) {
 
   if (!allActivities.length) {
     // nothing to merge into so just return additional stats
-    return { locations: {}, additionalStats };
+    return getDefaultV2Stats(additionalStats);
   }
 
   return {

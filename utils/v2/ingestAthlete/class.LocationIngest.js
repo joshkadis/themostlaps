@@ -1,3 +1,4 @@
+const _uniq = require('lodash/uniq');
 // Schema
 const Activity = require('../../../schema/Activity');
 const Athlete = require('../../../schema/Athlete');
@@ -434,17 +435,23 @@ class LocationIngest {
    * Save stats for athleteDoc using v2 format
    */
   async saveStats() {
-    const allLocationsStats = this.athleteDoc.get(
-      'stats.locations',
-    );
-
-    allLocationsStats[this.locationName] = this.stats;
+    const {
+      locations: topLevelLocations,
+      stats: prevStats,
+    } = this.athleteDoc;
 
     this.athleteDoc.set({
       stats_version: 'v2',
+      locations: _uniq([
+        ...topLevelLocations,
+        this.locationName,
+      ]),
       stats: {
-        ...this.athleteDoc.get('stats'),
-        locations: allLocationsStats,
+        ...prevStats,
+        locations: {
+          ...prevStats.locations,
+          [this.locationName]: this.stats,
+        },
       },
       last_updated: new Date().toISOString(),
     });
