@@ -14,18 +14,33 @@ const { captureSentry } = require('../services/sentry');
 const MAX_INVALID_ACTIVITIES = 0.05;
 
 /**
+ * Get ordered array of years in which athlete has stats anywhere
+ *
+ * @param {Object} locationsStats athlete.stats.locations
+ * @returns {Array}
+ */
+function getAllAvailableYears(locationsStats) {
+  const allYears = Object.keys(locationsStats).reduce(
+    (acc, loc) => [...acc, ...locationsStats[loc].availableYears],
+    [],
+  );
+  return sortUniq(allYears);
+}
+
+/**
  * Set stats array of all years in which
  * athlete has any stats for any location
  *
  * @param {Athlete} athleteDoc
  * @param {Object} athleteStats
  */
-async function setAthleteAvailableYears(athleteDoc, athleteStats) {
+async function setAthleteAvailableYears(athleteDoc, athleteStats = false) {
+  const useStats = athleteStats || athleteDoc.stats;
   // Set array of all years in which athlete has any stats for any location
   const availableYears = sortUniq(
-    Object.keys(athleteStats).reduce((acc, loc) => [
+    Object.keys(useStats).reduce((acc, loc) => [
       ...acc,
-      ...athleteStats[loc].availableYears,
+      ...useStats[loc].availableYears,
     ], []),
   );
 
@@ -67,7 +82,6 @@ async function ingestSingleLocation(
 
   try {
     const ingestor = new LocationIngest(athleteDoc, canonicalSegmentId);
-    console.log(`${"\n"}LocationIngest created for segment ${ingestor.segmentId} (${locationName})`);
 
     await ingestor.fetchActivities();
     console.log(`Found ${ingestor.getNumActivities()} activities`);
@@ -82,8 +96,6 @@ async function ingestSingleLocation(
 
     if (numInvalid) {
       console.log(JSON.stringify(invalidActivities, null, 2));
-    } else {
-      console.log('All activites were validated successfully');
     }
 
     if (numInvalid / ingestor.getNumActivities() > MAX_INVALID_ACTIVITIES) {
@@ -211,4 +223,6 @@ ${isDryRun ? '**THIS WAS A DRY RUN**' : ''}`);
 module.exports = {
   ingestAthleteHistory,
   ingestSingleLocation,
+  setAthleteAvailableYears,
+  getAllAvailableYears,
 };

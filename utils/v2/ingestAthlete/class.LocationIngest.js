@@ -282,6 +282,7 @@ class LocationIngest {
 
   /**
    * Validates an activity and saves it to the database
+   * Overwrites existing activity
    *
    * @param {Activity} activityDoc
    * @returns {Number} Number of laps for activity, for logging

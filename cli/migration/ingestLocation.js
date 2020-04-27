@@ -2,7 +2,10 @@ const { setupConnection } = require('../utils/setupConnection');
 const { makeArrayAsyncIterable } = require('../../utils/v2/asyncUtils');
 const { getLocationNames } = require('../../utils/v2/locations');
 const Athlete = require('../../schema/Athlete');
-const { ingestSingleLocation } = require('../../utils/v2/ingestAthlete/ingestAthleteHistory');
+const {
+  ingestLocationForAthlete,
+  resetLocationForAthlete,
+} = require('../utils/ingestLocation');
 const { captureSentry } = require('../../utils/v2/services/sentry');
 
 const DRY_RUN_MSG = '** THIS IS A DRY RUN **';
@@ -12,6 +15,7 @@ const DRY_RUN_MSG = '** THIS IS A DRY RUN **';
  */
 async function doCommand({
   dryRun: isDryRun = false,
+  reset: shouldReset = false,
   subargs = [],
   limit = 0,
   skip = 0,
@@ -28,30 +32,28 @@ async function doCommand({
 
   const migrationKey = `ingest${location.toLowerCase()}`;
   const athleteDocs = await Athlete.find(
-    { [`migration.${migrationKey}`]: { $ne: true } },
+    { [`migration.${migrationKey}`]: { $ne: !shouldReset } },
     null,
     { limit, skip },
   );
 
   const migrateLocationForAthlete = async (athleteDoc) => {
     try {
-      await ingestSingleLocation(
-        location,
-        athleteDoc,
-        isDryRun,
-      );
-
-      athleteDoc.set({
-        migration: {
-          ...(athleteDoc.migration || {}),
-          [migrationKey]: true,
-        },
-      });
-      athleteDoc.markModified('migration');
-      if (!isDryRun) {
-        await athleteDoc.save();
+      if (shouldReset) {
+        await resetLocationForAthlete(
+          athleteDoc,
+          location,
+          migrationKey,
+          isDryRun,
+        );
+      } else {
+        await ingestLocationForAthlete(
+          athleteDoc,
+          location,
+          migrationKey,
+          isDryRun,
+        );
       }
-
       return { success: true };
     } catch (err) {
       captureSentry(err, 'ingestlocation', {
@@ -61,12 +63,13 @@ async function doCommand({
       return { success: false, id: athleteDoc.id };
     }
   };
+
+  console.log(`${shouldReset ? 'Resetting' : 'Ingesting'} location ${location} for ${athleteDocs.length} athletes`);
+
   const iterable = makeArrayAsyncIterable(
     athleteDocs,
     migrateLocationForAthlete,
   );
-
-  console.log(`Ingesting location ${location} for ${athleteDocs.length} athletes`);
 
   const results = {
     Success: 0,
