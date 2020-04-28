@@ -454,7 +454,6 @@ class LocationIngest {
           [this.locationName]: this.stats,
         },
       },
-      last_updated: new Date().toISOString(),
     });
     this.athleteDoc.markModified('locations');
     this.athleteDoc.markModified('stats');

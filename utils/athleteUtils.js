@@ -63,7 +63,6 @@ function getAthleteModelFormat(athleteInfo, shouldSubscribe = true) {
     const currentDate = new Date();
     return {
       _id: id,
-      last_updated: currentDate.toISOString(),
       created: currentDate.toISOString(),
       last_refreshed: getEpochSecondsFromDateObj(currentDate),
       access_token,

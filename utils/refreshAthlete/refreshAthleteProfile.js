@@ -39,14 +39,12 @@ async function refreshAthleteProfile(athlete) {
 
     console.log(`Updating ${firstname} ${lastname} (${athleteDoc.get('_id')})`);
 
-    const currentDate = new Date();
     athleteDoc.set({
       athlete: {
         firstname,
         lastname,
         profile,
       },
-      last_updated: currentDate.toISOString(),
     });
 
     return await athleteDoc.save();

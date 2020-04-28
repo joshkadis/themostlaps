@@ -68,9 +68,7 @@ async function compileStatsForActivities(
  * @param {String} status Defaults to 'ready'
  */
 async function updateAthleteStats(athleteDoc, stats, status = 'ready') {
-  const currentDate = new Date();
   athleteDoc.set({
-    last_updated: currentDate.toISOString(),
     stats,
     status,
   });
