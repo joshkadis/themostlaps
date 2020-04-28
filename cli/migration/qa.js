@@ -11,7 +11,7 @@ async function doCommand({
   skip = 0,
 }) {
   const allAthletes = await Athlete.find(
-    { 'legacyStats.allTime': { $eq: 0 } },
+    {},
     null,
     {
       lean: true,
