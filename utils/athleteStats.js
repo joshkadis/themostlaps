@@ -1,6 +1,3 @@
-const Athlete = require('../schema/Athlete');
-const { compileSpecialStats } = require('./stats/compileSpecialStats');
-
 /**
  * Update athlete stats from array of new activity documents
  * Could be synchronous but don't want to break anything
@@ -25,7 +22,7 @@ async function compileStatsForActivities(
     const startDate = activity.get('start_date_local');
 
     // Increment allTime total
-    acc.allTime = acc.allTime + activityLaps;
+    acc.allTime += activityLaps;
 
     // Increment year and month allTimes
     const matches = /^(\d{4,4})-(\d{2,2})-/.exec(startDate);
@@ -75,7 +72,7 @@ async function updateAthleteStats(athleteDoc, stats, status = 'ready') {
   athleteDoc.markModified('stats');
   await athleteDoc.save();
   return athleteDoc;
-};
+}
 
 module.exports = {
   compileStatsForActivities,
