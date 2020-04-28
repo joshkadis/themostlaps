@@ -3,6 +3,7 @@ const { setupThenCommand: migrateActivitiesCommand } = require('./activities');
 const { setupThenCommand: ingestLocationCommand } = require('./ingestLocation');
 const { setupThenCommand: recalculateStatsCommand } = require('./recalculateStats');
 const { setupThenCommand: prepDocumentsCommand } = require('./prepDocuments');
+const { setupThenCommand: qaCommand } = require('./qa');
 const { withPrompt } = require('../utils');
 
 module.exports = {
@@ -53,6 +54,10 @@ module.exports = {
           prepDocumentsCommand,
           'Will mark all athletes and activities with version.',
         );
+        break;
+
+      case 'qa':
+        qaCommand(args);
         break;
 
       default:
