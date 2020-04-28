@@ -110,7 +110,6 @@ async function refreshAthlete(athlete, after = false, verbose = false) {
   );
   console.log(`Found ${stats.allTime - athleteDoc.get('stats.allTime')} new laps`);
 
-  // Update user stats and last_updated
   await updateAthleteStats(athleteDoc, stats);
 }
 

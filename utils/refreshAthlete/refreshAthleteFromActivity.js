@@ -155,7 +155,7 @@ async function refreshAthleteFromActivity(
   );
   console.log(`Added ${stats.allTime - athleteDoc.get('stats.allTime')} to stats.allTime`);
 
-  // Update user stats and last_updated
+  // Update user stats
   if (shouldUpdateDb) {
     try {
       await updateAthleteStats(athleteDoc, stats);

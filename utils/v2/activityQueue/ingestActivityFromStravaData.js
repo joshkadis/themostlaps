@@ -89,7 +89,6 @@ async function ingestActivityFromStravaData(
   athleteDoc.set({
     stats: updatedStats,
     last_refreshed: activityStartTimestamp,
-    last_updated: activityStartTimestamp,
   });
   athleteDoc.markModified('stats');
   if (!isDryRun) {
