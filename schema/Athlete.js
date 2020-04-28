@@ -41,5 +41,12 @@ const athleteSchema = new Schema(
   },
 );
 
+function setLastUpdated() {
+  this.set({
+    last_updated: new Date().toISOString(),
+  });
+}
+athleteSchema.pre('save', setLastUpdated);
+
 const Athlete = model('Athlete', athleteSchema);
 module.exports = Athlete;
