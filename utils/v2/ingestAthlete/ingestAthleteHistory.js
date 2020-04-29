@@ -201,6 +201,12 @@ Locations: ${locationsToLog}
     // @todo
   }
 
+  if (!isDryRun) {
+    // YAY WE MADE IT!
+    athleteDoc.set({ status: 'ready' });
+    await athleteDoc.save();
+  }
+
   const summary = Object.keys(allLocationsStats).reduce((acc, loc) => ({
     ...acc,
     [loc]: {
