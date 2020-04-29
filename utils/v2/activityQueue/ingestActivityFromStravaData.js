@@ -6,6 +6,10 @@ const {
 const { getTimestampFromString } = require('../../athleteUtils');
 const { transformActivity } = require('../stats/transformActivity');
 const { updateAllStatsFromActivity } = require('../stats/generateStatsV2');
+const { slackSuccess } = require('../../slackNotification');
+const captureSentry = require('../services/sentry');
+
+const NOTIFY_ON_SUCCESS = true;
 
 /**
  * Create Activity document, validate, and save
@@ -112,6 +116,39 @@ async function ingestActivityFromStravaData(
    Then we updated Athlete's stats and last_refreshed
    We made it!
   */
+
+  if (NOTIFY_ON_SUCCESS) {
+    // Going straight to prod with this so being cautious
+    try {
+      slackSuccess(
+        `New activity ${activityDoc.id} for ${athleteDoc.id} (${athleteDoc.athlete.firstname} ${athleteDoc.athlete.lastname})`,
+        {
+          athlete: {
+            allTime: athleteDoc.stats.locations[activityDoc.location].allTime,
+            last_updated: athleteDoc.last_updated,
+          },
+          activity: {
+            location: activityDoc.location,
+            laps: activityDoc.laps,
+            numSegmentEfforts: activityDoc.segment_efforts.length,
+            locationsStats: activityDoc.activityLocations.map(
+              ({ location, laps }) => `${location}: ${laps} lap(s)`,
+            ),
+          },
+        },
+      );
+    } catch (err) {
+      captureSentry(
+        'slackSuccess failed',
+        'ingestActivityFromStravaData',
+        {
+          athlete: athleteDoc._id,
+          activity: activityDoc._id,
+        },
+      );
+    }
+  }
+
   return {
     status: 'ingested',
     detail: `${activityData.laps} laps`,
