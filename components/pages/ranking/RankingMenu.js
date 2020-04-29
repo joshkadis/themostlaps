@@ -18,7 +18,7 @@ import { allowedRankingTypes } from '../../../api/apiConfig';
 
 const navigateFromMenu = (query) => {
   Router.push(
-    `/ranking_v2?${stringify(query)}`,
+    `/ranking?${stringify(query)}`,
     getRankingPathname(query),
   );
 };

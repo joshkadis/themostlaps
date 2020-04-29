@@ -109,7 +109,7 @@ class Navigation extends Component {
           ref={(el) => { this.linksContainer = el; }}
         >
           <Link
-            href={`/ranking_v2?location=${defaultLocation}`}
+            href={`/ranking?location=${defaultLocation}`}
             as={`/ranking/${defaultLocation}`}
           >
             <a className={styles.link}>Rankings</a>

@@ -60,7 +60,7 @@ app.prepare()
           return;
         }
 
-        app.render(req, res, '/ranking_v2', {
+        app.render(req, res, '/ranking', {
           ...query,
           ...filterParamsToLowerCase(params),
         });
