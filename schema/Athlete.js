@@ -17,7 +17,7 @@ const athleteSchema = new Schema(
       id: { type: Number, required: true },
     },
     status: { type: String, required: true, default: 'ingesting' },
-    last_updated: { type: String, required: true },
+    last_updated: String, // middleware updates this on each save
     created: { type: String, required: true },
     last_refreshed: { type: Number, required: true },
     stats: { type: Mixed, required: true, default: {} },
