@@ -71,7 +71,9 @@ class RankingPage extends Component {
     }
   }
 
-  static async getInitialProps({ query, asPath }) {
+  static async getInitialProps(context) {
+    console.log(context);
+    const { query, asPath } = context;
     const defaultDate = new Date();
     const {
       location = defaultLocation,

@@ -32,6 +32,16 @@ class Navigation extends Component {
     this.state = this.defaultState;
   }
 
+  componentDidMount() {
+    this.logRouteChanges();
+  }
+
+  logRouteChanges() {
+    this.props.router.events.on('routeChangeStart', (url) => console.log('start', url));
+    this.props.router.events.on('routeChangeComplete', (url) => console.log('complete', url));
+    this.props.router.events.on('routeChangeError', (err, url) => console.log('error', err, url));
+  }
+
   onClickButton() {
     this.setState({ shouldShowMobileNav: false });
     this.props.modalControls.open();
@@ -109,8 +119,11 @@ class Navigation extends Component {
           ref={(el) => { this.linksContainer = el; }}
         >
           <Link
-            href={`/ranking?location=${defaultLocation}`}
-            as={`/ranking/${defaultLocation}`}
+            href={{
+              pathname: '/ranking',
+              query: { location: defaultLocation },
+            }}
+            as={'/ranking'}
           >
             <a className={styles.link}>Rankings</a>
           </Link>
