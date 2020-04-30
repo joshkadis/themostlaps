@@ -54,6 +54,7 @@ dist/
 
 # V2 Pages
 !pages/*_v2.js
+!pages/ranking.js
 
 # Components
 !components/Navigation.js
