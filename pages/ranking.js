@@ -1,6 +1,5 @@
 import { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { withRouter } from 'next/router';
 
 import {
   getApiQueryPath,
@@ -42,6 +41,7 @@ class RankingPage extends Component {
   };
 
   constructor(props) {
+    console.log('constructor', props);
     super(props);
     this.state = {
       ...this.state,
@@ -50,6 +50,7 @@ class RankingPage extends Component {
     };
   }
 
+  // @todo attach to routeChangeComplete
   componentDidUpdate(prevProps) {
     const {
       location,
@@ -72,7 +73,7 @@ class RankingPage extends Component {
   }
 
   static async getInitialProps(context) {
-    console.log(context);
+    console.log('getInitialProps', context);
     const { query, asPath } = context;
     const defaultDate = new Date();
     const {
@@ -184,4 +185,4 @@ class RankingPage extends Component {
   }
 }
 
-export default withRouter(RankingPage);
+export default RankingPage;
