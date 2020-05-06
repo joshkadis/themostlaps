@@ -76,16 +76,13 @@ app.prepare()
         return;
       }
 
-      const pagePath = athleteDoc.stats_version === 'v2'
-        ? '/rider_v2'
-        : '/rider';
       const context = {
         ...req.query,
         athleteId,
         currentLocation: req.params.currentLocation || defaultLocation,
       };
 
-      app.render(req, res, pagePath, context);
+      app.render(req, res, '/rider', context);
     });
 
     server.get(/^\/(terms|privacy|about)$/, (req, res) => {
