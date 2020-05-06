@@ -21,7 +21,7 @@ class RiderPageWelcome extends Component {
     // ~until Tweet and FB Share have loaded
     setTimeout(() => {
       this.setState({ shouldShowNoThanks: true });
-    }, 1500)
+    }, 1500);
   }
 
   render() {

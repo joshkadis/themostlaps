@@ -7,7 +7,7 @@
   "env": {
     "node": true,
     "es6": true,
-    "jest": true,
+    "jest": true
   },
   "parser": "babel-eslint",
   "rules": {
@@ -21,15 +21,18 @@
         "ignoreUrls": true,
         "ignoreStrings": true,
         "ignoreTemplateLiterals": true,
-        "ignoreRegExpLiterals": true,
-      },
+        "ignoreRegExpLiterals": true
+      }
     ],
     "no-console": [0],
     "camelcase": [0],
     "import/prefer-default-export": [0],
     "no-underscore-dangle": [0],
+    "import/no-unused-modules": [1, {
+      "unusedExports": true,
+    }],
   },
   "globals": {
-    "React": "writable",
-  },
+    "React": "writable"
+  }
 }
