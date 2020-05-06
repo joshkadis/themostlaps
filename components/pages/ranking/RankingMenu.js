@@ -18,18 +18,18 @@ import { allowedRankingTypes } from '../../../api/apiConfig';
 
 const navigateFromMenu = (query) => {
   Router.push(
-    `/ranking_v2?${stringify(query)}`,
+    `/ranking?${stringify(query)}`,
     getRankingPathname(query),
   );
 };
 
 const LocationsButtons = () => (<div className={styles.RankingMenu__row}>
   {Object.values(locations).map(({ locationName }) => <MenuButton
-      key={`location-button-${locationName}`}
-      buttonKey='location'
-      buttonVal={locationName}
-      clickHandler={navigateFromMenu}
-    >{locations[locationName].locationLabel}</MenuButton>)
+    key={`location-button-${locationName}`}
+    buttonKey='location'
+    buttonVal={locationName}
+    clickHandler={navigateFromMenu}
+  >{locations[locationName].locationLabel}</MenuButton>)
   }
 </div>);
 
@@ -37,14 +37,14 @@ const LocationsButtons = () => (<div className={styles.RankingMenu__row}>
 // e.g. alltime to All Time
 const TypesButtons = () => (<div className={styles.RankingMenu__row}>
   {allowedRankingTypes.map((type) => <MenuButton
-      key={`type-button-${type}`}
-      buttonKey='reqPrimary'
-      buttonVal={type}
-      clickHandler={navigateFromMenu}
-    >{getFilterLabel(type)}</MenuButton>)
+    key={`type-button-${type}`}
+    buttonKey='reqPrimary'
+    buttonVal={type}
+    clickHandler={navigateFromMenu}
+  >{getFilterLabel(type)}</MenuButton>)
   }
-  <YearSplitButton clickHandler={navigateFromMenu}/>
-  <MonthSplitButton clickHandler={navigateFromMenu}/>
+  <YearSplitButton clickHandler={navigateFromMenu} />
+  <MonthSplitButton clickHandler={navigateFromMenu} />
 </div>);
 
 function RankingMenu() {
@@ -64,7 +64,7 @@ function RankingMenu() {
     >
       <button
         className={styles.RankingMenu__filtertoggle}
-        onClick={toggleFilters }
+        onClick={toggleFilters}
       >
         {isCollapsed ? 'Show ' : 'Hide '}Filters
       </button>
