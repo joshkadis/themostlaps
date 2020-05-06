@@ -54,14 +54,14 @@ class RiderPage extends Component {
     shouldShowUpdated: PropTypes.bool,
     isDuplicateSignup: PropTypes.bool,
     status: PropTypes.string,
-  }
+  };
 
   state = {
     chartRendered: false,
     showStatsBy: 'byYear',
     showStatsYear: new Date().getFullYear(),
     ...DEFAULT_COMPARE_ATHLETE_STATE,
-  }
+  };
 
   constructor(props) {
     super(props);
@@ -99,13 +99,6 @@ class RiderPage extends Component {
           return defaultInitialProps;
         }
 
-        if (apiResponse[0].stats_version === 'v1') {
-          this.props.router.push(
-            `/rider?athleteId=${athleteId}`,
-            `/rider/${athleteId}`,
-          );
-        }
-
         const {
           athlete,
           status,
@@ -128,25 +121,25 @@ class RiderPage extends Component {
         `/rider/${value}`,
       );
     }
-  }
+  };
 
   renderMessage = (msgName) => <RiderMessage
-      pathname={this.props.pathname}
-      query={this.props.query}
-      athlete={this.props.athlete}
-      msgName={msgName}
-    />;
+    pathname={this.props.pathname}
+    query={this.props.query}
+    athlete={this.props.athlete}
+    msgName={msgName}
+  />;
 
   renderNotFound = () => <RiderNotFound
-      pathname={this.props.pathname}
-      query={this.props.query}
-    />;
+    pathname={this.props.pathname}
+    query={this.props.query}
+  />;
 
   canRenderAthlete = () => this.props.status === 'ready' || this.props.status === 'ingesting';
 
   onChartRendered = () => {
     this.setState({ chartRendered: true });
-  }
+  };
 
   onSelectYear = (selected) => {
     const showStatsYear = selected.value
@@ -157,7 +150,7 @@ class RiderPage extends Component {
       showStatsBy: 'byMonth',
       showStatsYear,
     });
-  }
+  };
 
   /**
    * Handle change in search/select field for user to compare to
@@ -196,7 +189,7 @@ class RiderPage extends Component {
           },
         });
       });
-  }
+  };
 
   /**
    * Get compare athlete's stats for location and year
@@ -233,7 +226,7 @@ class RiderPage extends Component {
       compareAthleteByYear: byYear,
       compareAthleteByMonth: byMonth[showStatsYear] || [],
     };
-  }
+  };
 
   /**
    * Increment or decrement current state year
