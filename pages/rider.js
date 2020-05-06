@@ -11,7 +11,6 @@ import RiderPageMessage from '../components/RiderPageMessage';
 // Utils
 import { APIRequest } from '../utils';
 import { defaultLocation } from '../config';
-import { routeIsV2 } from '../utils/v2/router';
 import { transformLocationsForRender } from '../utils/v2/stats/transformForRender';
 import {
   riderHasLapsAnywhere,
@@ -371,11 +370,6 @@ class RiderPage extends Component {
             >
               View on Strava
             </a>
-          </div>
-        )}
-        {routeIsV2(routerProp) && (
-          <div style={{ textAlign: 'right' }}>
-            <span className="version-link">v2</span>
           </div>
         )}
       </Layout>
