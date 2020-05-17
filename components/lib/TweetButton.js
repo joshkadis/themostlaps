@@ -6,8 +6,9 @@ import { locale } from '../../config';
 class TweetButton extends Component {
   // Client-side only
   // https://dev.twitter.com/web/javascript/loading
+  /* eslint-disable */
   componentDidMount() {
-    window.twttr = (function(d, s, id) {
+    window.twttr = (function (d, s, id) {
       var js, fjs = d.getElementsByTagName(s)[0],
         t = window.twttr || {};
       if (d.getElementById(id)) return t;
@@ -17,7 +18,7 @@ class TweetButton extends Component {
       fjs.parentNode.insertBefore(js, fjs);
 
       t._e = [];
-      t.ready = function(f) {
+      t.ready = function (f) {
         t._e.push(f);
       };
 
@@ -33,10 +34,11 @@ class TweetButton extends Component {
       });
     });
   }
+  /* eslint-enable */
 
   render() {
     const params = {
-      text: `I\'ve ridden ${this.props.laps.toLocaleString(locale)} laps of Prospect Park! Get your stats at`,
+      text: `I've ridden ${this.props.laps.toLocaleString(locale)} laps of Prospect Park! Get your stats at`,
       via: 'themostlaps',
       url: 'https://themostlaps.com',
     };
