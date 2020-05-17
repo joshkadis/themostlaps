@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Markdown from 'react-markdown';
+// eslint-disable-next-line
 import pageContent from 'raw-loader!../../copy/signupModal.md';
 import * as styles from './Signup.css';
 import ConnectWithStravaButton from '../ConnectWithStravaButton';
