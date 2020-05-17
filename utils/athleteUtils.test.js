@@ -1,11 +1,7 @@
 require('dotenv').config();
-const mongoose = require('mongoose');
-const { Mockgoose } = require('mockgoose');
-const Athlete = require('../schema/Athlete');
 const {
   getEpochSecondsFromDateObj,
   getTimestampFromString,
-  getDocFromMaybeToken,
 } = require('./athleteUtils');
 
 test('getEpochSecondsFromDateObj', () => {
