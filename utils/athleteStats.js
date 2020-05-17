@@ -44,7 +44,7 @@ async function compileStatsForActivities(
   // Handle async special stats outside of Array.reduce()
   // let updatedSpecialStats = initial.special ?
   //   Object.assign({}, initial.special) : {};
-  // for (let i = 0; i < activities.length; i++) {
+  // for (let i = 0; i < activities.length; i += 1) {
   //   const activity = activities[i];
   //   updatedSpecialStats = await compileSpecialStats(
   //     activity,

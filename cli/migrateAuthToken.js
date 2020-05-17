@@ -63,7 +63,7 @@ async function migrateMany(findString, optionsString, isDryRun, forceRefresh = f
 
   let succeeded = 0;
   let failed = 0;
-  for (let i = 0; i < athletes.length; i++) {
+  for (let i = 0; i < athletes.length; i += 1) {
     console.log(`Migrating athlete: ${JSON.stringify(athletes[i])}`);
     try {
       const didMigrate = await migrateSingle(

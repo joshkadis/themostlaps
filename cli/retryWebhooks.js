@@ -82,7 +82,7 @@ async function retryWebhooks(startdate, dryrun) {
   }, []);
 
   // @todo Async iterator
-  for (let idx = 0; idx < activitiesToRetry.length; idx++) {
+  for (let idx = 0; idx < activitiesToRetry.length; idx += 1) {
     const { owner_id, object_id } = activitiesToRetry[idx];
     let laps;
     try {

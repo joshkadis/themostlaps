@@ -7,7 +7,7 @@ const { updateAthleteStats } = require('../utils/athleteStats');
 async function getTotalPointsFromActivities(activities, dryRun) {
   let totalPoints = 0;
   // Loop through activities asynchronously
-  for (let i = 0; i < activities.length; i++) {
+  for (let i = 0; i < activities.length; i += 1) {
     const activityPoints = await getColdLapsFromActivity(activities[i]);
     console.log(`Activity ${activities[i].get('_id')} has ${activityPoints} points`);
     if (!dryRun) {
@@ -41,7 +41,7 @@ async function calculateColdLaps(fromActivity, dryRun) {
 
   // Loop through athletes
   const athleteIds = Object.keys(groupedActivities);
-  for (let i = 0; i < athleteIds.length; i++) {
+  for (let i = 0; i < athleteIds.length; i += 1) {
     const athleteId = athleteIds[i];
     const athleteActivities = groupedActivities[athleteId];
     console.log(`Processing athlete ${athleteId} (${athleteActivities.length} activities)`);

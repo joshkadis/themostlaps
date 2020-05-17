@@ -22,7 +22,7 @@ const secondaryOptions = [{
   value: null,
   label: 'clear month',
 }];
-for (let mo = 1; mo <= 12; mo++) {
+for (let mo = 1; mo <= 12; mo += 1) {
   secondaryOptions.push({
     value: mo.toString(),
     label: getMonthName(mo),

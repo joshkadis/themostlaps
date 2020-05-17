@@ -16,7 +16,7 @@ module.exports = async (user, after) => {
 
   // Delete or save as applicable
   const savedActivities = [];
-  for (let i = 0; i < userActivities.length; i++) {
+  for (let i = 0; i < userActivities.length; i += 1) {
     const activity = userActivities[i];
     const activityDate = new Date(activity.get('start_date_local'));
     const activityTimestamp = Math.floor(activityDate.valueOf() / 1000);

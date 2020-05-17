@@ -13,7 +13,7 @@ const refreshAthleteProfile = require('./refreshAthlete/refreshAthleteProfile');
  */
 async function refreshAthletes(shouldRefreshActivities = false, findArgs = [{}]) {
   const athletes = await Athlete.find(...findArgs);
-  for (let i = 0; i < athletes.length; i++) {
+  for (let i = 0; i < athletes.length; i += 1) {
     const athlete = athletes[i];
     const updatedAthlete = await refreshAthleteProfile(athlete);
     if (updatedAthlete && shouldRefreshActivities) {
