@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 const Activity = require('../schema/Activity');
 const Athlete = require('../schema/Athlete');
 const { getColdLapsFromActivity } = require('../utils/stats/compileSpecialStats');
@@ -26,6 +27,7 @@ async function getTotalPointsFromActivities(activities, dryRun) {
 async function calculateColdLaps(fromActivity, dryRun) {
   // Fetch all activities starting with fromActivity
   const allActivities = await Activity.find({ _id: { $gte: fromActivity } });
+  // eslint-disable-next-line
   console.log(`Processing ${allActivities.length} activities${"\n"}------------------`);
 
   // Group by athlete
@@ -46,7 +48,10 @@ async function calculateColdLaps(fromActivity, dryRun) {
     const athleteActivities = groupedActivities[athleteId];
     console.log(`Processing athlete ${athleteId} (${athleteActivities.length} activities)`);
 
-    const totalPoints = await getTotalPointsFromActivities(athleteActivities, dryRun);
+    const totalPoints = await getTotalPointsFromActivities(
+      athleteActivities,
+      dryRun,
+    );
     console.log(`${totalPoints} total Cold Laps points`);
     if (!dryRun) {
       // Set athlete stats
@@ -62,6 +67,7 @@ async function calculateColdLaps(fromActivity, dryRun) {
         console.log(`Failed to update stats for athlete ${athleteId}`);
       }
     }
+    // eslint-disable-next-line
     console.log(`------------------${"\n"}`);
   }
 
