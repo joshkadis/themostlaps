@@ -1,10 +1,11 @@
+/* eslint-disable */
 import React, { Component } from 'react';
 
 class FBShareButton extends Component {
   // Client-side only
   // https://developers.facebook.com/docs/plugins/share-button
   componentDidMount() {
-    (function(d, s, id) {
+    (function (d, s, id) {
       var js, fjs = d.getElementsByTagName(s)[0];
       if (d.getElementById(id)) return;
       js = d.createElement(s); js.id = id;
