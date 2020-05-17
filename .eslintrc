@@ -33,6 +33,7 @@
     }],
   },
   "globals": {
-    "React": "writable"
+    "React": "writable",
+    "window": true,
   }
 }
