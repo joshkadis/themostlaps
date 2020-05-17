@@ -67,7 +67,7 @@ async function retryWebhooks(startdate, dryrun) {
   const logFiles = glob.sync(`${logFilesPath}/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9].json`)
     .map((filename) => path.basename(filename, '.json'))
     .map(dateStringToInt)
-    .filter((logDate) => (!isNaN(logDate) && logDate >= startdate))
+    .filter((logDate) => (!Number.isNaN(logDate) && logDate >= startdate))
     .map(intToDateString);
 
   console.log(`Retrying ${logFiles.length} log files`);
@@ -84,9 +84,9 @@ async function retryWebhooks(startdate, dryrun) {
   // @todo Async iterator
   for (let idx = 0; idx < activitiesToRetry.length; idx += 1) {
     const { owner_id, object_id } = activitiesToRetry[idx];
-    let laps;
     try {
-      laps = await refreshAthleteFromActivity(owner_id, object_id, !dryrun);
+      // eslint-disable-next-line
+      await refreshAthleteFromActivity(owner_id, object_id, !dryrun);
     } catch (err) {
       // log ouput provided by refreshAthleteFromActivity
     }
