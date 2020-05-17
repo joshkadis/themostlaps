@@ -11,7 +11,7 @@ const primaryOptions = [
 
 const current = new Date();
 
-for (let yr = current.getFullYear(); yr >= startYear; yr--) {
+for (let yr = current.getFullYear(); yr >= startYear; yr -= 1) {
   primaryOptions.push({
     value: `timePeriod.${yr}`,
     label: yr.toString(),
