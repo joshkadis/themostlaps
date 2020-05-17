@@ -10,7 +10,7 @@
     "build": "next build",
     "heroku-postbuild": "npm run build",
     "test": "jest",
-    "lint": "./node_modules/eslint/bin/eslint.js -f table .",
+    "lint": "npx eslint -f table ./",
     "toc": "./node_modules/markdown-toc/cli.js ./README.md  -i"
   },
   "repository": {
