@@ -8,7 +8,6 @@ import { LapPath } from '../components/lib/svg';
 import { APIRequest } from '../utils';
 
 class Welcome extends Component {
-
   state = {
     status: 'ingesting',
     allTime: null,
@@ -17,26 +16,26 @@ class Welcome extends Component {
   // Only need this client-side
   componentDidMount() {
     // Set user value in local storage
-    if ('undefined' !== typeof window && window.localStorage) {
-      localStorage.setItem('TMLAthleteId', this.props.id)
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem('TMLAthleteId', this.props.id);
     }
 
     this.fetchAthlete();
   }
 
   fetchAthlete = async () => {
-    if ('ingesting' !== this.state.status) {
+    if (this.state.status !== 'ingesting') {
       return;
     }
 
     APIRequest(`/athletes/${this.props.id}`, {}, {})
       .then((apiResponse) => {
-        if (!apiResponse.length || 'error' === apiResponse[0].status) {
+        if (!apiResponse.length || apiResponse[0].status === 'error') {
           this.setState({ status: 'error' });
           return;
         }
 
-        if ('ready' === apiResponse[0].status) {
+        if (apiResponse[0].status === 'ready') {
           Router.push(
             `/rider?athleteId=${this.props.id}&welcome=1`,
             `/rider/${this.props.id}`,
@@ -66,7 +65,7 @@ class Welcome extends Component {
           </Link>
         </p>
       </div>
-    )
+    );
   }
 
   renderError(id) {
@@ -115,16 +114,16 @@ class Welcome extends Component {
         default:
           return this.renderIngesting(this.props.id);
       }
-    }
+    };
 
     return (<Layout
       pathname="/welcome"
       query={{}}
     >
       <h1>
-        {this.state.status !== 'error' ?
-          '🎉🚴 Welcome 🎉🚴' :
-          '😞🚴 Welcome 🚴😞'
+        {this.state.status !== 'error'
+          ? '🎉🚴 Welcome 🎉🚴'
+          : '😞🚴 Welcome 🚴😞'
         }
       </h1>
       {renderContent()}

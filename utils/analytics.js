@@ -5,7 +5,7 @@ const { customDimensions } = require('../config/analytics');
  * Check for window.ga to avoid server-side errors by accident
  */
 function _ga(...args) {
-  if ('undefined' !== typeof window && window.ga) {
+  if (typeof window !== 'undefined' && window.ga) {
     ga(...args);
   }
 }
@@ -49,7 +49,7 @@ function trackPageview(pathname, fields = {}, setPageDimensions = true) {
  * @param {Object} fields Non-persistent custom dimensions
  */
 function trackEvent(...args) {
-  if ('string' !== typeof args[0]) {
+  if (typeof args[0] !== 'string') {
     return;
   }
   _ga('send', 'event', ...args);

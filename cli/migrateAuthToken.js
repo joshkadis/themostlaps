@@ -8,7 +8,7 @@ const fetchStravaAPI = require('../utils/fetchStravaAPI');
 /**
  * Confirm that migrated athlete token still works
  * Exit if not
- **/
+ * */
 async function testMigratedAthlete(athleteDoc) {
   let athleteResponse;
   try {
@@ -28,7 +28,7 @@ async function testMigratedAthlete(athleteDoc) {
 function parseJsonArg(inputString, required = true) {
   if (!inputString) {
     if (required) {
-      console.error(`Missing required JSON input`);
+      console.error('Missing required JSON input');
       process.exit(0);
     }
     return false;
@@ -70,7 +70,7 @@ async function migrateMany(findString, optionsString, isDryRun, forceRefresh = f
         athletes[i]._id,
         isDryRun,
         forceRefresh,
-        true // return instead exiting process
+        true, // return instead exiting process
       );
       if (didMigrate) {
         succeeded += 1;
@@ -119,10 +119,9 @@ async function migrateSingle(
   const expiresAt = athleteDoc.get('expires_at');
   if (expiresAt > 0 && refreshToken.length) {
     if (!forceRefresh) {
-      console.log(shouldRefreshToken(expiresAt) ?
-        'Athlete token already migrated but has expired.' :
-        'Athlete token already migrated and has not yet expired.'
-      );
+      console.log(shouldRefreshToken(expiresAt)
+        ? 'Athlete token already migrated but has expired.'
+        : 'Athlete token already migrated and has not yet expired.');
     } else {
       console.log('Refreshing access_token');
       if (!isDryRun) {
@@ -131,7 +130,7 @@ async function migrateSingle(
           console.log('Access token successfully refreshed');
         }
       } else {
-        console.log('Dry run, exiting.')
+        console.log('Dry run, exiting.');
       }
     }
     maybeExitProcess();

@@ -17,7 +17,7 @@ function loadOptions(skipUsers) {
   return APIRequest('/searchUsers', { complete: 1 }, defaultResponse)
     .then(({ complete, options }) => ({
       complete,
-      options: options.filter(({ value }) => (-1 === skipUsers.indexOf(value))),
+      options: options.filter(({ value }) => (skipUsers.indexOf(value) === -1)),
     }));
 }
 
@@ -29,7 +29,7 @@ const SearchUsers = ({
   onChange,
   onBlur,
   wrapperClassName,
-  skipUsers
+  skipUsers,
 }) => (
   <div className={wrapperClassName || ''}>
     <Async

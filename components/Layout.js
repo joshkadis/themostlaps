@@ -3,10 +3,10 @@ import PropTypes from 'prop-types';
 import Head from 'next/head';
 import Router from 'next/router';
 import { stringify } from 'query-string';
+import Modal from 'react-modal';
 import Header from './Header';
 import Footer from './Footer';
 import * as styles from './Layout.css';
-import Modal from 'react-modal';
 import { CloseSvg } from './lib/svg';
 import { getPathWithQueryString } from '../utils';
 import ModalContents from './ModalContents';
@@ -37,19 +37,19 @@ class Layout extends Component {
   componentDidMount() {
     Modal.setAppElement('#__next');
 
-    if ('#signup' === window.location.hash) {
+    if (window.location.hash === '#signup') {
       this.handleOpenModal();
     }
 
     window.addEventListener('hashchange', () => {
-      if ('#signup' === window.location.hash) {
+      if (window.location.hash === '#signup') {
         this.handleOpenModal();
       }
     });
   }
 
   handleOpenModal() {
-    if ('#signup' !== window.location.hash) {
+    if (window.location.hash !== '#signup') {
       window.location.hash = '#signup';
     }
 
@@ -66,15 +66,15 @@ class Layout extends Component {
     // Remove modal-related query string params from current URL
     Router.replace(
       getPathWithQueryString(Router.router),
-      window.location.pathname
+      window.location.pathname,
     );
   }
 
   render() {
     // Use aria-hidden for main content area if server is rendering with modal open
     // In client, we rely on Modal.setAppElement()
-    const shouldHideDuringRender = 'undefined' === typeof document &&
-      this.state.modalIsOpen;
+    const shouldHideDuringRender = typeof document === 'undefined'
+      && this.state.modalIsOpen;
 
     return (
       <div
@@ -86,13 +86,11 @@ class Layout extends Component {
           <meta httpEquiv="x-ua-compatible" content="ie=edge" />
           <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no, maximum-scale=1" />
           <title>{getDocumentTitle(this.props.pathname)}</title>
-          {getOgData().map((tag) =>
-            <meta
+          {getOgData().map((tag) => <meta
               key={tag[0]}
               property={`og:${tag[0]}`}
               content={tag[1]}
-            />
-          )}
+            />)}
           <link rel="shortcut icon" type="image/x-icon" href="/static/img/themostlaps.ico" />
           <link href="https://fonts.googleapis.com/css?family=Arvo:400,700" rel="stylesheet" />
           <link rel="stylesheet" href="/static/css/react-select.css" />
@@ -106,7 +104,7 @@ class Layout extends Component {
           modalIsOpen={this.state.modalIsOpen}
         />
         <div className={styles.main}>
-          <div className={ '/' !== this.props.pathname ? styles.mainContainer : null}>
+          <div className={ this.props.pathname !== '/' ? styles.mainContainer : null}>
             {this.props.children}
           </div>
         </div>
@@ -140,7 +138,7 @@ Layout.defaultProps = {
   query: {},
   pathname: '/',
   style: {},
-}
+};
 
 Layout.propTypes = {
   query: PropTypes.object,

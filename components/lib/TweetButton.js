@@ -25,8 +25,8 @@ class TweetButton extends Component {
     }(document, "script", "twitter-wjs"));
 
     // Track social share
-    twttr.ready(function(twttr) {
-      twttr.events.bind('tweet', function(evt) {
+    twttr.ready((twttr) => {
+      twttr.events.bind('tweet', (evt) => {
         if (window.ga && evt.target.getAttribute('data-url')) {
           ga('send', 'social', 'twitter', 'share', evt.target.getAttribute('data-url'));
         }
@@ -43,7 +43,7 @@ class TweetButton extends Component {
     return (
       <a
         className="twitter-share-button"
-        href={'https://twitter.com/intent/tweet?' + stringify(params)}
+        href={`https://twitter.com/intent/tweet?${stringify(params)}`}
         data-size="large"
       />
     );

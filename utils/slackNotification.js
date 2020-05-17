@@ -15,7 +15,7 @@ function sendSlackNotification(fallback, pretext, color, fields) {
   fetch(process.env.SLACK_WEBHOOK, {
     method: 'POST',
     body: JSON.stringify({
-      attachments:[
+      attachments: [
         {
           fallback,
           pretext,
@@ -34,7 +34,7 @@ function sendSlackNotification(fallback, pretext, color, fields) {
  * @param {addtlInfo} any Optional extra info
  */
 function slackError(errorCode = 0, addtlInfo = false) {
-  const addtlInfoStr = false !== addtlInfo ? ` (${JSON.stringify(addtlInfo)})` : '';
+  const addtlInfoStr = addtlInfo !== false ? ` (${JSON.stringify(addtlInfo)})` : '';
 
   sendSlackNotification(
     `Error ${errorCode}: ${getErrorMessage(errorCode)}${addtlInfoStr}`,
@@ -63,7 +63,7 @@ function slackSuccess(message = '', details) {
 
   sendSlackNotification(
     `Success: ${message}`,
-    `Success!`,
+    'Success!',
     'good',
     getFields(message, details),
   );
@@ -83,8 +83,8 @@ function getFields(primary, secondary) {
     short: false,
   }];
 
-  if ('undefined' !== typeof secondary) {
-    const value = 'string' === typeof secondary
+  if (typeof secondary !== 'undefined') {
+    const value = typeof secondary === 'string'
       ? secondary
       : JSON.stringify(secondary, null, 2);
 
@@ -92,7 +92,7 @@ function getFields(primary, secondary) {
       title: 'Details',
       short: false,
       value,
-    })
+    });
   }
 
   return fields;

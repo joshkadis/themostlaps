@@ -16,14 +16,15 @@ function getErrorResponseObject(code, errData = null, athlete = false) {
     errorCode: code,
     errorMsg: getInternalErrorMessage(code, errData),
     athlete,
-  }
+  };
 }
 
 function getStravaAuthRequestUrl(pathname = '/', shouldSubscribe = false) {
-  const params = Object.assign({}, authRequestParams, {
-    redirect_uri: getEnvOrigin() + '/auth-callback',
+  const params = {
+    ...authRequestParams,
+    redirect_uri: `${getEnvOrigin()}/auth-callback`,
     state: `${pathname}${shouldSubscribe ? '|shouldSubscribe' : ''}`,
-  });
+  };
 
   return `${stravaOauthUrl}/authorize?${stringify(params)}`;
 }

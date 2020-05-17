@@ -27,7 +27,7 @@ class BaseChart extends Component {
       showSelectField: false,
       shouldRenderChart: false,
       shouldRenderHorizontal: false,
-    }
+    };
   }
 
   componentWillReceiveProps(nextProps) {
@@ -51,9 +51,9 @@ class BaseChart extends Component {
    * Call render callback when shouldRenderChart changes from false to true
    */
   componentDidUpdate(prevProps, prevState) {
-    if (!prevState.shouldRenderChart &&
-      this.state.shouldRenderChart &&
-      'function' === typeof this.props.onChartRendered
+    if (!prevState.shouldRenderChart
+      && this.state.shouldRenderChart
+      && typeof this.props.onChartRendered === 'function'
     ) {
       this.props.onChartRendered();
     }
@@ -85,7 +85,7 @@ class BaseChart extends Component {
         {baseTitleText}
       </span>
       {this.renderCompareButton(buttonText)}
-    </span>
+    </span>;
   }
 
   renderBaseTitleCompare(baseTitleText, buttonText) {
@@ -103,11 +103,13 @@ class BaseChart extends Component {
         />
       </span>
       {this.renderCompareButton(buttonText)}
-    </span>
+    </span>;
   }
 
-  renderBarLabel({ value, x, y, width, height }, shouldTranspose = false) {
-    if (0 === value) {
+  renderBarLabel({
+    value, x, y, width, height,
+  }, shouldTranspose = false) {
+    if (value === 0) {
       return null;
     }
 
@@ -116,11 +118,11 @@ class BaseChart extends Component {
       renderAttrs = {
         x: x + width / 2,
         y: y - 10,
-        width: width,
-        height: height,
+        width,
+        height,
         dx: null,
         dy: '0.355em',
-      }
+      };
     } else {
       renderAttrs = {
         x: x + width + 10,
@@ -129,7 +131,7 @@ class BaseChart extends Component {
         width: height,
         dy: null,
         dx: '0.355em',
-      }
+      };
     }
 
     return (
@@ -154,9 +156,9 @@ class BaseChart extends Component {
   }
 
   getChartHeight({ height, shouldRenderHorizontal }, hasCompare) {
-    return hasCompare && shouldRenderHorizontal ?
-      height * 1.5 :
-      height;
+    return hasCompare && shouldRenderHorizontal
+      ? height * 1.5
+      : height;
   }
 
   render() {
@@ -164,8 +166,8 @@ class BaseChart extends Component {
       <div
         ref={(el) => this.container = el}
       >
-        {this.state.showSelectField &&
-          <div className={styles.compare__searchContainer}>
+        {this.state.showSelectField
+          && <div className={styles.compare__searchContainer}>
             <SearchUsers
               onChange={this.props.onChange}
               value={this.props.compareTo.id || 0}
@@ -181,8 +183,8 @@ class BaseChart extends Component {
           </div>
         }
 
-        {!this.state.showSelectField &&
-          <div className={styles.chart__titleContainer}>
+        {!this.state.showSelectField
+          && <div className={styles.chart__titleContainer}>
             {this.renderTitle(this.props, this.state)}
           </div>
         }

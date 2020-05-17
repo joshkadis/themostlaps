@@ -1,9 +1,8 @@
 const { breakpointPx } = require('../config');
 
-const isSmallViewport = () =>
-  'undefined' !== typeof window &&
-  'number' === typeof window.innerWidth &&
-  window.innerWidth < breakpointPx;
+const isSmallViewport = () => typeof window !== 'undefined'
+  && typeof window.innerWidth === 'number'
+  && window.innerWidth < breakpointPx;
 
 module.exports = {
   isSmallViewport,

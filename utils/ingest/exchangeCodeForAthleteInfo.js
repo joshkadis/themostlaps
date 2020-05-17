@@ -5,7 +5,7 @@ const {
 } = require('./utils');
 const {
   stravaOauthUrl,
-} = require('../../config')
+} = require('../../config');
 
 /**
  * Get query string for token request with oAuth code
@@ -34,7 +34,7 @@ async function exchangeCodeForAthleteInfo(code) {
       body: getTokenRequestBody(code),
     });
 
-    if (200 !== response.status) {
+    if (response.status !== 200) {
       return getErrorResponseObject(20);
     }
 

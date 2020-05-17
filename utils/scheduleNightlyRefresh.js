@@ -20,7 +20,7 @@ async function refreshAthletes(shouldRefreshActivities = false, findArgs = [{}])
       await refreshAthleteActivities(
         updatedAthlete,
         false,
-        process.env.SHOULD_REFRESH_VERBOSE
+        process.env.SHOULD_REFRESH_VERBOSE,
       );
     }
   }
@@ -31,7 +31,7 @@ async function refreshAthletes(shouldRefreshActivities = false, findArgs = [{}])
  * Nightly refresh of activities and stats
  */
 async function scheduleNightlyRefresh() {
-  console.log(`Scheduling refresh for ${timePartString(refreshSchedule.hour)}h${timePartString(refreshSchedule.minute)} GMT`)
+  console.log(`Scheduling refresh for ${timePartString(refreshSchedule.hour)}h${timePartString(refreshSchedule.minute)} GMT`);
   const job = scheduleJob(refreshSchedule, async () => {
     console.log('Refreshing athletes and stats');
     await refreshAthletes();

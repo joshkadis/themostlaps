@@ -1,15 +1,15 @@
 function numberOrNullProp(props, propName, componentName) {
-  if ('undefined' === typeof props[propName]) {
+  if (typeof props[propName] === 'undefined') {
     return new Error(
-      `${componentName} missing required prop '${propName}'`
+      `${componentName} missing required prop '${propName}'`,
     );
   }
 
-  if (props[propName] !== null && 'number' !== typeof props[propName]) {
+  if (props[propName] !== null && typeof props[propName] !== 'number') {
     return new Error(
-      `Invalid prop '${propName}' supplied to ${componentName}. Expected null or number`
+      `Invalid prop '${propName}' supplied to ${componentName}. Expected null or number`,
     );
   }
-};
+}
 
 module.exports = numberOrNullProp;

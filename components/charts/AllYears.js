@@ -25,7 +25,6 @@ import { mergeStats } from '../../utils/athleteStatsClient';
 // onClickTick: PropTypes.func.isRequired,
 
 class AllYears extends BaseChart {
-
   transformData({ hasCompare, compareData, primaryData }) {
     if (!hasCompare) {
       return primaryData;
@@ -35,22 +34,23 @@ class AllYears extends BaseChart {
 
   renderTitle({ hasCompare, compareTo }) {
     return <h2 className={styles.chart__title}>
-      {hasCompare ?
-        this.renderBaseTitleCompare('Yearly Totals', 'Change') :
-        this.renderBaseTitle('Yearly Totals', 'Compare')
+      {hasCompare
+        ? this.renderBaseTitleCompare('Yearly Totals', 'Change')
+        : this.renderBaseTitle('Yearly Totals', 'Compare')
       }
     </h2>;
   }
 
   renderChart(props, state) {
     const horiz = state.shouldRenderHorizontal;
-    let xAxis, yAxis;
+    let xAxis; let
+      yAxis;
     if (horiz) {
-      xAxis = <XAxis type="number" />
-      yAxis = <YAxis dataKey="year" type="category" onClick={props.onClickTick} />
+      xAxis = <XAxis type="number" />;
+      yAxis = <YAxis dataKey="year" type="category" onClick={props.onClickTick} />;
     } else {
-      xAxis = <XAxis dataKey="year" onClick={props.onClickTick} />
-      yAxis = <YAxis />
+      xAxis = <XAxis dataKey="year" onClick={props.onClickTick} />;
+      yAxis = <YAxis />;
     }
 
     return (
@@ -73,8 +73,8 @@ class AllYears extends BaseChart {
           fill="#450082"
           onClick={(evt) => props.onClickTick(evt.year || false)}
         />
-        {props.hasCompare &&
-          <Bar
+        {props.hasCompare
+          && <Bar
             label={(coords) => this.renderBarLabel(coords, horiz)}
             dataKey="secondary"
             fill="#914dff"
@@ -87,8 +87,6 @@ class AllYears extends BaseChart {
 }
 
 AllYears.defaultProps = baseChartDefaultProps;
-AllYears.propTypes = Object.assign({...baseChartPropTypes}, {
-  onClickTick: PropTypes.func.isRequired,
-});
+AllYears.propTypes = { ...baseChartPropTypes, onClickTick: PropTypes.func.isRequired };
 
 export default AllYears;

@@ -23,7 +23,7 @@ module.exports = async (user, after) => {
 
     // Delete activities after the cutoff date
     if (activityTimestamp > after) {
-      console.log(`Deleting activity ${activity.get('_id')} from ${activity.get('start_date_local')}`)
+      console.log(`Deleting activity ${activity.get('_id')} from ${activity.get('start_date_local')}`);
       await Activity.findByIdAndRemove(activity.get('_id'));
     } else {
       // Save activities for recalculating status
@@ -37,7 +37,7 @@ module.exports = async (user, after) => {
     athlete.set('last_refreshed', after);
     const lastUpdatedDoc = await athlete.save();
     const theDate = new Date(lastUpdatedDoc.get('last_refreshed') * 1000);
-    console.log(`Set last_refreshed to ${theDate.toISOString()}`)
+    console.log(`Set last_refreshed to ${theDate.toISOString()}`);
   } catch (err) {
     console.log(`Error saving last_refreshed to ${after}`);
   }

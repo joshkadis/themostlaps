@@ -11,10 +11,10 @@ const { modalQueryParams, timezoneOffset } = require('../config');
  * @return {String}
  */
 function getPathnameFromContext(context = {}) {
-  return 'string' === typeof context.asPath ?
-    context.asPath.split('?')[0] :
-    '/';
-};
+  return typeof context.asPath === 'string'
+    ? context.asPath.split('?')[0]
+    : '/';
+}
 
 /**
  * Get timestamp in seconds from ISO Date string
@@ -44,12 +44,8 @@ function APIRequest(path = false, query = {}, defaultResult = {}) {
   }
 
   return fetch(`${getEnvOrigin()}/api${path}?${stringify(query)}`)
-    .then((response) => {
-      return response.json();
-    })
-    .then((data) => {
-      return data.error ? defaultResult : data;
-    });
+    .then((response) => response.json())
+    .then((data) => (data.error ? defaultResult : data));
 }
 
 /**

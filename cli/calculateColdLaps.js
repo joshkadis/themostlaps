@@ -16,7 +16,7 @@ async function getTotalPointsFromActivities(activities, dryRun) {
       await activities[i].save();
     }
     if (activityPoints) {
-      totalPoints = totalPoints + activityPoints;
+      totalPoints += activityPoints;
     }
   }
   return totalPoints;
@@ -32,7 +32,7 @@ async function calculateColdLaps(fromActivity, dryRun) {
   const groupedActivities = allActivities.reduce((acc, activity) => {
     const athlete = activity.get('athlete_id');
     if (typeof acc[athlete] !== 'undefined' && acc[athlete].length) {
-      acc[athlete] = [...acc[athlete], activity]
+      acc[athlete] = [...acc[athlete], activity];
     } else {
       acc[athlete] = [activity];
     }
@@ -46,7 +46,7 @@ async function calculateColdLaps(fromActivity, dryRun) {
     const athleteActivities = groupedActivities[athleteId];
     console.log(`Processing athlete ${athleteId} (${athleteActivities.length} activities)`);
 
-    const totalPoints = await getTotalPointsFromActivities(athleteActivities, dryRun)
+    const totalPoints = await getTotalPointsFromActivities(athleteActivities, dryRun);
     console.log(`${totalPoints} total Cold Laps points`);
     if (!dryRun) {
       // Set athlete stats

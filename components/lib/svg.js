@@ -49,7 +49,7 @@ export const CloseSvg = ({ className }) => (
  */
 export const LapPath = (className, width = false) => (`
   <svg
-    width="${ `${width}px` || '190px'}"
+    width="${`${width}px` || '190px'}"
     height="${width ? `${width * 310 / 190}px` : '310px'}"
     viewBox="0 0 190 310"
     class="${className || ''}"
@@ -88,8 +88,8 @@ export const LapPath = (className, width = false) => (`
 export const TML_Mark = ({ className, wrapSvg = true }) => {
   const markId = 'TML_Mark';
   const rotateAttr = 'rotate(10.000000)';
-  const transformAttr = wrapSvg ? `${rotateAttr} translate(41.000000, 0)` :
-    `translate(730.000000, 161.000000) ${rotateAttr} translate(-730.000000, -161.000000) translate(635.000000, 8.000000)`;
+  const transformAttr = wrapSvg ? `${rotateAttr} translate(41.000000, 0)`
+    : `translate(730.000000, 161.000000) ${rotateAttr} translate(-730.000000, -161.000000) translate(635.000000, 8.000000)`;
 
   const inner = (
     <g

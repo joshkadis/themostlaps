@@ -32,11 +32,11 @@ class RiderPageMessage extends Component {
             Give us a minute to refresh your stats. If anything looks incorrect,
             {' '}please <a href="mailto:info@themostlaps.com">let us know</a>.
           </p>
-        </>)
+      </>)
       : (<>
           <p>Thanks for updating your account info.</p>
           <p>Please give us a moment to refresh your stats.</p>
-        </>);
+      </>);
   }
 
   render() {

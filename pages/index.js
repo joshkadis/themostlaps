@@ -33,12 +33,12 @@ function getDelay(...args) {
  * @return {Bool}
  */
 function modalIsOpen() {
-  if ('undefined' === typeof window) {
+  if (typeof window === 'undefined') {
     return false;
   }
 
-  return /auth(?:success|error)/.test(window.location.search) ||
-    '#signup' === window.location.hash;
+  return /auth(?:success|error)/.test(window.location.search)
+    || window.location.hash === '#signup';
 }
 
 class Index extends Component {
@@ -60,7 +60,7 @@ class Index extends Component {
     // Fade in primary content
     setTimeout(() => {
       this.setState({ shouldShowContent: true });
-    }, delays.startup)
+    }, delays.startup);
 
     // Fade out primary content
     setTimeout(() => {
@@ -72,8 +72,8 @@ class Index extends Component {
           contentMode: 'secondary',
           shouldShowContent: true,
         });
-      }, getDelay('transition', 'startup', 'initTransition'))
-    }, getDelay('initTransition', 'three', 'transition', 'interstitial'))
+      }, getDelay('transition', 'startup', 'initTransition'));
+    }, getDelay('initTransition', 'three', 'transition', 'interstitial'));
   }
 
   /**
@@ -105,7 +105,7 @@ class Index extends Component {
       >
         <div
           className={classNames(
-            styles['home__background']
+            styles.home__background,
           )}
           dangerouslySetInnerHTML={{ __html: LapPath('home__background--svg') }}
         />
@@ -124,14 +124,12 @@ class Index extends Component {
   }
 }
 
-Index.getInitialProps = (context) => {
-  return APIRequest('/totals')
-    .then((siteTotals) => ({
-      pathname: getPathnameFromContext(context),
-      query: context.query,
-      siteTotals,
-    }));
-};
+Index.getInitialProps = (context) => APIRequest('/totals')
+  .then((siteTotals) => ({
+    pathname: getPathnameFromContext(context),
+    query: context.query,
+    siteTotals,
+  }));
 
 Index.propTypes = {
   query: PropTypes.object.isRequired,

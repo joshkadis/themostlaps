@@ -28,7 +28,7 @@ class HomePrimary extends Component {
   }
 
   fade() {
-    if ('undefined' !== typeof document && this.container) {
+    if (typeof document !== 'undefined' && this.container) {
       setTimeout(() => {
         if (!this.container) {
           return;
@@ -43,12 +43,14 @@ class HomePrimary extends Component {
               el.classList.add(styles.home__transparent);
             }
           });
-        }, this.props.delays.initTransition);
+      }, this.props.delays.initTransition);
     }
   }
 
   render() {
-    const { one, two, three, four } = this.props.delays;
+    const {
+      one, two, three, four,
+    } = this.props.delays;
     return (
       <div
         className={styles.home__inner}
@@ -97,8 +99,8 @@ class HomePrimary extends Component {
         >
           {homeContent[this.props.contentMode].three}
         </p>
-        {this.props.contentMode === 'secondary' &&
-          <div
+        {this.props.contentMode === 'secondary'
+          && <div
             data-toggleopacity
             style={this.props.isVisible ? { transitionDelay: `${four}ms` } : null}
             className={classNames(

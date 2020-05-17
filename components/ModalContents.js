@@ -11,6 +11,6 @@ const ModalContents = ({ title, children }) => (
 ModalContents.propTypes = {
   title: PropTypes.string.isRequired,
   children: PropTypes.any.isRequired,
-}
+};
 
 export default ModalContents;

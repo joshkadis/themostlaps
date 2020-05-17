@@ -15,7 +15,7 @@ const getErrorMessage = (state, athleteId) => {
   }
 
   return <p>An error occurred. Please try again later.</p>;
-}
+};
 
 const ErrorPage = ({ errorPageState = 1, athleteId = 0 }) => (
   <Layout

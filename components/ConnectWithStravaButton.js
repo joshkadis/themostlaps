@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import * as styles from './ConnectWithStravaButton.css';
 import { trackConnectWithStrava } from '../utils/analytics';
-import { getStravaAuthRequestUrl } from '../utils/ingest/utils'
+import { getStravaAuthRequestUrl } from '../utils/ingest/utils';
 
 const ConnectWithStravaButton = ({ className, pathname, shouldSubscribe }) => (
   <a

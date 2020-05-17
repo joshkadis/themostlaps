@@ -5,7 +5,7 @@ const { authRequestParams, stravaOauthUrl } = require('../../config');
 
 describe('getStravaAuthRequestUrl', () => {
   it('forms correct URL for initial Stava authorization request', () => {
-    let url = [
+    const url = [
       stravaOauthUrl,
       '/authorize?',
       stringify(Object.assign(authRequestParams, {

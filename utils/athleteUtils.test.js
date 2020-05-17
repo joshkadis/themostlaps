@@ -1,11 +1,11 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
-const Mockgoose = require('mockgoose').Mockgoose;
+const { Mockgoose } = require('mockgoose');
 const Athlete = require('../schema/Athlete');
 const {
   getEpochSecondsFromDateObj,
   getTimestampFromString,
-  getDocFromMaybeToken
+  getDocFromMaybeToken,
 } = require('./athleteUtils');
 
 test('getEpochSecondsFromDateObj', () => {
@@ -30,14 +30,14 @@ test('getTimestampFromString', () => {
   expect(getTimestampFromString(`${baseTimeString}-04:00`, { unit: 'ms' }))
     .toEqual(baseTimestamp + (4 * 60 * 60 * 1000));
 
-    baseTimestamp = 1523192354;
-    expect(getTimestampFromString(baseTimeString, { unit: 'seconds' }))
-      .toEqual(baseTimestamp + (4 * 60 * 60));
-    expect(getTimestampFromString(`${baseTimeString}Z`, { unit: 'seconds' }))
-      .toEqual(baseTimestamp);
-    expect(getTimestampFromString(`${baseTimeString}-04:00`, { unit: 'seconds' }))
-      .toEqual(baseTimestamp + (4 * 60 * 60));
+  baseTimestamp = 1523192354;
+  expect(getTimestampFromString(baseTimeString, { unit: 'seconds' }))
+    .toEqual(baseTimestamp + (4 * 60 * 60));
+  expect(getTimestampFromString(`${baseTimeString}Z`, { unit: 'seconds' }))
+    .toEqual(baseTimestamp);
+  expect(getTimestampFromString(`${baseTimeString}-04:00`, { unit: 'seconds' }))
+    .toEqual(baseTimestamp + (4 * 60 * 60));
 
-    expect(getTimestampFromString('baseTimeString'))
-      .toEqual(false);
+  expect(getTimestampFromString('baseTimeString'))
+    .toEqual(false);
 });
