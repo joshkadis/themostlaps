@@ -1,3 +1,4 @@
+/* eslint-disable no-return-assign */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
@@ -21,11 +22,11 @@ class HomePrimary extends Component {
     this.fade();
   }
 
-  triggerModalOpen() {
+  triggerModalOpen = () => {
     triggerModalOpen();
     setDimensions({ 'Signup Starting Point': 'homepage' });
     trackModalOpen();
-  }
+  };
 
   fade() {
     if (typeof document !== 'undefined' && this.container) {
@@ -84,7 +85,7 @@ class HomePrimary extends Component {
               styles.home__big,
               styles.home__transparent,
             )}
-            >
+          >
             {homeContent[this.props.contentMode].two}
           </span>
         </p>
