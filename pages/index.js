@@ -80,10 +80,10 @@ class Index extends Component {
    *
    * @return {Bool} True if navigated, false if not
    */
-  maybeNavigateToRiderPage() {
+  maybeNavigateToRiderPage = () => {
     if (window.localStorage && !modalIsOpen()) {
       const TMLAthleteId = localStorage.getItem('TMLAthleteId');
-      if (TMLAthleteId && !isNaN(TMLAthleteId)) {
+      if (TMLAthleteId && !Number.isNaN(TMLAthleteId)) {
         Router.push(
           `/rider?athleteId=${TMLAthleteId}`,
           `/rider/${TMLAthleteId}`,
@@ -92,7 +92,7 @@ class Index extends Component {
       }
     }
     return false;
-  }
+  };
 
   render() {
     const { pathname, query, siteTotals } = this.props;

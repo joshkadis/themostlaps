@@ -24,7 +24,7 @@ function getPathnameFromContext(context = {}) {
  */
 function getTimestampFromLocalISO(dateString) {
   const dateObj = new Date(dateString);
-  if (isNaN(dateObj.valueOf())) {
+  if (Number.isNaN(dateObj.valueOf())) {
     return null;
   }
   return Math.floor(dateObj.valueOf() / 1000) + timezoneOffset * 60;

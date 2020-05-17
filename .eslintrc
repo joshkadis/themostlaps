@@ -35,5 +35,6 @@
   "globals": {
     "React": "writable",
     "window": true,
+    "localStorage": true,
   }
 }
