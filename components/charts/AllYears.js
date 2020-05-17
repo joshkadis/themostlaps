@@ -25,6 +25,7 @@ import { mergeStats } from '../../utils/athleteStatsClient';
 // onClickTick: PropTypes.func.isRequired,
 
 class AllYears extends BaseChart {
+  // eslint-disable-next-line
   transformData({ hasCompare, compareData, primaryData }) {
     if (!hasCompare) {
       return primaryData;
@@ -32,7 +33,7 @@ class AllYears extends BaseChart {
     return mergeStats(primaryData, compareData);
   }
 
-  renderTitle({ hasCompare, compareTo }) {
+  renderTitle({ hasCompare }) {
     return <h2 className={styles.chart__title}>
       {hasCompare
         ? this.renderBaseTitleCompare('Yearly Totals', 'Change')
@@ -87,6 +88,9 @@ class AllYears extends BaseChart {
 }
 
 AllYears.defaultProps = baseChartDefaultProps;
-AllYears.propTypes = { ...baseChartPropTypes, onClickTick: PropTypes.func.isRequired };
+AllYears.propTypes = {
+  ...baseChartPropTypes,
+  onClickTick: PropTypes.func.isRequired,
+};
 
 export default AllYears;
