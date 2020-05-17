@@ -1,8 +1,8 @@
+/* eslint-disable no-undef */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Head from 'next/head';
 import Router from 'next/router';
-import { stringify } from 'query-string';
 import Modal from 'react-modal';
 import Header from './Header';
 import Footer from './Footer';
@@ -11,9 +11,9 @@ import { CloseSvg } from './lib/svg';
 import { getPathWithQueryString } from '../utils';
 import ModalContents from './ModalContents';
 import Signup from './modal/Signup';
-import { modalTitles, locale } from '../config';
+import { modalTitles } from '../config';
 import { getDocumentTitle, getOgData } from '../utils/metaTags';
-import { trackPageview, trackAuthResult } from '../utils/analytics';
+import { trackPageview } from '../utils/analytics';
 
 Router.onRouteChangeComplete = (pathname) => {
   trackPageview(pathname);
@@ -87,10 +87,10 @@ class Layout extends Component {
           <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no, maximum-scale=1" />
           <title>{getDocumentTitle(this.props.pathname)}</title>
           {getOgData().map((tag) => <meta
-              key={tag[0]}
-              property={`og:${tag[0]}`}
-              content={tag[1]}
-            />)}
+            key={tag[0]}
+            property={`og:${tag[0]}`}
+            content={tag[1]}
+          />)}
           <link rel="shortcut icon" type="image/x-icon" href="/static/img/themostlaps.ico" />
           <link href="https://fonts.googleapis.com/css?family=Arvo:400,700" rel="stylesheet" />
           <link rel="stylesheet" href="/static/css/react-select.css" />
@@ -104,7 +104,7 @@ class Layout extends Component {
           modalIsOpen={this.state.modalIsOpen}
         />
         <div className={styles.main}>
-          <div className={ this.props.pathname !== '/' ? styles.mainContainer : null}>
+          <div className={this.props.pathname !== '/' ? styles.mainContainer : null}>
             {this.props.children}
           </div>
         </div>
