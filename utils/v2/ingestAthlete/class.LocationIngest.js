@@ -235,7 +235,7 @@ class LocationIngest {
 
     primaryDoc.set({ activityLocations: primaryLocations });
     primaryDoc.markModified('activityLocations');
-  }
+  };
 
   /**
    * Create Activity documents from formatted data
@@ -323,7 +323,7 @@ class LocationIngest {
 
     // For logging
     return activityDoc.laps;
-  }
+  };
 
   /**
    * Get complete history of athlete's efforts for canonical segment

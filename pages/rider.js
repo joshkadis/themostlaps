@@ -266,7 +266,6 @@ class RiderPage extends Component {
       isDuplicateSignup,
       locations = {},
       currentLocation,
-      router: routerProp,
     } = this.props;
 
     const {

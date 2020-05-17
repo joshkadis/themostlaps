@@ -1,69 +1,74 @@
 # Always ignore
-.next/
-node_module/
-build/
-dist/
+.next
+node_modules
+build
+dist
+.vscode
+test
+linting.html
+
+prepLocalDBForImport.js
 
 ############
 # Ignore legacy code by default
 ############
-/**/*.js
+# /**/*.js
 
-# Lint specific files/dirs as we go
-!cli.js
-!server.js
-!server/initApiRoutes.js
-!server/initWebhookRoutes.js
-!server/handleSignupCallback.js
-!server/ranking.js
-!server/ranking.test.js
-!schema/**/*.js
-!api/**/*.js
-!cli/callbacks.js
-!cli/deleteUser.js
-!cli/getActivityInfo.js
-!cli/activity/**/*.js
-!cli/athlete/**/*.js
-!cli/stats/**/*.js
-!cli/utils/**/*.js
-!cli/migration/**/*.js
+# # Lint specific files/dirs as we go
+# !cli.js
+# !server.js
+# !server/initApiRoutes.js
+# !server/initWebhookRoutes.js
+# !server/handleSignupCallback.js
+# !server/ranking.js
+# !server/ranking.test.js
+# !schema/**/*.js
+# !api/**/*.js
+# !cli/callbacks.js
+# !cli/deleteUser.js
+# !cli/getActivityInfo.js
+# !cli/activity/**/*.js
+# !cli/athlete/**/*.js
+# !cli/stats/**/*.js
+# !cli/utils/**/*.js
+# !cli/migration/**/*.js
 
-# Utils included in refactoring
-!utils/athleteStatsClient.js
-!utils/dateTimeUtils.js
-!utils/athleteUtils.js
-!utils/athleteStats.js
-!utils/refreshAthlete/index.js
-!utils/refreshAthlete/refreshAthleteFromActivity.js
-!utils/refreshAthlete/fetchLapsFromActivities.js
-!utils/refreshAthlete/fetchAthleteActivities.js
-!utils/refreshAthlete/utils.js
-!utils/refreshAthlete/utils.activityCouldHaveLaps.test.js
-!utils/refreshAthlete/calculateLapsFromSegmentEfforts.js
-!utils/refreshAthlete/refreshAthleteProfile.js
-!utils/athleteHistory.js
-!utils/ingest/handleDuplicateSignup.js
-!utils/getUpdatedAccessToken.js
-!utils/getUpdatedAccessToken.test.js
-!utils/fetchStravaAPI.js
-!utils/stats/compileSpecialStats.js
+# # Utils included in refactoring
+# !utils/athleteStatsClient.js
+# !utils/dateTimeUtils.js
+# !utils/athleteUtils.js
+# !utils/athleteStats.js
+# !utils/refreshAthlete/index.js
+# !utils/refreshAthlete/refreshAthleteFromActivity.js
+# !utils/refreshAthlete/fetchLapsFromActivities.js
+# !utils/refreshAthlete/fetchAthleteActivities.js
+# !utils/refreshAthlete/utils.js
+# !utils/refreshAthlete/utils.activityCouldHaveLaps.test.js
+# !utils/refreshAthlete/calculateLapsFromSegmentEfforts.js
+# !utils/refreshAthlete/refreshAthleteProfile.js
+# !utils/athleteHistory.js
+# !utils/ingest/handleDuplicateSignup.js
+# !utils/getUpdatedAccessToken.js
+# !utils/getUpdatedAccessToken.test.js
+# !utils/fetchStravaAPI.js
+# !utils/stats/compileSpecialStats.js
 
-# V2 Utils
-!utils/v2/**/*.js
-!utils/server/**/*.js
+# # V2 Utils
+# !utils/v2/**/*.js
+# !utils/server/**/*.js
 
-# V2 Pages
-!pages/*_v2.js
+# # V2 Pages
+# !pages/*_v2.js
 
-# Components
-!components/Navigation.js
-!components/RiderPageHeader.js
-!components/RankingRow.js
-!components/SplitButton.js
-!components/layouts/**/*.js
-!components/pages/**/*.js
-!components/lib/Button.js
+# # Components
+# !components/Navigation.js
+# !components/RiderPageHeader.js
+# !components/RankingRow.js
+# !components/SplitButton.js
+# !components/layouts/**/*.js
+# !components/pages/**/*.js
+# !components/lib/Button.js
 
-# Confic
-!config/index.js
-!config/locations/**/*.js
+# # Confic
+# !config/index.js
+# !config/locations/**/*.js

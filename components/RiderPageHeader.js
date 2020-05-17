@@ -10,35 +10,38 @@ const getRiderInfoClassName = () => classNames(
   styles.riderPageHeader_info,
 );
 
-const RiderPageHeader = ({
-  firstname,
-  lastname,
-  img,
-  allTime,
-  single,
-  className,
-}) => (
-  <div className={classNames(styles.riderPageHeader, className)}>
-    <AthleteHeader
-      img={img}
-      firstname={firstname}
-      lastname={lastname}
-      className={`biggest ${styles.riderPageHeader_athleteHeader}`}
-    />
+function RiderPageHeader(props) {
+  const {
+    firstname,
+    lastname,
+    img,
+    allTime,
+    single,
+    className,
+  } = props;
+  return (
+    <div className={classNames(styles.riderPageHeader, className)}>
+      <AthleteHeader
+        img={img}
+        firstname={firstname}
+        lastname={lastname}
+        className={`biggest ${styles.riderPageHeader_athleteHeader}`}
+      />
 
-    {allTime > 0 && (
-      <span className={getRiderInfoClassName()}>
-        All-time laps: <strong>{allTime.toLocaleString(locale)}</strong>
-      </span>
-    )}
+      {allTime > 0 && (
+        <span className={getRiderInfoClassName()}>
+          All-time laps: <strong>{allTime.toLocaleString(locale)}</strong>
+        </span>
+      )}
 
-    {single > 0 && (
-      <span className={getRiderInfoClassName()}>
-        Biggest ride: <strong>{single} laps</strong>
-      </span>
-    )}
-  </div>
-);
+      {single > 0 && (
+        <span className={getRiderInfoClassName()}>
+          Biggest ride: <strong>{single} laps</strong>
+        </span>
+      )}
+    </div>
+  );
+}
 
 RiderPageHeader.defaultProps = {
   className: '',

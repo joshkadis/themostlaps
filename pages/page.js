@@ -1,10 +1,11 @@
 import PropTypes from 'prop-types';
 import Markdown from 'react-markdown';
-import Link from 'next/link';
-import Layout from '../components/Layout';
+/* eslint-disable */
 import aboutContent from 'raw-loader!../copy/about.md';
 import termsContent from 'raw-loader!../copy/terms.md';
 import privacyContent from 'raw-loader!../copy/privacy.md';
+/* eslint-enable */
+import Layout from '../components/Layout';
 import convertMarkdownLink from '../components/lib/convertMarkdownLink';
 
 const pageContent = (pageName) => {

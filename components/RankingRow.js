@@ -5,36 +5,39 @@ import { locale } from '../config';
 import * as styles from './Layout.css';
 import AthleteHeader from './lib/AthleteHeader';
 
-const RankingRow = ({
-  athleteId,
-  rank,
-  firstname,
-  lastname,
-  img,
-  value,
-  unit,
-}) => (
-  <tr className="big">
-    <td className={classNames(
-      { biggest: rank === 1, bigger: rank !== 1 },
-      { [styles['ranking-row__first']]: rank === 1 },
-    )}>
-      {rank}
-    </td>
-    <td>
-      <Link href={`/rider?athleteId=${athleteId}`} as={`/rider/${athleteId}`}>
-        <a>
-          <AthleteHeader
-            img={img}
-            firstname={firstname}
-            lastname={lastname}
-          />
-        </a>
-      </Link>
-    </td>
-    <td>{value.toLocaleString(locale)} {unit}{value === 1 ? '' : 's'}</td>
-  </tr>
-);
+function RankingRow(props) {
+  const {
+    athleteId,
+    rank,
+    firstname,
+    lastname,
+    img,
+    value,
+    unit,
+  } = props;
+  return (
+    <tr className="big">
+      <td className={classNames(
+        { biggest: rank === 1, bigger: rank !== 1 },
+        { [styles['ranking-row__first']]: rank === 1 },
+      )}>
+        {rank}
+      </td>
+      <td>
+        <Link href={`/rider?athleteId=${athleteId}`} as={`/rider/${athleteId}`}>
+          <a>
+            <AthleteHeader
+              img={img}
+              firstname={firstname}
+              lastname={lastname}
+            />
+          </a>
+        </Link>
+      </td>
+      <td>{value.toLocaleString(locale)} {unit}{value === 1 ? '' : 's'}</td>
+    </tr>
+  );
+}
 
 RankingRow.defaultProps = {
   unit: 'lap',

@@ -1,3 +1,4 @@
+/* eslint-disable */
 // Make new backup
 use themostlaps;
 db.copyDatabase('themostlaps', `themostlaps_backup_${Date.now()}`);

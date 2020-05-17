@@ -1,25 +1,24 @@
 const fs = require('fs');
 const path = require('path');
 const glob = require('glob');
-const refreshAthleteFromActivity =
-  require('../utils/refreshAthlete/refreshAthleteFromActivity');
+const refreshAthleteFromActivity = require('../utils/refreshAthlete/refreshAthleteFromActivity');
 
 // YYYY-MM-DD to integer
 const dateStringToInt = (date) => parseInt(date.replace(/-/g, ''), 10);
 
 // integer to YYYY-MM-DD
 const intToDateString = (int) => {
-  let digits = [...int.toString()];
+  const digits = [...int.toString()];
   digits.splice(4, 0, '-');
-  digits.splice(7, 0, '-')
+  digits.splice(7, 0, '-');
   return digits.join('');
-}
+};
 
 function getActivityDataToRetry({ attachments }) {
   let shouldRetry = true;
   try {
-    shouldRetry = attachments[0].pretext === 'Error code 110' &&
-      attachments[0].fields[1].title === 'Details';
+    shouldRetry = attachments[0].pretext === 'Error code 110'
+      && attachments[0].fields[1].title === 'Details';
   } catch (error) {
     return false;
   }
@@ -40,7 +39,6 @@ function getActivityDataToRetry({ attachments }) {
   } catch (error) {
     return false;
   }
-
 }
 
 function getActivitiesFromFile(filename) {
@@ -66,10 +64,10 @@ function getActivitiesFromFile(filename) {
 
 async function retryWebhooks(startdate, dryrun) {
   const logFilesPath = path.resolve(__dirname, '../slack-logs');
-  const logFiles = glob.sync(logFilesPath + '/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9].json')
+  const logFiles = glob.sync(`${logFilesPath}/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9].json`)
     .map((filename) => path.basename(filename, '.json'))
     .map(dateStringToInt)
-    .filter((logDate) => (!isNaN(logDate) && logDate >= startdate))
+    .filter((logDate) => (!Number.isNaN(logDate) && logDate >= startdate))
     .map(intToDateString);
 
   console.log(`Retrying ${logFiles.length} log files`);
@@ -84,11 +82,11 @@ async function retryWebhooks(startdate, dryrun) {
   }, []);
 
   // @todo Async iterator
-  for (let idx = 0; idx < activitiesToRetry.length; idx++) {
+  for (let idx = 0; idx < activitiesToRetry.length; idx += 1) {
     const { owner_id, object_id } = activitiesToRetry[idx];
-    let laps;
     try {
-      laps = await refreshAthleteFromActivity(owner_id, object_id, !dryrun);
+      // eslint-disable-next-line
+      await refreshAthleteFromActivity(owner_id, object_id, !dryrun);
     } catch (err) {
       // log ouput provided by refreshAthleteFromActivity
     }

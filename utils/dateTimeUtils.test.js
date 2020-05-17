@@ -13,7 +13,6 @@ test('timePartString', () => {
   expect(timePartString('12')).toEqual('12');
   expect(timePartString(12)).toEqual('12');
   expect(timePartString(12.0)).toEqual('12');
-
 });
 
 test('getMonthKey()', () => {

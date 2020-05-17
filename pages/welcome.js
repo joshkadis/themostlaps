@@ -3,40 +3,38 @@ import PropTypes from 'prop-types';
 import Link from 'next/link';
 import Router from 'next/router';
 import Layout from '../components/Layout';
-import { welcomeContent } from '../config/content';
 import { LapPath } from '../components/lib/svg';
 import { APIRequest } from '../utils';
 
 class Welcome extends Component {
-
   state = {
     status: 'ingesting',
     allTime: null,
-  }
+  };
 
   // Only need this client-side
   componentDidMount() {
     // Set user value in local storage
-    if ('undefined' !== typeof window && window.localStorage) {
-      localStorage.setItem('TMLAthleteId', this.props.id)
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem('TMLAthleteId', this.props.id);
     }
 
     this.fetchAthlete();
   }
 
   fetchAthlete = async () => {
-    if ('ingesting' !== this.state.status) {
+    if (this.state.status !== 'ingesting') {
       return;
     }
 
     APIRequest(`/athletes/${this.props.id}`, {}, {})
       .then((apiResponse) => {
-        if (!apiResponse.length || 'error' === apiResponse[0].status) {
+        if (!apiResponse.length || apiResponse[0].status === 'error') {
           this.setState({ status: 'error' });
           return;
         }
 
-        if ('ready' === apiResponse[0].status) {
+        if (apiResponse[0].status === 'ready') {
           Router.push(
             `/rider?athleteId=${this.props.id}&welcome=1`,
             `/rider/${this.props.id}`,
@@ -46,61 +44,55 @@ class Welcome extends Component {
 
         setTimeout(this.fetchAthlete, 1000);
       });
-  }
+  };
 
-  renderIngesting(id) {
-    return (
-      <div style={{ textAlign: 'center' }}>
-        <h3>{"We're"} building your profile!</h3>
-        <p>
-          {"You'll"} be redirected to{' '}
-          <Link href={`/rider?athleteId=${id}`} as={`/rider/${id}`}>
-            <a>your rider page</a>
-          </Link>{' '}
+  renderIngesting = (id) => (
+    <div style={{ textAlign: 'center' }}>
+      <h3>{"We're"} building your profile!</h3>
+      <p>
+        You&rsquo;ll be redirected to{' '}
+        <Link href={`/rider?athleteId=${id}`} as={`/rider/${id}`}>
+          <a>your rider page</a>
+        </Link>{' '}
           after {"we've"} downloaded your laps history from Strava.
         </p>
-        <p>
-          Or if you want to go ride some laps, you can come back later to <br />
-          <Link href={`/rider?athleteId=${id}`} as={`/rider/${id}`}>
-            <a>https://themostlaps.com/rider/{id}</a>
-          </Link>
-        </p>
-      </div>
-    )
-  }
+      <p>
+        Or if you want to go ride some laps, you can come back later to <br />
+        <Link href={`/rider?athleteId=${id}`} as={`/rider/${id}`}>
+          <a>https://themostlaps.com/rider/{id}</a>
+        </Link>
+      </p>
+    </div>
+  );
 
-  renderError(id) {
-    return (
-      <div style={{ textAlign: 'center' }}>
-        <h3>Something went wrong.</h3>
-        <p>
-          An error occurred while we were building{' '}
-          <Link href={`/rider?athleteId=${id}`} as={`/rider/${id}`}>
-            <a>your rider page</a>
-          </Link>.
+  renderError = (id) => (
+    <div style={{ textAlign: 'center' }}>
+      <h3>Something went wrong.</h3>
+      <p>
+        An error occurred while we were building{' '}
+        <Link href={`/rider?athleteId=${id}`} as={`/rider/${id}`}>
+          <a>your rider page</a>
+        </Link>.
         </p>
-        <p>
-          We're looking into it;{' '}
+      <p>
+        We&rsquo;re looking into it;{' '}
           please email <a href="mailto:info@themostlaps.com">info@themostlaps.com</a>{' '}
           with any questions. Thanks!
         </p>
-      </div>
-    );
-  }
+    </div>
+  );
 
-  renderReady(id) {
-    return (
-      <div style={{ textAlign: 'center' }}>
-        <h3>Your profile is ready!</h3>
-        <p>
-          <Link href={`/rider?athleteId=${id}`} as={`/rider/${id}`}>
-            <a>Click here</a>
-          </Link>{' '}
-          if you are not automatically redirected to view your laps.
-        </p>
-      </div>
-    );
-  }
+  renderReady = (id) => (
+    <div style={{ textAlign: 'center' }}>
+      <h3>Your profile is ready!</h3>
+      <p>
+        <Link href={`/rider?athleteId=${id}`} as={`/rider/${id}`}>
+          <a>Click here</a>
+        </Link>{' '}
+        if you are not automatically redirected to view your laps.
+      </p>
+    </div>
+  );
 
   render() {
     const renderContent = () => {
@@ -115,16 +107,16 @@ class Welcome extends Component {
         default:
           return this.renderIngesting(this.props.id);
       }
-    }
+    };
 
     return (<Layout
       pathname="/welcome"
       query={{}}
     >
       <h1>
-        {this.state.status !== 'error' ?
-          '🎉🚴 Welcome 🎉🚴' :
-          '😞🚴 Welcome 🚴😞'
+        {this.state.status !== 'error'
+          ? '🎉🚴 Welcome 🎉🚴'
+          : '😞🚴 Welcome 🚴😞'
         }
       </h1>
       {renderContent()}

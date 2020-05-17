@@ -1,13 +1,15 @@
+import PropTypes from 'prop-types';
 import Link from 'next/link';
 
 /**
  * If {_blank} is appened to href, add target="_blank" attribute
  * If href is a "page" /about, /privacy, /terms, use Next's <Link />
  */
-export default ({ href, children }) => {
+const convertMarkdownLink = ({ href, children }) => {
   if (/{_blank}$/.test(href)) {
     return <a
       href={href.replace('{_blank}', '')}
+      rel="noopener noreferrer"
       target="_blank"
     >
       {children}
@@ -28,3 +30,10 @@ export default ({ href, children }) => {
     </Link>
   );
 };
+
+convertMarkdownLink.propTypes = {
+  href: PropTypes.string,
+  children: PropTypes.any,
+};
+
+export default convertMarkdownLink;

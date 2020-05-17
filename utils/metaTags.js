@@ -22,7 +22,7 @@ function getDocumentTitle(pathname) {
  */
 function getOgData() {
   return openGraph.concat([
-    ['image', getEnvOrigin() + '/static/img/themostlaps_og.jpg'],
+    ['image', `${getEnvOrigin()}/static/img/themostlaps_og.jpg`],
     ['url', getEnvOrigin()],
   ]);
 }

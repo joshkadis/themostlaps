@@ -5,7 +5,7 @@ const { customDimensions } = require('../config/analytics');
  * Check for window.ga to avoid server-side errors by accident
  */
 function _ga(...args) {
-  if ('undefined' !== typeof window && window.ga) {
+  if (typeof window !== 'undefined' && window.ga) {
     ga(...args);
   }
 }
@@ -49,7 +49,7 @@ function trackPageview(pathname, fields = {}, setPageDimensions = true) {
  * @param {Object} fields Non-persistent custom dimensions
  */
 function trackEvent(...args) {
-  if ('string' !== typeof args[0]) {
+  if (typeof args[0] !== 'string') {
     return;
   }
   _ga('send', 'event', ...args);
@@ -74,26 +74,6 @@ function trackConnectWithStrava(withSubscribe = false) {
 }
 
 /**
- * Track authorization result
- *
- * @param {Bool} success
- * @param {Number} errorCode Optional code if error
- */
-function trackAuthResult(success, errorCode = null) {
-  // Set persistent dimensions
-  const dimensions = {
-    'Signup Result': success ? 'success' : 'error',
-  };
-  if (!success && errorCode !== null) {
-    dimensions['Signup Error Code'] = errorCode.toString();
-  }
-  setDimensions(dimensions);
-
-  // Track event with outcome as event label
-  trackEvent('signup', 'result', success ? 'success' : 'error');
-}
-
-/**
  * Track social interaction
  *
  * @param {String} network
@@ -113,6 +93,14 @@ function trackSocial(network, action, target) {
 function trackRankingSelector(action, label = '') {
   trackEvent('rankingSelector', action, label);
 }
+
+/**
+ * Get custom dimension key from name, e.g. 'User Has Connected' -> 'dimension1'
+ *
+ * @param {String} name
+ * @return {String|Bool}
+ */
+const getDimensionKey = (name) => (customDimensions[name] || false);
 
 /**
  * Set persistent custom dimensions from key-value object with
@@ -138,12 +126,24 @@ function setDimensions(namedDimensions) {
 }
 
 /**
- * Get custom dimension key from name, e.g. 'User Has Connected' -> 'dimension1'
+ * Track authorization result
  *
- * @param {String} name
- * @return {String|Bool}
+ * @param {Bool} success
+ * @param {Number} errorCode Optional code if error
  */
-const getDimensionKey = (name) => (customDimensions[name] || false);
+function trackAuthResult(success, errorCode = null) {
+  // Set persistent dimensions
+  const dimensions = {
+    'Signup Result': success ? 'success' : 'error',
+  };
+  if (!success && errorCode !== null) {
+    dimensions['Signup Error Code'] = errorCode.toString();
+  }
+  setDimensions(dimensions);
+
+  // Track event with outcome as event label
+  trackEvent('signup', 'result', success ? 'success' : 'error');
+}
 
 module.exports = {
   trackPageview,

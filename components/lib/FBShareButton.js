@@ -1,10 +1,11 @@
+/* eslint-disable */
 import React, { Component } from 'react';
 
 class FBShareButton extends Component {
   // Client-side only
   // https://developers.facebook.com/docs/plugins/share-button
   componentDidMount() {
-    (function(d, s, id) {
+    (function (d, s, id) {
       var js, fjs = d.getElementsByTagName(s)[0];
       if (d.getElementById(id)) return;
       js = d.createElement(s); js.id = id;
@@ -26,7 +27,7 @@ class FBShareButton extends Component {
         >
           <a
             target="_blank"
-            href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fthemostlaps.com%2F&amp;src=sdkpreparse" class="fb-xfbml-parse-ignore"
+            href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fthemostlaps.com%2F&amp;src=sdkpreparse" className="fb-xfbml-parse-ignore"
           />
         </span>
       </span>

@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import TweetButton from './lib/TweetButton';
 import FBShareButton from './lib/FBShareButton';
@@ -21,7 +22,7 @@ class RiderPageWelcome extends Component {
     // ~until Tweet and FB Share have loaded
     setTimeout(() => {
       this.setState({ shouldShowNoThanks: true });
-    }, 1500)
+    }, 1500);
   }
 
   render() {
@@ -49,5 +50,10 @@ class RiderPageWelcome extends Component {
     );
   }
 }
+
+RiderPageWelcome.propTypes = {
+  allTime: PropTypes.number,
+  firstname: PropTypes.string,
+};
 
 export default RiderPageWelcome;

@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Markdown from 'react-markdown';
+// eslint-disable-next-line
+import pageContent from 'raw-loader!../../copy/signupModal.md';
 import * as styles from './Signup.css';
 import ConnectWithStravaButton from '../ConnectWithStravaButton';
-import pageContent from 'raw-loader!../../copy/signupModal.md';
 import convertMarkdownLink from '../lib/convertMarkdownLink';
 
 class Signup extends Component {
@@ -45,6 +46,6 @@ class Signup extends Component {
 
 Signup.propTypes = {
   pathname: PropTypes.string.isRequired,
-}
+};
 
 export default Signup;

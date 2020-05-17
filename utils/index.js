@@ -1,7 +1,7 @@
 const fetch = require('isomorphic-unfetch');
 const { stringify } = require('query-string');
 const { getEnvOrigin } = require('./envUtils');
-const { modalQueryParams, timezoneOffset } = require('../config');
+const { timezoneOffset } = require('../config');
 
 /**
  * Get pathname without query string from Next.js context object
@@ -11,10 +11,10 @@ const { modalQueryParams, timezoneOffset } = require('../config');
  * @return {String}
  */
 function getPathnameFromContext(context = {}) {
-  return 'string' === typeof context.asPath ?
-    context.asPath.split('?')[0] :
-    '/';
-};
+  return typeof context.asPath === 'string'
+    ? context.asPath.split('?')[0]
+    : '/';
+}
 
 /**
  * Get timestamp in seconds from ISO Date string
@@ -24,7 +24,7 @@ function getPathnameFromContext(context = {}) {
  */
 function getTimestampFromLocalISO(dateString) {
   const dateObj = new Date(dateString);
-  if (isNaN(dateObj.valueOf())) {
+  if (Number.isNaN(dateObj.valueOf())) {
     return null;
   }
   return Math.floor(dateObj.valueOf() / 1000) + timezoneOffset * 60;
@@ -44,12 +44,8 @@ function APIRequest(path = false, query = {}, defaultResult = {}) {
   }
 
   return fetch(`${getEnvOrigin()}/api${path}?${stringify(query)}`)
-    .then((response) => {
-      return response.json();
-    })
-    .then((data) => {
-      return data.error ? defaultResult : data;
-    });
+    .then((response) => response.json())
+    .then((data) => (data.error ? defaultResult : data));
 }
 
 /**

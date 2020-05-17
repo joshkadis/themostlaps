@@ -1,5 +1,4 @@
 const {
-  compileSpecialStats,
   compileGiro2018,
 } = require('./compileSpecialStats');
 

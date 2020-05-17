@@ -11,16 +11,21 @@ const refreshAthleteProfile = require('./refreshAthlete/refreshAthleteProfile');
  * @param {Bool} shouldRefreshActivities Default to false, i.e. update profile
  * @param {Multiple} findArgs Args to pass to http://mongoosejs.com/docs/api.html#find_find
  */
-async function refreshAthletes(shouldRefreshActivities = false, findArgs = [{}]) {
+async function refreshAthletes(
+  shouldRefreshActivities = false,
+  findArgs = [{}],
+) {
   const athletes = await Athlete.find(...findArgs);
-  for (let i = 0; i < athletes.length; i++) {
+  for (let i = 0; i < athletes.length; i += 1) {
     const athlete = athletes[i];
+    // eslint-disable-next-line
     const updatedAthlete = await refreshAthleteProfile(athlete);
     if (updatedAthlete && shouldRefreshActivities) {
+      // eslint-disable-next-line
       await refreshAthleteActivities(
         updatedAthlete,
         false,
-        process.env.SHOULD_REFRESH_VERBOSE
+        process.env.SHOULD_REFRESH_VERBOSE,
       );
     }
   }
@@ -31,8 +36,8 @@ async function refreshAthletes(shouldRefreshActivities = false, findArgs = [{}])
  * Nightly refresh of activities and stats
  */
 async function scheduleNightlyRefresh() {
-  console.log(`Scheduling refresh for ${timePartString(refreshSchedule.hour)}h${timePartString(refreshSchedule.minute)} GMT`)
-  const job = scheduleJob(refreshSchedule, async () => {
+  console.log(`Scheduling refresh for ${timePartString(refreshSchedule.hour)}h${timePartString(refreshSchedule.minute)} GMT`);
+  scheduleJob(refreshSchedule, async () => {
     console.log('Refreshing athletes and stats');
     await refreshAthletes();
   });

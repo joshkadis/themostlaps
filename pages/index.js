@@ -1,5 +1,5 @@
+/* eslint-disable no-return-assign */
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import Router from 'next/router';
 import classNames from 'classnames';
@@ -33,12 +33,12 @@ function getDelay(...args) {
  * @return {Bool}
  */
 function modalIsOpen() {
-  if ('undefined' === typeof window) {
+  if (typeof window === 'undefined') {
     return false;
   }
 
-  return /auth(?:success|error)/.test(window.location.search) ||
-    '#signup' === window.location.hash;
+  return /auth(?:success|error)/.test(window.location.search)
+    || window.location.hash === '#signup';
 }
 
 class Index extends Component {
@@ -60,7 +60,7 @@ class Index extends Component {
     // Fade in primary content
     setTimeout(() => {
       this.setState({ shouldShowContent: true });
-    }, delays.startup)
+    }, delays.startup);
 
     // Fade out primary content
     setTimeout(() => {
@@ -72,8 +72,8 @@ class Index extends Component {
           contentMode: 'secondary',
           shouldShowContent: true,
         });
-      }, getDelay('transition', 'startup', 'initTransition'))
-    }, getDelay('initTransition', 'three', 'transition', 'interstitial'))
+      }, getDelay('transition', 'startup', 'initTransition'));
+    }, getDelay('initTransition', 'three', 'transition', 'interstitial'));
   }
 
   /**
@@ -81,10 +81,10 @@ class Index extends Component {
    *
    * @return {Bool} True if navigated, false if not
    */
-  maybeNavigateToRiderPage() {
+  maybeNavigateToRiderPage = () => {
     if (window.localStorage && !modalIsOpen()) {
       const TMLAthleteId = localStorage.getItem('TMLAthleteId');
-      if (TMLAthleteId && !isNaN(TMLAthleteId)) {
+      if (TMLAthleteId && !Number.isNaN(TMLAthleteId)) {
         Router.push(
           `/rider?athleteId=${TMLAthleteId}`,
           `/rider/${TMLAthleteId}`,
@@ -93,10 +93,10 @@ class Index extends Component {
       }
     }
     return false;
-  }
+  };
 
   render() {
-    const { pathname, query, siteTotals } = this.props;
+    const { pathname, query } = this.props;
     return (
       <Layout
         pathname={pathname}
@@ -105,7 +105,7 @@ class Index extends Component {
       >
         <div
           className={classNames(
-            styles['home__background']
+            styles.home__background,
           )}
           dangerouslySetInnerHTML={{ __html: LapPath('home__background--svg') }}
         />
@@ -124,14 +124,12 @@ class Index extends Component {
   }
 }
 
-Index.getInitialProps = (context) => {
-  return APIRequest('/totals')
-    .then((siteTotals) => ({
-      pathname: getPathnameFromContext(context),
-      query: context.query,
-      siteTotals,
-    }));
-};
+Index.getInitialProps = (context) => APIRequest('/totals')
+  .then((siteTotals) => ({
+    pathname: getPathnameFromContext(context),
+    query: context.query,
+    siteTotals,
+  }));
 
 Index.propTypes = {
   query: PropTypes.object.isRequired,

@@ -16,14 +16,15 @@ module.exports = async (user, after) => {
 
   // Delete or save as applicable
   const savedActivities = [];
-  for (let i = 0; i < userActivities.length; i++) {
+  for (let i = 0; i < userActivities.length; i += 1) {
     const activity = userActivities[i];
     const activityDate = new Date(activity.get('start_date_local'));
     const activityTimestamp = Math.floor(activityDate.valueOf() / 1000);
 
     // Delete activities after the cutoff date
     if (activityTimestamp > after) {
-      console.log(`Deleting activity ${activity.get('_id')} from ${activity.get('start_date_local')}`)
+      console.log(`Deleting activity ${activity.get('_id')} from ${activity.get('start_date_local')}`);
+      // eslint-disable-next-line
       await Activity.findByIdAndRemove(activity.get('_id'));
     } else {
       // Save activities for recalculating status
@@ -37,7 +38,7 @@ module.exports = async (user, after) => {
     athlete.set('last_refreshed', after);
     const lastUpdatedDoc = await athlete.save();
     const theDate = new Date(lastUpdatedDoc.get('last_refreshed') * 1000);
-    console.log(`Set last_refreshed to ${theDate.toISOString()}`)
+    console.log(`Set last_refreshed to ${theDate.toISOString()}`);
   } catch (err) {
     console.log(`Error saving last_refreshed to ${after}`);
   }

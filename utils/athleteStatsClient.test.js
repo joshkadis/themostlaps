@@ -56,19 +56,19 @@ test('statsForAthletePage', () => {
       single: 13,
       years: ['2016', '2017', '2018'],
       data: {
-        '2017': {
+        2017: {
           total: 33,
           '01': 10,
           '02': 11,
           '03': 12,
         },
-        '2018': {
+        2018: {
           total: 63,
           '01': 20,
           '02': 21,
           '03': 22,
         },
-        '2016': {
+        2016: {
           total: 93,
           '01': 30,
           '02': 31,
@@ -80,19 +80,19 @@ test('statsForAthletePage', () => {
 
 test('statsForSingleAthleteChart', () => {
   expect(statsForSingleAthleteChart({
-    '2017': {
+    2017: {
       total: 33,
       '01': 10,
       '02': 11,
       '03': 12,
     },
-    '2018': {
+    2018: {
       total: 63,
       '01': 20,
       '02': 21,
       '03': 22,
     },
-    '2016': {
+    2016: {
       total: 93,
       '01': 30,
       '02': 31,
@@ -106,13 +106,13 @@ test('statsForSingleAthleteChart', () => {
     ]);
 
   expect(statsForSingleAthleteChart({
-    '2018': {
+    2018: {
       total: 63,
       '01': 20,
       '02': 21,
       '03': 22,
     },
-    '2016': {
+    2016: {
       total: 93,
       '01': 30,
       '02': 31,
@@ -127,9 +127,9 @@ test('statsForSingleAthleteChart', () => {
 });
 
 test('getMinMaxYears', () => {
-  let input = [2013, 2014, '2017', '2016', 2015];
+  const input = [2013, 2014, '2017', '2016', 2015];
   expect(getMinMaxYears(input)).toEqual({ min: 2013, max: 2017 });
-})
+});
 
 test('mergeStats', () => {
   const primary = [

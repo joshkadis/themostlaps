@@ -4,9 +4,9 @@ function isLocalEnv() {
 
 function getEnvOrigin() {
   const protocol = isLocalEnv() ? 'http' : 'https';
-  const port = isLocalEnv() && process.env.PORT ?
-    `:${process.env.PORT}` :
-    '';
+  const port = isLocalEnv() && process.env.PORT
+    ? `:${process.env.PORT}`
+    : '';
   return `${protocol}://${process.env.APP_DOMAIN}${port}`;
 }
 

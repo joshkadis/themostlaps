@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 const Activity = require('../schema/Activity');
 const Athlete = require('../schema/Athlete');
 const { getColdLapsFromActivity } = require('../utils/stats/compileSpecialStats');
@@ -7,7 +8,7 @@ const { updateAthleteStats } = require('../utils/athleteStats');
 async function getTotalPointsFromActivities(activities, dryRun) {
   let totalPoints = 0;
   // Loop through activities asynchronously
-  for (let i = 0; i < activities.length; i++) {
+  for (let i = 0; i < activities.length; i += 1) {
     const activityPoints = await getColdLapsFromActivity(activities[i]);
     console.log(`Activity ${activities[i].get('_id')} has ${activityPoints} points`);
     if (!dryRun) {
@@ -16,7 +17,7 @@ async function getTotalPointsFromActivities(activities, dryRun) {
       await activities[i].save();
     }
     if (activityPoints) {
-      totalPoints = totalPoints + activityPoints;
+      totalPoints += activityPoints;
     }
   }
   return totalPoints;
@@ -26,13 +27,14 @@ async function getTotalPointsFromActivities(activities, dryRun) {
 async function calculateColdLaps(fromActivity, dryRun) {
   // Fetch all activities starting with fromActivity
   const allActivities = await Activity.find({ _id: { $gte: fromActivity } });
+  // eslint-disable-next-line
   console.log(`Processing ${allActivities.length} activities${"\n"}------------------`);
 
   // Group by athlete
   const groupedActivities = allActivities.reduce((acc, activity) => {
     const athlete = activity.get('athlete_id');
     if (typeof acc[athlete] !== 'undefined' && acc[athlete].length) {
-      acc[athlete] = [...acc[athlete], activity]
+      acc[athlete] = [...acc[athlete], activity];
     } else {
       acc[athlete] = [activity];
     }
@@ -41,12 +43,15 @@ async function calculateColdLaps(fromActivity, dryRun) {
 
   // Loop through athletes
   const athleteIds = Object.keys(groupedActivities);
-  for (let i = 0; i < athleteIds.length; i++) {
+  for (let i = 0; i < athleteIds.length; i += 1) {
     const athleteId = athleteIds[i];
     const athleteActivities = groupedActivities[athleteId];
     console.log(`Processing athlete ${athleteId} (${athleteActivities.length} activities)`);
 
-    const totalPoints = await getTotalPointsFromActivities(athleteActivities, dryRun)
+    const totalPoints = await getTotalPointsFromActivities(
+      athleteActivities,
+      dryRun,
+    );
     console.log(`${totalPoints} total Cold Laps points`);
     if (!dryRun) {
       // Set athlete stats
@@ -62,6 +67,7 @@ async function calculateColdLaps(fromActivity, dryRun) {
         console.log(`Failed to update stats for athlete ${athleteId}`);
       }
     }
+    // eslint-disable-next-line
     console.log(`------------------${"\n"}`);
   }
 

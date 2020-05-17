@@ -11,7 +11,7 @@ const primaryOptions = [
 
 const current = new Date();
 
-for (let yr = current.getFullYear(); yr >= startYear; yr--) {
+for (let yr = current.getFullYear(); yr >= startYear; yr -= 1) {
   primaryOptions.push({
     value: `timePeriod.${yr}`,
     label: yr.toString(),
@@ -22,7 +22,7 @@ const secondaryOptions = [{
   value: null,
   label: 'clear month',
 }];
-for (let mo = 1; mo <= 12; mo++) {
+for (let mo = 1; mo <= 12; mo += 1) {
   secondaryOptions.push({
     value: mo.toString(),
     label: getMonthName(mo),

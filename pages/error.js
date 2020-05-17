@@ -15,7 +15,7 @@ const getErrorMessage = (state, athleteId) => {
   }
 
   return <p>An error occurred. Please try again later.</p>;
-}
+};
 
 const ErrorPage = ({ errorPageState = 1, athleteId = 0 }) => (
   <Layout
@@ -27,7 +27,7 @@ const ErrorPage = ({ errorPageState = 1, athleteId = 0 }) => (
     <p>
       If you think this is something we should know about,{' '}
       please email <a href="mailto:info@themostlaps.com">info@themostlaps.com</a>{' '}
-      and let us know what's up. Thanks!
+      and let us know what&rsquo;s up. Thanks!
     </p>
   </Layout>
 );
@@ -39,13 +39,14 @@ ErrorPage.getInitialProps = ({ query }) => {
   } = query;
 
   return {
-    errorPageState: !isNaN(type) ? parseInt(type, 10) : 1,
-    athleteId: !isNaN(id) ? parseInt(id, 10) : 0,
+    errorPageState: !Number.isNaN(type) ? parseInt(type, 10) : 1,
+    athleteId: !Number.isNaN(id) ? parseInt(id, 10) : 0,
   };
 };
 
 ErrorPage.propTypes = {
   errorPageState: PropTypes.number.isRequired,
+  athleteId: PropTypes.number.isRequired,
 };
 
 export default ErrorPage;

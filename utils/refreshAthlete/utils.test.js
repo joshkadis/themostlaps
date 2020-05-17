@@ -49,7 +49,7 @@ test('uses filterSegmentEfforts() to filter, dedupe, and format', () => {
     ...input,
     ...makeSegmentEffortsInput(
       [lapSegmentId],
-      { start_date_local: '2019-12-07T19:06:13.023Z' }
+      { start_date_local: '2019-12-07T19:06:13.023Z' },
     ),
   ];
 
@@ -58,7 +58,7 @@ test('uses filterSegmentEfforts() to filter, dedupe, and format', () => {
     ...makeSegmentEffortsOutput(
       1,
       { start_date_local: '2019-12-07T19:06:13.023Z' },
-    )
+    ),
   ];
   expect(input.length).toBe(3);
   expect(expected.length).toBe(2);
@@ -69,7 +69,7 @@ test('uses filterSegmentEfforts() to filter, dedupe, and format', () => {
     ...input,
     ...makeSegmentEffortsInput(
       [lapSegmentId, lapSegmentId],
-      { start_date_local: '2019-12-07T19:16:13.023Z' }
+      { start_date_local: '2019-12-07T19:16:13.023Z' },
     ),
   ];
 
@@ -78,7 +78,7 @@ test('uses filterSegmentEfforts() to filter, dedupe, and format', () => {
     ...makeSegmentEffortsOutput(
       1,
       { start_date_local: '2019-12-07T19:16:13.023Z' },
-    )
+    ),
   ];
   expect(input.length).toBe(5);
   expect(expected.length).toBe(3);

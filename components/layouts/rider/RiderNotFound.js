@@ -23,7 +23,7 @@ const RiderNotFound = ({
       <h2 style={{ textAlign: 'center' }}>Rider not found 😧</h2>
       <SearchUsers onChange={navigateToRiderPage} />
     </Layout>
-  );
+);
 
 RiderNotFound.propTypes = {
   pathname: PropTypes.string.isRequired,
