@@ -1,5 +1,4 @@
 import PropTypes from 'prop-types';
-import Link from 'next/link';
 import Layout from '../components/Layout';
 import { notificationsText } from '../config/content';
 
@@ -16,7 +15,9 @@ const Notifications = ({ query, success }) => (
   </Layout>
 );
 
-Notifications.getInitialProps = ({ query }) => ({ query, success: query.success });
+Notifications.getInitialProps = ({ query }) => (
+  { query, success: query.success }
+);
 
 Notifications.defaultProps = {
   success: false,

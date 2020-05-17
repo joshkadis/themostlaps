@@ -1,3 +1,4 @@
+/* eslint-disable no-return-assign */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Router from 'next/router';
@@ -95,7 +96,7 @@ class Index extends Component {
   };
 
   render() {
-    const { pathname, query, siteTotals } = this.props;
+    const { pathname, query } = this.props;
     return (
       <Layout
         pathname={pathname}
