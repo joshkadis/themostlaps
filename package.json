@@ -79,6 +79,9 @@
     "markdown-toc": "^1.2.0",
     "mockgoose": "^8.0.2"
   },
+  "peerDependencies": {
+    "webpack": "4.x"
+  },
   "jest": {
     "automock": false,
     "testURL": "http://localhost/",
