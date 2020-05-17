@@ -5,15 +5,17 @@ import { locale } from '../config';
 import * as styles from './Layout.css';
 import AthleteHeader from './lib/AthleteHeader';
 
-const RankingRow = ({
-  athleteId,
-  rank,
-  firstname,
-  lastname,
-  img,
-  value,
-  unit,
-}) => (
+function RankingRow(props) {
+  const {
+    athleteId,
+    rank,
+    firstname,
+    lastname,
+    img,
+    value,
+    unit,
+  } = props;
+  return (
     <tr className="big">
       <td className={classNames(
         { biggest: rank === 1, bigger: rank !== 1 },
@@ -35,6 +37,7 @@ const RankingRow = ({
       <td>{value.toLocaleString(locale)} {unit}{value === 1 ? '' : 's'}</td>
     </tr>
   );
+}
 
 RankingRow.defaultProps = {
   unit: 'lap',
