@@ -27,6 +27,7 @@ import { mergeStatsSingleYear } from '../../utils/athleteStatsClient';
 // onClickBack: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]),
 
 class SingleYear extends BaseChart {
+  // eslint-disable-next-line
   transformData({ hasCompare, compareData, primaryData }) {
     if (!hasCompare) {
       return primaryData;
@@ -129,9 +130,15 @@ SingleYear.defaultProps = baseChartDefaultProps;
 SingleYear.propTypes = {
   ...baseChartPropTypes,
   year: PropTypes.string.isRequired,
-  onClickPrevYear: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]).isRequired,
-  onClickNextYear: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]).isRequired,
-  onClickBack: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]).isRequired,
+  onClickPrevYear: PropTypes.oneOfType(
+    [PropTypes.func, PropTypes.bool],
+  ).isRequired,
+  onClickNextYear: PropTypes.oneOfType(
+    [PropTypes.func, PropTypes.bool],
+  ).isRequired,
+  onClickBack: PropTypes.oneOfType(
+    [PropTypes.func, PropTypes.bool],
+  ).isRequired,
 };
 
 export default SingleYear;
