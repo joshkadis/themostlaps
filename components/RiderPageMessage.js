@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import Button from './lib/Button';
 import * as styles from './Layout.css';
@@ -26,16 +27,16 @@ class RiderPageMessage extends Component {
     // Duplicate signup takes precedence.
     return isDuplicateSignup
       ? (<>
-          <p>Looks like you{"'"}re already signed up!</p>
-          {/* eslint-disable-next-line */}
-          <p>
-            Give us a minute to refresh your stats. If anything looks incorrect,
+        <p>Looks like you{"'"}re already signed up!</p>
+        {/* eslint-disable-next-line */}
+        <p>
+          Give us a minute to refresh your stats. If anything looks incorrect,
             {' '}please <a href="mailto:info@themostlaps.com">let us know</a>.
           </p>
       </>)
       : (<>
-          <p>Thanks for updating your account info.</p>
-          <p>Please give us a moment to refresh your stats.</p>
+        <p>Thanks for updating your account info.</p>
+        <p>Please give us a moment to refresh your stats.</p>
       </>);
   }
 
@@ -62,5 +63,10 @@ class RiderPageMessage extends Component {
     );
   }
 }
+
+RiderPageMessage.propTypes = {
+  shouldShowUpdated: PropTypes.bool,
+  isDuplicateSignup: PropTypes.bool,
+};
 
 export default RiderPageMessage;
