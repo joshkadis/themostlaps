@@ -1,3 +1,4 @@
+/* eslint-disable quotes */
 const Athlete = require('../schema/Athlete');
 const {
   getUpdatedAccessToken,
@@ -40,50 +41,7 @@ function parseJsonArg(inputString, required = true) {
     console.error(`Malformed JSON input: "${inputString}"`);
     process.exit(0);
   }
-}
-
-async function migrateMany(findString, optionsString, isDryRun, forceRefresh = false) {
-  const query = parseJsonArg(findString);
-  const options = parseJsonArg(optionsString, false) || {};
-
-  let athletes;
-  try {
-    athletes = await Athlete.find(query, '_id', options);
-  } catch (err) {
-    console.error(`Athlete.find failed, check input: "${findString}"`);
-    process.exit(0);
-  }
-
-  if (!athletes.length) {
-    console.log(`No results for query: "${findString}"`);
-    process.exit(0);
-  }
-
-  console.log(`Found ${athletes.length} athletes${"\n"}---------------${"\n"}`);
-
-  let succeeded = 0;
-  let failed = 0;
-  for (let i = 0; i < athletes.length; i += 1) {
-    console.log(`Migrating athlete: ${JSON.stringify(athletes[i])}`);
-    try {
-      const didMigrate = await migrateSingle(
-        athletes[i]._id,
-        isDryRun,
-        forceRefresh,
-        true, // return instead exiting process
-      );
-      if (didMigrate) {
-        succeeded += 1;
-      } else {
-        failed += 1;
-      }
-      console.log("--------------------\n");
-    } catch (err) {
-      process.exit(1);
-    }
-  }
-  console.log(`Found ${athletes.length}${"\n"}migrated ${succeeded}${"\n"}${failed} errors`);
-  process.exit(0);
+  return false;
 }
 
 async function migrateSingle(
@@ -174,6 +132,56 @@ async function migrateSingle(
   testMigratedAthlete(newAthleteDoc);
   maybeExitProcess();
   return true;
+}
+
+async function migrateMany(
+  findString,
+  optionsString,
+  isDryRun,
+  forceRefresh = false,
+) {
+  const query = parseJsonArg(findString);
+  const options = parseJsonArg(optionsString, false) || {};
+
+  let athletes;
+  try {
+    athletes = await Athlete.find(query, '_id', options);
+  } catch (err) {
+    console.error(`Athlete.find failed, check input: "${findString}"`);
+    process.exit(0);
+  }
+
+  if (!athletes.length) {
+    console.log(`No results for query: "${findString}"`);
+    process.exit(0);
+  }
+
+  console.log(`Found ${athletes.length} athletes${"\n"}---------------${"\n"}`);
+
+  let succeeded = 0;
+  let failed = 0;
+  for (let i = 0; i < athletes.length; i += 1) {
+    console.log(`Migrating athlete: ${JSON.stringify(athletes[i])}`);
+    try {
+      // eslint-disable-next-line
+      const didMigrate = await migrateSingle(
+        athletes[i]._id,
+        isDryRun,
+        forceRefresh,
+        true, // return instead exiting process
+      );
+      if (didMigrate) {
+        succeeded += 1;
+      } else {
+        failed += 1;
+      }
+      console.log("--------------------\n");
+    } catch (err) {
+      process.exit(1);
+    }
+  }
+  console.log(`Found ${athletes.length}${"\n"}migrated ${succeeded}${"\n"}${failed} errors`);
+  process.exit(0);
 }
 
 module.exports = {
