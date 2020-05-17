@@ -7,6 +7,8 @@ dist
 test
 linting.html
 
+prepLocalDBForImport.js
+
 ############
 # Ignore legacy code by default
 ############

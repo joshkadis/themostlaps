@@ -36,5 +36,6 @@
     "React": "writable",
     "window": true,
     "localStorage": true,
+    "ga": true,
   }
 }

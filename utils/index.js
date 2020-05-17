@@ -1,7 +1,7 @@
 const fetch = require('isomorphic-unfetch');
 const { stringify } = require('query-string');
 const { getEnvOrigin } = require('./envUtils');
-const { modalQueryParams, timezoneOffset } = require('../config');
+const { timezoneOffset } = require('../config');
 
 /**
  * Get pathname without query string from Next.js context object
