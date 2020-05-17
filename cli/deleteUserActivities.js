@@ -24,6 +24,7 @@ module.exports = async (user, after) => {
     // Delete activities after the cutoff date
     if (activityTimestamp > after) {
       console.log(`Deleting activity ${activity.get('_id')} from ${activity.get('start_date_local')}`);
+      // eslint-disable-next-line
       await Activity.findByIdAndRemove(activity.get('_id'));
     } else {
       // Save activities for recalculating status
