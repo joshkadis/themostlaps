@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import TweetButton from './lib/TweetButton';
 import FBShareButton from './lib/FBShareButton';
@@ -49,5 +50,10 @@ class RiderPageWelcome extends Component {
     );
   }
 }
+
+RiderPageWelcome.propTypes = {
+  allTime: PropTypes.number,
+  firstname: PropTypes.string,
+};
 
 export default RiderPageWelcome;
