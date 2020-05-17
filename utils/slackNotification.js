@@ -28,6 +28,35 @@ function sendSlackNotification(fallback, pretext, color, fields) {
 }
 
 /**
+ * Get fields array
+ *
+ * @param {String} primary
+ * @param {Any} secondary Optional
+ * @return {Array}
+ */
+function getFields(primary, secondary) {
+  const fields = [{
+    title: 'Description',
+    value: primary,
+    short: false,
+  }];
+
+  if (typeof secondary !== 'undefined') {
+    const value = typeof secondary === 'string'
+      ? secondary
+      : JSON.stringify(secondary, null, 2);
+
+    fields.push({
+      title: 'Details',
+      short: false,
+      value,
+    });
+  }
+
+  return fields;
+}
+
+/**
  * Send error notification to Slack based on error code string
  *
  * @param {Int} errorCode
@@ -67,35 +96,6 @@ function slackSuccess(message = '', details) {
     'good',
     getFields(message, details),
   );
-}
-
-/**
- * Get fields array
- *
- * @param {String} primary
- * @param {Any} secondary Optional
- * @return {Array}
- */
-function getFields(primary, secondary) {
-  const fields = [{
-    title: 'Description',
-    value: primary,
-    short: false,
-  }];
-
-  if (typeof secondary !== 'undefined') {
-    const value = typeof secondary === 'string'
-      ? secondary
-      : JSON.stringify(secondary, null, 2);
-
-    fields.push({
-      title: 'Details',
-      short: false,
-      value,
-    });
-  }
-
-  return fields;
 }
 
 module.exports = {
