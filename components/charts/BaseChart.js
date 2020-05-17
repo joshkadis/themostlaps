@@ -1,5 +1,6 @@
+/* eslint-disable no-return-assign */
+import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import classNames from 'classnames';
 import * as styles from '../Layout.css';
 import Button from '../lib/Button';
 import SearchUsers from '../lib/SearchUsers';
@@ -30,7 +31,14 @@ class BaseChart extends Component {
     };
   }
 
-  componentWillReceiveProps(nextProps) {
+  propTypes = {
+    onChartRendered: PropTypes.func,
+    onChange: PropTypes.func,
+    compareTo: PropTypes.object,
+    primaryId: PropTypes.number,
+  };
+
+  UNSAFE_componentWillReceiveProps(nextProps) {
     this.setState({
       chartData: this.transformData(nextProps),
       showSelectField: false,
@@ -106,9 +114,9 @@ class BaseChart extends Component {
     </span>;
   }
 
-  renderBarLabel({
+  renderBarLabel = ({
     value, x, y, width, height,
-  }, shouldTranspose = false) {
+  }, shouldTranspose = false) => {
     if (value === 0) {
       return null;
     }
@@ -153,13 +161,13 @@ class BaseChart extends Component {
         </tspan>
       </text>
     );
-  }
+  };
 
-  getChartHeight({ height, shouldRenderHorizontal }, hasCompare) {
-    return hasCompare && shouldRenderHorizontal
+  getChartHeight = ({ height, shouldRenderHorizontal }, hasCompare) => (
+    hasCompare && shouldRenderHorizontal
       ? height * 1.5
-      : height;
-  }
+      : height
+  );
 
   render() {
     return (
@@ -189,7 +197,7 @@ class BaseChart extends Component {
           </div>
         }
 
-        {this.state.shouldRenderChart && this.renderChart(this.props, this.state)}
+        {this.state.shouldRenderChart && this.renderChart(this.props, this.state) /* eslint-disable-line */}
       </div>
     );
   }
