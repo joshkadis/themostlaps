@@ -7,6 +7,7 @@ import Layout from '../components/Layout';
 import RiderPageHeader from '../components/RiderPageHeader';
 import RiderPageWelcome from '../components/RiderPageWelcome';
 import RiderPageMessage from '../components/RiderPageMessage';
+import LocationsButtons from '../components/LocationsButtons';
 
 // Utils
 import { APIRequest } from '../utils';
@@ -246,6 +247,21 @@ class RiderPage extends Component {
     }
   }
 
+  updateLocation = (rankingContext) => {
+    const { location: nextLocation } = rankingContext;
+    const { router, athlete } = this.props;
+    router.push(
+      {
+        pathname: '/rider',
+        query: {
+          athleteId: athlete.id,
+          currentLocation: nextLocation,
+        },
+      },
+      `/rider/${athlete.id}/${nextLocation}`,
+    );
+  };
+
   render() {
     const {
       pathname,
@@ -316,17 +332,6 @@ class RiderPage extends Component {
             />
           )
         }
-        <button onClick={() => {
-          router.push({
-            pathname: '/rider',
-            query: {
-              athleteId: athlete.id,
-              currentLocation: currentLocation === 'prospectpark' ? 'centralpark' : 'prospectpark',
-            }
-          }, `/rider/${athlete.id}/${currentLocation === 'prospectpark' ? 'centralpark' : 'prospectpark'}`);
-        }}>
-          change location via router
-        </button>
 
         <RiderPageHeader
           firstname={athlete.firstname}
@@ -334,6 +339,13 @@ class RiderPage extends Component {
           img={athlete.profile}
           allTime={allTime}
           single={single}
+        />
+        <LocationsButtons
+          onClick={this.updateLocation}
+          style={{
+            textAlign: 'center',
+            margin: '1.5rem 0',
+          }}
         />
         {showStatsBy === 'byYear' && (
           <AllYears
