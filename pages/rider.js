@@ -272,7 +272,6 @@ class RiderPage extends Component {
       shouldShowUpdated,
       isDuplicateSignup,
       locations = {},
-      router,
       currentLocation,
     } = this.props;
 

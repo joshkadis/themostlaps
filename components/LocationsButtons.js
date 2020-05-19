@@ -17,6 +17,7 @@ const LocationsButtons = ({ style = {}, onClick = () => ({}) }) => (
 
 LocationsButtons.propTypes = {
   onClick: PropTypes.func,
+  style: PropTypes.object,
 };
 
 export default LocationsButtons;
