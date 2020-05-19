@@ -104,6 +104,9 @@ class Layout extends Component {
         />
         <div className={styles.main}>
           <div className={this.props.pathname !== '/' ? styles.mainContainer : null}>
+            <p className="small"><em>
+              Stats are gonna be weird as we deal with Strava&rsquo;s <a href="https://www.strava.com/subscription">new subscriptions model.</a>
+            </em></p>
             {this.props.children}
           </div>
         </div>
