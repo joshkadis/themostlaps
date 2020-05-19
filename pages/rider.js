@@ -7,6 +7,7 @@ import Layout from '../components/Layout';
 import RiderPageHeader from '../components/RiderPageHeader';
 import RiderPageWelcome from '../components/RiderPageWelcome';
 import RiderPageMessage from '../components/RiderPageMessage';
+import LocationsButtons from '../components/LocationsButtons';
 
 // Utils
 import { APIRequest } from '../utils';
@@ -62,18 +63,6 @@ class RiderPage extends Component {
     ...DEFAULT_COMPARE_ATHLETE_STATE,
   };
 
-  constructor(props) {
-    super(props);
-    const {
-      currentLocation,
-    } = props;
-
-    this.state = {
-      ...this.state,
-      currentLocation, // @todo Enable changing location
-    };
-  }
-
   static async getInitialProps({ query, req = {} }) {
     // Basic props from context
     const { athleteId = false, currentLocation = defaultLocation } = query;
@@ -106,9 +95,13 @@ class RiderPage extends Component {
 
         return {
           ...defaultInitialProps,
-          athlete,
+          athlete: {
+            ...athlete,
+            id: athleteId,
+          },
           locations: transformLocationsForRender(locations),
           status,
+          currentLocation,
         };
       });
   }
@@ -172,7 +165,7 @@ class RiderPage extends Component {
 
         if (!riderHasStatsForLocation(
           apiResponse[0].stats,
-          this.state.currentLocation,
+          this.props.currentLocation,
         )) {
           // @todo Add some message here!
           this.setState(DEFAULT_COMPARE_ATHLETE_STATE);
@@ -199,10 +192,9 @@ class RiderPage extends Component {
     const {
       hasCompareAthlete,
       compareAthlete,
-      currentLocation,
       showStatsYear,
     } = this.state;
-
+    const { currentLocation } = this.props;
     // @todo Message if we're trying to compare an athlete
     // but they don't have stats for this location
     if (!hasCompareAthlete
@@ -239,7 +231,7 @@ class RiderPage extends Component {
 
     // Make sure type of current and available years match
     const showStatsYear = parseInt(this.state.showStatsYear, 10);
-    const availableYears = this.props.locations[this.state.currentLocation]
+    const availableYears = this.props.locations[this.props.currentLocation]
       .availableYears
       .map((yr) => Number.parseInt(yr, 10));
 
@@ -254,6 +246,21 @@ class RiderPage extends Component {
       this.setState({ showStatsYear: availableYears[showIdx - 1] });
     }
   }
+
+  updateLocation = (rankingContext) => {
+    const { location: nextLocation } = rankingContext;
+    const { router, athlete } = this.props;
+    router.push(
+      {
+        pathname: '/rider',
+        query: {
+          athleteId: athlete.id,
+          currentLocation: nextLocation,
+        },
+      },
+      `/rider/${athlete.id}/${nextLocation}`,
+    );
+  };
 
   render() {
     const {
@@ -331,6 +338,13 @@ class RiderPage extends Component {
           img={athlete.profile}
           allTime={allTime}
           single={single}
+        />
+        <LocationsButtons
+          onClick={this.updateLocation}
+          style={{
+            textAlign: 'center',
+            margin: '1.5rem 0',
+          }}
         />
         {showStatsBy === 'byYear' && (
           <AllYears

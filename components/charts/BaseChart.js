@@ -87,12 +87,14 @@ class BaseChart extends Component {
     </Button>);
   }
 
+  // @note Temporarily disabled Compare button because it was broken
+  // eslint-disable-next-line
   renderBaseTitle(baseTitleText, buttonText) {
     return <span className={styles.chart__baseTitle__container}>
       <span className={styles.chart__baseTitle}>
         {baseTitleText}
       </span>
-      {this.renderCompareButton(buttonText)}
+      {/* this.renderCompareButton(buttonText) */}
     </span>;
   }
 
