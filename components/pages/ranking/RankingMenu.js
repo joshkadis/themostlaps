@@ -48,7 +48,7 @@ const TypesButtons = () => (<div className={styles.RankingMenu__row}>
 </div>);
 
 function RankingMenu() {
-  const [isCollapsed, setCollapsed] = useState(true);
+  const [isCollapsed, setCollapsed] = useState(false);
 
   function toggleFilters({ target }) {
     setCollapsed(!isCollapsed);
