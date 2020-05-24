@@ -5,6 +5,7 @@ module.exports = {
   },
   allowedRadius: 50000,
   minDistance: 5000,
+  maxLapRadius: 1400, // padded max distance from locationCenter to a point on loop
   addMakeupLap: true, // Avoids excess API calls when ingesting new user
   devFetchActivities: 10,
   lapSegmentId: 5313629, // Prospect Park Race Lap
