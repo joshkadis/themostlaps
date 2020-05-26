@@ -1,24 +1,26 @@
+const _isEmpty = require('lodash/isEmpty');
+const { locations: allLocations } = require('../../../config');
 const {
-  getDistance,
-} = require('geolib');
-const { locations } = require('../../../config');
+  getDistsToLocations,
+  getCurrentLocation,
+} = require('./utils');
 
+// Padding around a waypoint that we'll count as having passed through it
 const LAP_POINT_PADDING = 75;
+// If an activity start point must be within this distance of a location
+// or else we don't try to get laps for that location
+const LOCATIONS_MAX_DISTANCE = 50000;
 
 class LapsFromStream {
-  laps = 0;
+  locationsDists = {};
 
-  location = {};
+  closestLocation = '';
 
-  streams = {};
+  currentLocation = '';
 
-  shouldUseLatlng = false;
+  streamIdx = 0;
 
-  constructor(streams, locName) {
-    if (!locations[locName]) {
-      throw new Error(`Unknown location: ${locName}`);
-    }
-
+  constructor(streams) {
     // Break StreamSet into disctinct data array
     streams.forEach((stream) => {
       const { type, data } = stream;
@@ -31,50 +33,57 @@ class LapsFromStream {
 
     if (
       !this.streams.distance
-      || !this.streams.distance.length
+      || !this.streams.time
       || this.streams.distance.length !== this.streams.latlng.length
+      || this.streams.time.length !== this.streams.latlng.length
     ) {
       this.shouldUseLatlng = true;
     }
-  }
 
-  calculate() {
-    if (this.shouldUseLatlng) {
-      this.calculateFromLatLng();
-      return;
+    this.locationsDists = getDistsToLocations(
+      this.streams.latlng[0],
+      allLocations,
+      LOCATIONS_MAX_DISTANCE,
+    );
+
+    // Not close enough to any location to keep going
+    if (_isEmpty(this.locationsDists)) {
+      return false;
     }
 
-    // If we get this far, we know we have a latlng stream and
-    // a distance stream and they are the same size
-    const points = [...this.streams.latlng];
-    const dists = [...this.streams.distance];
-    const numPoints = this.streams.latlng.length;
-    const {
-      locationCenter: center,
-      maxLapRadius: maxRad,
-    } = { ...this.location };
-
-    // If we start 5000m from center and maxRad is 1500m
-    // Must travel at least 3500m before starting first lap
-    const minDistanceToPerimeter = getDistance(points[0], center, 100) - maxRad;
-
-    for (let idx = 0; idx < numPoints; idx += 1) {
-      // No geolib functions are necessary until we reach
-      // the perimeter of the loop
-      if (dists[idx] < minDistanceToPerimeter) {
-        return;
+    // In case activity starts on the loop itself
+    this.currentLocation = getCurrentLocation(this.locationsDists);
+    if (!this.currentLocation) {
+      this.skipToCurrentLocation();
+      // Not close enough to any location to keep going
+      if (_isEmpty(this.locationsDists)) {
+        return false;
       }
-      const currentPoint = points[idx];
+    } else {
+      // make both are set
+      this.closestLocation = this.currentLocation;
+      // no reason to check 0 again
+      this.streamIdx = 1;
+    }
+    return this;
+  }
 
-      // If no start point set, Loop through lap points
-      // If current point is near one, mark it as start point
-      // and set up array of points to be completed in order to count a lap
-      // then continue
-
-      // If
-
-
-
+  /**
+   * Iterante over streams.latlng until we find a location
+   * to start counting laps
+   */
+  skipToCurrentLocation() {
+    while (
+      !this.currentLocation
+      && this.streamIdx < this.streams.latlng.length
+    ) {
+      this.locationsDists = getDistsToLocations(
+        this.streams.latlng[this.streamIdx],
+        this.locationsDists,
+        LOCATIONS_MAX_DISTANCE,
+      );
+      this.currentLocation = getCurrentLocation(this.locationsDists);
+      this.streamIdx += 1;
     }
   }
 }
