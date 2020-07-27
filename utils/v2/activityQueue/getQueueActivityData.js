@@ -37,7 +37,7 @@ async function getQueueActivityData(queueDoc, athleteDoc) {
   if (shouldTestStreams(athleteDoc.id) && dataForIngest) {
     // testActivityStreams is async but we don't need to wait for
     try {
-      testActivityStreams(activityId, dataForIngest, athleteDoc);
+      await testActivityStreams(activityId, dataForIngest, athleteDoc);
     } catch (err) {
       captureSentry(
         'testActivityStreams failed',

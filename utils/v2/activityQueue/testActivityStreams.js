@@ -36,10 +36,10 @@ async function testActivityStreams(
   );
 
   // Will be key-value pairs like { latlng: 2000 }
-  const streamsLengths = streams.reduce(
-    (acc, { type, data = [] }) => ({
+  const streamsLengths = Object.keys(streams).reduce(
+    (acc, type) => ({
       ...acc,
-      [type]: data.length,
+      [type]: streams[type].original_size,
     }),
     {},
   );
