@@ -35,7 +35,13 @@ async function refreshAthleteProfile(athlete) {
       return null;
     }
 
-    const { firstname, lastname, profile } = athleteResult;
+    const {
+      firstname,
+      lastname,
+      profile,
+      premium = false,
+      summit = false,
+    } = athleteResult;
 
     console.log(`Updating ${firstname} ${lastname} (${athleteDoc.get('_id')})`);
 
@@ -43,6 +49,7 @@ async function refreshAthleteProfile(athlete) {
       athlete: {
         firstname,
         lastname,
+        isSubscriber: premium || summit,
         profile,
       },
     });

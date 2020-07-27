@@ -35,6 +35,7 @@ const athleteSchema = new Schema(
       ingestcentralpark: Boolean,
       recalculateStats: Boolean,
     },
+    isSubscriber: { type: Boolean, default: false },
   },
   {
     autoIndex: false,

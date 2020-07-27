@@ -10,6 +10,7 @@ const {
   getQueueActivityData,
 } = require('./getQueueActivityData');
 const { ingestActivityFromStravaData } = require('./ingestActivityFromStravaData');
+const refreshAthleteProfile = require('../../refreshAthlete/refreshAthleteProfile');
 
 const MAX_INGEST_ATTEMPTS = 8;
 const INGEST_QUEUE_INTERVAL = 60 * 60 * 1000; // 1hr
@@ -83,6 +84,11 @@ ${queueActivityDoc.errorMsg || queueActivityDoc.detail}`);
         errorMsg: 'No athleteDoc',
       });
       return completeProcessing();
+    }
+
+    await refreshAthleteProfile(athleteDoc);
+    if (!athleteDoc.isSubscriber) {
+      // ingestActivityFromStream(queueActivityDoc);
     }
 
     // Get Strava API data and set status of queueActivityDoc
