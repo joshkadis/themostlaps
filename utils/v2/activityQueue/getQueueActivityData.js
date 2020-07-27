@@ -3,6 +3,8 @@ const {
   activityCouldHaveLaps,
 } = require('../../refreshAthlete/utils');
 
+const SHOULD_TEST_STREAMS = true;
+
 /**
  * Get Strava API data for enqueued activity
  * Assume queue status check was already performed
@@ -24,6 +26,10 @@ async function getQueueActivityData(queueDoc, athleteDoc) {
     dataForIngest = await fetchActivity(activityId, athleteDoc);
   } catch (err) {
     // i think we're ok here without doing anything
+  }
+
+  if (SHOULD_TEST_STREAMS && dataForIngest) {
+    testActivityStreams(activityId, dataForIngest, athleteDoc);
   }
 
   // There are some edge cases where fetchActivity could return an empty object
