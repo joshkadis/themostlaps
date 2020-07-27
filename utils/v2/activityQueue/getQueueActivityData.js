@@ -2,8 +2,13 @@ const {
   fetchActivity,
   activityCouldHaveLaps,
 } = require('../../refreshAthlete/utils');
+const captureSentry = require('../services/sentry');
 
 const SHOULD_TEST_STREAMS = true;
+const TEST_ATHLETES = [541773];
+const shouldTestStreams = (athleteId) => (
+  SHOULD_TEST_STREAMS && TEST_ATHLETES.includes(+athleteId)
+);
 
 /**
  * Get Strava API data for enqueued activity
@@ -28,8 +33,25 @@ async function getQueueActivityData(queueDoc, athleteDoc) {
     // i think we're ok here without doing anything
   }
 
-  if (SHOULD_TEST_STREAMS && dataForIngest) {
-    testActivityStreams(activityId, dataForIngest, athleteDoc);
+  if (shouldTestStreams(athleteDoc.id) && dataForIngest) {
+    // testActivityStreams is async but we don't need to wait for
+    try {
+      testActivityStreams(activityId, dataForIngest, athleteDoc);
+    } catch (err) {
+      captureSentry(
+        'testActivityStreams failed',
+        'getQueueActivityData',
+        {
+          extra: {
+            activityId,
+            segmentEfforts: dataForIngest.segment_efforts
+              ? dataForIngest.segment_efforts.length
+              : -1,
+            athlete: athleteDoc.id,
+          }
+        }
+      );
+    }
   }
 
   // There are some edge cases where fetchActivity could return an empty object
