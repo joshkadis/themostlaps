@@ -88,7 +88,8 @@ ${queueActivityDoc.errorMsg || queueActivityDoc.detail}`);
 
     await refreshAthleteProfile(athleteDoc);
     if (!athleteDoc.isSubscriber) {
-      // ingestActivityFromStream(queueActivityDoc);
+      await ingestActivityFromStream(queueActivityDoc, athleteDoc);
+      return completeProcessing();
     }
 
     // Get Strava API data and set status of queueActivityDoc

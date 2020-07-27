@@ -3,6 +3,35 @@ const {
   activityCouldHaveLaps,
 } = require('../../refreshAthlete/utils');
 
+async function fetchDetailedActivityFromQueue(queueDoc, athleteDoc) {
+  let dataForIngest = false;
+  try {
+    dataForIngest = await fetchActivity(queueDoc.activityId, athleteDoc);
+  } catch (err) {
+    // i think we're ok here without doing anything
+  }
+
+  // There are some edge cases where fetchActivity could return an empty object
+  // so check for activity id
+  if (!dataForIngest || !dataForIngest.id) {
+    console.warn(errorMsg);
+    queueDoc.set({
+      status: 'error',
+      errorMsg: 'No fetchActivity response',
+    });
+    return false;
+  }
+
+  if (!activityCouldHaveLaps(dataForIngest)) {
+    queueDoc.set({
+      status: 'dequeued',
+      detail: 'activityCouldHaveLaps() returned false during queue check',
+    });
+    return false;
+  }
+  return dataForIngest;
+}
+
 /**
  * Get Strava API data for enqueued activity
  * Assume queue status check was already performed
@@ -19,30 +48,11 @@ async function getQueueActivityData(queueDoc, athleteDoc) {
     status: queuedStatus,
   } = queueDoc;
 
-  let dataForIngest = false;
-  try {
-    dataForIngest = await fetchActivity(activityId, athleteDoc);
-  } catch (err) {
-    // i think we're ok here without doing anything
-  }
-
-  // There are some edge cases where fetchActivity could return an empty object
-  // so check for activity id
-  if (!dataForIngest || !dataForIngest.id) {
-    const errorMsg = 'No fetchActivity response';
-    console.warn(errorMsg);
-    queueDoc.set({
-      status: 'error',
-      errorMsg,
-    });
+  // If we didn't get activity data, queueDoc status will have been set
+  // depending on why it was invalid.
+  const dataForIngest = fetchDetailedActivityFromQueue(queueDoc, athleteDoc);
+  if (!dataForIngest) {
     return false;
-  }
-
-  if (!activityCouldHaveLaps(dataForIngest)) {
-    queueDoc.set({
-      status: 'dequeued',
-      detail: 'activityCouldHaveLaps() returned false during queue check',
-    });
   }
 
   const nextNumSegmentEfforts = dataForIngest.segment_efforts
@@ -81,4 +91,5 @@ async function getQueueActivityData(queueDoc, athleteDoc) {
 
 module.exports = {
   getQueueActivityData,
+  validateActivity,
 };

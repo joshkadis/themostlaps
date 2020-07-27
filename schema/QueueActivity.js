@@ -11,6 +11,11 @@ const queueActivitySchema = new Schema({
     required: true,
     index: true,
   },
+  calculatingFromStream: {
+    type: Boolean,
+    default: false,
+    required: false,
+  },
   createdAt: {
     type: Date,
     required: true,
