@@ -8,6 +8,7 @@ const streamsTestSchema = new Schema({
   latlng: [Number],
   time: [Number],
   distance: [Number],
+  testTime: [String],
 });
 
 const StreamTest = model('StreamTest', streamsTestSchema);

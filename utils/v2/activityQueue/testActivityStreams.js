@@ -4,6 +4,8 @@ const fetchStravaAPI = require('../../fetchStravaAPI');
 /**
  * Create or update a document tracking number of segment efforts
  * and streams data points each time a queue event is fetched
+ * The point of the test is to find out how long it takes for
+ * streams to be available after activity creation webhook
  *
  * @param {Number} activityId
  * @param {Array} activityData.segment_efforts
@@ -23,6 +25,7 @@ async function testActivityStreams(
       latlng: [],
       time: [],
       distance: [],
+      testTime: [],
     });
   }
 
@@ -60,11 +63,14 @@ async function testActivityStreams(
   // -1 indicates that streams API response missing distance data
   const nextDistances = [...streamsDoc.distance, streamsLengths.distance || -1];
 
+  const currentTimeStr = new Date().toISOString();
+
   streamsDoc.set({
     segmentEfforts: nextSegmentEfforts,
     latlng: nextLatLngs,
     distance: nextDistances,
     time: nextTimes,
+    testTime: [...streamsDoc.testTime, currentTimeStr],
   });
   await streamsDoc.save();
 }
