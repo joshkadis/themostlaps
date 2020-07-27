@@ -32,7 +32,7 @@ async function testActivityStreams(
   const streams = await fetchStravaAPI(
     `/activities/${activityId}/streams`,
     athleteDoc,
-    { keys: 'latlng,time,distance', 'key_by_type': true },
+    { keys: 'latlng,time,distance', key_by_type: true },
   );
 
   // Will be key-value pairs like { latlng: 2000 }
@@ -74,3 +74,6 @@ async function testActivityStreams(
   });
   await streamsDoc.save();
 }
+module.exports = {
+  testActivityStreams,
+};

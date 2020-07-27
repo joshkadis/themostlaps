@@ -2,7 +2,8 @@ const {
   fetchActivity,
   activityCouldHaveLaps,
 } = require('../../refreshAthlete/utils');
-const captureSentry = require('../services/sentry');
+const { captureSentry } = require('../services/sentry');
+const { testActivityStreams } = require('./testActivityStreams');
 
 const SHOULD_TEST_STREAMS = true;
 const TEST_ATHLETES = [541773];
@@ -48,8 +49,8 @@ async function getQueueActivityData(queueDoc, athleteDoc) {
               ? dataForIngest.segment_efforts.length
               : -1,
             athlete: athleteDoc.id,
-          }
-        }
+          },
+        },
       );
     }
   }
