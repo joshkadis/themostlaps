@@ -6,10 +6,6 @@ const { captureSentry } = require('../services/sentry');
 const { testActivityStreams } = require('./testActivityStreams');
 
 const SHOULD_TEST_STREAMS = true;
-const TEST_ATHLETES = [541773];
-const shouldTestStreams = (athleteId) => (
-  SHOULD_TEST_STREAMS && TEST_ATHLETES.includes(+athleteId)
-);
 
 /**
  * Get Strava API data for enqueued activity
@@ -34,7 +30,7 @@ async function getQueueActivityData(queueDoc, athleteDoc) {
     // i think we're ok here without doing anything
   }
 
-  if (shouldTestStreams(athleteDoc.id) && dataForIngest) {
+  if (SHOULD_TEST_STREAMS && dataForIngest) {
     // testActivityStreams is async but we don't need to wait for
     try {
       await testActivityStreams(activityId, dataForIngest, athleteDoc);
