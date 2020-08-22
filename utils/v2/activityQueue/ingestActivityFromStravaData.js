@@ -60,7 +60,7 @@ async function ingestActivityFromStravaData(
     };
   }
 
-  const activityData = transformActivity(rawActivity, athleteDoc.isSubscriber);
+  const activityData = await transformActivity(rawActivity, athleteDoc.isSubscriber);
   if (!activityData.laps) {
     // Activity was processed but has no laps
     return {

@@ -63,7 +63,7 @@ ${stringifyActivity(activity)}
   console.log(`Fetching activity ${activityId} from Strava API:`);
 
   const rawActivityData = await fetchActivity(activityId, athleteDoc);
-  const transformed = transformActivity(rawActivityData);
+  const transformed = await transformActivity(rawActivityData);
   console.log(`${stringifyActivity(transformed)}
 ----------------------
 *Segment efforts displayed as ID only*

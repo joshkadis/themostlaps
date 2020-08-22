@@ -304,7 +304,7 @@ function activityStatsFromSegmentEfforts(activity) {
  * @param {Boolean} isSubscriber If false, will calculate stats from latlng stream
  *                               instead of segment_efforts
  */
-function transformActivity(activity, isSubscriber = true) {
+async function transformActivity(activity, isSubscriber = true) {
   const activityStats = isSubscriber
     ? activityStatsFromSegmentEfforts(activity)
     : await activityStatsFromLatlngStream(activity);
