@@ -86,6 +86,12 @@ ${queueActivityDoc.errorMsg || queueActivityDoc.detail}`);
       return completeProcessing();
     }
 
+    /**
+     * Handle activity for non-subscriber that we are ingesting from latlng stream
+     * Ok to do this on the first attempt. Did a test where 3 of ~2300 activities
+     * had a different number of latlng points on the first queue process attempt
+     * than on subsequent attempts
+     */
     await refreshAthleteProfile(athleteDoc);
     if (!athleteDoc.isSubscriber) {
       await ingestActivityFromStream(queueActivityDoc, athleteDoc);
