@@ -3,6 +3,7 @@ const _flatten = require('lodash/flatten');
 const _uniq = require('lodash/uniq');
 const { locations: allLocations } = require('../../../config');
 const { findPotentialLocations } = require('../activityQueue/findPotentialLocations');
+const activityStatsFromStream = require('../activityQueue/activityStatsFromStream');
 const {
   calculateLapsFromSegmentEfforts,
   calculateLapsFromDefinitions,
@@ -307,7 +308,7 @@ function activityStatsFromSegmentEfforts(activity) {
 async function transformActivity(activity, isSubscriber = true) {
   const activityStats = isSubscriber
     ? activityStatsFromSegmentEfforts(activity)
-    : await activityStatsFromLatlngStream(activity);
+    : await activityStatsFromStream(activity);
   const activityData = formatActivity(activity);
   return {
     ...activityData,
