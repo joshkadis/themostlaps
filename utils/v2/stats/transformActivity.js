@@ -227,7 +227,7 @@ function filterSegmentEfforts(segmentEfforts, potentialLocations = []) {
  * @returns {Number} locations[locName].laps
  * @returns {Array} locations[locName].segmentEfforts
  */
-function getStatsFromRawActivity(activity) {
+function activityStatsFromSegmentEfforts(activity) {
   const {
     segment_efforts: segmentEfforts,
   } = activity;
@@ -301,9 +301,13 @@ function getStatsFromRawActivity(activity) {
  * into Activity data model
  *
  * @param {Object} activity Strava API response for activity
+ * @param {Boolean} isSubscriber If false, will calculate stats from latlng stream
+ *                               instead of segment_efforts
  */
-function transformActivity(activity) {
-  const activityStats = getStatsFromRawActivity(activity);
+function transformActivity(activity, isSubscriber = true) {
+  const activityStats = isSubscriber
+    ? activityStatsFromSegmentEfforts(activity)
+    : await activityStatsFromLatlngStream(activity);
   const activityData = formatActivity(activity);
   return {
     ...activityData,
@@ -313,7 +317,7 @@ function transformActivity(activity) {
 
 module.exports = {
   transformActivity,
-  getStatsFromRawActivity,
+  activityStatsFromSegmentEfforts,
   getAllSegmentIdsForLocation,
   getAllSegmentIdsForAllLocations,
   isDuplicateEffort,
