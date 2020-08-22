@@ -91,5 +91,4 @@ async function getQueueActivityData(queueDoc, athleteDoc) {
 
 module.exports = {
   getQueueActivityData,
-  validateActivity,
 };
