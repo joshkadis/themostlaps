@@ -2,13 +2,7 @@ const Athlete = require('../../../schema/Athlete');
 const fetchStravaAPI = require("../../fetchStravaAPI");
 const { captureSentry } = require('../services/sentry');
 const { findPotentialLocations } = require('./findPotentialLocations');
-
-function locationLapsFromStream(
-  { latlng, distance, time },
-  location
-) {
-
-}
+const { locationLapsFromStream } = require('./locationLapsFromStream');
 
 /**
  * Calculate laps from activity data stream instead of segment efforts
