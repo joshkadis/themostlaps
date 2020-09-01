@@ -9,6 +9,11 @@ const SegmentEffort = new Schema({
   moving_time: Number,
   start_date_local: String,
   startDateUtc: Date,
+  fromStream: {
+    type: Boolean,
+    default: false,
+    required: false,
+  },
 });
 
 const ActivityLocation = new Schema(
@@ -42,6 +47,11 @@ const activitySchema = new Schema({
   app_version: String, // 'v1' if created before Apr 2020 migration
   migration: {
     location: Boolean,
+  },
+  fromStream: {
+    type: Boolean,
+    default: false,
+    required: false,
   },
 });
 
