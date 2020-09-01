@@ -1,5 +1,5 @@
 const Athlete = require('../../../schema/Athlete');
-const fetchStravaAPI = require("../../fetchStravaAPI");
+const fetchStravaAPI = require('../../fetchStravaAPI');
 const { captureSentry } = require('../services/sentry');
 const { findPotentialLocations } = require('./findPotentialLocations');
 const { locationLapsFromStream } = require('./locationLapsFromStream');
@@ -28,15 +28,20 @@ async function activityStatsFromStream(activityData) {
   const streams = await fetchStravaAPI(
     `/activities/${activityData.id}/streams`,
     athleteDoc,
-    { keys: 'latlng,time,distance', 'key_by_type': true },
+    { keys: 'latlng,time,distance', key_by_type: true },
   );
+
+  // add coordinates formatted for geolib
+  streams.geoCoords = streams.latlng.map(([lat, lon]) => ({ lat, lon }));
 
   // Get number of laps and inferred segment_efforts for each location
   const potentialLocs = findPotentialLocations(activityData);
-  const activityLocations = potentialLocs.map((loc) => locationLapsFromStream(streams, loc));
+  const activityLocations = potentialLocs.map(
+    (loc) => locationLapsFromStream(streams, loc),
+  );
   const topLocation = activityLocations.reduce(
     (acc, locStats) => {
-      if (!acc.laps || app.laps < locStats.laps) {
+      if (!acc.laps || acc.laps < locStats.laps) {
         return {
           ...locStats,
         };

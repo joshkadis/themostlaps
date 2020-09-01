@@ -1,12 +1,43 @@
+const geolib = require('geolib');
 const { locations } = require('../../../config');
 
-const makeInferredSegmentEffort = (start, end, time) => ({
-  elapsed_time: time[end] - time[start],
-  moving_time: -1, // can only get elapsed time reliably
+/**
+ * Take a coordinate object in various format and return a csv string
+ * useful for finding index of coordinate in an array of coordinates
+ *
+ * @param {Object|Array} src
+ * @returns str
+ */
+const latlngToString = ({
+  lat = '',
+  latitude = '',
+  lon = '',
+  lng = '',
+  longitude = '',
+}) => `${lat || latitude},${lon || lng || longitude}`;
+
+/**
+ * Get object formatted for SegmentEffort schema from start and end
+ * within an array of timestamps
+ *
+ * @param {Number} start Index of lap start in array of times
+ * @param {Number} end Index of lap end in array of times
+ * @param {Array} times Array of times
+ * @returns {Object}
+ */
+const makeInferredSegmentEffort = (start, end, times) => ({
+  elapsed_time: times[end] - times[start],
+  moving_time: null, // can only get elapsed time reliably
   start_date_local: new Date(start), // @todo
   startDateUtc: new Date(start),
   fromStream: true,
 });
+
+
+const getNearestWaypointIdx = (point, waypoints, waypointsStrs) => {
+  const nearest = geolib.findNearest(point, waypoints);
+  return waypointsStrs.indexOf(latlngToString(nearest));
+};
 
 /**
  * Use activity stream to calculate laps
@@ -16,11 +47,11 @@ const makeInferredSegmentEffort = (start, end, time) => ({
  * @returns {ActivityLocation} See schema/Activity.js
  */
 function locationLapsFromStream(
-  { latlng, distance, time },
+  {
+    latlng, distance, time, geoCoords,
+  },
   locName,
 ) {
-  const inferSegmentEffort = (start, end) => makeInferredSegmentEffort(start, end, time);
-
   const location = locations[locName] || null;
   if (!location || !location.waypoints) {
     return null;
@@ -28,6 +59,12 @@ function locationLapsFromStream(
   const {
     waypoints,
   } = location;
+  // {lat, lon} => 'lat,lon' to find index more easily
+  const waypointsStrs = waypoints.map(latlngToString);
+
+  const inferSegmentEffort = (start, end) => makeInferredSegmentEffort(start, end, time);
+  const nearestWaypointIdx = (point) => getNearestWaypointIdx(point, waypoints, waypointsStrs);
+
   // loop through latlng stream
   // near first waypoint
   // set up orderedWaypoints accordingly
@@ -39,8 +76,8 @@ function locationLapsFromStream(
   let orderedWaypoints = [];
   let startWaypointIdx = null;
   let startLapTimeIdx = null;
-  latlng.forEach((currPoint, currIdx) => {
-    const nearestIdx = nearestWaypointIdx(currPoint, waypoints);
+  geoCoords.forEach((currPoint, currIdx) => {
+    const nearestIdx = nearestWaypointIdx(currPoint);
     if (nearestIdx === -1) {
       return;
     }
