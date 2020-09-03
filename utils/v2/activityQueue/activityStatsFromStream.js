@@ -31,13 +31,10 @@ async function activityStatsFromStream(activityData) {
     { keys: 'latlng,time,distance', key_by_type: true },
   );
 
-  // add coordinates formatted for geolib
-  streams.geoCoords = streams.latlng.map(([lat, lon]) => ({ lat, lon }));
-
   // Get number of laps and inferred segment_efforts for each location
   const potentialLocs = findPotentialLocations(activityData);
   const activityLocations = potentialLocs.map(
-    (loc) => locationLapsFromStream(streams, loc),
+    (loc) => locationLapsFromStream(streams, loc, activityData),
   );
   const topLocation = activityLocations.reduce(
     (acc, locStats) => {

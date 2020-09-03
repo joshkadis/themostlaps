@@ -1,3 +1,4 @@
+const moment = require('moment');
 const geolib = require('geolib');
 const { locations } = require('../../../config');
 
@@ -20,23 +21,42 @@ const latlngToString = ({
  * Get object formatted for SegmentEffort schema from start and end
  * within an array of timestamps
  *
- * @param {Number} start Index of lap start in array of times
- * @param {Number} end Index of lap end in array of times
+ * @param {Number} startIdx Index of lap start in array of times
+ * @param {Number} endIdx Index of lap end in array of times
  * @param {Array} times Array of times
+ * @param {Object} activity Strava API activity response
  * @returns {Object}
  */
-const makeInferredSegmentEffort = (start, end, times) => ({
-  elapsed_time: times[end] - times[start],
-  moving_time: null, // can only get elapsed time reliably
-  start_date_local: new Date(start), // @todo
-  startDateUtc: new Date(start),
-  fromStream: true,
-});
+const makeInferredSegmentEffort = (
+  startIdx,
+  endIdx,
+  times,
+  { start_date_local, start_date },
+) => {
+  // Original string type in schema
+  const adjustedLocal = moment(start_date_local)
+    .add(times[startIdx], 'seconds')
+    .toISOString()
+    .replace(/\.\d+Z$/, 'Z'); // Strava doesn't provide fraction of second
+
+  // Newer date type in schema
+  const adjustedUtc = moment(start_date)
+    .add(times[startIdx], 'seconds')
+    .toDate();
+
+  return {
+    elapsed_time: times[endIdx] - times[startIdx],
+    moving_time: null, // can only get elapsed time reliably
+    start_date_local: adjustedLocal,
+    startDateUtc: adjustedUtc,
+    fromStream: true,
+  };
+};
 
 
-const getNearestWaypointIdx = (point, waypoints, waypointsStrs) => {
+const getNearestWaypointIdx = (point, waypoints) => {
   const nearest = geolib.findNearest(point, waypoints);
-  return waypointsStrs.indexOf(latlngToString(nearest));
+  return Number.parseInt(nearest.key, 10);
 };
 
 /**
@@ -44,14 +64,19 @@ const getNearestWaypointIdx = (point, waypoints, waypointsStrs) => {
  *
  * @param {Object} streams Streams data
  * @param {String} locName Location name
+ * @param {Object} activity Activity data from Strava API response
  * @returns {ActivityLocation} See schema/Activity.js
  */
 function locationLapsFromStream(
   {
-    latlng, distance, time, geoCoords,
+    latlng, distance, time,
   },
   locName,
+  activity,
 ) {
+  // add coordinates formatted for geolib
+  const geoCoords = latlng.map(([lat, lon]) => ({ lat, lon }));
+
   const location = locations[locName] || null;
   if (!location || !location.waypoints) {
     return null;
@@ -59,11 +84,9 @@ function locationLapsFromStream(
   const {
     waypoints,
   } = location;
-  // {lat, lon} => 'lat,lon' to find index more easily
-  const waypointsStrs = waypoints.map(latlngToString);
 
   const inferSegmentEffort = (start, end) => makeInferredSegmentEffort(start, end, time);
-  const nearestWaypointIdx = (point) => getNearestWaypointIdx(point, waypoints, waypointsStrs);
+  const nearestWaypointIdx = (point) => getNearestWaypointIdx(point, waypoints);
 
   // loop through latlng stream
   // near first waypoint
@@ -119,4 +142,7 @@ function locationLapsFromStream(
 
 module.exports = {
   locationLapsFromStream,
+  latlngToString,
+  makeInferredSegmentEffort,
+  getNearestWaypointIdx,
 };
