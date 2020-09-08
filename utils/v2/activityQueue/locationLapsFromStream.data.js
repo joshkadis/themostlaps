@@ -4,6 +4,7 @@ const latlngData = streams[0].data;
 const distance = streams[1].data;
 const time = streams[2].data;
 const geoCoords = latlngData.map(([lat, lon]) => ({ lat, lon }));
+const activity = require('./locationLapsFromStream.activity.rawData.json');
 
 module.exports = {
   streams,
@@ -11,4 +12,5 @@ module.exports = {
   distance,
   time,
   geoCoords,
+  activity,
 };

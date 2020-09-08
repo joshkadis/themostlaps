@@ -2,6 +2,24 @@ const moment = require('moment');
 const geolib = require('geolib');
 const { locations } = require('../../../config');
 
+const WAYPOINT_PADDING = 50;
+
+/**
+ * Set up array of waypoints starting with specific index
+ * and looping back to match expected length
+ *
+ * @param {Number} startIdx
+ * @param {Number} length
+ * @returns {Array}
+ */
+const setupOrderedWaypoints = (startIdx, length) => {
+  const arr = Array(length).fill(0).map((el, idx) => idx);
+  const startPts = arr.slice((startIdx - 1));
+  const endPts = arr.slice(0, (startIdx - 1));
+  const ordered = startPts.concat(endPts);
+  return ordered;
+};
+
 /**
  * Take a coordinate object in various format and return a csv string
  * useful for finding index of coordinate in an array of coordinates
@@ -53,10 +71,19 @@ const makeInferredSegmentEffort = (
   };
 };
 
-
-const getNearestWaypointIdx = (point, waypoints) => {
+/**
+ * Get closest waypoint to a given point within an allowed padding
+ *
+ * @param {Object} point lat/lon object
+ * @param {Array} waypoints array of lat/lon objects
+ * @param {Number} padding max distance from initial point to waypoint
+ * @returns {Number} Index of nearest waypoint or -1 if not within padding
+ */
+const getNearestWaypointIdx = (point, waypoints, padding = WAYPOINT_PADDING) => {
   const nearest = geolib.findNearest(point, waypoints);
-  return Number.parseInt(nearest.key, 10);
+  return nearest.distance <= padding
+    ? Number.parseInt(nearest.key, 10)
+    : -1;
 };
 
 /**
@@ -68,14 +95,14 @@ const getNearestWaypointIdx = (point, waypoints) => {
  * @returns {ActivityLocation} See schema/Activity.js
  */
 function locationLapsFromStream(
-  {
+  [
     latlng, distance, time,
-  },
+  ],
   locName,
   activity,
 ) {
   // add coordinates formatted for geolib
-  const geoCoords = latlng.map(([lat, lon]) => ({ lat, lon }));
+  const geoCoords = latlng.data.map(([lat, lon]) => ({ lat, lon }));
 
   const location = locations[locName] || null;
   if (!location || !location.waypoints) {
@@ -85,7 +112,12 @@ function locationLapsFromStream(
     waypoints,
   } = location;
 
-  const inferSegmentEffort = (start, end) => makeInferredSegmentEffort(start, end, time);
+  const inferSegmentEffort = (start, end) => makeInferredSegmentEffort(
+    start,
+    end,
+    time.data,
+    activity,
+  );
   const nearestWaypointIdx = (point) => getNearestWaypointIdx(point, waypoints);
 
   // loop through latlng stream
@@ -115,8 +147,7 @@ function locationLapsFromStream(
       }
       startLapTimeIdx = currIdx;
       startWaypointIdx = nearestIdx;
-      orderedWaypoints = waypoints.slice(nearestIdx)
-        .concat(waypoints.slice(0, nearestIdx));
+      orderedWaypoints = setupOrderedWaypoints(nearestIdx, waypoints.length);
     }
 
     // If we're in the middle of a lap
@@ -145,4 +176,5 @@ module.exports = {
   latlngToString,
   makeInferredSegmentEffort,
   getNearestWaypointIdx,
+  setupOrderedWaypoints,
 };
