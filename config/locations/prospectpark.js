@@ -23,7 +23,7 @@ module.exports = {
   locationLabel: 'Prospect Park',
   locationCity: 'Brooklyn, NY',
   waypoints: [
-    { lat: 40.65947, lon: -73.97583 },
+    { lat: 40.65995, lon: -73.97536 },
     { lat: 40.65374, lon: -73.97197 },
     { lat: 40.65358, lon: -73.96722 },
     { lat: 40.65755, lon: -73.96296 },

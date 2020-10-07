@@ -13,11 +13,22 @@ const WAYPOINT_PADDING = 50;
  * @returns {Array}
  */
 const setupOrderedWaypoints = (startIdx, length) => {
-  const arr = Array(length).fill(0).map((el, idx) => idx);
-  const startPts = arr.slice((startIdx - 1));
-  const endPts = arr.slice(0, (startIdx - 1));
-  const ordered = startPts.concat(endPts);
-  return ordered;
+  const forCount = [];
+
+  for (let curr = startIdx; forCount.length < length; curr += 1) {
+    if (curr === length) {
+      curr = 0;
+    }
+    forCount.push(curr);
+  }
+  const forTime = [...forCount];
+  forTime.push(forTime.shift());
+  forCount.shift();
+
+  return {
+    forTime,
+    forCount,
+  };
 };
 
 /**
@@ -128,46 +139,57 @@ function locationLapsFromStream(
   // shift from orderedWaypoints
   let numLaps = 0;
   const segmentEfforts = [];
-  let orderedWaypoints = [];
-  let startWaypointIdx = null;
   let startLapTimeIdx = null;
+  let endLapTimeIdx = null;
+  let lapCounter = [];
+  let lapTimer = [];
+  let lastIdx = -1;
   geoCoords.forEach((currPoint, currIdx) => {
     const nearestIdx = nearestWaypointIdx(currPoint);
     if (nearestIdx === -1) {
       return;
     }
 
-    // Let's set up to track a new lap
-    if (orderedWaypoints.length === 0) {
-      // If we're finishing a lap, make a segment effort
-      if (numLaps > 0) {
-        segmentEfforts.push(
-          inferSegmentEffort(startLapTimeIdx, currIdx),
-        );
-      }
-      startLapTimeIdx = currIdx;
-      startWaypointIdx = nearestIdx;
-      orderedWaypoints = setupOrderedWaypoints(nearestIdx, waypoints.length);
+    // if (lastIdx !== nearestIdx) {
+    //   console.log(nearestIdx);
+    // }
+    if (lastIdx !== nearestIdx) {
+      console.log(lastIdx);
     }
+    lastIdx = nearestIdx;
 
-    // If we're in the middle of a lap
-    if (nearestIdx === orderedWaypoints[0]) {
-      // If this is the last remaining waypoint,
-      // count a lap to account for exiting between waypoints
-      if (orderedWaypoints.length === 1) {
-        numLaps += 1;
-      }
-      // get ready for next waypoint
-      orderedWaypoints.shift();
+    const { forTime, forCount } = setupOrderedWaypoints(nearestIdx, waypoints.length);
+
+    // handle lap counting
+    if (lapCounter.length === 0) {
+      // set up lap counter
+      lapCounter = [...forCount];
+    } else if (lapCounter.length === 1 && nearestIdx === lapCounter[0]) {
+      // if we've reached the last waypoint for this lap
+      // count a lap
+      numLaps += 1;
+      // reset counter
+      lapCounter = [];
+    } else if (nearestIdx === lapCounter[1]) {
+      // if we've reached the next waypoint
+      // remove it frome the counter
+      lapCounter.splice(1, 1);
     }
+    // set up a new lap timer
+    // if (lapTimer.length === 0) {
+    //   lapTimer = [...forTime];
+    // } else if (nearestIdx === lapTimer[0]) {
+    //   if (startLapTimeIdx !== null) {
 
-    // @todo handle out-of-order waypoints
+    //   }
+
+    // }
   });
 
   return {
-    location: locName,
+    // location: locName,
     laps: numLaps,
-    segment_efforts: segmentEfforts,
+    // segment_efforts: segmentEfforts,
   };
 }
 
