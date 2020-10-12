@@ -150,7 +150,7 @@ function locationLapsFromStream(
     startLapTimerIdx = streamIdx;
   };
 
-  const recordSegment = (start, end) => {
+  const recordSegmentEffort = (start, end) => {
     segmentEfforts.push(inferSegmentEffort(start, end));
   };
 
@@ -170,9 +170,10 @@ function locationLapsFromStream(
       // Record a segment effort
       // except on the start of the first lap
       if (startLapTimerIdx >= 0) {
-        recordSegment(startLapTimerIdx, currIdx);
+        recordSegmentEffort(startLapTimerIdx, currIdx);
       }
       resetLap();
+      return;
     }
 
     // Reaching the next point in a lap
@@ -183,8 +184,12 @@ function locationLapsFromStream(
       if (remainingWaypoints.length === 0) {
         incrementCounter();
       }
-    } else if (remainingWaypoints.includes(nearestIdx)) {
-      // Reached waypoint out of order
+      return;
+    }
+
+    // Reached waypoint out of order, reset without
+    // counting a lap or segment effort
+    if (remainingWaypoints.includes(nearestIdx)) {
       resetLap();
     }
   });
