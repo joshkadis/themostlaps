@@ -97,7 +97,7 @@ const getNearestWaypointIdx = (
 ) => {
   const nearest = geolib.findNearest(point, waypoints);
   return nearest.distance <= padding
-    ? Number.parseInt(nearest.key, 10)
+    ? Number(nearest.key)
     : -1;
 };
 
@@ -148,7 +148,7 @@ function locationLapsFromStream(
   const resetLap = (waypointIdx, streamPoint, streamIdx) => {
     const prevWaypoint = waypointIdx > 0
       ? waypoints[waypointIdx - 1]
-      : waypoints.slice(-1);
+      : waypoints[waypoints.length - 1];
 
     const nextWaypoint = (waypointIdx + 1) < waypoints.length
       ? waypoints[waypointIdx + 1]
@@ -157,10 +157,9 @@ function locationLapsFromStream(
     // Is streamPoint close to next waypoint or prev waypoint?
     // If prev, count lap from waypointIdx
     // If next, count lap from next waypoint
-    const closerWaypoint = getNearestWaypointIdx(
+    const closerWaypoint = geolib.findNearest(
       streamPoint,
       [prevWaypoint, nextWaypoint],
-      0,
     );
     const startLapFromWaypoint = waypointIdx + closerWaypoint;
 
