@@ -88,8 +88,6 @@ describe('locationLapsFromStream', () => {
       streams,
       'prospectpark',
       activity,
-    )).toStrictEqual({
-      laps: 6,
-    });
+    ).laps).toEqual(6);
   });
 });

@@ -142,11 +142,34 @@ function locationLapsFromStream(
   const segmentEfforts = [];
   let startLapTimerIdx = -1;
   let remainingWaypoints = [];
+  let lastHandledWaypoint = -1;
+  let segmentEffortStartFinish = -1;
 
-  const resetLap = (waypointIdx, streamIdx) => {
-    remainingWaypoints = waypoints
-      .slice(waypointIdx)
-      .concat(waypoints.slice(0, waypointIdx));
+  const resetLap = (waypointIdx, streamPoint, streamIdx) => {
+    const prevWaypoint = waypointIdx > 0
+      ? waypoints[waypointIdx - 1]
+      : waypoints.slice(-1);
+
+    const nextWaypoint = (waypointIdx + 1) < waypoints.length
+      ? waypoints[waypointIdx + 1]
+      : waypoints[0];
+
+    // Is streamPoint close to next waypoint or prev waypoint?
+    // If prev, count lap from waypointIdx
+    // If next, count lap from next waypoint
+    const closerWaypoint = getNearestWaypointIdx(
+      streamPoint,
+      [prevWaypoint, nextWaypoint],
+      0,
+    );
+    const startLapFromWaypoint = waypointIdx + closerWaypoint;
+
+    const indices = Object.keys(waypoints);
+    remainingWaypoints = indices
+      .slice(startLapFromWaypoint)
+      .concat(waypoints.slice(0, startLapFromWaypoint))
+      .map((key) => Number(key));
+    segmentEffortStartFinish = remainingWaypoints.shift();
     startLapTimerIdx = streamIdx;
   };
 
@@ -161,18 +184,24 @@ function locationLapsFromStream(
   geoCoords.forEach((currPoint, currIdx) => {
     const nearestIdx = nearestWaypointIdx(currPoint);
     // Ignore if we're not near a waypoint
-    if (nearestIdx === -1) {
+    // or if near on the same waypoint
+    if (nearestIdx === -1 || nearestIdx === lastHandledWaypoint) {
       return;
     }
+    // Mark that we're handling a new waypoint
+    lastHandledWaypoint = nearestIdx;
 
     // Start tracking a lap
     if (remainingWaypoints.length === 0) {
+      console.log(`starting a new lap, nearestIdx: ${nearestIdx}`);
       // Record a segment effort
       // except on the start of the first lap
-      if (startLapTimerIdx >= 0) {
+      if (nearestIdx === segmentEffortStartFinish) {
         recordSegmentEffort(startLapTimerIdx, currIdx);
+        console.log('recorded segment effort', segmentEfforts);
       }
-      resetLap();
+      resetLap(nearestIdx, currPoint, currIdx);
+      console.log('reset lap', remainingWaypoints);
       return;
     }
 
@@ -183,6 +212,7 @@ function locationLapsFromStream(
       // count lap if this was the last point
       if (remainingWaypoints.length === 0) {
         incrementCounter();
+        console.log(`counted a new lap, numLaps: ${numLaps}`);
       }
       return;
     }
@@ -190,7 +220,8 @@ function locationLapsFromStream(
     // Reached waypoint out of order, reset without
     // counting a lap or segment effort
     if (remainingWaypoints.includes(nearestIdx)) {
-      resetLap();
+      resetLap(nearestIdx, currPoint, currIdx);
+      console.log(`reset lap from nearestIdx: ${nearestIdx}`);
     }
   });
 
