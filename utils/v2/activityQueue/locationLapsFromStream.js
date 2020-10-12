@@ -90,7 +90,11 @@ const makeInferredSegmentEffort = (
  * @param {Number} padding max distance from initial point to waypoint
  * @returns {Number} Index of nearest waypoint or -1 if not within padding
  */
-const getNearestWaypointIdx = (point, waypoints, padding = WAYPOINT_PADDING) => {
+const getNearestWaypointIdx = (
+  point,
+  waypoints,
+  padding = WAYPOINT_PADDING,
+) => {
   const nearest = geolib.findNearest(point, waypoints);
   return nearest.distance <= padding
     ? Number.parseInt(nearest.key, 10)
@@ -106,9 +110,8 @@ const getNearestWaypointIdx = (point, waypoints, padding = WAYPOINT_PADDING) => 
  * @returns {ActivityLocation} See schema/Activity.js
  */
 function locationLapsFromStream(
-  [
-    latlng, distance, time,
-  ],
+  // eslint-disable-next-line no-unused-vars
+  [latlng, distance, time],
   locName,
   activity,
 ) {
@@ -131,65 +134,65 @@ function locationLapsFromStream(
   );
   const nearestWaypointIdx = (point) => getNearestWaypointIdx(point, waypoints);
 
-  // loop through latlng stream
-  // near first waypoint
-  // set up orderedWaypoints accordingly
-  // count lap when reached last in orderedWaypoints
-  // *time* lap when reached first in orderedWaypoints
-  // shift from orderedWaypoints
-  let numLaps = 0;
+  // The order of waypoints that defines a lap and
+  // the current start/finish point for timing
+  // Definition will tick off as rider reaches waypoints
+  // or rest if they cut through the middle
+  let numLaps = -1;
   const segmentEfforts = [];
-  let startLapTimeIdx = null;
-  let endLapTimeIdx = null;
-  let lapCounter = [];
-  let lapTimer = [];
-  let lastIdx = -1;
+  let startLapTimerIdx = -1;
+  let remainingWaypoints = [];
+
+  const resetLap = (waypointIdx, streamIdx) => {
+    remainingWaypoints = waypoints
+      .slice(waypointIdx)
+      .concat(waypoints.slice(0, waypointIdx));
+    startLapTimerIdx = streamIdx;
+  };
+
+  const recordSegment = (start, end) => {
+    segmentEfforts.push(inferSegmentEffort(start, end));
+  };
+
+  const incrementCounter = () => {
+    numLaps += 1;
+  };
+
   geoCoords.forEach((currPoint, currIdx) => {
     const nearestIdx = nearestWaypointIdx(currPoint);
+    // Ignore if we're not near a waypoint
     if (nearestIdx === -1) {
       return;
     }
 
-    // if (lastIdx !== nearestIdx) {
-    //   console.log(nearestIdx);
-    // }
-    if (lastIdx !== nearestIdx) {
-      console.log(lastIdx);
+    // Start tracking a lap
+    if (remainingWaypoints.length === 0) {
+      // Record a segment effort
+      // except on the start of the first lap
+      if (startLapTimerIdx >= 0) {
+        recordSegment(startLapTimerIdx, currIdx);
+      }
+      resetLap();
     }
-    lastIdx = nearestIdx;
 
-    const { forTime, forCount } = setupOrderedWaypoints(nearestIdx, waypoints.length);
-
-    // handle lap counting
-    if (lapCounter.length === 0) {
-      // set up lap counter
-      lapCounter = [...forCount];
-    } else if (lapCounter.length === 1 && nearestIdx === lapCounter[0]) {
-      // if we've reached the last waypoint for this lap
-      // count a lap
-      numLaps += 1;
-      // reset counter
-      lapCounter = [];
-    } else if (nearestIdx === lapCounter[1]) {
-      // if we've reached the next waypoint
-      // remove it frome the counter
-      lapCounter.splice(1, 1);
+    // Reaching the next point in a lap
+    if (nearestIdx === remainingWaypoints[0]) {
+      // remove from remaining waypoints
+      remainingWaypoints.shift();
+      // count lap if this was the last point
+      if (remainingWaypoints.length === 0) {
+        incrementCounter();
+      }
+    } else if (remainingWaypoints.includes(nearestIdx)) {
+      // Reached waypoint out of order
+      resetLap();
     }
-    // set up a new lap timer
-    // if (lapTimer.length === 0) {
-    //   lapTimer = [...forTime];
-    // } else if (nearestIdx === lapTimer[0]) {
-    //   if (startLapTimeIdx !== null) {
-
-    //   }
-
-    // }
   });
 
   return {
-    // location: locName,
+    location: locName,
     laps: numLaps,
-    // segment_efforts: segmentEfforts,
+    segment_efforts: segmentEfforts,
   };
 }
 
