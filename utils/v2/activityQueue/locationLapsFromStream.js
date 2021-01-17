@@ -2,7 +2,7 @@ const moment = require('moment');
 const geolib = require('geolib');
 const { locations } = require('../../../config');
 
-const WAYPOINT_PADDING = 50;
+const WAYPOINT_PADDING = 150;
 
 /**
  * Set up array of waypoints starting with specific index
@@ -119,11 +119,13 @@ function locationLapsFromStream(
   const geoCoords = latlng.data.map(([lat, lon]) => ({ lat, lon }));
 
   const location = locations[locName] || null;
-  if (!location || !location.waypoints) {
+  if (!location || !location.useStream) {
     return null;
   }
   const {
     waypoints,
+    lapMarker,
+    lapLength,
   } = location;
 
   const inferSegmentEffort = (start, end) => makeInferredSegmentEffort(
@@ -138,7 +140,7 @@ function locationLapsFromStream(
   // the current start/finish point for timing
   // Definition will tick off as rider reaches waypoints
   // or rest if they cut through the middle
-  let numLaps = -1;
+  let numLaps = 0;
   const segmentEfforts = [];
   let startLapTimerIdx = -1;
   let remainingWaypoints = [];
@@ -180,49 +182,79 @@ function locationLapsFromStream(
     numLaps += 1;
   };
 
+  let currentWaypointIdx;
+  const preMarkerWaypoints = [];
+  const postMarkerWaypoints = [];
+  const lapMarks = [];
+  let currentPostMarkerWaypoints = [];
+  let hasExitPartialLap = false;
   geoCoords.forEach((currPoint, currIdx) => {
     const nearestIdx = nearestWaypointIdx(currPoint);
-    // Ignore if we're not near a waypoint
-    // or if near on the same waypoint
-    if (nearestIdx === -1 || nearestIdx === lastHandledWaypoint) {
+    const logState = (msg, skip = true) => {
+      if (skip) return;
+      console.log(msg);
+      console.table({
+        numLaps,
+        nearestIdx,
+        lastHandledWaypoint,
+        remainingWaypoints: remainingWaypoints.join(', '),
+        numSegmentEfforts: segmentEfforts.length,
+      });
+    };
+
+    // Handle lap start/finish
+    if (isLapMarker(currPoint)) {
+      lapMarks.push({
+        ...currPoint,
+        time: time[currIdx],
+        distance: distance[currIdx],
+      });
+    }
+
+    // Ignore unless we've reached a new waypoint
+    if (nearestIdx === -1 || nearestIdx === currentWaypointIdx) {
       return;
     }
+
     // Mark that we're handling a new waypoint
-    lastHandledWaypoint = nearestIdx;
+    currentWaypointIdx = nearestIdx;
 
-    // Start tracking a lap
-    if (remainingWaypoints.length === 0) {
-      console.log(`starting a new lap, nearestIdx: ${nearestIdx}`);
-      // Record a segment effort
-      // except on the start of the first lap
-      if (nearestIdx === segmentEffortStartFinish) {
-        recordSegmentEffort(startLapTimerIdx, currIdx);
-        console.log('recorded segment effort', segmentEfforts);
-      }
-      resetLap(nearestIdx, currPoint, currIdx);
-      console.log('reset lap', remainingWaypoints);
-      return;
+    // Track partial lap from entry on circuit to first lap marker
+    if (!lapMarks.length) {
+      preMarkerWaypoints.push(currentWaypointIdx);
     }
 
-    // Reaching the next point in a lap
-    if (nearestIdx === remainingWaypoints[0]) {
-      // remove from remaining waypoints
-      remainingWaypoints.shift();
-      // count lap if this was the last point
-      if (remainingWaypoints.length === 0) {
-        incrementCounter();
-        console.log(`counted a new lap, numLaps: ${numLaps}`);
-      }
-      return;
+    // Set up tracking for exit partial lap from final lap marker to exit off circuit
+    if (lapMarks.length === 1 && !preMarkerWaypoints.includes(currentWaypointIdx)) {
+      postMarkerWaypoints.push(currentWaypointIdx);
     }
 
-    // Reached waypoint out of order, reset without
-    // counting a lap or segment effort
-    if (remainingWaypoints.includes(nearestIdx)) {
-      resetLap(nearestIdx, currPoint, currIdx);
-      console.log(`reset lap from nearestIdx: ${nearestIdx}`);
+    // Start tracking exit partial laps after first lap marker
+    if (lapMarks.length > 1) {
+      // If we've reached the next expected post-marker waypoint,
+      // move on to the one after that
+      if (currentWaypointIdx === currentPostMarkerWaypoints[0]) {
+        currentPostMarkerWaypoints.shift();
+      }
+
+      // If we've exhausted all the post-marker waypoints,
+      // track a completed exit partial lap
+      if (!currentPostMarkerWaypoints.length) {
+        hasExitPartialLap = true;
+      }
+
+      // If we come back around to the waypoint where we started,
+      // reset the partial exit lap
+      if (currentWaypointIdx === preMarkerWaypoints[0]) {
+        hasExitPartialLap = false;
+        currentPostMarkerWaypoints = [...postMarkerWaypoints];
+      }
     }
   });
+
+  // Now we have the partial entry, maybe partial exit, and all the times we crossed the lap marker
+  // so calculate number of laps and inferred segment efforts using distance between lap markers to confirm
+  // that a full lap was completed, i.e. marker[n].distance - marker[n + 1].distance ~= lapLength
 
   return {
     location: locName,

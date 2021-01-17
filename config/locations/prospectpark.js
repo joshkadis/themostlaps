@@ -33,4 +33,7 @@ module.exports = {
     { lat: 40.67056, lon: -73.97081 },
     { lat: 40.66542, lon: -73.97297 },
   ],
+  lapMarker: { lat: 40.66192, lon: -73.96489 },
+  lapLength: 5448,
+  useStream: true,
 };
