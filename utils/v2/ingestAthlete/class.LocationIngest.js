@@ -337,15 +337,29 @@ class LocationIngest {
       limitPerPage = DEFAULT_FETCH_OPTS.limitPerPage,
     } = opts;
 
+    const params = {
+      athlete_id: athleteId,
+      per_page: limitPerPage,
+      segment_id: this.segmentId,
+    };
+    if (opts.start_date_local) {
+      params.start_date_local = opts.start_date_local;
+    }
+
+    console.log(`fetchSegmentEfforts | page ${page} | allEfforts.length ${allEfforts.length}`);
+
     const efforts = await fetchStravaAPI(
-      `/segments/${this.segmentId}/all_efforts`,
+      '/segment_efforts',
       this.athleteDoc,
-      {
-        athlete_id: athleteId,
-        per_page: limitPerPage,
-        page,
-      },
+      params,
     );
+    console.log(`Received ${efforts.length} efforts
+First start_date: ${efforts[0].start_date}
+Last start_date: ${efforts.slice(-1)[0].start_date}
+--------------------`);
+
+    // Start next request from last effort of this request
+    const nextStartDate = efforts.slice(-1)[0].start_date_local;
 
     if (efforts.status && efforts.status !== 200) {
       captureSentry('Strava API response error', 'LocationIngest', {
@@ -371,6 +385,9 @@ class LocationIngest {
     return await this.fetchSegmentEfforts(
       (page + 1),
       returnEfforts,
+      {
+        start_date_local: nextStartDate,
+      },
     );
   }
 
