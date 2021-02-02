@@ -45,7 +45,10 @@ async function fetchStravaAPI(endpoint, athleteDoc, params = false) {
       },
     },
   );
-
+  if (response.status === 429) {
+    console.log(`Exceeded rate limit: ${response.headers.get('x-ratelimit-usage')}`);
+    console.log(endpoint);
+  }
   if (response.status && response.status !== 200) {
     let attemptedAthleteId = null;
     let attemptedAthleteDoc = false;
@@ -71,7 +74,7 @@ async function fetchStravaAPI(endpoint, athleteDoc, params = false) {
       attemptedAthleteId = attemptedAthleteDoc.get('_id');
     }
 
-    if (attemptedAthleteDoc && attemptedAthleteId && response.status === 401) {
+    if (response.status === 401) {
       // Set athlete status to deauthorized
       attemptedAthleteDoc.set('status', 'deauthorized');
       await attemptedAthleteDoc.save();
@@ -82,6 +85,19 @@ async function fetchStravaAPI(endpoint, athleteDoc, params = false) {
         {
           level: 'warning',
           extra: { url, athleteId: attemptedAthleteId },
+        },
+      );
+    } else if (response.status === 429) {
+      captureSentry(
+        'Exceeded rate limit',
+        'fetchStravaAPI',
+        {
+          level: 'warning',
+          extra: {
+            url,
+            athleteId: attemptedAthleteId,
+            limit: response.headers.get('x-ratelimit-usage'),
+          },
         },
       );
     } else {
