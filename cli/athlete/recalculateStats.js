@@ -57,6 +57,7 @@ Not yet migrated to v2: ${getAthleteIdentifier(athleteDoc)}`);
       recalculateStats: true,
     },
   });
+  console.log(nextStats);
 
   athleteDoc.markModified('stats');
   athleteDoc.markModified('migration');

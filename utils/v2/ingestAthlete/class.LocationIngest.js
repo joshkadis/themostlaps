@@ -18,8 +18,8 @@ const { buildLocationsStatsFromActivities } = require('../stats/generateStatsV2'
 const INGEST_SOURCE = 'signup';
 const MIN_ACTIVITY_ID = 1000;
 const DEFAULT_FETCH_OPTS = {
-  limitPages: 0,
-  limitPerPage: 200,
+  limitPages: 1,
+  limitPerPage: 30,
 };
 
 class LocationIngest {
@@ -337,29 +337,26 @@ class LocationIngest {
       limitPerPage = DEFAULT_FETCH_OPTS.limitPerPage,
     } = opts;
 
-    const params = {
-      athlete_id: athleteId,
+    let params = {
       per_page: limitPerPage,
       segment_id: this.segmentId,
     };
-    if (opts.start_date_local) {
-      params.start_date_local = opts.start_date_local;
+
+    if (opts.start_date_local && opts.end_date_local) {
+      params = {
+        ...params,
+        start_date_local: opts.start_date_local,
+        end_date_local: opts.end_date_local,
+      };
     }
 
-    console.log(`fetchSegmentEfforts | page ${page} | allEfforts.length ${allEfforts.length}`);
+    console.log(`fetchSegmentEfforts | page ${page} | start_date_local ${params.start_date_local} | end_date_local ${params.end_date_local} | allEfforts.length ${allEfforts.length}`);
 
     const efforts = await fetchStravaAPI(
       '/segment_efforts',
       this.athleteDoc,
       params,
     );
-    console.log(`Received ${efforts.length} efforts
-First start_date: ${efforts[0].start_date}
-Last start_date: ${efforts.slice(-1)[0].start_date}
---------------------`);
-
-    // Start next request from last effort of this request
-    const nextStartDate = efforts.slice(-1)[0].start_date_local;
 
     if (efforts.status && efforts.status !== 200) {
       captureSentry('Strava API response error', 'LocationIngest', {
@@ -371,22 +368,32 @@ Last start_date: ${efforts.slice(-1)[0].start_date}
       return allEfforts;
     }
 
-    if (!efforts.length) {
-      return allEfforts;
+    console.log(`Received ${efforts.length} efforts`);
+    if (efforts.length) {
+      console.log(`First start_date_local: ${efforts[0].start_date_local}
+Last start_date_local: ${efforts.slice(-1)[0].start_date_local}
+--------------------`);
     }
-
-    // Enforce page limit
     const returnEfforts = [...allEfforts, ...efforts];
-    if (limitPages && page >= limitPages) {
+
+    // @todo handle if last page has effort.length === limitPerPage
+    if (efforts.length < limitPerPage) {
+      console.log(`fetchSegmentEfforts finished with ${returnEfforts.length} efforts`);
       return returnEfforts;
     }
 
-    /* eslint-disable-next-line no-return-await */
-    return await this.fetchSegmentEfforts(
+    // Enforce page limit when testing, Strava doesn't have this param
+    if (limitPages && page >= limitPages) {
+      console.log(`fetchSegmentEfforts hit page limit ${limitPages} with ${returnEfforts.length} efforts`);
+      return returnEfforts;
+    }
+
+    return this.fetchSegmentEfforts(
       (page + 1),
       returnEfforts,
       {
-        start_date_local: nextStartDate,
+        start_date_local: '2012-05-22T16:08:54Z', // JK created_at
+        end_date_local: efforts.slice(-1)[0].start_date_local, // Start next request from last effort of this request
       },
     );
   }
