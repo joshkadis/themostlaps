@@ -58,6 +58,7 @@ function getAthleteModelFormat(athleteInfo, shouldSubscribe = true) {
       lastname,
       profile,
       id,
+      created_at: createdAt,
     } = athleteInfo.athlete;
 
     const currentDate = new Date();
@@ -74,6 +75,7 @@ function getAthleteModelFormat(athleteInfo, shouldSubscribe = true) {
         lastname,
         profile,
         id,
+        createdAt,
       },
       preferences: {
         notifications: {

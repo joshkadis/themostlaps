@@ -15,6 +15,7 @@ const athleteSchema = new Schema(
       profile: String,
       email: String,
       id: { type: Number, required: true },
+      createdAt: { type: Date, required: false },
     },
     status: { type: String, required: true, default: 'ingesting' },
     last_updated: String, // middleware updates this on each save
