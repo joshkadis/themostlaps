@@ -82,6 +82,8 @@ class LocationIngest {
       captureSentry('LocationIngest without Athlete document', 'LocationIngest');
     }
 
+    this.createdAt = this.athleteDoc.athlete.createdAt || null;
+
     if (isValidCanonicalSegmentId(segmentId)) {
       this.segmentId = segmentId;
       this.locationName = getLocationNameFromSegmentId(segmentId);
@@ -331,7 +333,16 @@ class LocationIngest {
    * @return {Array}
    */
   async fetchSegmentEfforts(page = 1, allEfforts = [], opts = {}) {
-    const athleteId = this.athleteDoc._id;
+    if (!this.createdAt) {
+      const apiAthlete = await fetchStravaAPI('/athlete', this.athleteDoc);
+      this.createdAt = apiAthlete.created_at;
+    }
+    const {
+      createdAt,
+      athleteDoc: {
+        _id: athleteId,
+      },
+    } = this;
     const {
       limitPages = DEFAULT_FETCH_OPTS.limitPages,
       limitPerPage = DEFAULT_FETCH_OPTS.limitPerPage,
