@@ -18,8 +18,8 @@ const { buildLocationsStatsFromActivities } = require('../stats/generateStatsV2'
 const INGEST_SOURCE = 'signup';
 const MIN_ACTIVITY_ID = 1000;
 const DEFAULT_FETCH_OPTS = {
-  limitPages: 1,
-  limitPerPage: 30,
+  limitPages: 0,
+  limitPerPage: 200,
 };
 
 class LocationIngest {
@@ -337,25 +337,14 @@ class LocationIngest {
       limitPerPage = DEFAULT_FETCH_OPTS.limitPerPage,
     } = opts;
 
-    let params = {
-      per_page: limitPerPage,
-      segment_id: this.segmentId,
-    };
-
-    if (opts.start_date_local && opts.end_date_local) {
-      params = {
-        ...params,
-        start_date_local: opts.start_date_local,
-        end_date_local: opts.end_date_local,
-      };
-    }
-
-    console.log(`fetchSegmentEfforts | page ${page} | start_date_local ${params.start_date_local} | end_date_local ${params.end_date_local} | allEfforts.length ${allEfforts.length}`);
-
     const efforts = await fetchStravaAPI(
-      '/segment_efforts',
+      `/segments/${this.segmentId}/all_efforts`,
       this.athleteDoc,
-      params,
+      {
+        athlete_id: athleteId,
+        per_page: limitPerPage,
+        page,
+      },
     );
 
     if (efforts.status && efforts.status !== 200) {
@@ -368,33 +357,20 @@ class LocationIngest {
       return allEfforts;
     }
 
-    console.log(`Received ${efforts.length} efforts`);
-    if (efforts.length) {
-      console.log(`First start_date_local: ${efforts[0].start_date_local}
-Last start_date_local: ${efforts.slice(-1)[0].start_date_local}
---------------------`);
+    if (!efforts.length) {
+      return allEfforts;
     }
+
+    // Enforce page limit
     const returnEfforts = [...allEfforts, ...efforts];
-
-    // @todo handle if last page has effort.length === limitPerPage
-    if (efforts.length < limitPerPage) {
-      console.log(`fetchSegmentEfforts finished with ${returnEfforts.length} efforts`);
-      return returnEfforts;
-    }
-
-    // Enforce page limit when testing, Strava doesn't have this param
     if (limitPages && page >= limitPages) {
-      console.log(`fetchSegmentEfforts hit page limit ${limitPages} with ${returnEfforts.length} efforts`);
       return returnEfforts;
     }
 
-    return this.fetchSegmentEfforts(
+    /* eslint-disable-next-line no-return-await */
+    return await this.fetchSegmentEfforts(
       (page + 1),
       returnEfforts,
-      {
-        start_date_local: '2012-05-22T16:08:54Z', // JK created_at
-        end_date_local: efforts.slice(-1)[0].start_date_local, // Start next request from last effort of this request
-      },
     );
   }
 
