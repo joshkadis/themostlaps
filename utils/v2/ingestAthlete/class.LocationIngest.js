@@ -12,11 +12,12 @@ const {
 const fetchStravaAPI = require('../../fetchStravaAPI');
 const { makeArrayAsyncIterable } = require('../asyncUtils');
 const { compareActivityLocations } = require('../models/activityHelpers');
-const { dedupeSegmentEfforts } = require('../../refreshAthlete/utils');
+const { dedupeSegmentEfforts, incrementDate } = require('../../refreshAthlete/utils');
 const { buildLocationsStatsFromActivities } = require('../stats/generateStatsV2');
 
 const INGEST_SOURCE = 'signup';
 const MIN_ACTIVITY_ID = 1000;
+const INCREMENT_DATE_BY = 7 * 24 * 60 * 60 * 1000; // 1 week in ms
 const DEFAULT_FETCH_OPTS = {
   limitPages: 1,
   limitPerPage: 30,
@@ -346,20 +347,16 @@ class LocationIngest {
     const {
       limitPages = DEFAULT_FETCH_OPTS.limitPages,
       limitPerPage = DEFAULT_FETCH_OPTS.limitPerPage,
+      start_date_local = createdAt,
     } = opts;
+    const end_date_local = incrementDate(start_date_local, INCREMENT_DATE_BY);
 
-    let params = {
+    const params = {
       per_page: limitPerPage,
       segment_id: this.segmentId,
+      start_date_local,
+      end_date_local,
     };
-
-    if (opts.start_date_local && opts.end_date_local) {
-      params = {
-        ...params,
-        start_date_local: opts.start_date_local,
-        end_date_local: opts.end_date_local,
-      };
-    }
 
     console.log(`fetchSegmentEfforts | page ${page} | start_date_local ${params.start_date_local} | end_date_local ${params.end_date_local} | allEfforts.length ${allEfforts.length}`);
 
@@ -380,15 +377,21 @@ class LocationIngest {
     }
 
     console.log(`Received ${efforts.length} efforts`);
-    if (efforts.length) {
-      console.log(`First start_date_local: ${efforts[0].start_date_local}
-Last start_date_local: ${efforts.slice(-1)[0].start_date_local}
---------------------`);
+
+    if (
+      allEfforts.length
+      && efforts.length
+      && allEfforts.slice(-1)[0].id === efforts[0].id
+    ) {
+      // I guess this could happen if a segment effort started
+      // exactly on the previous end_date_local
+      // which is the same as the new start_date_local
+      efforts.shift();
     }
+
     const returnEfforts = [...allEfforts, ...efforts];
 
-    // @todo handle if last page has effort.length === limitPerPage
-    if (efforts.length < limitPerPage) {
+    if (new Date(end_date_local).valueOf() > Date.now() || page > 500) {
       console.log(`fetchSegmentEfforts finished with ${returnEfforts.length} efforts`);
       return returnEfforts;
     }
@@ -403,8 +406,7 @@ Last start_date_local: ${efforts.slice(-1)[0].start_date_local}
       (page + 1),
       returnEfforts,
       {
-        start_date_local: '2012-05-22T16:08:54Z', // JK created_at
-        end_date_local: efforts.slice(-1)[0].start_date_local, // Start next request from last effort of this request
+        start_date_local: end_date_local, // start next request period from end of this request period
       },
     );
   }
