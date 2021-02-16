@@ -19,8 +19,8 @@ const INGEST_SOURCE = 'signup';
 const MIN_ACTIVITY_ID = 1000;
 const INCREMENT_DATE_BY = 7 * 24 * 60 * 60 * 1000; // 1 week in ms
 const DEFAULT_FETCH_OPTS = {
-  limitPages: 1,
-  limitPerPage: 30,
+  limitPages: 0,
+  limitPerPage: 200,
 };
 
 class LocationIngest {
@@ -71,6 +71,11 @@ class LocationIngest {
   stats = {};
 
   /**
+   * @type {String} ISO string of athlete creation date
+   */
+  createdAt = '2021-01-26T16:08:54Z';
+
+  /**
    * Set up class
    *
    * @param {Athlete} athleteDoc
@@ -83,7 +88,9 @@ class LocationIngest {
       captureSentry('LocationIngest without Athlete document', 'LocationIngest');
     }
 
-    this.createdAt = this.athleteDoc.athlete.createdAt || null;
+    this.createdAt = this.createdAt
+      || this.athleteDoc.athlete.createdAt
+      || null;
 
     if (isValidCanonicalSegmentId(segmentId)) {
       this.segmentId = segmentId;
@@ -146,7 +153,9 @@ class LocationIngest {
       } else {
         return;
       }
+      console.log(`create | ${activityId} | ${this.activities[activityId].laps} laps`);
     }
+
     // Create and add SegmentEffort to activity
     const prevNumSegmentEfforts = this.activities[activityId]
       .segment_efforts
@@ -161,6 +170,9 @@ class LocationIngest {
       // This should always be 1
       const delta = newNumSegmentEfforts - prevNumSegmentEfforts;
       this.activities[activityId].laps += delta;
+      console.log(`update | ${activityId} | ${this.activities[activityId].laps} laps`);
+    } else {
+      console.log(`skip | ${activityId} | ${this.activities[activityId].laps} laps`);
     }
   }
 
@@ -344,6 +356,10 @@ class LocationIngest {
         _id: athleteId,
       },
     } = this;
+    if (page === 1) {
+      console.log(`athleteId ${athleteId} | createdAt ${createdAt}`);
+    }
+
     const {
       limitPages = DEFAULT_FETCH_OPTS.limitPages,
       limitPerPage = DEFAULT_FETCH_OPTS.limitPerPage,
