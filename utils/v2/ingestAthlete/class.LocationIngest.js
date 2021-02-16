@@ -73,7 +73,7 @@ class LocationIngest {
   /**
    * @type {String} ISO string of athlete creation date
    */
-  createdAt = '2021-01-26T16:08:54Z';
+  createdAt = '';
 
   /**
    * Set up class
@@ -153,7 +153,6 @@ class LocationIngest {
       } else {
         return;
       }
-      console.log(`create | ${activityId} | ${this.activities[activityId].laps} laps`);
     }
 
     // Create and add SegmentEffort to activity
@@ -170,9 +169,6 @@ class LocationIngest {
       // This should always be 1
       const delta = newNumSegmentEfforts - prevNumSegmentEfforts;
       this.activities[activityId].laps += delta;
-      console.log(`update | ${activityId} | ${this.activities[activityId].laps} laps`);
-    } else {
-      console.log(`skip | ${activityId} | ${this.activities[activityId].laps} laps`);
     }
   }
 
