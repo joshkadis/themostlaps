@@ -69,3 +69,4 @@ typings/
 linting.html
 slack-logs
 .vscode
+*.json
