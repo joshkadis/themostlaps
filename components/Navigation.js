@@ -45,13 +45,20 @@ class Navigation extends Component {
     });
   }
 
-  navigateToRiderPage(selection) {
-    if (selection && selection.value) {
+  navigateToRiderPage({ value = false }) {
+    if (value) {
       this.setState(this.defaultState);
-      this.props.router.push(
-        `/rider?athleteId=${selection.value}`,
-        `/rider/${selection.value}`,
-      );
+      // router.push is broken on other pages because of this
+      // old issue that would require CSS refactoring to fix
+      // https://github.com/vercel/next.js/discussions/12335
+      if (['/ranking', '/rider'].includes(this.props.router.route)) {
+        this.props.router.push(
+          `/rider?athleteId=${value}`,
+          `/rider/${value}`,
+        );
+      } else {
+        window.location = `/rider/${value}`;
+      }
     }
   }
 
