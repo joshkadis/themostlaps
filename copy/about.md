@@ -1,22 +1,30 @@
 ## Infrequently Asked Questions
 
+#### What's this all about?
+
+If you're a cyclist in New York City, you can end up riding an absurd number of times around Prospect Park in Brooklyn or Central Park in that other borough. Now there's a leaderboard for that.
+
+This brings up an important point: NYC is home to the most diverse community of cyclists in the world but they're not all on Strava. So take these rankings with a grain of salt because the true lap leaders have been out there for decades.
+
+#### How is this different from Local Legends on Strava?
+
+Because we did it first. And because Local Legends counts all the segments that no one cares about and only for the last 90 days. 
+
 #### Who can be on here?
 
-Technically, any Strava user can sign up but it probably helps if you ride laps in Prospect Park.
+Technically, any Strava user can sign up but it probably helps if you ride laps in Prospect Park or Central Park.
 
-This brings up an important point: Prospect Park is home to the most diverse community of cyclists in the world but they're not all on Strava. So take these rankings with a grain of salt because the true lap leaders have been out here since the days when chamois and sew-up were literal terms.
-
-Extra special shoutout to Postal Joe. Some estimate his lifetime total at **250,000 laps.** 🙌
+This site works best for paid Strava subscribers. If you're a free Strava user, [sign up anyway](#signup)! We don't have access to as much information about your rides, but we're working on it.
 
 #### Who made this?
 
 The Most Laps was conceived, designed, and built by [Josh Kadis][1], a cyclist, web developer, and product manager from Brooklyn.
 
-At first, Josh just wanted to use the Strava API to count all the Prospect Park laps he'd ridden. Then he quit his job and had some time on his hands, and things went from there...
+At first, I just wanted to use the Strava API to count all the Prospect Park laps he'd ridden. Then I quit my job and had some time on my hands, and things went from there...
 
 #### How can I contact you?
 
-[Email][6], [Twitter][7], or [Instagram][8], take your pick. We are particularly interested in sponsorships, freelance projects, and job offers. 😀
+[Email][6] or [Instagram][8], take your pick. We are particularly interested in sponsorships, freelance projects, and job offers. 😀
 
 #### How does it work?
 
@@ -24,23 +32,17 @@ The most important thing is that we **do not** collect or retain any of your dat
 
 #### How does it really work?
 
-It's an isomorphic React web application built with Next.js and MongoDB, if that's what you mean.
-
-#### How are laps calculated?
-
-It's more complicated than you might think! The [segment][3] we use to calculate laps starts and finishes on the Flatbush side of the park. But let's say you enter at 15th Street and Prospect Park West. If you do 5 laps, your Strava activity will only include that segment 4 times. To make up for the half-laps at the beginning and end of your ride, we look at shorter Strava segments along the route to piece together the extra lap.
-
-Because of performance constraints during your initial setup, we give you the benefit of the doubt and add an extra lap to any ride that contains more than one lap.
+Next.js, a bunch of Node stuff, and MongoDB. If that's what you mean.
 
 #### Where is my profile page?
 
 There's no page on The Most Laps that "knows" if you're logged in, but you can see the public page of your stats at https://themostlaps.com/rider/your-Strava-ID. To be removed from The Most Laps, [email us](mailto:info@themostlaps.com).
 
-#### What personal data is stored?
+#### What personal information do you store?
 
-From your Strava profile, we store your user id, first and last names, a link to your profile photo, and your email address. (Note: If you signed up after January 15, 2019, we don't have your email address.) Unless you subscribe to our [newsletter][4], we will _only_ use your email address for administrative purposes. We'll never share it with anyone.
+From your Strava profile, we store your user id, first and last names, a link to your profile photo, and your email address. (Note: If you signed up after January 15, 2019, we don't have your email address.)
 
-We also store, of course, the authentication token used to fetch your rides from the Strava API. However, this is only used "behind the scenes" on our server. It is never exposed to your browser.
+We don't share your personal info with anyone. Why would we?
 
 #### What about private rides?
 
