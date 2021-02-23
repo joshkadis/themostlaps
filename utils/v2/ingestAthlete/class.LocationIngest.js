@@ -17,7 +17,7 @@ const { buildLocationsStatsFromActivities } = require('../stats/generateStatsV2'
 
 const INGEST_SOURCE = 'signup';
 const MIN_ACTIVITY_ID = 1000;
-const INCREMENT_DATE_BY = 7 * 24 * 60 * 60 * 1000; // 1 week in ms
+const INCREMENT_DATE_BY = 30 * 24 * 60 * 60 * 1000; // 30 days
 const DEFAULT_FETCH_OPTS = {
   limitPages: 0,
   limitPerPage: 200,
