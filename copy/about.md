@@ -2,25 +2,25 @@
 
 #### What's this all about?
 
-If you're a cyclist in New York City, you can end up riding an absurd number of times around Prospect Park in Brooklyn or Central Park in that other borough. Now there's a leaderboard for that.
+As a cyclist in New York City, you probably spend a lot of time riding around Prospect Park or Central Park. Now there's a leaderboard for that.
 
 This brings up an important point: NYC is home to the most diverse community of cyclists in the world but they're not all on Strava. So take these rankings with a grain of salt because the true lap leaders have been out there for decades.
 
 #### How is this different from Local Legends on Strava?
 
-Because we did it first. And because Local Legends counts all the segments that no one cares about and only for the last 90 days. 
+Local Legends counts the last 90 for ton of random segments. The Most Laps goes all the way back to when you joined Strava and only counts the segments that _matter_.
 
 #### Who can be on here?
 
 Technically, any Strava user can sign up but it probably helps if you ride laps in Prospect Park or Central Park.
 
-This site works best for paid Strava subscribers. If you're a free Strava user, [sign up anyway](#signup)! We don't have access to as much information about your rides, but we're working on it.
+This site works best for paid Strava subscribers. If you're a free Strava user, [sign up anyway](#signup)! Strava doesn't give us as much information about your rides, but we're making the best of it.
 
 #### Who made this?
 
 The Most Laps was conceived, designed, and built by [Josh Kadis][1], a cyclist, web developer, and product manager from Brooklyn.
 
-At first, I just wanted to use the Strava API to count all the Prospect Park laps he'd ridden. Then I quit my job and had some time on my hands, and things went from there...
+_"At first, I just wanted to use the Strava API to count all the Prospect Park laps I'd ridden. Then I quit my job and had some time on my hands, and things went from there..."_
 
 #### How can I contact you?
 
@@ -28,15 +28,17 @@ At first, I just wanted to use the Strava API to count all the Prospect Park lap
 
 #### How does it work?
 
-The most important thing is that we **do not** collect or retain any of your data without your consent. Once you authorize The Most Laps to access your Strava account, we look back through your past [segment efforts][2] and calculate your all-time, yearly, and monthly totals, and the most laps in a single ride. Then we check automatically to see if you've ridden any new laps, and we add those to your stats.
+When you sign up, you authorize The Most Laps to access your Strava data. Then we look back through your past [segment efforts][2] and calculate your all-time, yearly, and monthly totals, and the most laps you've done in a single ride.
+
+Whenever you have a new ride on Strava, we automatically count the laps and add them to your stats.
 
 #### How does it really work?
 
-Next.js, a bunch of Node stuff, and MongoDB. If that's what you mean.
+Nextjs, a bunch of Node stuff, and MongoDB. If that's what you mean.
 
 #### Where is my profile page?
 
-There's no page on The Most Laps that "knows" if you're logged in, but you can see the public page of your stats at https://themostlaps.com/rider/your-Strava-ID. To be removed from The Most Laps, [email us](mailto:info@themostlaps.com).
+There's no page on The Most Laps that "knows" if you're logged in. To find the public page with your stats, click the **Riders** link at the top of the page and search for yourself.
 
 #### What personal information do you store?
 
@@ -48,11 +50,11 @@ We don't share your personal info with anyone. Why would we?
 
 Private rides (or "activities" in Strava's technical terminology) _are_ included in your total stats. However, information that could identify any specific ride is _never_ displayed on the site.
 
-#### Can you remove me from the site?
+#### Can you remove all my data from the site?
 
 Yes, no problem. [Email us](mailto:info@themostlaps.com) and we'll take care of it right away.
 
-Note that if you revoke access in [your Strava settings][5], your data will still be on the site until you let us know to remove you.
+If you revoke access in [your Strava settings][5], your data will be removed from the site automatically. If that doesn't happen, email and we'll fix it right away.
 
 #### Where can I read the legal stuff?
 
