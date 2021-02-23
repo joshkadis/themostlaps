@@ -371,23 +371,14 @@ class LocationIngest {
     };
 
     console.log(`fetchSegmentEfforts | page ${page} | start_date_local ${params.start_date_local} | end_date_local ${params.end_date_local} | allEfforts.length ${allEfforts.length}`);
-
-    const efforts = await fetchStravaAPI(
-      `/segments/${this.segmentId}/all_efforts`,
-      this.athleteDoc,
-      {
-        athlete_id: athleteId,
-        per_page: limitPerPage,
-        page,
-      },
-    );
+    const efforts = await fetchStravaAPI('/segment_efforts', this.athleteDoc, params);
 
     if (efforts.status && efforts.status !== 200) {
       captureSentry('Strava API response error', 'LocationIngest', {
         athleteId,
-        path: `/segments/${this.segmentId}/all_efforts`,
-        page,
+        path: '/segment_efforts',
         status: efforts.status,
+        params,
       });
       return allEfforts;
     }
@@ -412,8 +403,9 @@ class LocationIngest {
       return returnEfforts;
     }
 
-    // Enforce page limit
+    // Enforce page limit when testing, Strava doesn't have this param
     if (limitPages && page >= limitPages) {
+      console.log(`fetchSegmentEfforts hit page limit ${limitPages} with ${returnEfforts.length} efforts`);
       return returnEfforts;
     }
 
