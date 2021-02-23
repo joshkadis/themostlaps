@@ -10,8 +10,7 @@ const checkNumArgs = makeCheckNumArgs('Use format: $ athlete migratestats');
 
 const DRY_RUN_MSG = '** THIS IS A DRY RUN **';
 /**
- * Recalculate athlete stats from activites already stored in database
- * v2 only
+ * Migrate an athlete from v1 to v2 stats format
  */
 async function doCommand({
   subargs,
@@ -57,7 +56,6 @@ Not yet migrated to v2: ${getAthleteIdentifier(athleteDoc)}`);
       recalculateStats: true,
     },
   });
-  console.log(nextStats);
 
   athleteDoc.markModified('stats');
   athleteDoc.markModified('migration');

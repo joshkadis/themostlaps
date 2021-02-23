@@ -373,9 +373,13 @@ class LocationIngest {
     console.log(`fetchSegmentEfforts | page ${page} | start_date_local ${params.start_date_local} | end_date_local ${params.end_date_local} | allEfforts.length ${allEfforts.length}`);
 
     const efforts = await fetchStravaAPI(
-      '/segment_efforts',
+      `/segments/${this.segmentId}/all_efforts`,
       this.athleteDoc,
-      params,
+      {
+        athlete_id: athleteId,
+        per_page: limitPerPage,
+        page,
+      },
     );
 
     if (efforts.status && efforts.status !== 200) {
@@ -408,9 +412,8 @@ class LocationIngest {
       return returnEfforts;
     }
 
-    // Enforce page limit when testing, Strava doesn't have this param
+    // Enforce page limit
     if (limitPages && page >= limitPages) {
-      console.log(`fetchSegmentEfforts hit page limit ${limitPages} with ${returnEfforts.length} efforts`);
       return returnEfforts;
     }
 
