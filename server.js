@@ -5,7 +5,6 @@ const bodyParser = require('body-parser');
 const next = require('next');
 
 const Athlete = require('./schema/Athlete');
-const { scheduleNightlyRefresh } = require('./utils/scheduleNightlyRefresh');
 const { defaultLocation } = require('./config');
 const { mongooseConnectionOptions } = require('./config/mongodb');
 const { initSentry } = require('./utils/v2/services/sentry');
@@ -117,9 +116,6 @@ app.prepare()
       console.log(`Connected to database: ${db.name}`);
       server.listen(process.env.PORT, () => {
         console.log(`App listening on port ${process.env.PORT}`);
-        if (!process.env.DISABLE_NIGHTLY_REFRESH) {
-          scheduleNightlyRefresh();
-        }
         initializeActivityQueue();
       });
     });

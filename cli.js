@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* eslint-disable prefer-destructuring,import/order,no-unused-vars */
+/* eslint-disable prefer-destructuring,import/order */
 
 require('dotenv').config();
 const {
@@ -7,8 +7,6 @@ const {
   callbackDeleteUserActivities,
   callbackRefreshUser,
   callbackRefreshMany,
-  callbackRefreshBatch,
-  callbackUpdateSubscriptions,
   callbackRetryWebhooks,
   callbackColdLaps,
   callbackMigrateToken,
@@ -22,6 +20,7 @@ function createPositionals(...args) {
   };
 }
 
+/* eslint-disable-next-line */
 const setupArgv = require('yargs')
   .usage('$0 <cmd> [args]')
   /**
@@ -71,30 +70,6 @@ const setupArgv = require('yargs')
       ['users', { type: 'array' }],
     ),
     async (argv) => callbackRefreshMany(argv),
-  )
-  /**
-   * Process batch of athletes w/ simulated nightly refresh
-   */
-  .command(
-    'refreshbatch limit skip [--activities]',
-    false,
-    createPositionals(
-      ['limit', { type: 'number' }],
-      ['skip', { type: 'number' }],
-      ['activities', { type: 'boolean', default: false }],
-    ),
-    async (argv) => callbackRefreshBatch(argv),
-  )
-  /**
-   * Process batch of athletes w/ simulated nightly refresh
-   */
-  .command(
-    'updatesubscriptions [--dry-run]',
-    false,
-    createPositionals(
-      ['dry-run', { type: 'boolean', default: false }],
-    ),
-    async (argv) => callbackUpdateSubscriptions(argv),
   )
   .command(
     'retrywebhooks startdate [--dry-run]',
