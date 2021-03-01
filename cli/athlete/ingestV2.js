@@ -1,3 +1,4 @@
+const { confirm } = require('promptly');
 const { setupConnection } = require('../utils/setupConnection');
 const { makeCheckNumArgs } = require('../utils');
 const Athlete = require('../../schema/Athlete');
@@ -34,11 +35,20 @@ async function doCommand({
     console.warn(`Unknown location: ${location}`);
     return;
   }
-
+  if (location && !isDryRun) {
+    const confirmed = await confirm('Ingesting a single location will overwrite stats from other locations. Continue? [y/n]');
+    if (!confirmed) {
+      return;
+    }
+  }
   if (isDryRun) {
     console.log(DRY_RUN_MSG);
   }
 
+  /**
+   * BUG where ingesting one location will overwrite
+   * existing status for any other locations
+   */
   await ingestAthleteHistory(
     athleteDoc,
     location ? [location] : null,

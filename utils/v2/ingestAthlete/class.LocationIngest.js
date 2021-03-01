@@ -466,7 +466,8 @@ class LocationIngest {
   });
 
   /**
-   * Generate stats for this location from prepared documents
+   * Builds stats from *all* locations but
+   * keeps only this location's status
    */
   generateStats() {
     // buildLocationsStatsFromActivities() can handle activites
@@ -483,6 +484,7 @@ class LocationIngest {
 
   /**
    * Save stats for athleteDoc using v2 format
+   * Merges this location's stats back into full stats object
    */
   async saveStats() {
     const {

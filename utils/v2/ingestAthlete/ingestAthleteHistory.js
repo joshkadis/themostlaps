@@ -115,10 +115,13 @@ async function ingestSingleLocation(
       await ingestor.saveActivities();
     }
 
+    // Regenerates complete stats from all activities
+    // but only keeps a copy of this location's stats
     ingestor.generateStats();
-    // @todo Refactor to only save the athlete at the end
-    // instead of after each iteratee location
     if (!isDryRun) {
+      // Merges this location's stats
+      // back into complete stats then saves
+      // Not sure why I did it this way 🤷‍♂️
       await ingestor.saveStats();
     }
 
