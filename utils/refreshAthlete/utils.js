@@ -223,7 +223,9 @@ function getActivityData(activity, verbose = false) {
  * @returns {String} ISO 8601 string with MS stripped
  */
 const incrementDate = (startDateString, increment = 0) => {
-  const startDate = new Date(startDateString);
+  const startDate = startDateString instanceof Date
+    ? startDateString
+    : new Date(startDateString);
   const endDate = new Date(startDate.valueOf() + increment);
   return endDate.toISOString().replace(/\.\d{3}Z/, 'Z');
 };

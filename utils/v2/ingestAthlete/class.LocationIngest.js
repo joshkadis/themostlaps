@@ -88,9 +88,10 @@ class LocationIngest {
       captureSentry('LocationIngest without Athlete document', 'LocationIngest');
     }
 
-    this.createdAt = this.createdAt
-      || this.athleteDoc.athlete.createdAt
-      || null;
+    this.createdAt = this.athleteDoc.athlete.createdAt || '';
+    this.createdAt = this.createdAt instanceof Date
+      ? this.createdAt.toISOString().replace(/\.\d{3}Z/, 'Z')
+      : this.createdAt.replace(/\.\d{3}Z/, 'Z');
 
     if (isValidCanonicalSegmentId(segmentId)) {
       this.segmentId = segmentId;
