@@ -77,6 +77,12 @@ class LocationIngest {
   createdAt = '';
 
   /**
+   * @type {Number} Number of times to retry after a 500 error
+   *                which we've been seeing sometimes
+   */
+  retry500 = 3;
+
+  /**
    * Set up class
    *
    * @param {Athlete} athleteDoc
@@ -379,6 +385,15 @@ class LocationIngest {
     const efforts = await fetchStravaAPI('/segment_efforts', this.athleteDoc, params);
 
     if (efforts.status && efforts.status !== 200) {
+      if (efforts.status === 500 && this.retry500 > 0) {
+        this.retry500 -= 1;
+        console.log(`Strava API 500 error; ${this.retry500} retries remaining`);
+        return this.fetchSegmentEfforts(
+          page + 1,
+          allEfforts,
+          { start_date_local },
+        );
+      }
       captureSentry('Strava API response error', 'LocationIngest', {
         athleteId,
         path: '/segment_efforts',
