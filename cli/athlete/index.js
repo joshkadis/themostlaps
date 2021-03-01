@@ -1,7 +1,8 @@
 const { setupThenCommand: ingestV2Command } = require('./ingestV2');
 const { setupThenCommand: deleteActivityCommand } = require('./deleteActivity');
 const { setupThenCommand: migrateStatsCommand } = require('./migrateStats');
-const { setupThenCommand: recalculateStatsCommand } = require('./recalculateStats');
+const { setupThenCommand: recalculateStatsCommand } = require('./refreshProfile');
+const { setupThenCommand: refreshProfileComand } = require('./recalculateStats');
 const { withPrompt } = require('../utils');
 
 module.exports = {
@@ -46,6 +47,10 @@ module.exports = {
           migrateStatsCommand,
           'This will transform athlete stats from v1 to v2 format.',
         );
+        break;
+
+      case 'refreshprofile':
+        refreshProfileComand(args);
         break;
 
       default:
