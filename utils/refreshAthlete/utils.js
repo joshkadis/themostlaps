@@ -215,7 +215,23 @@ function getActivityData(activity, verbose = false) {
   };
 }
 
+/**
+ * Increment a date string by ms and return ISO string without ms
+ *
+ * @param {String} startDateString ISO 8601 string
+ * @param {Number} increment MS to increment by
+ * @returns {String} ISO 8601 string with MS stripped
+ */
+const incrementDate = (startDateString, increment = 0) => {
+  const startDate = startDateString instanceof Date
+    ? startDateString
+    : new Date(startDateString);
+  const endDate = new Date(startDate.valueOf() + increment);
+  return endDate.toISOString().replace(/\.\d{3}Z/, 'Z');
+};
+
 module.exports = {
+  incrementDate,
   dedupeSegmentEfforts,
   filterSegmentEfforts,
   fetchActivity,

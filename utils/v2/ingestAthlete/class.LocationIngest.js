@@ -12,11 +12,13 @@ const {
 const fetchStravaAPI = require('../../fetchStravaAPI');
 const { makeArrayAsyncIterable } = require('../asyncUtils');
 const { compareActivityLocations } = require('../models/activityHelpers');
-const { dedupeSegmentEfforts } = require('../../refreshAthlete/utils');
+const { dedupeSegmentEfforts, incrementDate } = require('../../refreshAthlete/utils');
 const { buildLocationsStatsFromActivities } = require('../stats/generateStatsV2');
+const { slackError } = require('../../slackNotification');
 
 const INGEST_SOURCE = 'signup';
 const MIN_ACTIVITY_ID = 1000;
+const INCREMENT_DATE_BY = 30 * 24 * 60 * 60 * 1000; // 30 days
 const DEFAULT_FETCH_OPTS = {
   limitPages: 0,
   limitPerPage: 200,
@@ -70,6 +72,11 @@ class LocationIngest {
   stats = {};
 
   /**
+   * @type {String} ISO string of athlete creation date
+   */
+  createdAt = '';
+
+  /**
    * Set up class
    *
    * @param {Athlete} athleteDoc
@@ -81,6 +88,11 @@ class LocationIngest {
     } else {
       captureSentry('LocationIngest without Athlete document', 'LocationIngest');
     }
+
+    this.createdAt = this.athleteDoc.athlete.createdAt || '';
+    this.createdAt = this.createdAt instanceof Date
+      ? this.createdAt.toISOString().replace(/\.\d{3}Z/, 'Z')
+      : this.createdAt.replace(/\.\d{3}Z/, 'Z');
 
     if (isValidCanonicalSegmentId(segmentId)) {
       this.segmentId = segmentId;
@@ -144,6 +156,7 @@ class LocationIngest {
         return;
       }
     }
+
     // Create and add SegmentEffort to activity
     const prevNumSegmentEfforts = this.activities[activityId]
       .segment_efforts
@@ -331,46 +344,82 @@ class LocationIngest {
    * @return {Array}
    */
   async fetchSegmentEfforts(page = 1, allEfforts = [], opts = {}) {
-    const athleteId = this.athleteDoc._id;
+    if (!this.createdAt) {
+      // We'd hit this if the Athlete document doesn't include athlete.createdAt
+      // which means that we need to run the update athlete command for that user
+      const apiAthlete = await fetchStravaAPI('/athlete', this.athleteDoc);
+      this.createdAt = apiAthlete.created_at;
+      slackError(`Update required for athlete ${this.athleteDoc._id}`);
+    }
+    const {
+      createdAt,
+      athleteDoc: {
+        _id: athleteId,
+      },
+    } = this;
+    if (page === 1) {
+      console.log(`athleteId ${athleteId} | createdAt ${createdAt}`);
+    }
+
     const {
       limitPages = DEFAULT_FETCH_OPTS.limitPages,
       limitPerPage = DEFAULT_FETCH_OPTS.limitPerPage,
+      start_date_local = createdAt,
     } = opts;
+    const end_date_local = incrementDate(start_date_local, INCREMENT_DATE_BY);
 
-    const efforts = await fetchStravaAPI(
-      `/segments/${this.segmentId}/all_efforts`,
-      this.athleteDoc,
-      {
-        athlete_id: athleteId,
-        per_page: limitPerPage,
-        page,
-      },
-    );
+    const params = {
+      per_page: limitPerPage,
+      segment_id: this.segmentId,
+      start_date_local,
+      end_date_local,
+    };
+
+    console.log(`fetchSegmentEfforts | page ${page} | start_date_local ${params.start_date_local} | end_date_local ${params.end_date_local} | allEfforts.length ${allEfforts.length}`);
+    const efforts = await fetchStravaAPI('/segment_efforts', this.athleteDoc, params);
 
     if (efforts.status && efforts.status !== 200) {
       captureSentry('Strava API response error', 'LocationIngest', {
         athleteId,
-        path: `/segments/${this.segmentId}/all_efforts`,
-        page,
+        path: '/segment_efforts',
         status: efforts.status,
+        params,
       });
       return allEfforts;
     }
 
-    if (!efforts.length) {
-      return allEfforts;
+    console.log(`Received ${efforts.length} efforts`);
+
+    if (
+      allEfforts.length
+      && efforts.length
+      && allEfforts.slice(-1)[0].id === efforts[0].id
+    ) {
+      // I guess this could happen if a segment effort started
+      // exactly on the previous end_date_local
+      // which is the same as the new start_date_local
+      efforts.shift();
     }
 
-    // Enforce page limit
     const returnEfforts = [...allEfforts, ...efforts];
-    if (limitPages && page >= limitPages) {
+
+    if (new Date(end_date_local).valueOf() > Date.now() || page > 500) {
+      console.log(`fetchSegmentEfforts finished with ${returnEfforts.length} efforts`);
       return returnEfforts;
     }
 
-    /* eslint-disable-next-line no-return-await */
-    return await this.fetchSegmentEfforts(
+    // Enforce page limit when testing, Strava doesn't have this param
+    if (limitPages && page >= limitPages) {
+      console.log(`fetchSegmentEfforts hit page limit ${limitPages} with ${returnEfforts.length} efforts`);
+      return returnEfforts;
+    }
+
+    return this.fetchSegmentEfforts(
       (page + 1),
       returnEfforts,
+      {
+        start_date_local: end_date_local, // start next request period from end of this request period
+      },
     );
   }
 

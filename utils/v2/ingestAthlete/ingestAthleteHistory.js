@@ -207,22 +207,21 @@ Locations: ${locationsToLog}
     await athleteDoc.save();
   }
 
-  const summary = Object.keys(allLocationsStats).reduce((acc, loc) => ({
-    ...acc,
-    [loc]: {
-      total: allLocationsStats[loc].allTime,
-      activites: allLocationsStats[loc].numActivities,
-    },
-  }), {});
-
   if (!isDryRun) {
+    const summary = Object.keys(allLocationsStats).reduce((acc, loc) => ({
+      ...acc,
+      [loc]: {
+        total: allLocationsStats[loc].allTime,
+        activites: allLocationsStats[loc].numActivities,
+      },
+    }), {});
     slackSuccess(`Ingested athlete history for ${athleteDoc.id}`, summary);
   }
 
   console.log(`
 --------RESULTS---------
 Ingested athlete history for ${athleteDoc.id}:
-${JSON.stringify(summary, null, 2)}
+${JSON.stringify(allLocationsStats, null, 2)}
 ${isDryRun ? '**THIS WAS A DRY RUN**' : ''}`);
 }
 

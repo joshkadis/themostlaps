@@ -2,6 +2,8 @@ const {
   lapSegmentId,
 } = require('../../config');
 
+const { incrementDate } = require('./utils');
+
 const {
   getActivityData,
   filterSegmentEfforts,
@@ -192,4 +194,12 @@ test('calculates laps from API response for activity', () => {
     source: 'refresh',
     start_date_local: '2019-12-07T18:56:13.023Z',
   });
+});
+
+test('incrementDate', () => {
+  expect(incrementDate('2007-09-15T08:15:29Z', 604800000)).toEqual('2007-09-22T08:15:29Z');
+  expect(incrementDate(new Date('2007-09-15T08:15:29Z'), 604800000)).toEqual('2007-09-22T08:15:29Z');
+
+  expect(incrementDate('2007-09-15T08:15:29Z')).toEqual('2007-09-15T08:15:29Z');
+  expect(incrementDate(new Date('2007-09-15T08:15:29Z'))).toEqual('2007-09-15T08:15:29Z');
 });

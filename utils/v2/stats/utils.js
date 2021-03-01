@@ -1,6 +1,5 @@
 const _cloneDeep = require('lodash/cloneDeep');
-const { defaultLocationStats } = require('../../../config/stats');
-const { defaultV2Stats } = require('../../../config/stats');
+const { defaultV2Stats, defaultLocationStats } = require('../../../config/stats');
 
 /**
  * Get new object in default format for a single location
