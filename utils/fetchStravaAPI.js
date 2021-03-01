@@ -99,7 +99,11 @@ async function fetchStravaAPI(endpoint, athleteDoc, params = false) {
         },
       );
     }
-    return response;
+    const body = await response.text();
+    return {
+      body,
+      status: response.status,
+    };
   }
 
   return response.json();
