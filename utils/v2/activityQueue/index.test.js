@@ -43,6 +43,11 @@ const BASE_COULD_HAVE_LAPS = {
   distance: 10000,
 };
 
+/*
+ * Tests will break if SHOULD_TEST_STREAMS is true
+ * in getQueueActivityData
+ */
+
 describe('getQueueActivityData()', () => {
   test('mocking is working', async () => {
     // Athlete model mock

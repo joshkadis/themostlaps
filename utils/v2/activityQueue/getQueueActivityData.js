@@ -5,7 +5,7 @@ const {
 const { captureSentry } = require('../services/sentry');
 const { testActivityStreams } = require('./testActivityStreams');
 
-const SHOULD_TEST_STREAMS = true;
+const SHOULD_TEST_STREAMS = false;
 
 /**
  * Get Strava API data for enqueued activity
