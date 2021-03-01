@@ -14,6 +14,7 @@ const { makeArrayAsyncIterable } = require('../asyncUtils');
 const { compareActivityLocations } = require('../models/activityHelpers');
 const { dedupeSegmentEfforts, incrementDate } = require('../../refreshAthlete/utils');
 const { buildLocationsStatsFromActivities } = require('../stats/generateStatsV2');
+const { slackError } = require('../../slackNotification');
 
 const INGEST_SOURCE = 'signup';
 const MIN_ACTIVITY_ID = 1000;
@@ -344,8 +345,11 @@ class LocationIngest {
    */
   async fetchSegmentEfforts(page = 1, allEfforts = [], opts = {}) {
     if (!this.createdAt) {
+      // We'd hit this if the Athlete document doesn't include athlete.createdAt
+      // which means that we need to run the update athlete command for that user
       const apiAthlete = await fetchStravaAPI('/athlete', this.athleteDoc);
       this.createdAt = apiAthlete.created_at;
+      slackError(`Update required for athlete ${this.athleteDoc._id}`);
     }
     const {
       createdAt,
