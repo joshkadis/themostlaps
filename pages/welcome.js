@@ -6,6 +6,11 @@ import Layout from '../components/Layout';
 import { LapPath } from '../components/lib/svg';
 import { APIRequest } from '../utils';
 
+/**
+ * Temporarily added hard links due to old
+ * Nextjs issue with CSS imports
+ */
+
 class Welcome extends Component {
   state = {
     status: 'ingesting',
@@ -35,10 +40,7 @@ class Welcome extends Component {
         }
 
         if (apiResponse[0].status === 'ready') {
-          Router.push(
-            `/rider?athleteId=${this.props.id}&welcome=1`,
-            `/rider/${this.props.id}`,
-          );
+          window.location = `/rider/${this.props.id}`;
           return;
         }
 
@@ -51,16 +53,12 @@ class Welcome extends Component {
       <h3>{"We're"} building your profile!</h3>
       <p>
         You&rsquo;ll be redirected to{' '}
-        <Link href={`/rider?athleteId=${id}`} as={`/rider/${id}`}>
-          <a>your rider page</a>
-        </Link>{' '}
-          after {"we've"} downloaded your laps history from Strava.
-        </p>
+        <a href={`/rider/${id}`}>your rider page</a>
+        after {"we've"} downloaded your laps history from Strava.
+      </p>
       <p>
         Or if you want to go ride some laps, you can come back later to <br />
-        <Link href={`/rider?athleteId=${id}`} as={`/rider/${id}`}>
-          <a>https://themostlaps.com/rider/{id}</a>
-        </Link>
+        <a href={`/rider/${id}`}>https://themostlaps.com/rider/{id}</a>
       </p>
     </div>
   );
