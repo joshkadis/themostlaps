@@ -198,5 +198,8 @@ test('calculates laps from API response for activity', () => {
 
 test('incrementDate', () => {
   expect(incrementDate('2007-09-15T08:15:29Z', 604800000)).toEqual('2007-09-22T08:15:29Z');
+  expect(incrementDate(new Date('2007-09-15T08:15:29Z'), 604800000)).toEqual('2007-09-22T08:15:29Z');
+
   expect(incrementDate('2007-09-15T08:15:29Z')).toEqual('2007-09-15T08:15:29Z');
+  expect(incrementDate(new Date('2007-09-15T08:15:29Z'))).toEqual('2007-09-15T08:15:29Z');
 });
