@@ -11,9 +11,14 @@ const { captureSentry } = require('./v2/services/sentry');
  * @param {String} endpoint Path to endpoint
  * @param {Document|String} athleteDoc Athlete document or fallback to forever token string
  * @param {Object} params Any optional params
- * @return {Object} Response data
+ * @return {Object} Response JSON data or http response
  */
-async function fetchStravaAPI(endpoint, athleteDoc, params = false) {
+async function fetchStravaAPI(
+  endpoint,
+  athleteDoc,
+  params = false,
+  returnResponse = false,
+) {
   let access_token;
 
   if (typeof athleteDoc === 'string') {
@@ -102,7 +107,9 @@ async function fetchStravaAPI(endpoint, athleteDoc, params = false) {
     return response;
   }
 
-  return response.json();
+  return returnResponse
+    ? response
+    : response.json();
 }
 
 module.exports = fetchStravaAPI;
