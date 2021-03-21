@@ -83,11 +83,12 @@ async function doCommand({
     const response = await fetchStravaApi('/athlete', athleteDoc, false, true);
 
     // handle bad response, deauthorized, etc
-    if (response.status >= 400) {
-      logResult(athleteDoc._id, response.status, 'Error');
-      const msg = response.status === 429
+    if (response.status >= 400 || !response.status) {
+      const responseError = response.status || 'unknown';
+      logResult(athleteDoc._id, responseError, 'Error');
+      const msg = responseError === 429
         ? '429 response, reached rate limit. Try again later.'
-        : `${athleteDoc._id}\t${response.status}`;
+        : `${athleteDoc._id}\t${responseError}`;
       return new Error(msg);
     }
 
