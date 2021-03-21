@@ -1,14 +1,18 @@
 const ProgressBar = require('progress');
-const { promises: timersPromise } = require('timers');
+const timersPromises = require('timers/promises'); // Node 15 only
 const { setupConnection } = require('../utils/setupConnection');
 const { makeCheckNumArgs } = require('../utils');
 const Athlete = require('../../schema/Athlete');
 const fetchStravaApi = require('../../utils/fetchStravaAPI');
+const { makeArrayAsyncIterable } = require('../../utils/v2/asyncUtils');
 
 const checkNumArgs = makeCheckNumArgs('Use format: $ athlete refreshprofile --all or $ athlete refreshprofile');
 
 const DRY_RUN_MSG = '** THIS IS A DRY RUN **';
-const WAIT_INCREMENT = 16 * 60 * 1000; // Give it an extra minute
+const WAIT_INCREMENT = 30 * 1000; // 10s for testing
+// 16 * 60 * 1000; // Give it an extra minute
+const USAGE_BUFFER = 550; // 30;
+const USAGE_BUFFER_DAILY = 300;
 
 const getRateLimits = (response, headerKey) => response.headers
   .get(headerKey)
@@ -22,7 +26,7 @@ async function doCommand({
   subargs,
   dryRun: isDryRun = false,
   all: updateAll = false,
-  verbose = true,
+  verbose = false,
 }) {
   if (!updateAll && !checkNumArgs(subargs, 1, '<athleteIds>')) {
     return false;
@@ -33,7 +37,7 @@ async function doCommand({
     return false;
   }
 
-  if (isDryRun && verbose) {
+  if (isDryRun) {
     console.log(DRY_RUN_MSG);
   }
 
@@ -58,40 +62,47 @@ async function doCommand({
 
   const athleteDocs = await Athlete.find(findArgs);
   console.log(`Found ${athleteDocs.length} Athlete documents`);
-  const resultsLog = {};
+  const resultsLog = [];
   const logResult = (id, status, detail) => resultsLog.push({
     id,
     status,
     detail,
   });
-  const bar = new ProgressBar(':bar', { total: athleteDocs.length });
+
   const updateAthlete = async (athleteDoc) => {
-    bar.tick();
-    const response = await fetchStravaApi('/athlete', athleteDoc, false, false);
+    if (verbose) {
+      const {
+        athlete: {
+          firstname,
+          lastname,
+        },
+        _id,
+      } = athleteDoc.toJSON();
+      console.log(`${firstname} ${lastname} | ${_id}`);
+    }
+    const response = await fetchStravaApi('/athlete', athleteDoc, false, true);
 
     // handle bad response, deauthorized, etc
     if (response.status >= 400) {
+      logResult(athleteDoc._id, response.status, 'Error');
       const msg = response.status === 429
         ? '429 response, reached rate limit. Try again later.'
         : `${athleteDoc._id}\t${response.status}`;
-      console.log(msg);
-      logResult(athleteDoc._id, response.status, 'Error');
-      return;
+      return new Error(msg);
     }
 
     // Set interval and wait if response status is exceeded limit
     const [usage, usageDay] = getRateLimits(response, 'X-RateLimit-Usage');
     const [limit, limitDay] = getRateLimits(response, 'X-RateLimit-Limit');
 
-    if ((limitDay - usageDay) < 300) {
-      console.log(`Used ${usageDay} of ${limitDay} daily API requests. Try again tomorrow`);
-      return;
+    if ((limitDay - usageDay) < USAGE_BUFFER_DAILY) {
+      return new Error(`Used ${usageDay} of ${limitDay} daily API requests. Try again tomorrow`);
     }
 
-    if ((limit - usage) < 30) {
+    if ((limit - usage) < USAGE_BUFFER) {
       const resetDate = new Date(Date.now() + WAIT_INCREMENT);
       console.log(`Used ${usage} of ${limit} 15min API requests. Will continue at ${resetDate.toISOString()}.`);
-      await timersPromise.setTimeout(WAIT_INCREMENT);
+      await timersPromises.setTimeout(WAIT_INCREMENT);
     }
 
     // set athleteDoc properties and save
@@ -107,9 +118,19 @@ async function doCommand({
 
     // return result for logging
     logResult(athleteDoc._id, response.status, 'Success');
+    return true;
   };
 
   // async iterator over athleteDocs
+  const bar = new ProgressBar(':bar', { total: athleteDocs.length });
+  const docsIterator = makeArrayAsyncIterable(athleteDocs, updateAthlete);
+  for await (const result of docsIterator) {
+    if (result instanceof Error) {
+      throw result;
+    }
+    bar.tick();
+  }
+
 
   return true;
 }
